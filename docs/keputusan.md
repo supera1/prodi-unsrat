@@ -22,7 +22,7 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
 - **Keputusan:** pengalihan dari situs lama (mis. informatika.unsrat.ac.id) dikerjakan admin VM/jaringan UNSRAT.
 - **Disetujui:** pengguna, 26 Oktober 2026.
 
-### K-P5 — Stack Docker terpisah di VM yang sama dengan www
+### K-P5 — Stack Docker terpisah di VM yang sama dengan www *(digantikan K-P17, 26 Oktober 2026)*
 - **Konsekuensi:** stack www tidak diubah; data www dibaca lewat volume yang dipasang hanya-baca.
 - **Disetujui:** pengguna, 26 Oktober 2026.
 
@@ -54,7 +54,7 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   menjangkau semua prodi; kata umum seperti "unsrat", "admin", "qwerty", "123456" ditolak di bagian mana pun.
 - **Disetujui:** pengguna, 26 Oktober 2026.
 
-### K-P11 — Logo dan unggahan di Google Cloud Storage
+### K-P11 — Logo dan unggahan di Google Cloud Storage *(digantikan K-P19, 26 Oktober 2026)*
 - **Keputusan:** bucket yang sama dengan www, folder `prodi/<kode_pddikti>/`.
 - **Disetujui:** pengguna, 26 Oktober 2026.
 
@@ -109,6 +109,38 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
     otomatis setelah tarik data.
 - **Konsekuensi:** data di situs prodi bisa berbeda dengan www.unsrat.ac.id; halaman Data prodi mengingatkan agar
   perubahan yang benar juga disampaikan ke pengelola www. Semua perubahan tercatat di riwayat dan log audit.
+
+### K-P17 — VM sendiri; di-deploy admin UNSRAT dari GitHub (mengganti K-P5)
+- **Konteks:** aplikasi tidak lagi berbagi VM dengan www.unsrat.ac.id.
+- **Keputusan** (pengguna, 26 Oktober 2026):
+  - Stack `prodi-unsrat` berjalan di **VM sendiri**. Deploy dilakukan **admin UNSRAT** dengan mengambil kode dari
+    GitHub `supera1/prodi-unsrat`; repo menyediakan berkas Docker dan panduannya, Claude tidak menjalankan apa pun ke
+    server.
+  - **HTTPS: disiapkan dua cara.** Bawaan: stack melayani HTTP di belakang load balancer/reverse proxy yang memegang
+    sertifikat (seperti www). Panduan deploy juga menjelaskan cara memasang sertifikat di VM itu sendiri bila tidak ada
+    load balancer.
+- **Konsekuensi:** volume data www tidak bisa dipasang ke VM prodi → K-P18. Kunci GCS www tidak ada di VM prodi → K-P19.
+  Pembatasan admin ke jaringan/VPN UNSRAT (`ADMIN_IP_BOLEH`) tetap berlaku.
+
+### K-P18 — Data resmi dari www diunggah manual oleh superadmin
+- **Konteks:** www hanya menerbitkan `data/prodi.json` yang diringkas (kode dan alamat), jadi data lengkap (CPL,
+  akreditasi, dll.) tidak bisa ditarik dari luar VM www.
+- **Keputusan** (pengguna, 26 Oktober 2026, dari tiga pilihan: ekspor JSON publik di www, salin antar-VM, unggah
+  manual): **superadmin prodi mengunggah berkas data www** di halaman Data www, lalu pratinjau → terapkan seperti
+  sebelumnya (semua pemeriksaan tetap berlaku, termasuk saringan judi).
+  - Data prodi dan CPL: **berkas Excel ekspor program studi dari superadmin www** (lembar "Program studi" dan "CPL";
+    tombolnya sudah ada di www, www tidak perlu diubah), atau `prodi.json`.
+  - Fakultas, kalender, dan kontak universitas (jarang berubah): `unit.json`, `kalender.json`, `situs.json` dari www;
+    yang tidak diunggah tetap memakai salinan terakhir.
+  - Folder `WWW_DATA` tetap didukung (komputer pengembang, atau bila kelak berkas disalin antar-VM).
+- **Konsekuensi:** data prodi mengikuti www hanya sejauh superadmin rutin mengunggah; dasbor superadmin menampilkan
+  kapan data terakhir diunggah.
+
+### K-P19 — Unggahan disimpan di volume lokal VM prodi (mengganti K-P11)
+- **Keputusan** (pengguna, 26 Oktober 2026): logo, foto, dan PDF disimpan di volume VM prodi (`PRODI_PENYIMPANAN=lokal`)
+  dan disajikan Nginx situs prodi. Tidak perlu kunci GCS; berkas yang diterbitkan ikut diawasi pemantau integritas.
+  Kode penyimpanan GCS tetap ada sebagai pilihan.
+- **Konsekuensi:** volume data (termasuk unggahan) wajib dicadangkan setiap hari.
 
 ### K-P13 — Port di VM menyusul
 - **Status:** terbuka. Diisi saat langkah 7 (Docker & deploy staging).

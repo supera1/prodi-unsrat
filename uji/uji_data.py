@@ -117,6 +117,9 @@ try:
     lap = tarik_www.pratinjau()["laporan"]
     cek(not tarik_www.ada_perubahan(lap), "tarikan ulang tanpa perubahan harus kosong: %r" % lap)
     cek(lap["kekurangan"].get("21201") == ["CPL"], "prodi tanpa CPL harus dilaporkan kurang CPL")
+    cek(tarik_www.kekurangan({"akreditasi": "belum", "cpl": [1], "lembaga_akreditasi": "x", "gelar": "x", "sks": 1,
+                              "surel": "x", "bidang_kerja": "x", "nama_en": "x"}) == ["status akreditasi"],
+        "akreditasi 'belum' dihitung sebagai data kosong")
     cek(lap["belum_terdaftar"] == ["20201", "21201", "55201"], "semua prodi belum terdaftar sebelum registri")
 
     # --- registry from a slug list

@@ -88,7 +88,7 @@ WWW = {
     "prodi": {"tampilkan_berlaku_hingga": True, "program": [
         prodi("55201", "Teknik Informatika", "S1", "ft", "Fakultas Teknik", nama_en="Informatics Engineering"),
         prodi("11901", "Profesi Dokter", "Profesi", "fk", "Fakultas Kedokteran", cpl=0, akreditasi="", lembaga_akreditasi=""),
-        prodi("67201", "Ilmu Politik", "S1", "fisip", "FISIP")]},
+        prodi("67201", "Ilmu Politik", "S1", "fisip", "FISIP", akreditasi="belum")]},
     "unit": {"unit": [
         {"kode": "ft", "nama": "Fakultas Teknik", "website": "https://fatek.unsrat.ac.id", "surel": "ft@unsrat.ac.id",
          "bendera": {"dasar": "#000099", "tulisan": "#FFFF00"}},
@@ -232,6 +232,11 @@ try:
     cpl = baca_halaman("profesidokter/akademik/profil-lulusan/index.html")
     cek("Capaian pembelajaran lulusan sedang dilengkapi" in cpl, "prodi tanpa CPL harus tampil sedang dilengkapi")
     cek("Status akreditasi sedang dilengkapi" in baca_halaman("profesidokter/profil/akreditasi/index.html"), "akreditasi kosong")
+    hero_politik = baca_halaman("s1politik/index.html").split('<section class="pahlawan', 1)[1].split("</section>", 1)[0]
+    cek("belum" not in hero_politik and "<dt>Akreditasi</dt>" not in hero_politik,
+        "akreditasi 'belum' (www: belum dilengkapi) tidak tampil sebagai nilai")
+    cek("Status akreditasi sedang dilengkapi" in baca_halaman("s1politik/profil/akreditasi/index.html"), "akreditasi 'belum' = kosong")
+    cek("Akreditasi belum" not in baca_halaman("index.html"), "halaman akar tanpa lencana 'belum'")
     cek("15 Agustus 2030" in baca_halaman("s1informatika/profil/akreditasi/index.html"), "berlaku hingga tampil bila diizinkan")
     kal = baca_halaman("s1informatika/akademik/kalender/index.html")
     cek("Semester Gasal 2026/2027" in kal and "Genap" not in kal, "hanya semester yang tampil")

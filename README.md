@@ -12,7 +12,8 @@ yang mengikuti kriteria akreditasi dan bisa disesuaikan oleh tiap prodi.
 - Data resmi prodi (nama, gelar, SKS, CPL, akreditasi) dibaca dari data www.unsrat.ac.id dan tidak diubah di sini.
 - Generator membangun halaman statis untuk setiap prodi dari data resmi itu ditambah isi yang diisi prodi.
 - Admin (hanya dari jaringan/VPN UNSRAT) punya tiga peran: superadmin, admin prodi, operator.
-- Produksi: stack Docker `prodi-unsrat` di VM yang sama dengan www, lewat Portainer.
+- Produksi: stack Docker `prodi-unsrat` di VM sendiri, di-deploy admin UNSRAT dari GitHub (K-P17). Data www diunggah
+  superadmin (K-P18); unggahan disimpan di VM (K-P19).
 
 ## Menjalankan uji
 

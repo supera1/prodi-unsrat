@@ -36,6 +36,20 @@ def baca():
 
 
 URUTAN_JENJANG = ("S1", "S2", "S3", "Profesi", "Sp-1", "Sp-2")
+# accreditation values in www's data and how www shows them (site/mockup/_bangun-prodi.py AKREDITASI, commit 37b5e6d);
+# "belum" means not filled in yet and is shown like an empty value
+AKREDITASI_LABEL = {"Unggul": "Unggul", "Baik Sekali": "Baik Sekali", "Baik": "Baik", "A": "A", "B": "B", "C": "C",
+                    "TERAKREDITASI": "Terakreditasi", "Terakreditasi Sementara": "Terakreditasi sementara",
+                    "Akreditasi Minimum": "Akreditasi minimum", "Menunggu Akr. PS Baru": "Menunggu akreditasi prodi baru"}
+
+
+def label_akreditasi(nilai):
+    """How an accreditation value is shown; "" when there is none (empty or "belum")."""
+    if not nilai or nilai == "belum":
+        return ""
+    return AKREDITASI_LABEL.get(nilai, nilai)
+
+
 JENJANG_PANJANG = {"S1": "Sarjana", "S2": "Magister", "S3": "Doktor", "Profesi": "Profesi", "Sp-1": "Spesialis",
                    "Sp-2": "Subspesialis"}
 

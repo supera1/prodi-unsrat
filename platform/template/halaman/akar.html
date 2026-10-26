@@ -39,7 +39,7 @@
 			<li class="kartu kartu--prodi">
 				<h3 class="kartu__judul"><a href="{{ ke(x.r.slug) }}">{{ nama_tampil(x.p) }}</a></h3>
 				<p class="kartu__unit">{{ x.unit }}</p>
-				{% if x.p.akreditasi %}<p><span class="lencana">Akreditasi {{ x.p.akreditasi }}</span></p>{% endif %}
+				{% if x.p.akreditasi | akreditasi %}<p><span class="lencana">Akreditasi {{ x.p.akreditasi | akreditasi }}</span></p>{% endif %}
 			</li>
 			{% endfor %}
 		</ul>

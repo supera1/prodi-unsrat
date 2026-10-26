@@ -22,6 +22,9 @@ Lampiran: [`platform/data-awal/slug.csv`](../platform/data-awal/slug.csv) — al
 | K-P11 | Logo dan unggahan disimpan di Google Cloud Storage (bucket yang sama dengan www, folder `prodi/`) | Pengguna |
 | K-P12 | Tanpa SMTP: sandi diganti sendiri oleh pemilik akun atau direset superadmin | Pengguna |
 | K-P13 | Port situs dan admin di VM diinformasikan kemudian | Pengguna |
+| K-P17 | VM sendiri (bukan VM www); deploy oleh admin UNSRAT dari GitHub; HTTPS di load balancer atau di VM | Pengguna, 26 Okt 2026 |
+| K-P18 | Data www diunggah manual oleh superadmin (Excel ekspor prodi dari www, atau berkas JSON www) | Pengguna, 26 Okt 2026 |
+| K-P19 | Unggahan di volume lokal VM prodi (mengganti K-P11) | Pengguna, 26 Okt 2026 |
 
 ## 1. Tujuan Fase 1
 
@@ -34,7 +37,7 @@ Membangun **fondasi** yang dipakai semua fase berikutnya. Setelah Fase 1 selesai
    dengan pratinjau perubahan, dan melihat log audit.
 4. Admin prodi bisa: mengganti identitas tampilan (tagline, warna dari palet, logo), mengatur menu
    (ganti label, urutkan, sembunyikan menu opsional), dan mengelola operator prodinya.
-5. Stack Docker terpisah berjalan di VM yang sama, lengkap dengan pemantau *deface*.
+5. Stack Docker siap di-deploy di VM sendiri (K-P17), lengkap dengan pemantau *deface*.
 
 ## 2. Di luar lingkup Fase 1 (masuk fase berikutnya)
 
@@ -51,28 +54,28 @@ Membangun **fondasi** yang dipakai semua fase berikutnya. Setelah Fase 1 selesai
 
 ## 3. Arsitektur
 
+*Diperbarui 26 Oktober 2026 (K-P17–K-P19): VM sendiri, data www diunggah superadmin, unggahan lokal.*
+
 ```
-VM yang sama (Portainer)
-├── Stack "website-unsrat" (sudah ada, tidak diubah)
-│     web :454 · admin :455 · pemantau
-│     volume unsrat-data ──────────────┐  (berisi data/prodi.json, unit.json, kalender.json)
-│                                      │  dipasang HANYA-BACA
-└── Stack "prodi-unsrat" (baru)         ▼
-      prodi-web      Nginx: situs publik + admin (hanya IP UNSRAT/VPN); port menyusul (K-P13)
-      prodi-admin    Flask + generator; membaca data www, menulis halaman ke volume prodi-publik
-      prodi-pemantau cek integritas tiap 10 menit (pakai ulang site/pemantau dari www)
-      volume prodi-data, prodi-rahasia, prodi-publik
+VM www.unsrat.ac.id (tidak diubah)          VM prodi.unsrat.ac.id (baru, di-deploy admin UNSRAT dari GitHub)
+  superadmin www: Ekspor Excel prodi ──┐     Stack "prodi-unsrat"
+  (dan berkas JSON data www)           │       prodi-web       Nginx: situs publik + admin (hanya IP UNSRAT/VPN);
+                                       │                       HTTP di belakang load balancer, atau HTTPS sendiri
+                                       └──►    prodi-admin     Flask + generator; superadmin MENGUNGGAH data www,
+                     (diunduh dan diunggah                     menulis halaman ke volume publik
+                      superadmin, K-P18)       prodi-pemantau  cek integritas tiap 10 menit
+                                               volume data (+ unggahan), rahasia, publik
 ```
 
 - **Repo baru** (usulan: `supera1/prodi-unsrat`), tidak dicampur dengan repo www. Modul yang terbukti aman di www
   **disalin** (bukan di-*import* lintas repo) dan dicatat asal versinya: `gambar_aman.py`, `svg_aman.py`,
   `saringan_spam.py`, `cek_integritas.py`, `riwayat.py`, pola `_rakit-publik.py`, pola CSP/Nginx, `tokens.css`.
-- **Data www dibaca lewat volume**, bukan lewat internet: volume data stack www dipasang hanya-baca ke
-  `prodi-admin` sebagai *external volume*. Tidak ada port atau API baru di sisi www, dan www tidak perlu diubah.
-  (Nama volume di Portainer biasanya berawalan nama stack, mis. `website-unsrat_unsrat-data`; dipastikan saat deploy.)
-- **Domain**: `prodi.unsrat.ac.id` diarahkan ke load balancer yang sama, diteruskan ke port situs prodi.
-  Admin dibuka lewat awalan jalur (pola `ADMIN_AWALAN` seperti `/zz` di www) dan dibatasi `ADMIN_IP_BOLEH`.
-  Pengaturan DNS dan load balancer dikerjakan admin VM UNSRAT; repo menyediakan panduannya.
+- **Data www diunggah superadmin** (K-P18): berkas Excel ekspor program studi dari superadmin www (atau berkas JSON
+  data www) diunggah di halaman Data www, lalu pratinjau → terapkan. www tidak perlu diubah. *(Rancangan awal:
+  membaca volume data www hanya-baca; tidak mungkin di VM terpisah.)*
+- **Domain**: `prodi.unsrat.ac.id` diarahkan ke VM prodi (lewat load balancer, atau langsung dengan sertifikat di VM).
+  Admin dibuka lewat port atau awalan jalur tersendiri (`ADMIN_AWALAN`) dan dibatasi `ADMIN_IP_BOLEH`.
+  Pengaturan DNS, load balancer, dan VM dikerjakan admin UNSRAT; repo menyediakan panduannya.
 - **Tanpa paket baru** selain yang sudah dipakai www (Flask, Werkzeug, argon2-cffi, Pillow, pypdf, openpyxl,
   defusedxml, waitress, google-cloud-storage). Akun disimpan di SQLite (pustaka standar Python).
 
@@ -115,7 +118,7 @@ dengan keterangan "sedang dilengkapi" dan masuk daftar kekurangan di dasbor supe
 
 Skrip `tarik_www.py`, dijalankan dari tombol superadmin (dan opsional terjadwal harian):
 
-1. Baca `prodi.json`, `unit.json`, `kalender.json` dari volume www (hanya-baca); validasi skema.
+1. Baca berkas data www yang diunggah superadmin (K-P18; atau folder `WWW_DATA` bila ada); validasi skema.
 2. Bandingkan dengan `data/warisan/` → **pratinjau perubahan** per prodi (field mana berubah, CPL ditambah/dihapus).
 3. Superadmin menerapkan → versi lama disimpan ke riwayat → situs prodi yang terdampak dibangun ulang.
 4. Prodi baru di www muncul sebagai **"belum terdaftar"** sampai superadmin menetapkan slugnya.
@@ -236,9 +239,14 @@ Catatan:
 6. **Admin prodi**: identitas, palet, logo, menu, bagian depan beranda (latar, foto, teks, kartu), operator, formulir
    pengumuman (operator menulis, admin prodi menyetujui). *Pelaksanaan:* juga riwayat isi prodi (bandingkan,
    pulihkan) untuk admin prodi dan daftar periksa kesiapan situs di dasbor prodi.
-7. **Docker & deploy staging**: compose stack terpisah, Nginx, pemantau, panduan Portainer + catatan DNS/LB untuk admin VM,
-   bangun ulang terjadwal harian (pengumuman kedaluwarsa), dan cara Nginx memuat ulang `nginx-buatan/slug-lama.conf`
-   setelah slug diubah (pengalihan 301 baru berlaku setelah itu).
+7. **Docker & deploy di VM sendiri** (K-P17–K-P19):
+   - unggah data www di halaman Data www: Excel ekspor program studi dari www (lembar "Program studi" + "CPL") dan
+     berkas JSON (`prodi.json`, `unit.json`, `kalender.json`, `situs.json`), dengan pratinjau seperti sekarang; data
+     awal untuk VM baru;
+   - `docker-compose.yml` untuk VM sendiri: `web` (Nginx: situs + admin hanya IP UNSRAT, pengalihan slug lama yang
+     dimuat ulang otomatis), `admin` (waitress), `pemantau`; volume data (+ unggahan lokal), rahasia, publik;
+   - bangun ulang terjadwal harian (pengumuman kedaluwarsa); HTTPS di belakang load balancer (bawaan) atau sertifikat
+     di VM; panduan deploy untuk admin UNSRAT (Portainer atau `docker compose`), cadangan harian, dan uji di image.
 8. **Uji menyeluruh + `docs/log/fase-01.md`** (cara verifikasi manual, sisa pekerjaan, keputusan yang perlu dikonfirmasi).
 
 ## 11. Kriteria selesai Fase 1

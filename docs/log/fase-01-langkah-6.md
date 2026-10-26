@@ -62,3 +62,15 @@ gambarnya. Jumlah halaman wajib yang benar adalah 22 (log langkah 3 sempat menul
 ## Langkah berikutnya
 Langkah 7 — Docker & deploy staging: stack `prodi-unsrat` (web, admin, pemantau), volume, Nginx (termasuk memuat ulang
 pengalihan slug), bangun ulang terjadwal harian, panduan Portainer, catatan DNS/load balancer untuk admin VM.
+
+## Tambahan (26 Oktober 2026, sebelum langkah 7)
+- **Keputusan baru** (pengguna): aplikasi di **VM sendiri**, di-deploy admin UNSRAT dari GitHub (K-P17); data www
+  **diunggah manual oleh superadmin** (K-P18; Excel ekspor program studi dari superadmin www atau berkas JSON www);
+  unggahan di **volume lokal** VM prodi (K-P19, mengganti K-P11); HTTPS disiapkan dua cara (load balancer atau di VM).
+  Rencana langkah 7 diperbarui.
+- **Perbaikan bug (dari langkah 3):** 7 prodi di data www berakreditasi `belum` (www: "Belum dilengkapi"). Situs prodi
+  sempat menampilkannya sebagai nilai ("Akreditasi: belum"). Sekarang `belum` diperlakukan sebagai kosong (tanpa kartu
+  akreditasi, halaman Akreditasi "sedang dilengkapi", dihitung sebagai data kosong di dasbor), dan nilai lain memakai
+  label yang sama dengan www (mis. `TERAKREDITASI` → "Terakreditasi"). Uji ditambah dan dibuktikan dengan uji mutasi.
+- **Perbaikan uji:** dua pemeriksaan bagian depan (`uji_bangun`, `uji_beranda`) memotong HTML pada kemunculan kedua
+  `class="pahlawan` sehingga tidak benar-benar memeriksa kartu fakta; kini memotong satu bagian `<section>` utuh.

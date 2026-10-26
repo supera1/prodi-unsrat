@@ -3,8 +3,9 @@
 
     PRODI_DATA      the platform's own data (default: <repo>/data; in Docker the volume prodi-data)
     PRODI_RIWAYAT   version history of every data file (default: <PRODI_DATA>/../riwayat)
-    WWW_DATA        the data folder of www.unsrat.ac.id, read only (default: the sibling checkout
-                    ../website-unsrat-2026/site/mockup/data; in Docker the www data volume mounted read-only)
+    WWW_DATA        a folder with www.unsrat.ac.id's data files, read only (default: the sibling checkout
+                    ../website-unsrat-2026/site/mockup/data on a developer's machine). On the server www's data is
+                    uploaded by the superadmin instead (K-P18), since the platform runs on its own VM (K-P17).
     PRODI_PUBLIK    the built site, the only folder the web server serves (default: <repo>/publik)
     PRODI_MANIFES   SHA-256 of every published file, for the integrity check (default: <repo>/manifes-publik.json)
     PRODI_NGINX     configuration the builder writes for Nginx, e.g. redirects of old slugs (default: <repo>/nginx-buatan)

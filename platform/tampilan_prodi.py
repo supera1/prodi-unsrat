@@ -212,8 +212,8 @@ def bawaan_dan_resmi(p, nama_unit):
               "subjudul": p.get("nama_en") or "",
               "pengantar": "Program studi %s di %s, Universitas Sam Ratulangi, Manado." % (jenjang.lower(), nama_unit)}
     resmi = []
-    if p.get("akreditasi"):
-        resmi.append({"id": "akreditasi", "label": "Akreditasi", "nilai": p["akreditasi"],
+    if registri.label_akreditasi(p.get("akreditasi")):
+        resmi.append({"id": "akreditasi", "label": "Akreditasi", "nilai": registri.label_akreditasi(p["akreditasi"]),
                       "keterangan": p.get("lembaga_akreditasi") or "", "sorot": True})
     if p.get("gelar"):
         resmi.append({"id": "gelar", "label": "Gelar", "nilai": p["gelar"], "keterangan": "", "sorot": False})

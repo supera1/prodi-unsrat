@@ -217,7 +217,7 @@ try:
     cek([k[0] for k in kartu] == ["Beban studi", "Peringkat akreditasi", "Gelar", "Mahasiswa aktif"],
         "urutan, label, dan kartu tambahan: %r" % kartu)
     cek(("Peringkat akreditasi", "Unggul ") in kartu and ("Gelar", "S.Kom.") in kartu, "nilai kartu resmi tetap dari www: %r" % kartu)
-    cek("AUN-QA" not in ti.split("</section>")[0].split('class="pahlawan')[1], "kartu yang disembunyikan tidak tampil")
+    cek("AUN-QA" not in ti.split('<section class="pahlawan', 1)[1].split("</section>", 1)[0], "kartu yang disembunyikan tidak tampil")
     cek('lang="en">Informatics Engineering' in ti, "subjudul bawaan (nama Inggris) ditandai lang=en")
     cek('property="og:image" content="https://prodi.unsrat.ac.id/unggahan/55201/' in ti, "pratinjau tautan memakai foto latar")
 

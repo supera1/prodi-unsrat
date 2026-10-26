@@ -213,7 +213,8 @@ def baca_sumber(folder=None):
 
 def kekurangan(p):
     """Labels of the official fields a programme still lacks (to be filled in www, never here)."""
-    return [label for f, label in KEKURANGAN if p.get(f) in (None, "", [])]
+    return [label for f, label in KEKURANGAN
+            if p.get(f) in (None, "", []) or (f == "akreditasi" and p.get(f) == "belum")]   # "belum": www's "not filled in"
 
 
 def _beda_cpl(lama, baru):

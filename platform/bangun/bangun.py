@@ -200,7 +200,7 @@ class Pembangun(object):
         self.env = Environment(loader=FileSystemLoader(os.path.join(TEMPLATE, "halaman")), autoescape=True,
                                undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True, keep_trailing_newline=True)
         self.env.filters.update(tanggal=tanggal, tautan_md=tautan_md, json_ld=json_ld, teks_isi=teks_isi, ukuran=ukuran,
-                                foto_varian=foto_varian)
+                                foto_varian=foto_varian, akreditasi=registri.label_akreditasi)
         self.env.globals.update(nama_tampil=nama_tampil, JENJANG_PANJANG=JENJANG_PANJANG,
                                 NAMA_MEDIA_SOSIAL={k: v[0] for k, v in tampilan_prodi.MEDIA_SOSIAL.items()})
         self.berkas = {}      # published path -> bytes

@@ -11,7 +11,7 @@
 	<div><dt>Fakultas</dt><dd>{{ unit.nama }}</dd></div>
 	<div><dt>Perguruan tinggi</dt><dd>Universitas Sam Ratulangi, Manado</dd></div>
 	<div><dt>Kode program studi (PDDIKTI)</dt><dd>{{ p.kode_pddikti }}</dd></div>
-	<div><dt>Akreditasi</dt><dd>{% if p.akreditasi %}{{ p.akreditasi }}{% if p.lembaga_akreditasi %} ({{ p.lembaga_akreditasi }}){% endif %}{% else %}Sedang dilengkapi{% endif %}</dd></div>
+	<div><dt>Akreditasi</dt><dd>{% if p.akreditasi | akreditasi %}{{ p.akreditasi | akreditasi }}{% if p.lembaga_akreditasi %} ({{ p.lembaga_akreditasi }}){% endif %}{% else %}Sedang dilengkapi{% endif %}</dd></div>
 	{% if p.internasional %}<div><dt>Akreditasi internasional</dt><dd>{{ p.internasional }}</dd></div>{% endif %}
 	{% if kurikulum %}<div><dt>Kurikulum</dt><dd>{{ kurikulum | join(', ') }}</dd></div>{% endif %}
 	{% if p.surel %}<div><dt>Surel</dt><dd><a href="mailto:{{ p.surel }}">{{ p.surel }}</a></dd></div>{% endif %}

@@ -23,12 +23,14 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
 
 ## Arsitektur (sudah diputuskan)
 - Generator halaman statis (Python + Jinja2) + admin Flask, pola yang sama dengan www (K-P7).
-- Stack Docker sendiri `prodi-unsrat` di VM yang sama dengan www, lewat Portainer (K-P5): `prodi-web` (Nginx),
-  `prodi-admin` (Flask + generator), `prodi-pemantau`. Port menyusul (K-P13).
-- Data www dibaca dari volume data stack www yang dipasang **hanya-baca**. Repo ini tidak pernah menulis ke www.
+- Stack Docker `prodi-unsrat` di **VM sendiri**, di-deploy admin UNSRAT dari GitHub `supera1/prodi-unsrat` (K-P17):
+  `prodi-web` (Nginx), `prodi-admin` (Flask + generator), `prodi-pemantau`. Port menyusul (K-P13). HTTPS di load
+  balancer (bawaan) atau di VM.
+- Data www **diunggah superadmin** (Excel ekspor prodi dari www, atau berkas JSON www; K-P18). Folder `WWW_DATA` hanya
+  untuk komputer pengembang. Repo ini tidak pernah menulis ke www.
 - Akun per orang di SQLite (pustaka standar), sandi argon2, tanpa 2FA tetapi wajib sandi kuat (K-P10).
   Tanpa SMTP: sandi diganti pemilik akun atau direset superadmin (K-P12).
-- Logo dan unggahan di Google Cloud Storage, bucket www, folder `prodi/` (K-P11).
+- Logo dan unggahan di volume lokal VM prodi (`PRODI_PENYIMPANAN=lokal`, K-P19); kode GCS tetap ada sebagai pilihan.
 - Server web hanya menyajikan folder publik hasil rakitan *allow-list*; data mentah, skrip, dan riwayat tidak pernah
   ikut tersaji.
 
