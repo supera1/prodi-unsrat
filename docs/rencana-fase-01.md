@@ -224,6 +224,8 @@ Catatan:
    perakit folder publik, sitemap/robots per mode.
    - **3b. Pengumuman dan berita** (ditambahkan 26 Oktober 2026, K-P14): model data, foto/PDF aman, halaman daftar,
      detail, kategori, arsip, RSS, beranda, kabar terkait. Formulirnya di langkah 6.
+   - **5b. Data prodi bisa diubah** (ditambahkan 26 Oktober 2026, K-P16): superadmin dan admin prodi mengubah data
+     dari www (termasuk CPL) sebagai timpaan per kolom; bentrok dengan www ditandai.
    - **3c. Bagian depan beranda** (ditambahkan 26 Oktober 2026, K-P15): latar warna/foto, teks, dan kartu fakta per
      prodi; nilai resmi tetap dari www. Formulirnya di langkah 6.
 4. **Akun & peran**: SQLite, login, aturan sandi kuat, ganti/reset sandi, dekorator akses per prodi, audit log.

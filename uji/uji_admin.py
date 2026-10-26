@@ -293,6 +293,12 @@ try:
         ("POST", "/super/akun/%d/reset" % ids["opb"], "akun_semua_reset", hanya("superuji")),
         ("POST", "/super/akun/%d/aktif" % ids["opb"], "akun_semua_aktif", hanya("superuji", ya=302)),
         ("POST", "/super/akun/baru", "akun_semua_baru", hanya("superuji")),
+        # a programme's own data (langkah 5b): its admins and the superadmin, not operators, not other programmes
+        ("GET", "/prodi/%s/data" % A, "data_prodi_lihat", hanya("superuji", "adma")),
+        ("POST", "/prodi/%s/data" % A, "data_prodi_simpan", hanya("superuji", "adma", ya=400)),
+        ("POST", "/prodi/%s/data/akreditasi/www" % A, "data_prodi_pakai_www", hanya("superuji", "adma", ya=302)),
+        ("POST", "/prodi/%s/data/akreditasi/tetap" % A, "data_prodi_tetap", hanya("superuji", "adma", ya=302)),
+        ("GET", "/prodi/%s/data" % B, "data_prodi_lihat", hanya("superuji", "admb")),
         # superadmin pages (langkah 5); harmless inputs, so the rows only test who gets in
         ("GET", "/super/prodi", "super_prodi", hanya("superuji")),
         ("GET", "/super/prodi/%s" % A, "super_prodi_detail", hanya("superuji")),

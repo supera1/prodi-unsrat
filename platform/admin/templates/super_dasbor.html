@@ -10,6 +10,8 @@
 	<li><a href="{{ url_for('super_dosen') }}"><strong>{{ r.tanpa_dosen | length }}</strong> situs aktif tanpa tautan dosen</a></li>
 	<li><a href="#kurang"><strong>{{ r.kurang | length }}</strong> prodi dengan data resmi yang masih kosong</a></li>
 	<li><a href="#hilang"><strong>{{ r.hilang | length }}</strong> prodi hilang dari data www</a></li>
+	<li><a href="#bentrok"><strong>{{ r.bentrok | length }}</strong> prodi dengan data yang bentrok dengan www</a></li>
+	<li><a href="{{ url_for('super_prodi') }}"><strong>{{ r.timpaan }}</strong> prodi mengubah data resminya sendiri</a></li>
 </ul>
 <section class="kartu">
 	<h2>Data resmi dari www</h2>
@@ -27,14 +29,15 @@
 </section>
 {% for id_, judul, daftar, ket in [("tanpa-admin", "Situs aktif tanpa admin prodi", r.tanpa_admin, "Buat akun admin prodi lewat menu Akun."),
 	("kurang", "Data resmi yang masih kosong", r.kurang, "Dilengkapi di superadmin www, lalu tarik data lagi."),
-	("hilang", "Hilang dari data www", r.hilang, "Periksa di www; nonaktifkan situsnya bila prodi memang ditutup.")] %}
+	("hilang", "Hilang dari data www", r.hilang, "Periksa di www; nonaktifkan situsnya bila prodi memang ditutup."),
+	("bentrok", "Data prodi bentrok dengan www", r.bentrok, "Data prodi tetap dipakai; pilih di halaman Data prodi: pakai data www atau tetap.")] %}
 {% if daftar %}
 <section class="kartu" id="{{ id_ }}">
 	<h2>{{ judul }} ({{ daftar | length }})</h2>
 	<p class="keterangan">{{ ket }}</p>
 	<ul class="daftar-ringkas">
 		{% for x in daftar[:30] %}
-		<li><a href="{{ url_for('super_prodi_detail', kode=x.kode) }}">{{ x.nama }}</a>{% if x.kekurangan and id_ == 'kurang' %} — {{ x.kekurangan | join(', ') }}{% endif %}</li>
+		<li><a href="{{ url_for('data_prodi_lihat', kode=x.kode) if id_ == 'bentrok' else url_for('super_prodi_detail', kode=x.kode) }}">{{ x.nama }}</a>{% if x.kekurangan and id_ == 'kurang' %} — {{ x.kekurangan | join(', ') }}{% endif %}{% if id_ == 'bentrok' %} — {{ x.bentrok | join(', ') }}{% endif %}</li>
 		{% endfor %}
 	</ul>
 	{% if daftar | length > 30 %}<p><a href="{{ url_for('super_prodi') }}">Lihat semua</a></p>{% endif %}

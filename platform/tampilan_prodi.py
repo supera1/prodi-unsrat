@@ -15,8 +15,8 @@ Settings live in prodi/<kode>/situs.json:
 What the admin may change (decision of 26 October 2026): the label line, the title, the subtitle and the sentence;
 the background (pale or full programme colour, any colour that keeps text readable, or a photo); and the fact cards'
 labels, order and visibility, plus two cards of its own. The VALUES of the official cards (accreditation, degree,
-credits, international accreditation) always come from www (K-P6), so the home page never shows a figure that differs
-from the official data an assessor checks.
+credits, international accreditation) always come from the programme's data (www's, with the changes made on the
+Data prodi page, K-P16), never from these settings, so every figure on the site comes from one place.
 
 Readability: every background is checked before use. A chosen colour gets white or dark text, whichever reaches 4.5:1;
 a colour where neither does is refused. A photo gets an overlay of the programme's dark colour strong enough that white

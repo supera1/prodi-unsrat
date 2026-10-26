@@ -32,6 +32,7 @@ sys.path.insert(0, ADMIN)
 from flask import abort, flash, g, make_response, redirect, render_template, request, url_for  # noqa: E402
 
 import akun as akun_mod  # noqa: E402
+import data_prodi  # noqa: E402
 import impor_dosen  # noqa: E402
 import lokasi  # noqa: E402
 import registri  # noqa: E402
@@ -59,8 +60,10 @@ def pasang(app, alat):
         return r
 
     def ikhtisar():
-        """One row per registered programme, with what the superadmin needs to see about it."""
-        war = registri.warisan_per_kode()
+        """One row per registered programme, with what the superadmin needs to see about it (its effective data:
+        www's with the programme's own changes)."""
+        war = data_prodi.semua_efektif()
+        bentrok = data_prodi.semua_bentrok()
         semua_akun = akun_mod.semua()
         hasil = []
         for r in registri.baca()["prodi"]:
@@ -74,6 +77,7 @@ def pasang(app, alat):
                 "kekurangan": tarik_www.kekurangan(p) if p else [],
                 "admin": sum(1 for a in semua_akun if a["aktif"] and a["peran"] == "admin" and kode in a["prodi"]),
                 "operator": sum(1 for a in semua_akun if a["aktif"] and a["peran"] == "operator" and kode in a["prodi"]),
+                "timpaan": sorted(data_prodi.baca(kode)["timpaan"]), "bentrok": [b[0] for b in bentrok.get(kode, [])],
             })
         return sorted(hasil, key=registri.kunci_urut)
 
@@ -83,6 +87,7 @@ def pasang(app, alat):
         return {"terdaftar": len(baris), "aktif": len(aktif), "belum": registri.belum_terdaftar(),
                 "tanpa_admin": [r for r in aktif if not r["admin"]], "hilang": [r for r in baris if r["hilang"]],
                 "kurang": [r for r in aktif if r["kekurangan"]], "tanpa_dosen": [r for r in aktif if not r["dosen_url"]],
+                "bentrok": [r for r in baris if r["bentrok"]], "timpaan": sum(1 for r in baris if r["timpaan"]),
                 "meta": lokasi.baca("warisan/meta") or {}, "bangun": alat.antrean.status}
     alat.ringkasan = ringkasan
 
@@ -153,10 +158,11 @@ def pasang(app, alat):
     def halaman_detail(kode, kode_status=200):
         r = kode_terdaftar(kode)
         baris = [b for b in ikhtisar() if b["kode"] == kode][0]
-        p = registri.warisan_per_kode().get(kode)
+        p = data_prodi.semua_efektif().get(kode)
         anggota = [a for a in akun_mod.semua() if kode in a["prodi"]]
         situs = alat.info_prodi(kode)
         return render_template("super_prodi_detail.html", r=r, b=baris, p=p, anggota=anggota, situs=situs,
+                               timpaan=baris["timpaan"], bentrok=baris["bentrok"],
                                riwayat_prodi=[v for v in riwayat.daftar(500) if v["berkas"].startswith("prodi/%s/" % kode)][:10]), kode_status
 
     @app.route("/super/prodi/<kode>")
@@ -225,7 +231,7 @@ def pasang(app, alat):
     # -------------------------------------------------------------- lecturer links
 
     def nama_semua():
-        return {k: registri.nama_tampil(p) for k, p in registri.warisan_per_kode().items()}
+        return {k: registri.nama_tampil(p) for k, p in data_prodi.semua_efektif().items()}
 
     @app.route("/super/dosen")
     @akses("super")
@@ -333,7 +339,8 @@ def pasang(app, alat):
         m = re.match(r"^prodi/([0-9A-Za-z]{3,12})/(.+)$", berkas)
         if m:
             return "%s — %s" % (nama_semua().get(m.group(1), m.group(1)), {"situs": "identitas dan beranda",
-                                                                            "pengumuman": "pengumuman"}.get(m.group(2), m.group(2)))
+                                                                            "pengumuman": "pengumuman",
+                                                                            "data": "data prodi"}.get(m.group(2), m.group(2)))
         return {"registri": "Registri prodi (slug, aktif, tautan dosen)", "warisan/prodi": "Data resmi prodi dari www",
                 "warisan/unit": "Data fakultas dari www", "warisan/kalender": "Kalender akademik dari www",
                 "warisan/universitas": "Identitas universitas dari www", "warisan/meta": "Catatan tarik data"}.get(berkas, berkas)

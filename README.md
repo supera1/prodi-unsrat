@@ -3,8 +3,8 @@
 Situs ke-97 program studi Universitas Sam Ratulangi di `https://prodi.unsrat.ac.id/<slug>/`, dengan template seragam
 yang mengikuti kriteria akreditasi dan bisa disesuaikan oleh tiap prodi.
 
-> **Status 26 Oktober 2026:** Fase 1 langkah 5 (superadmin): prodi dan slug, tarik data www, tautan dosen, riwayat versi, dan bangun ulang
-> otomatis bisa dikelola dari admin; formulir isi untuk admin prodi menyusul di langkah 6.
+> **Status 26 Oktober 2026:** Fase 1 langkah 5b: superadmin dan admin prodi bisa mengubah data prodi (termasuk CPL dan akreditasi); perubahan
+> tetap dipakai walau www berubah, dan bentrok ditandai. Formulir isi lain untuk admin prodi menyusul di langkah 6.
 > Rencana: [docs/rencana-fase-01.md](docs/rencana-fase-01.md) · Keputusan: [docs/keputusan.md](docs/keputusan.md)
 
 ## Cara kerja singkat
@@ -56,7 +56,8 @@ sendiri, lalu hapus berkas itu. Hasilnya di `data/`, `riwayat/`, `publik/`, dan 
 | 3b | Pengumuman dan berita | selesai |
 | 3c | Bagian depan beranda per prodi | selesai |
 | 4 | Akun & peran | selesai |
-| 5 | Superadmin | selesai, menunggu tinjauan |
+| 5 | Superadmin | selesai |
+| 5b | Data prodi bisa diubah (termasuk CPL), bentrok dengan www ditandai | selesai, menunggu tinjauan |
 | 6 | Admin prodi | — |
 | 7 | Docker & deploy staging | — |
 | 8 | Uji menyeluruh + log fase | — |

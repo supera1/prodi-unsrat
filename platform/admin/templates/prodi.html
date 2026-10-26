@@ -6,6 +6,7 @@
 <p>{{ p.unit }} · <a href="{{ p.alamat }}">{{ p.alamat }}</a>{% if not p.aktif %} · <strong>situs nonaktif</strong>{% endif %}</p>
 <nav class="sub-navigasi" aria-label="Menu prodi">
 	{% if a.peran != 'operator' %}
+	<a href="{{ url_for('data_prodi_lihat', kode=p.kode) }}">Data prodi (CPL, akreditasi, …)</a>
 	<a href="{{ url_for('akun_prodi', kode=p.kode) }}">Akun prodi</a>
 	<a href="{{ url_for('audit_prodi', kode=p.kode) }}">Log audit prodi</a>
 	{% endif %}

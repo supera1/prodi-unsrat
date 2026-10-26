@@ -51,8 +51,9 @@
 </section>
 
 <section class="kartu">
-	<h2>Data resmi dari www</h2>
+	<h2>Data prodi</h2>
 	{% if p %}
+	{% if timpaan %}<p class="pesan pesan--info">{{ timpaan | length }} kolom diubah di sini{% if bentrok %}, {{ bentrok | length }} di antaranya bentrok dengan www{% endif %}: {{ timpaan | join(', ') }}.</p>{% endif %}
 	<dl class="data">
 		<dt>Nama</dt><dd>{{ p.nama }}{% if p.nama_en %} <span class="keterangan" lang="en">{{ p.nama_en }}</span>{% endif %}</dd>
 		<dt>Jenjang, gelar, SKS</dt><dd>{{ p.jenjang }} · {{ p.gelar or '—' }} · {{ p.sks or '—' }} SKS</dd>
@@ -60,7 +61,8 @@
 		<dt>CPL</dt><dd>{{ p.cpl | length }} butir</dd>
 		<dt>Surel</dt><dd>{{ p.surel or '—' }}</dd>
 	</dl>
-	{% if b.kekurangan %}<p class="pesan pesan--info">Masih kosong: {{ b.kekurangan | join(', ') }}. Dilengkapi di superadmin www, lalu tarik data lagi.</p>{% endif %}
+	{% if b.kekurangan %}<p class="pesan pesan--info">Masih kosong: {{ b.kekurangan | join(', ') }}. Lengkapi di halaman Data prodi, atau di superadmin www lalu tarik data lagi.</p>{% endif %}
+	<p><a class="tombol tombol--garis" href="{{ url_for('data_prodi_lihat', kode=b.kode) }}">Ubah data prodi</a></p>
 	{% else %}
 	<p>Tidak ada di data resmi.</p>
 	{% endif %}

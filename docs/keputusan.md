@@ -30,6 +30,8 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
 - **Konteks:** angka di situs universitas dan situs prodi tidak boleh berbeda, terutama saat visitasi asesor.
 - **Keputusan:** nama, jenjang, gelar, SKS, CPL, bidang kerja, akreditasi, dan kode PDDIKTI diambil dari data www dan
   terkunci di platform prodi. Prodi hanya bisa mengusulkan perubahan (Fase 2). Prodi baru ditambahkan dulu di www.
+- **Diubah oleh K-P16 (26 Oktober 2026):** data tetap ditarik dari www, tetapi superadmin dan admin prodi boleh
+  mengubahnya di platform; kode PDDIKTI tetap kunci dan prodi baru tetap ditambahkan lewat www.
 - **Disetujui:** pengguna, 26 Oktober 2026.
 
 ### K-P7 — Generator statis + admin Flask, admin hanya dari jaringan/VPN UNSRAT
@@ -83,6 +85,8 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
     subjudul, kalimat pengantar, label/urutan/tampil kartu fakta, dan menambah 2 kartu sendiri.
   - **Nilai** kartu resmi (akreditasi dan lembaganya, gelar, SKS, akreditasi internasional) tetap dari www dan tidak
     bisa ditimpa; judul halaman (`<title>`), kepala situs, dan halaman Spesifikasi tetap memakai nama resmi.
+  - *Diubah oleh K-P16:* nilai itu kini diambil dari data prodi (www + perubahan di halaman Data prodi); pengaturan
+    bagian depan tetap tidak bisa menimpanya, jadi setiap angka di situs berasal dari satu tempat.
   - Foto latar: JPEG/PNG minimal 2400 × 800 piksel, dipotong otomatis 3:1 (2400 dan 1600 px) dan 4:3 untuk ponsel
     (1200 × 900) di sekitar titik fokus (tengah, kiri, kanan, atas, bawah).
   - Keterbacaan dijamin: warna pilihan mendapat teks putih atau gelap yang mencapai 4,5:1 (warna yang tidak bisa
@@ -90,6 +94,21 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
     bagian foto yang putih sekalipun.
 - **Konsekuensi:** formulir di langkah 6 menampilkan petunjuk ukuran foto (`media.PETUNJUK_HERO`) dan pratinjau.
 - **Disetujui:** pengguna, 26 Oktober 2026.
+
+### K-P16 — Data resmi dari www bisa diubah di platform; perubahan lokal tetap dipakai (langkah 5b)
+- **Konteks:** prodi perlu memperbarui datanya sendiri (mis. CPL kurikulum baru) tanpa menunggu www.
+- **Keputusan** (pengguna, 26 Oktober 2026, dari pilihan yang diajukan):
+  - **Superadmin dan admin prodi** boleh mengubah semua kolom data prodinya: nama, nama Inggris, jenjang, gelar, SKS,
+    fakultas, surel, bidang kerja, akreditasi (peringkat, lembaga, berlaku hingga, internasional), dan CPL. Operator
+    tidak. Kode PDDIKTI tidak bisa diubah.
+  - Salinan dari www tidak pernah diubah; perubahan disimpan per kolom sebagai **timpaan** di `prodi/<kode>/data.json`
+    bersama nilai www saat diubah. Situs memakai data www dengan timpaan di atasnya.
+  - **Data prodi tetap dipakai** walau www berubah. Bila www mengubah kolom yang sudah diubah prodi, kolom itu ditandai
+    **bentrok** (pratinjau tarik data, dasbor superadmin, halaman Data prodi) dengan pilihan "pakai data www" atau
+    "tetap data prodi". Kolom yang tidak diubah prodi tetap mengikuti www. Timpaan yang sudah sama dengan www dihapus
+    otomatis setelah tarik data.
+- **Konsekuensi:** data di situs prodi bisa berbeda dengan www.unsrat.ac.id; halaman Data prodi mengingatkan agar
+  perubahan yang benar juga disampaikan ke pengelola www. Semua perubahan tercatat di riwayat dan log audit.
 
 ### K-P13 — Port di VM menyusul
 - **Status:** terbuka. Diisi saat langkah 7 (Docker & deploy staging).

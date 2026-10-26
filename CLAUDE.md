@@ -6,7 +6,8 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
 
 ## Konteks singkat
 - Saudara proyek: `../website-unsrat-2026` (www.unsrat.ac.id). Data resmi prodi (nama, jenjang, gelar, SKS, CPL,
-  bidang kerja, akreditasi) **bersumber dari www** dan hanya mengalir satu arah, www → prodi (K-P6).
+  bidang kerja, akreditasi) **ditarik dari www**; superadmin dan admin prodi boleh mengubahnya di halaman Data prodi
+  sebagai timpaan per kolom yang tetap dipakai walau www berubah (K-P16, `platform/data_prodi.py`).
 - Pengelola: superadmin (UPA TIK), admin prodi (koordinator prodi), operator prodi. Mereka bukan developer —
   antarmuka harus sederhana dan sulit dirusak. Tidak ada peran admin fakultas (K-P2).
 - Audiens: asesor akreditasi, calon mahasiswa, mahasiswa, alumni, pengguna lulusan. Banyak pengguna ponsel dengan
@@ -74,7 +75,8 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai
   berbahasa Inggris.
 - Jangan mengarang fakta institusi: angka, nama pejabat, akreditasi, teks kebijakan. Data kosong tampil sebagai
   "sedang dilengkapi" dan dicatat, bukan diisi tebakan.
-- Jangan mengubah nama resmi prodi; nama datang dari www.
+- Jangan mengubah nama atau data resmi prodi atas inisiatif sendiri; data datang dari www atau dari admin lewat halaman
+  Data prodi. Situs selalu dibangun dari data efektif (`data_prodi.semua_efektif()`), bukan langsung dari `warisan/`.
 - Menambah paket Python baru: tanya dulu. Versi dikunci di `platform/admin/constraints.txt`.
 - Modul yang disalin dari www: perbaikan keamanan di www juga diterapkan di sini (lihat `docs/asal-modul.md`).
 

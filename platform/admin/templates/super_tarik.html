@@ -2,7 +2,7 @@
 {% block judul %}Data resmi dari www{% endblock %}
 {% block isi %}
 <h1>Data resmi dari www</h1>
-<p>Data prodi (nama, jenjang, gelar, SKS, CPL, akreditasi), fakultas, kalender, dan identitas universitas diambil satu arah dari www.unsrat.ac.id. Perbaikan dilakukan di superadmin www, lalu ditarik ke sini.{% if meta.ditarik %} Terakhir ditarik {{ meta.ditarik }} oleh {{ meta.oleh }}.{% endif %}</p>
+<p>Data prodi (nama, jenjang, gelar, SKS, CPL, akreditasi), fakultas, kalender, dan identitas universitas diambil dari www.unsrat.ac.id. Kolom yang diubah sendiri oleh prodi (halaman Data prodi) tetap memakai data prodi; kolom lain mengikuti www.{% if meta.ditarik %} Terakhir ditarik {{ meta.ditarik }} oleh {{ meta.oleh }}.{% endif %}</p>
 {% if masalah %}
 <section class="kartu">
 	<h2>Data www tidak dapat ditarik</h2>
@@ -30,6 +30,11 @@
 		<li>{{ nama.get(k, k) }}<ul>{% for x in beda %}<li><code>{{ x }}</code></li>{% endfor %}</ul></li>
 		{% endfor %}
 	</ul>
+	{% endif %}
+	{% if laporan.bentrok %}
+	<h3>Bentrok dengan data yang diubah prodi: {{ laporan.bentrok | length }} prodi</h3>
+	<p class="keterangan">Kolom ini juga diubah di www. Data prodi tetap dipakai; admin prodi atau superadmin memilih di halaman Data prodi.</p>
+	<ul>{% for k, f in laporan.bentrok | dictsort %}<li>{{ nama.get(k, k) }}: {{ f | join(', ') }}</li>{% endfor %}</ul>
 	{% endif %}
 	{% for kunci, judul in [("unit_berubah", "Data fakultas berubah."), ("kalender_berubah", "Kalender akademik berubah."), ("universitas_berubah", "Identitas atau kontak universitas berubah."), ("tampilan_berubah", "Pengaturan tampil 'berlaku hingga' berubah.")] %}
 	{% if laporan[kunci] %}<p>{{ judul }}</p>{% endif %}

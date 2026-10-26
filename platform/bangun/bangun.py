@@ -5,7 +5,8 @@
     python3 platform/bangun/bangun.py --prodi 55201    one programme (by PDDIKTI code) + the root pages
     python3 platform/bangun/bangun.py --produksi       production form (also: PRODI_MODE=produksi)
 
-Inputs: warisan/* (official data from www, tarik_www.py), registri.json and prodi/<kode>/situs.json (lokasi.py),
+Inputs: warisan/* (official data from www, tarik_www.py) with each programme's own changes (prodi/<kode>/data.json,
+data_prodi.py), registri.json and prodi/<kode>/situs.json (lokasi.py),
 platform/template/menu.json, platform/data-awal/palet.json, and the templates and assets in platform/template/.
 
 Output (PRODI_PUBLIK, the only folder the web server serves):
@@ -52,6 +53,7 @@ sys.path.insert(0, BANGUN)
 from jinja2 import Environment, FileSystemLoader, StrictUndefined  # noqa: E402
 from markupsafe import Markup, escape  # noqa: E402
 
+import data_prodi  # noqa: E402
 import lokasi  # noqa: E402
 import menu as menu_mod  # noqa: E402
 import media  # noqa: E402
@@ -186,7 +188,8 @@ class Pembangun(object):
         if not warisan:
             raise GagalBangun("data resmi belum ada: jalankan dulu platform/tarik_www.py --terapkan")
         self.tampil_berlaku = bool(warisan.get("tampilkan_berlaku_hingga"))
-        self.prodi = {p["kode_pddikti"]: p for p in warisan["program"]}
+        # www's data with each programme's own changes put over it (data_prodi.py, K-P16)
+        self.prodi = data_prodi.semua_efektif()
         self.unit = {u["kode"]: u for u in (lokasi.baca("warisan/unit") or {}).get("unit", [])}
         self.kalender = lokasi.baca("warisan/kalender") or {}
         self.univ = lokasi.baca("warisan/universitas") or {}

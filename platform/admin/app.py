@@ -36,7 +36,9 @@ from flask import Flask, abort, flash, g, redirect, render_template, request, se
 import akun as akun_mod  # noqa: E402
 import audit  # noqa: E402
 import lokasi  # noqa: E402
+import data_prodi  # noqa: E402
 import pembangun  # noqa: E402
+import prodi_admin  # noqa: E402
 import registri  # noqa: E402
 import superadmin  # noqa: E402
 from akses import akses  # noqa: E402
@@ -156,6 +158,7 @@ def buat_app(env=None):
 
     def info_prodi(kode):
         r, p = registri_per_kode().get(kode), warisan_per_kode().get(kode)
+        p = data_prodi.efektif(kode, p) if p else None          # with the programme's own changes
         if not r or not p:
             return None
         return {"kode": kode, "slug": r["slug"], "aktif": r["aktif"], "nama": registri.nama_tampil(p), "unit": p["unit"],
@@ -456,6 +459,7 @@ def buat_app(env=None):
     alat.catat, alat.antrean, alat.info_prodi = catat, antrean, info_prodi
     alat.kelompok_prodi, alat.prodi_dari_formulir = kelompok_prodi, prodi_dari_formulir
     superadmin.pasang(app, alat)
+    prodi_admin.pasang(app, alat)
     app.antrean = antrean
 
     # -------------------------------------------------------------- errors

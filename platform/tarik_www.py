@@ -289,6 +289,9 @@ def pratinjau(folder=None):
                                         if p["kode_pddikti"] not in terdaftar and not p.get("hilang_dari_www"))
     aktif_lama = [p for p in (lama or {}).get("program", []) if not p.get("hilang_dari_www")]
     laporan["hilang_terlalu_banyak"] = bool(aktif_lama) and len(laporan["hilang"]) > BATAS_HILANG * len(aktif_lama)
+    # fields changed by a programme itself that www now changes too: the programme's value stays (data_prodi.py)
+    import data_prodi
+    laporan["bentrok"] = data_prodi.bentrok_jika_ditarik(prodi)
     return {"sumber": sumber, "prodi": prodi, "laporan": laporan}
 
 
@@ -319,6 +322,8 @@ def terapkan(oleh, folder=None, paksa=False):
     meta = dict(hasil["sumber"]["meta"])
     meta.update({"ditarik": datetime.datetime.now().isoformat(timespec="seconds"), "oleh": oleh})
     lokasi.tulis("warisan/meta", meta, oleh, bagian, "tarik data www")
+    import data_prodi
+    laporan["dirapikan"] = data_prodi.rapikan(oleh)       # programme changes that www now has too
     return laporan
 
 
@@ -346,6 +351,10 @@ def cetak_laporan(laporan, nama):
                          ("tampilan_berubah", "Pengaturan tampil 'berlaku hingga' berubah")):
         if laporan[kunci]:
             print(judul + ".")
+    if laporan.get("bentrok"):
+        print("Bentrok dengan data yang diubah prodi (data prodi tetap dipakai): %d prodi" % len(laporan["bentrok"]))
+        for k, f in sorted(laporan["bentrok"].items()):
+            print("  - %s: %s" % (n(k), ", ".join(f)))
     if laporan["kekurangan"]:
         print("Data resmi yang masih kosong (dilengkapi di www): %d prodi" % len(laporan["kekurangan"]))
         for k, label in sorted(laporan["kekurangan"].items()):
