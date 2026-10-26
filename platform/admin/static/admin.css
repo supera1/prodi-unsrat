@@ -292,3 +292,161 @@ th {
 	color: var(--abu-600);
 	font-size: 0.875rem;
 }
+
+/* ---------------------------------------------------------------- superadmin pages (langkah 5) */
+
+.ringkasan {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+	gap: 0.75rem;
+	padding: 0;
+	list-style: none;
+}
+
+.ringkasan a {
+	display: block;
+	height: 100%;
+	padding: 1rem;
+	background: #fff;
+	border: 1px solid var(--abu-200);
+	border-left: 4px solid var(--biru);
+	border-radius: 8px;
+	color: var(--abu-900);
+	text-decoration: none;
+}
+
+.ringkasan a:hover {
+	border-color: var(--biru);
+}
+
+.ringkasan strong {
+	display: block;
+	font-size: 1.75rem;
+	line-height: 1.1;
+	color: var(--biru);
+}
+
+.jejak-admin {
+	margin: 1rem 0 0;
+	font-size: 0.875rem;
+}
+
+.daftar-ringkas {
+	columns: 2 18rem;
+	padding-left: 1.25rem;
+}
+
+.saring {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 0.5rem 1rem;
+	margin-bottom: 1rem;
+}
+
+.saring .isian {
+	margin: 0;
+}
+
+.saring label {
+	display: block;
+	font-size: 0.875rem;
+	font-weight: 700;
+}
+
+.saring select,
+.saring input {
+	padding: 0.25rem 0.5rem;
+	border: 1px solid var(--abu-600);
+	border-radius: 4px;
+	font: inherit;
+	max-width: 20rem;
+}
+
+.sebaris-penuh {
+	padding: 0.75rem 0;
+	border-top: 1px solid var(--abu-200);
+}
+
+.sebaris-penuh p {
+	margin: 0 0 0.5rem;
+}
+
+dl.data {
+	display: grid;
+	grid-template-columns: max-content minmax(0, 1fr);
+	gap: 0.25rem 1rem;
+}
+
+dl.data dt {
+	font-weight: 700;
+}
+
+dl.data dd {
+	margin: 0;
+}
+
+.pilih-prodi {
+	margin: 0 0 1rem;
+	padding: 0.75rem 1rem;
+	border: 1px solid var(--abu-200);
+	border-radius: 8px;
+}
+
+.pilih-prodi legend {
+	padding: 0 0.25rem;
+	font-weight: 700;
+}
+
+.pilih-prodi__unit {
+	border-bottom: 1px solid var(--abu-200);
+}
+
+.pilih-prodi__unit summary {
+	padding: 0.5rem 0;
+	cursor: pointer;
+}
+
+.pilih-prodi__unit ul {
+	margin: 0 0 0.5rem;
+	padding: 0;
+	list-style: none;
+	columns: 2 18rem;
+}
+
+.pilih-prodi__unit li {
+	break-inside: avoid;
+}
+
+.pilih-prodi__unit label {
+	display: inline-flex;
+	gap: 0.4rem;
+	align-items: baseline;
+	font-weight: 400;
+	padding: 0.15rem 0;
+}
+
+.beda,
+.keluaran {
+	overflow-x: auto;
+	max-height: 70vh;
+	padding: 0.75rem;
+	background: #fff;
+	border: 1px solid var(--abu-200);
+	border-radius: 4px;
+	font-size: 0.8125rem;
+	line-height: 1.45;
+}
+
+.beda span {
+	display: block;
+	white-space: pre;
+}
+
+.beda__tambah {
+	background: #e8f5ec;
+}
+
+.beda__hapus {
+	background: #fdecec;
+}

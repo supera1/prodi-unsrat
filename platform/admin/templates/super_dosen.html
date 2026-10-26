@@ -1,0 +1,35 @@
+{% extends "dasar.html" %}
+{% block judul %}Tautan dosen{% endblock %}
+{% block isi %}
+<h1>Tautan dosen tetap</h1>
+{% if terisi is not none %}<p>{{ terisi }} dari {{ baris | length }} prodi sudah punya tautan ke dosen.unsrat.ac.id.</p>{% endif %}
+<section class="kartu">
+	<h2>Impor banyak prodi sekaligus</h2>
+	<ol>
+		<li><a href="{{ url_for('super_dosen_templat') }}">Unduh templat CSV</a> (semua prodi terdaftar dengan tautannya sekarang).</li>
+		<li>Isi kolom <code>dosen_url</code> dengan alamat di <code>https://dosen.unsrat.ac.id/</code>. Kolom lain boleh dibiarkan; baris dengan <code>dosen_url</code> kosong tidak diubah.</li>
+		<li>Unggah berkasnya (CSV atau Excel .xlsx, maksimal 2 MB), periksa pratinjaunya, lalu terapkan.</li>
+	</ol>
+	<form method="post" action="{{ url_for('super_dosen_impor') }}" enctype="multipart/form-data" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<div class="isian">
+			<label for="berkas">Berkas CSV atau Excel</label>
+			<input id="berkas" name="berkas" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+		</div>
+		<button type="submit" class="tombol">Lihat pratinjau</button>
+	</form>
+</section>
+<section class="kartu">
+	<h2>Tautan sekarang</h2>
+	<div class="tabel-gulir">
+		<table>
+			<thead><tr><th scope="col">Program studi</th><th scope="col">Tautan</th></tr></thead>
+			<tbody>
+				{% for b in baris %}
+				<tr><td><a href="{{ url_for('super_prodi_detail', kode=b.kode) }}">{{ b.nama }}</a></td><td>{% if b.dosen_url %}<a href="{{ b.dosen_url }}">{{ b.dosen_url }}</a>{% else %}—{% endif %}</td></tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</section>
+{% endblock %}

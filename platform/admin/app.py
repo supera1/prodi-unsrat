@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Admin of prodi.unsrat.ac.id (langkah 4: accounts and roles).
+"""Admin of prodi.unsrat.ac.id: accounts and roles (langkah 4), superadmin pages (langkah 5, superadmin.py).
 
     python3 platform/admin/siapkan.py                                    first time: session key in <PRODI_RAHASIA>/.env
     python3 platform/admin/siapkan.py --superadmin nama --nama-lengkap "Nama"   first superadmin (password in a file)
@@ -10,13 +10,9 @@ and in production only over HTTPS (ADMIN_HTTPS=1) behind the web container. Patt
 (site/admin/app.py): network allow-list, lockout per address and per user name, sessions bound to the password,
 CSRF on every form, strict security headers, no debugger.
 
-Access is declared on every route with @akses(...) and checked in one place (periksa_akses) before any view runs:
-    akses("umum")               no login (the login page)
-    akses("masuk")              any logged-in account
-    akses("super")              superadmin only
-    akses("prodi")              /prodi/<kode>/...: the superadmin, or an account of that programme
-    akses("prodi", "admin")     the same, but not an operator
-A route without a declaration is refused (fail closed); uji/uji_admin.py tries every route with every role.
+Access is declared on every route with @akses(...) (akses.py) and checked in one place (periksa_akses) before any
+view runs. A route without a declaration is refused (fail closed); uji/uji_admin.py tries every route with every role.
+Changes that affect the published sites are followed by a rebuild (pembangun.py, PRODI_BANGUN).
 """
 from __future__ import print_function
 
@@ -40,6 +36,10 @@ from flask import Flask, abort, flash, g, redirect, render_template, request, se
 import akun as akun_mod  # noqa: E402
 import audit  # noqa: E402
 import lokasi  # noqa: E402
+import pembangun  # noqa: E402
+import registri  # noqa: E402
+import superadmin  # noqa: E402
+from akses import akses  # noqa: E402
 
 SESI_MENIT = 120              # a session ends after this long without activity...
 SESI_MAKS_JAM = 12            # ...and at the latest this long after logging in
@@ -48,7 +48,10 @@ GAGAL_MAKS_AKUN = 10          # failed logins for one user name, from any addres
 KUNCI_MENIT = 15
 MAKS_TANPA_LOGIN = 64 * 1024  # largest request accepted before logging in (the login form)
 IP_BOLEH_BAWAAN = "103.84.116.0/24"
-PENGATURAN_LINGKUNGAN = ("ADMIN_IP_BOLEH", "ADMIN_HTTPS", "PROXY_TERPERCAYA", "ADMIN_AWALAN", "PORT", "PRODI_ALAMAT_PUBLIK")
+PENGATURAN_LINGKUNGAN = ("ADMIN_IP_BOLEH", "ADMIN_HTTPS", "PROXY_TERPERCAYA", "ADMIN_AWALAN", "PORT", "PRODI_ALAMAT_PUBLIK",
+                         "PRODI_BANGUN")
+POLA_NAMA_AKUN = re.compile(r"^([a-z][a-z0-9._-]{2,31}|-|baris-perintah)$")
+POLA_AKSI = re.compile(r"^[a-z][a-z-]{1,40}$")
 POLA_KODE = re.compile(r"^[0-9A-Za-z]{3,12}$")
 
 HALAMAN_LUAR_JARINGAN = (
@@ -84,16 +87,6 @@ def baca_jaringan(teks):
     return hasil
 
 
-def akses(jenis, minimal="operator"):
-    """Declare who may open a route (see the module docstring)."""
-    assert jenis in ("umum", "masuk", "super", "prodi") and minimal in ("operator", "admin")
-
-    def hias(fungsi):
-        fungsi.akses = (jenis, minimal)
-        return fungsi
-    return hias
-
-
 def buat_app(env=None):
     """The admin application. env: settings (default: <PRODI_RAHASIA>/.env, overridden by the environment)."""
     if env is None:
@@ -124,6 +117,7 @@ def buat_app(env=None):
         from werkzeug.middleware.proxy_fix import ProxyFix
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=proksi, x_proto=proksi, x_prefix=proksi)
 
+    antrean = pembangun.Antrean(env.get("PRODI_BANGUN") or "latar")
     gagal = {}                     # "ip:<address>" / "akun:<name>" -> times of failed logins within the window
     kunci_gagal = threading.Lock()
 
@@ -164,9 +158,21 @@ def buat_app(env=None):
         r, p = registri_per_kode().get(kode), warisan_per_kode().get(kode)
         if not r or not p:
             return None
-        nama = p["nama"] if p["jenjang"] == "Profesi" else "%s %s" % (p["jenjang"], p["nama"])
-        return {"kode": kode, "slug": r["slug"], "aktif": r["aktif"], "nama": nama, "unit": p["unit"],
+        return {"kode": kode, "slug": r["slug"], "aktif": r["aktif"], "nama": registri.nama_tampil(p), "unit": p["unit"],
                 "jenjang": p["jenjang"], "alamat": "%s/%s/" % (alamat_publik, r["slug"])}
+
+    def kelompok_prodi():
+        """Registered programmes grouped by faculty, for the programme checkboxes of the account forms."""
+        kelompok = {}
+        for kode in registri_per_kode():
+            x = info_prodi(kode)
+            if x:
+                kelompok.setdefault(x["unit"], []).append(x)
+        return [(unit, sorted(isi, key=registri.kunci_urut)) for unit, isi in sorted(kelompok.items())]
+
+    def prodi_dari_formulir():
+        """Programme codes from checkboxes (several fields "prodi") or a comma-separated field."""
+        return [k.strip() for v in request.form.getlist("prodi") for k in re.split(r"[,\s]+", v) if k.strip()]
 
     # -------------------------------------------------------------- checks before every request
 
@@ -309,16 +315,16 @@ def buat_app(env=None):
     # -------------------------------------------------------------- dashboards
 
     def prodi_terlihat(a):
-        semua = [info_prodi(k) for k in sorted(registri_per_kode())]
-        urutan = {j: i for i, j in enumerate(("S1", "S2", "S3", "Profesi", "Sp-1", "Sp-2"))}
-        semua = sorted((x for x in semua if x), key=lambda x: (urutan.get(x["jenjang"], 9), x["nama"]))
+        semua = sorted((x for x in (info_prodi(k) for k in registri_per_kode()) if x), key=registri.kunci_urut)
         return semua if a["peran"] == "super" else [x for x in semua if x["kode"] in a["prodi"]]
 
     @app.route("/")
     @akses("masuk")
     def dasbor():
         daftar = prodi_terlihat(g.akun)
-        if g.akun["peran"] != "super" and len(daftar) == 1:
+        if g.akun["peran"] == "super":
+            return render_template("super_dasbor.html", r=alat.ringkasan())
+        if len(daftar) == 1:
             return redirect(url_for("dasbor_prodi", kode=daftar[0]["kode"]))
         return render_template("dasbor.html", daftar=daftar)
 
@@ -339,12 +345,13 @@ def buat_app(env=None):
 
     def daftar_akun(kode=None):
         return render_template("akun.html", daftar=akun_mod.terlihat_oleh(g.akun, kode), kode=kode,
-                               p=g.get("prodi"), boleh_kelola=lambda s: akun_mod.boleh_kelola(g.akun, s) and s["id"] != g.akun["id"])
+                               p=g.get("prodi"), kelompok=kelompok_prodi() if not kode else [],
+                               boleh_kelola=lambda s: akun_mod.boleh_kelola(g.akun, s) and s["id"] != g.akun["id"])
 
     def buat_akun(kode=None):
         f = request.form
         peran = f.get("peran", "operator")
-        prodi = [kode] if kode else [k.strip() for k in re.split(r"[,\s]+", f.get("prodi", "")) if k.strip()]
+        prodi = [kode] if kode else prodi_dari_formulir()
         try:
             id_, sandi_baru = akun_mod.buat(g.akun, f.get("nama", ""), f.get("nama_lengkap", ""), peran, prodi)
         except akun_mod.GagalAkun as e:
@@ -406,7 +413,7 @@ def buat_app(env=None):
     @app.route("/prodi/<kode>/audit")
     @akses("prodi", "admin")
     def audit_prodi(kode):
-        return render_template("audit.html", baris=audit.baca(prodi=kode), p=g.prodi)
+        return render_template("audit.html", baris=audit.baca(prodi=kode), p=g.prodi, saring=None)
 
     @app.route("/super/akun", methods=["GET"])
     @akses("super")
@@ -433,7 +440,23 @@ def buat_app(env=None):
     @app.route("/super/audit")
     @akses("super")
     def audit_semua():
-        return render_template("audit.html", baris=audit.baca(), p=None)
+        saring = {"prodi": request.args.get("prodi", ""), "oleh": request.args.get("oleh", ""), "aksi": request.args.get("aksi", "")}
+        if (saring["prodi"] and not POLA_KODE.match(saring["prodi"])) or (saring["oleh"] and not POLA_NAMA_AKUN.match(saring["oleh"])) \
+                or (saring["aksi"] and not POLA_AKSI.match(saring["aksi"])):
+            abort(404)
+        baris = audit.baca(prodi=saring["prodi"] or None, oleh=saring["oleh"] or None, aksi=saring["aksi"] or None, batas=500)
+        return render_template("audit.html", baris=baris, p=None, saring=saring, jenis_aksi=audit.jenis_aksi(),
+                               semua_prodi=prodi_terlihat(g.akun))
+
+    # -------------------------------------------------------------- superadmin pages (superadmin.py)
+
+    class Alat(object):
+        pass
+    alat = Alat()
+    alat.catat, alat.antrean, alat.info_prodi = catat, antrean, info_prodi
+    alat.kelompok_prodi, alat.prodi_dari_formulir = kelompok_prodi, prodi_dari_formulir
+    superadmin.pasang(app, alat)
+    app.antrean = antrean
 
     # -------------------------------------------------------------- errors
 

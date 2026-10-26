@@ -1,0 +1,56 @@
+{% extends "dasar.html" %}
+{% block judul %}Data resmi dari www{% endblock %}
+{% block isi %}
+<h1>Data resmi dari www</h1>
+<p>Data prodi (nama, jenjang, gelar, SKS, CPL, akreditasi), fakultas, kalender, dan identitas universitas diambil satu arah dari www.unsrat.ac.id. Perbaikan dilakukan di superadmin www, lalu ditarik ke sini.{% if meta.ditarik %} Terakhir ditarik {{ meta.ditarik }} oleh {{ meta.oleh }}.{% endif %}</p>
+{% if masalah %}
+<section class="kartu">
+	<h2>Data www tidak dapat ditarik</h2>
+	<p class="pesan pesan--galat">Tidak ada yang diubah. Masalah di data www ({{ masalah | length }}):</p>
+	<ul>{% for m in masalah[:100] %}<li>{{ m }}</li>{% endfor %}</ul>
+	{% if masalah | length > 100 %}<p>… dan {{ masalah | length - 100 }} lainnya.</p>{% endif %}
+</section>
+{% elif laporan %}
+{% if not ada %}
+<p class="pesan pesan--ok">Tidak ada perubahan: data di sini sama dengan data www.</p>
+{% else %}
+<section class="kartu">
+	<h2>Pratinjau perubahan</h2>
+	{% if laporan.pertama %}<p>Salinan pertama: {{ nama | length }} prodi.</p>{% endif %}
+	{% for judul, kunci in [("Prodi baru di www (perlu didaftarkan setelah ditarik)", "baru"), ("Hilang dari www (ditandai, tidak dihapus)", "hilang"), ("Muncul kembali di www", "kembali")] %}
+	{% if laporan[kunci] %}
+	<h3>{{ judul }}: {{ laporan[kunci] | length }}</h3>
+	<ul>{% for k in laporan[kunci] %}<li>{{ nama.get(k, k) }} ({{ k }})</li>{% endfor %}</ul>
+	{% endif %}
+	{% endfor %}
+	{% if laporan.berubah %}
+	<h3>Berubah: {{ laporan.berubah | length }} prodi</h3>
+	<ul>
+		{% for k, beda in laporan.berubah | dictsort %}
+		<li>{{ nama.get(k, k) }}<ul>{% for x in beda %}<li><code>{{ x }}</code></li>{% endfor %}</ul></li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	{% for kunci, judul in [("unit_berubah", "Data fakultas berubah."), ("kalender_berubah", "Kalender akademik berubah."), ("universitas_berubah", "Identitas atau kontak universitas berubah."), ("tampilan_berubah", "Pengaturan tampil 'berlaku hingga' berubah.")] %}
+	{% if laporan[kunci] %}<p>{{ judul }}</p>{% endif %}
+	{% endfor %}
+	<form method="post" action="{{ url_for('super_tarik_terapkan') }}" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<input type="hidden" name="sidik" value="{{ sidik }}">
+		{% if laporan.hilang_terlalu_banyak %}
+		<p class="pesan pesan--galat">{{ laporan.hilang | length }} prodi hilang sekaligus (lebih dari {{ batas_hilang }}%). Ini sering tanda data www sedang rusak. Periksa www dulu.</p>
+		<p><label><input type="checkbox" name="paksa" value="1"> Saya sudah memeriksa www; terapkan juga</label></p>
+		{% endif %}
+		<button type="submit" class="tombol">Terapkan dan bangun ulang semua situs</button>
+	</form>
+</section>
+{% endif %}
+{% if laporan.kekurangan %}
+<section class="kartu">
+	<h2>Data resmi yang masih kosong ({{ laporan.kekurangan | length }} prodi)</h2>
+	<p class="keterangan">Dilengkapi di superadmin www, bukan di sini.</p>
+	<ul>{% for k, label in laporan.kekurangan | dictsort %}<li>{{ nama.get(k, k) }}: {{ label | join(', ') }}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+{% endif %}
+{% endblock %}

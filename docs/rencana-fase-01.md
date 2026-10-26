@@ -234,7 +234,8 @@ Catatan:
 6. **Admin prodi**: identitas, palet, logo, menu, bagian depan beranda (latar, foto, teks, kartu), operator, formulir
    pengumuman (operator menulis, admin prodi menyetujui).
 7. **Docker & deploy staging**: compose stack terpisah, Nginx, pemantau, panduan Portainer + catatan DNS/LB untuk admin VM,
-   bangun ulang terjadwal harian (pengumuman kedaluwarsa).
+   bangun ulang terjadwal harian (pengumuman kedaluwarsa), dan cara Nginx memuat ulang `nginx-buatan/slug-lama.conf`
+   setelah slug diubah (pengalihan 301 baru berlaku setelah itu).
 8. **Uji menyeluruh + `docs/log/fase-01.md`** (cara verifikasi manual, sisa pekerjaan, keputusan yang perlu dikonfirmasi).
 
 ## 11. Kriteria selesai Fase 1

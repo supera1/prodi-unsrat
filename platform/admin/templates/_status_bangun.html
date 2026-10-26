@@ -1,0 +1,8 @@
+{# The rebuild status (pembangun.Antrean.status). #}
+{% macro status_bangun(s) %}
+<p class="pesan pesan--{{ 'info' if s.berjalan else ('ok' if s.ok else 'galat') }}" role="status">
+	{% if s.berjalan %}Sedang membangun ulang ({{ s.cakupan }})…{% else %}{{ s.pesan }}{% endif %}
+	{% if s.waktu and not s.berjalan %}<br><span class="keterangan">{{ s.waktu }} · {{ s.cakupan }}{% if s.durasi is not none %} · {{ s.durasi }} detik{% endif %}{% if s.peringatan %} · {{ s.peringatan | length }} peringatan{% endif %}</span>{% endif %}
+	{% if s.menunggu %}<br><span class="keterangan">{{ s.menunggu }} permintaan menunggu.</span>{% endif %}
+</p>
+{% endmacro %}

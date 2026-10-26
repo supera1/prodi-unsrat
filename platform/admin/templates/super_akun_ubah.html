@@ -1,0 +1,30 @@
+{% extends "dasar.html" %}
+{% from "_pilih_prodi.html" import pilih_prodi %}
+{% block judul %}Akun {{ sasaran.nama }}{% endblock %}
+{% block isi %}
+{% set a = akun_aktif() %}
+<p class="jejak-admin"><a href="{{ url_for('akun_semua') }}">Akun</a> › {{ sasaran.nama }}</p>
+<h1>{{ sasaran.nama_lengkap }}</h1>
+<p><code>{{ sasaran.nama }}</code> · {{ NAMA_PERAN[sasaran.peran] }} · {{ 'aktif' if sasaran.aktif else 'nonaktif' }}{% if sasaran.wajib_ganti %} · sandi sementara{% endif %} · dibuat {{ sasaran.dibuat }} oleh {{ sasaran.dibuat_oleh }} · masuk terakhir {{ sasaran.masuk_terakhir or '—' }}</p>
+<form method="post" action="{{ url_for('super_akun_simpan', id_=sasaran.id) }}" class="formulir kartu">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<div class="isian">
+		<label for="nama_lengkap">Nama lengkap</label>
+		<input id="nama_lengkap" name="nama_lengkap" type="text" value="{{ sasaran.nama_lengkap }}" maxlength="100" required>
+	</div>
+	<div class="isian">
+		<label for="peran">Peran</label>
+		{% if sasaran.id == a.id %}
+		<input type="hidden" name="peran" value="{{ sasaran.peran }}">
+		<p id="peran">{{ NAMA_PERAN[sasaran.peran] }} <span class="keterangan">(peran akun sendiri tidak dapat diubah)</span></p>
+		{% else %}
+		<select id="peran" name="peran">
+			{% for k in ['operator', 'admin', 'super'] %}<option value="{{ k }}"{% if sasaran.peran == k %} selected{% endif %}>{{ NAMA_PERAN[k] }}</option>{% endfor %}
+		</select>
+		{% endif %}
+	</div>
+	{{ pilih_prodi(kelompok, sasaran.prodi, "Prodi akun ini (kosongkan untuk superadmin)") }}
+	<button type="submit" class="tombol">Simpan</button>
+	<p class="keterangan">Perubahan peran dan prodi berlaku langsung, juga untuk sesi yang sedang berjalan. Nama pengguna tidak dapat diubah.</p>
+</form>
+{% endblock %}

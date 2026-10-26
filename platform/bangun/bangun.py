@@ -56,6 +56,7 @@ import lokasi  # noqa: E402
 import menu as menu_mod  # noqa: E402
 import media  # noqa: E402
 import pengumuman as pengumuman_mod  # noqa: E402
+import registri  # noqa: E402
 import tampilan_prodi  # noqa: E402
 import warna as warna_mod  # noqa: E402
 from slug import POLA_SLUG  # noqa: E402
@@ -94,11 +95,7 @@ class GagalBangun(Exception):
 
 # ------------------------------------------------------------------ small helpers used by the templates
 
-def nama_tampil(p):
-    """"S1 Teknik Informatika", "Profesi Dokter", "Sp-1 Ilmu Penyakit Mata"."""
-    if p["jenjang"] == "Profesi":
-        return p["nama"] if "profesi" in p["nama"].lower() else "Profesi " + p["nama"]
-    return "%s %s" % (p["jenjang"], p["nama"])
+nama_tampil = registri.nama_tampil
 
 
 def tanggal(iso):

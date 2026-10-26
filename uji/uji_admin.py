@@ -33,7 +33,8 @@ except ImportError:
     sys.exit(1)
 
 KERJA = tempfile.mkdtemp(prefix="prodi-uji-admin-")
-for nama, sub in (("PRODI_DATA", "data"), ("PRODI_RIWAYAT", "riwayat"), ("PRODI_RAHASIA", "rahasia"), ("PRODI_LOG", "log")):
+for nama, sub in (("PRODI_DATA", "data"), ("PRODI_RIWAYAT", "riwayat"), ("PRODI_RAHASIA", "rahasia"), ("PRODI_LOG", "log"),
+                  ("WWW_DATA", "www-tidak-ada")):        # never the real www data next to this repository
     os.environ[nama] = os.path.join(KERJA, sub)
 
 import akun  # noqa: E402
@@ -122,7 +123,7 @@ try:
     akun.ganti_sandi(super_id, s_sementara, SANDI["super"])
 
     # --- the application
-    env = {"SECRET_KEY": "k" * 64, "ADMIN_IP_BOLEH": "103.84.116.0/24"}
+    env = {"SECRET_KEY": "k" * 64, "ADMIN_IP_BOLEH": "103.84.116.0/24", "PRODI_BANGUN": "mati"}
     app = app_mod.buat_app(env)
     app.testing = False
 
@@ -292,6 +293,27 @@ try:
         ("POST", "/super/akun/%d/reset" % ids["opb"], "akun_semua_reset", hanya("superuji")),
         ("POST", "/super/akun/%d/aktif" % ids["opb"], "akun_semua_aktif", hanya("superuji", ya=302)),
         ("POST", "/super/akun/baru", "akun_semua_baru", hanya("superuji")),
+        # superadmin pages (langkah 5); harmless inputs, so the rows only test who gets in
+        ("GET", "/super/prodi", "super_prodi", hanya("superuji")),
+        ("GET", "/super/prodi/%s" % A, "super_prodi_detail", hanya("superuji")),
+        ("POST", "/super/prodi/%s/slug" % A, "super_prodi_slug", hanya("superuji", ya=302)),
+        ("POST", "/super/prodi/%s/aktif" % A, "super_prodi_aktif", hanya("superuji", ya=302)),
+        ("POST", "/super/prodi/%s/dosen" % A, "super_prodi_dosen", hanya("superuji", ya=302)),
+        ("POST", "/super/prodi/%s/bangun" % A, "super_prodi_bangun", hanya("superuji", ya=302)),
+        ("POST", "/super/prodi/daftar", "super_prodi_daftar", hanya("superuji", ya=400)),
+        ("GET", "/super/dosen", "super_dosen", hanya("superuji")),
+        ("GET", "/super/dosen/templat.csv", "super_dosen_templat", hanya("superuji")),
+        ("POST", "/super/dosen/impor", "super_dosen_impor", hanya("superuji", ya=400)),
+        ("POST", "/super/dosen/terapkan", "super_dosen_terapkan", hanya("superuji", ya=302)),
+        ("GET", "/super/tarik", "super_tarik", hanya("superuji")),
+        ("POST", "/super/tarik/terapkan", "super_tarik_terapkan", hanya("superuji", ya=400)),
+        ("GET", "/super/riwayat", "super_riwayat", hanya("superuji")),
+        ("GET", "/super/riwayat/lihat?berkas=registri&versi=20000101-000000-000000", "super_riwayat_lihat", hanya("superuji", ya=404)),
+        ("POST", "/super/riwayat/pulihkan", "super_riwayat_pulihkan", hanya("superuji", ya=404)),
+        ("GET", "/super/bangun", "super_bangun", hanya("superuji")),
+        ("POST", "/super/bangun/semua", "super_bangun_semua", hanya("superuji", ya=302)),
+        ("GET", "/super/akun/%d" % korban["id"], "super_akun_ubah", hanya("superuji")),
+        ("POST", "/super/akun/%d/ubah" % korban["id"], "super_akun_simpan", hanya("superuji", ya=302)),
         ("POST", "/keluar", "keluar", hanya(*semua_nama, ya=302)),
     ]
     n_akun = [0]
@@ -304,7 +326,7 @@ try:
             else:
                 n_akun[0] += 1
                 data = {"aktif": "1", "nama": "uji%d" % n_akun[0], "nama_lengkap": "Akun Uji", "peran": "operator",
-                        "prodi": A}
+                        "prodi": A, "slug": "s1informatika", "berkas": "registri", "versi": "bukan-versi"}
                 r = kirim(k, url, **data)
             cek(r.status_code == harapan[nama], "%s %s oleh %s: %s, harus %s" % (metode, url, nama, r.status_code, harapan[nama]))
             if ep == "keluar" and r.status_code == 302:

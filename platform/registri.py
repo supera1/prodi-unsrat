@@ -35,6 +35,39 @@ def baca():
     return lokasi.baca("registri") or {"prodi": []}
 
 
+URUTAN_JENJANG = ("S1", "S2", "S3", "Profesi", "Sp-1", "Sp-2")
+
+
+def nama_tampil(p):
+    """"S1 Teknik Informatika", "Profesi Dokter", "Sp-1 Ilmu Penyakit Mata"."""
+    if p["jenjang"] == "Profesi":
+        return p["nama"] if "profesi" in p["nama"].lower() else "Profesi " + p["nama"]
+    return "%s %s" % (p["jenjang"], p["nama"])
+
+
+def kunci_urut(p):
+    """Sort key for lists of programmes: by level, then name."""
+    return (URUTAN_JENJANG.index(p["jenjang"]) if p.get("jenjang") in URUTAN_JENJANG else 9, p.get("nama", ""))
+
+
+def belum_terdaftar():
+    """Programmes in the official data (not gone from www) that have no site yet, by name."""
+    terdaftar = {r["kode_pddikti"] for r in baca()["prodi"]}
+    return sorted((p for p in warisan_per_kode().values()
+                   if p["kode_pddikti"] not in terdaftar and not p.get("hilang_dari_www")),
+                  key=kunci_urut)
+
+
+def periksa_dosen_url(url):
+    """A problem with a lecturer link, or None. Only addresses on https://dosen.unsrat.ac.id/ are accepted."""
+    url = (url or "").strip()
+    if not url:
+        return None
+    if not (url.startswith(POLA_URL_DOSEN) and len(url) <= 300 and not any(c.isspace() or c in "\"'<>\\" for c in url)):
+        return "tautan dosen harus alamat di https://dosen.unsrat.ac.id/"
+    return None
+
+
 def warisan_per_kode():
     return {p["kode_pddikti"]: p for p in (lokasi.baca("warisan/prodi") or {}).get("program", [])}
 
@@ -155,14 +188,33 @@ def atur(kode, oleh, aktif=None, dosen_url=None):
         raise GagalRegistri("prodi %s belum terdaftar" % kode)
     if dosen_url is not None:
         dosen_url = dosen_url.strip()
-        if dosen_url and not (dosen_url.startswith(POLA_URL_DOSEN) and len(dosen_url) <= 300
-                              and not any(c.isspace() or c in "\"'<>" for c in dosen_url)):
-            raise GagalRegistri("tautan dosen harus alamat di https://dosen.unsrat.ac.id/")
+        masalah = periksa_dosen_url(dosen_url)
+        if masalah:
+            raise GagalRegistri(masalah)
         r["dosen_url"] = dosen_url
     if aktif is not None:
         r["aktif"] = bool(aktif)
     r["diubah"] = _hari_ini()
     lokasi.tulis("registri", registri, oleh, "Registri", "atur %s" % kode)
+
+
+def atur_banyak(dosen_url, oleh):
+    """Set the lecturer links of many programmes at once ({code: link}), as one change in the history."""
+    registri = baca()
+    masalah = []
+    for kode, url in dosen_url.items():
+        r = cari(registri, kode)
+        if r is None:
+            masalah.append("prodi %s belum terdaftar" % kode)
+        elif periksa_dosen_url(url):
+            masalah.append("%s: %s" % (kode, periksa_dosen_url(url)))
+    if masalah:
+        raise GagalRegistri("; ".join(masalah))
+    for kode, url in dosen_url.items():
+        r = cari(registri, kode)
+        r["dosen_url"] = url.strip()
+        r["diubah"] = _hari_ini()
+    lokasi.tulis("registri", registri, oleh, "Registri", "impor tautan dosen (%d prodi)" % len(dosen_url))
 
 
 def main(argv=None):

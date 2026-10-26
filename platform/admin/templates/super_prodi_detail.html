@@ -1,0 +1,80 @@
+{% extends "dasar.html" %}
+{% block judul %}{{ b.nama }}{% endblock %}
+{% block isi %}
+<p class="jejak-admin"><a href="{{ url_for('super_prodi') }}">Prodi</a> › {{ b.nama }}</p>
+<h1>{{ b.nama }}</h1>
+<p>{{ b.unit }} · kode PDDIKTI {{ b.kode }}{% if situs %} · <a href="{{ situs.alamat }}">{{ situs.alamat }}</a> · <a href="{{ url_for('dasbor_prodi', kode=b.kode) }}">dasbor prodi</a>{% endif %}</p>
+{% if b.hilang %}<p class="pesan pesan--galat">Prodi ini tidak ada (lagi) di data www. Periksa di www; nonaktifkan situsnya bila prodi memang ditutup.</p>{% endif %}
+
+<section class="kartu">
+	<h2>Alamat (slug)</h2>
+	<p>Sekarang: <code>/{{ r.slug }}/</code>{% if r.slug_lama %} · alamat lama yang dialihkan: {% for s in r.slug_lama %}<code>/{{ s }}/</code>{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}</p>
+	<form method="post" action="{{ url_for('super_prodi_slug', kode=b.kode) }}" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<div class="isian">
+			<label for="slug">Slug baru</label>
+			<input id="slug" name="slug" type="text" value="{{ r.slug }}" maxlength="24" pattern="[a-z][a-z0-9]{2,23}" autocapitalize="none" spellcheck="false" required aria-describedby="slug-ket">
+			<p id="slug-ket" class="keterangan">Huruf kecil dan angka, diawali jenjang (mis. s1, s2, profesi, sp1). Mengubah slug membuat alamat baru; alamat lama dialihkan permanen dan tidak bisa dipakai prodi lain. Tautan yang sudah tersebar (surat, spanduk, mesin pencari) tetap bekerja lewat pengalihan, tetapi sebaiknya slug tidak diubah setelah tayang.</p>
+		</div>
+		<button type="submit" class="tombol tombol--kecil">Ubah slug</button>
+	</form>
+</section>
+
+<section class="kartu">
+	<h2>Status situs</h2>
+	<p>Situs prodi ini <strong>{{ 'aktif' if r.aktif else 'nonaktif' }}</strong>.</p>
+	<form method="post" action="{{ url_for('super_prodi_aktif', kode=b.kode) }}" class="sebaris">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<input type="hidden" name="aktif" value="{{ '0' if r.aktif else '1' }}">
+		<button type="submit" class="tombol tombol--kecil tombol--garis">{{ 'Nonaktifkan situs' if r.aktif else 'Aktifkan situs' }}</button>
+	</form>
+	{% if r.aktif %}
+	<form method="post" action="{{ url_for('super_prodi_bangun', kode=b.kode) }}" class="sebaris">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<button type="submit" class="tombol tombol--kecil tombol--garis">Bangun ulang situs ini</button>
+	</form>
+	{% endif %}
+	<p class="keterangan">Situs nonaktif tidak dibangun dan hilang dari daftar prodi; datanya tetap tersimpan.</p>
+</section>
+
+<section class="kartu">
+	<h2>Tautan dosen tetap</h2>
+	<form method="post" action="{{ url_for('super_prodi_dosen', kode=b.kode) }}" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<div class="isian">
+			<label for="dosen_url">Alamat daftar dosen di dosen.unsrat.ac.id</label>
+			<input id="dosen_url" name="dosen_url" type="url" value="{{ r.dosen_url or '' }}" maxlength="300" placeholder="https://dosen.unsrat.ac.id/..." aria-describedby="dosen-ket">
+			<p id="dosen-ket" class="keterangan">Kosongkan untuk menautkan ke Direktori Dosen UNSRAT secara umum. Banyak prodi sekaligus: menu Tautan dosen.</p>
+		</div>
+		<button type="submit" class="tombol tombol--kecil">Simpan tautan</button>
+	</form>
+</section>
+
+<section class="kartu">
+	<h2>Data resmi dari www</h2>
+	{% if p %}
+	<dl class="data">
+		<dt>Nama</dt><dd>{{ p.nama }}{% if p.nama_en %} <span class="keterangan" lang="en">{{ p.nama_en }}</span>{% endif %}</dd>
+		<dt>Jenjang, gelar, SKS</dt><dd>{{ p.jenjang }} · {{ p.gelar or '—' }} · {{ p.sks or '—' }} SKS</dd>
+		<dt>Akreditasi</dt><dd>{{ p.akreditasi or '—' }} {{ p.lembaga_akreditasi }}{% if p.berlaku_hingga %} (s.d. {{ p.berlaku_hingga }}){% endif %}{% if p.internasional %} · {{ p.internasional }}{% endif %}</dd>
+		<dt>CPL</dt><dd>{{ p.cpl | length }} butir</dd>
+		<dt>Surel</dt><dd>{{ p.surel or '—' }}</dd>
+	</dl>
+	{% if b.kekurangan %}<p class="pesan pesan--info">Masih kosong: {{ b.kekurangan | join(', ') }}. Dilengkapi di superadmin www, lalu tarik data lagi.</p>{% endif %}
+	{% else %}
+	<p>Tidak ada di data resmi.</p>
+	{% endif %}
+</section>
+
+<section class="kartu">
+	<h2>Akun prodi ini ({{ anggota | length }})</h2>
+	{% if anggota %}
+	<ul>
+		{% for x in anggota %}
+		<li><a href="{{ url_for('super_akun_ubah', id_=x.id) }}">{{ x.nama_lengkap }}</a> (<code>{{ x.nama }}</code>) — {{ NAMA_PERAN[x.peran] }}{% if not x.aktif %}, nonaktif{% endif %}</li>
+		{% endfor %}
+	</ul>
+	{% else %}<p>Belum ada.</p>{% endif %}
+	<p><a href="{{ url_for('akun_prodi', kode=b.kode) }}">Kelola akun prodi</a> · <a href="{{ url_for('audit_semua', prodi=b.kode) }}">Log audit prodi</a> · <a href="{{ url_for('super_riwayat', berkas='prodi/' ~ b.kode) }}">Riwayat isi prodi</a></p>
+</section>
+{% endblock %}

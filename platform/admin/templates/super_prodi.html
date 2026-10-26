@@ -1,0 +1,43 @@
+{% extends "dasar.html" %}
+{% block judul %}Prodi{% endblock %}
+{% block isi %}
+<h1>Prodi</h1>
+<p>{{ baris | length }} prodi terdaftar, {{ baris | selectattr('aktif') | list | length }} situs aktif.</p>
+<div class="tabel-gulir">
+	<table>
+		<thead><tr><th scope="col">Program studi</th><th scope="col">Alamat</th><th scope="col">Status</th><th scope="col">Admin / operator</th><th scope="col">Tautan dosen</th><th scope="col">Data resmi</th></tr></thead>
+		<tbody>
+			{% for b in baris %}
+			<tr>
+				<td><a href="{{ url_for('super_prodi_detail', kode=b.kode) }}">{{ b.nama }}</a><br><span class="keterangan">{{ b.unit }} · {{ b.kode }}</span></td>
+				<td><code>/{{ b.slug }}/</code>{% if b.slug_lama %}<br><span class="keterangan">dulu: {{ b.slug_lama | join(', ') }}</span>{% endif %}</td>
+				<td>{{ 'Aktif' if b.aktif else 'Nonaktif' }}{% if b.hilang %}<br><strong>hilang dari www</strong>{% endif %}</td>
+				<td>{{ b.admin }} / {{ b.operator }}</td>
+				<td>{{ 'Ada' if b.dosen_url else '—' }}</td>
+				<td>{% if b.kekurangan %}Kurang: {{ b.kekurangan | join(', ') }}{% else %}Lengkap{% endif %}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+<section class="kartu" id="belum">
+	<h2>Prodi baru di www yang belum terdaftar ({{ belum | length }})</h2>
+	{% if belum %}
+	<p class="keterangan">Tetapkan alamatnya (slug) untuk membuat situsnya. Usulan slug mengikuti pola yang disetujui: jenjang + nama tanpa kata "Teknik" dan "Ilmu". Slug tidak sebaiknya diubah setelah tayang.</p>
+	{% for p in belum %}
+	<form method="post" action="{{ url_for('super_prodi_daftar') }}" class="formulir sebaris-penuh">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<input type="hidden" name="kode" value="{{ p.kode_pddikti }}">
+		<p><strong>{{ p.tampil }}</strong> — {{ p.unit }} ({{ p.kode_pddikti }})</p>
+		<div class="isian">
+			<label for="slug-{{ p.kode_pddikti }}">Slug</label>
+			<input id="slug-{{ p.kode_pddikti }}" name="slug" type="text" value="{{ p.usulan }}" maxlength="24" pattern="[a-z][a-z0-9]{2,23}" autocapitalize="none" spellcheck="false" required>
+		</div>
+		<button type="submit" class="tombol tombol--kecil">Daftarkan dan buat situs</button>
+	</form>
+	{% endfor %}
+	{% else %}
+	<p>Semua prodi di data www sudah terdaftar.</p>
+	{% endif %}
+</section>
+{% endblock %}

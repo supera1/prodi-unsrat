@@ -1,0 +1,33 @@
+{% extends "dasar.html" %}
+{% block judul %}Pratinjau impor tautan dosen{% endblock %}
+{% block isi %}
+<h1>Pratinjau impor tautan dosen</h1>
+<p>Berkas <code>{{ nama_berkas }}</code>: <strong>{{ rencana.ubah | length }}</strong> prodi berubah, {{ rencana.sama }} sudah sama, {{ rencana.kosong }} baris tanpa tautan (tidak diubah), <strong>{{ rencana.galat | length }}</strong> baris bermasalah.</p>
+{% if rencana.galat %}
+<section class="kartu">
+	<h2>Baris bermasalah (tidak diterapkan)</h2>
+	<ul>{% for x in rencana.galat %}<li>Baris {{ x.baris }}: {{ x.pesan }}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+{% if rencana.ubah %}
+<div class="tabel-gulir">
+	<table>
+		<thead><tr><th scope="col">Program studi</th><th scope="col">Tautan sekarang</th><th scope="col">Tautan baru</th></tr></thead>
+		<tbody>
+			{% for u in rencana.ubah %}
+			<tr><td>{{ u.nama or u.kode }}</td><td>{{ u.lama or '—' }}</td><td>{{ u.baru }}</td></tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+<form method="post" action="{{ url_for('super_dosen_terapkan') }}" class="formulir">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<input type="hidden" name="token" value="{{ token }}">
+	<button type="submit" class="tombol">Terapkan {{ rencana.ubah | length }} perubahan</button>
+	<a href="{{ url_for('super_dosen') }}">Batal</a>
+	<p class="keterangan">Pratinjau ini berlaku 30 menit dan hanya sekali pakai. Baris bermasalah tidak ikut diterapkan.</p>
+</form>
+{% else %}
+<p>Tidak ada yang perlu diterapkan. <a href="{{ url_for('super_dosen') }}">Kembali</a></p>
+{% endif %}
+{% endblock %}

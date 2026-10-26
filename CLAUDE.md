@@ -58,8 +58,10 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai
 - Admin (langkah 4): sekali `python3 platform/admin/siapkan.py` (kunci sesi di `rahasia/.env`), lalu
   `.venv/bin/python platform/admin/siapkan.py --superadmin <nama> --nama-lengkap "..."` (sandi sementara ditulis ke
   `rahasia/.kredensial-<nama>.txt`); jalankan `.venv/bin/python platform/admin/app.py` → http://127.0.0.1:8791/.
-- Setiap rute admin wajib `@akses(...)` dan wajib masuk matriks di `uji/uji_admin.py` (uji gagal bila ada rute baru
-  yang belum diuji untuk semua peran).
+- Setiap rute admin wajib `@akses(...)` (`platform/admin/akses.py`) dan wajib masuk matriks di `uji/uji_admin.py`
+  (uji gagal bila ada rute baru yang belum diuji untuk semua peran).
+- Halaman superadmin di `platform/admin/superadmin.py`. Perubahan yang memengaruhi situs memanggil bangun ulang lewat
+  `platform/admin/pembangun.py`; `PRODI_BANGUN=latar` (bawaan, utas latar), `sinkron` (uji), `mati` (uji akses).
 - Template: `platform/template/menu.json` (menu induk), `platform/template/kategori.json` (kategori pengumuman), `platform/template/halaman/*.html` (Jinja2, autoescape),
   `platform/template/aset/css/prodi.css`; palet pilihan `platform/data-awal/palet.json`, uji kontras di `platform/bangun/warna.py`.
 

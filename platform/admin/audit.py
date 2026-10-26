@@ -39,12 +39,24 @@ def catat(aksi, oleh="-", ip="-", prodi=None, **data):
         f.write(json.dumps(data, ensure_ascii=False, sort_keys=True) + "\n")
 
 
-def baca(prodi=None, batas=200):
-    """Newest first; prodi: only that programme's lines."""
+def baca(prodi=None, batas=200, oleh=None, aksi=None):
+    """Newest first; prodi / oleh / aksi: only the lines of that programme, account or action."""
     if not os.path.isfile(path()):
         return []
     with io.open(path(), encoding="utf-8") as f:
         baris = [json.loads(x) for x in f if x.strip()]
     if prodi:
         baris = [b for b in baris if b.get("prodi") == prodi or (isinstance(b.get("prodi"), list) and prodi in b["prodi"])]
+    if oleh:
+        baris = [b for b in baris if b.get("oleh") == oleh or b.get("akun") == oleh]
+    if aksi:
+        baris = [b for b in baris if b.get("aksi") == aksi]
     return list(reversed(baris))[:batas]
+
+
+def jenis_aksi():
+    """Every action name in the log, for the filter."""
+    if not os.path.isfile(path()):
+        return []
+    with io.open(path(), encoding="utf-8") as f:
+        return sorted({json.loads(x).get("aksi", "") for x in f if x.strip()} - {""})

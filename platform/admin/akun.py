@@ -322,6 +322,41 @@ def buat(pelaku, nama, nama_lengkap, peran, prodi=()):
         db.close()
 
 
+def ubah(pelaku, sasaran_id, nama_lengkap, peran, prodi):
+    """The superadmin changes an account's full name, role and programmes. Nobody changes their own role, and the
+    last active superadmin stays one. The change applies at the account's next request (roles and programmes are
+    read for every request, never kept in the session)."""
+    if not pelaku or pelaku["peran"] != "super" or not pelaku["aktif"]:
+        raise GagalAkun("Hanya superadmin yang dapat mengubah peran dan prodi akun.")
+    sasaran = ambil(sasaran_id)
+    if not sasaran:
+        raise GagalAkun("Akun tidak ditemukan.")
+    prodi = sorted(set(prodi or ()))
+    masalah = _periksa_isian(sasaran["nama"], nama_lengkap, peran, prodi)
+    if sasaran["id"] == pelaku["id"] and peran != sasaran["peran"]:
+        masalah.append("Anda tidak dapat mengubah peran akun sendiri.")
+    if masalah:
+        raise GagalAkun(" ".join(masalah))
+    db = sambung()
+    try:
+        with _kunci:
+            if sasaran["peran"] == "super" and peran != "super" and sasaran["aktif"] and jumlah_super_aktif(db) <= 1:
+                raise GagalAkun("Superadmin aktif terakhir tidak dapat diubah perannya.")
+            db.execute("BEGIN IMMEDIATE")
+            db.execute("UPDATE akun SET nama_lengkap = ?, peran = ?, diubah = ? WHERE id = ?",
+                       (nama_lengkap.strip(), peran, _sekarang(), sasaran_id))
+            db.execute("DELETE FROM anggota WHERE akun_id = ?", (sasaran_id,))
+            db.executemany("INSERT INTO anggota (akun_id, kode_prodi) VALUES (?, ?)", [(sasaran_id, k) for k in prodi])
+            db.execute("COMMIT")
+    except sqlite3.Error:
+        if db.in_transaction:
+            db.execute("ROLLBACK")
+        raise
+    finally:
+        db.close()
+    return ambil(sasaran_id)
+
+
 def ganti_sandi(akun_id, sandi_lama, sandi_baru):
     """The owner sets a new password (also the forced change after a temporary one)."""
     akun = ambil(akun_id)

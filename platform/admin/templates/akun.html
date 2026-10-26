@@ -1,4 +1,5 @@
 {% extends "dasar.html" %}
+{% from "_pilih_prodi.html" import pilih_prodi %}
 {% block judul %}Akun{% if p %} — {{ p.nama }}{% endif %}{% endblock %}
 {% block isi %}
 {% set a = akun_aktif() %}
@@ -9,7 +10,7 @@
 		<tbody>
 			{% for x in daftar %}
 			<tr>
-				<td>{{ x.nama_lengkap }}{% if x.id == a.id %} (Anda){% endif %}</td>
+				<td>{% if a.peran == 'super' %}<a href="{{ url_for('super_akun_ubah', id_=x.id) }}">{{ x.nama_lengkap }}</a>{% else %}{{ x.nama_lengkap }}{% endif %}{% if x.id == a.id %} (Anda){% endif %}</td>
 				<td><code>{{ x.nama }}</code></td>
 				<td>{{ NAMA_PERAN[x.peran] }}</td>
 				<td>{{ x.prodi | join(', ') or 'semua' }}</td>
@@ -61,11 +62,7 @@
 		<input type="hidden" name="peran" value="operator">
 		{% endif %}
 		{% if not kode %}
-		<div class="isian">
-			<label for="prodi">Kode PDDIKTI prodi</label>
-			<input id="prodi" name="prodi" type="text" aria-describedby="prodi-ket">
-			<p id="prodi-ket" class="keterangan">Pisahkan dengan koma bila lebih dari satu. Kosongkan untuk superadmin.</p>
-		</div>
+		{{ pilih_prodi(kelompok, [], "Prodi akun ini (kosongkan untuk superadmin)") }}
 		{% endif %}
 		<button type="submit" class="tombol">Buat akun</button>
 		<p class="keterangan">Kata sandi sementara ditampilkan sekali setelah akun dibuat; pemiliknya wajib menggantinya saat pertama masuk.</p>

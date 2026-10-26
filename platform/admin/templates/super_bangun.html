@@ -1,0 +1,24 @@
+{% extends "dasar.html" %}
+{% from "_status_bangun.html" import status_bangun %}
+{% block judul %}Bangun ulang{% endblock %}
+{% block isi %}
+<h1>Bangun ulang situs</h1>
+<p>Situs dibangun ulang otomatis setelah setiap perubahan. Bangun ulang semua hanya perlu bila ada yang tampak tidak sesuai.</p>
+{{ status_bangun(status) }}
+{% if status.peringatan %}
+<section class="kartu">
+	<h2>Peringatan bangun terakhir ({{ status.peringatan | length }})</h2>
+	<ul>{% for x in status.peringatan %}<li>{{ x }}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+{% if status.keluaran %}
+<details class="kartu">
+	<summary>Keluaran lengkap</summary>
+	<pre class="keluaran">{{ status.keluaran }}</pre>
+</details>
+{% endif %}
+<form method="post" action="{{ url_for('super_bangun_semua') }}">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<button type="submit" class="tombol">Bangun ulang semua situs</button>
+</form>
+{% endblock %}
