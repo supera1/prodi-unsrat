@@ -1,0 +1,21 @@
+# Admin + generator of prodi.unsrat.ac.id. Taken from the www admin (website-unsrat-2026, site/admin/requirements.txt,
+# commit 37b5e6d), whose minimum versions close the flaws found in its pre-production audit (21 October 2026).
+# Dropped here: imageio-ffmpeg (no hero films on programme sites).
+# Image: pip install -r requirements.txt -c constraints.txt (exact versions that passed the tests in the image).
+
+Flask>=3.1.1
+Werkzeug>=3.1.4
+Jinja2>=3.1.6
+argon2-cffi>=23.1.0
+Pillow>=11.3.0
+pypdf>=6.1.3
+openpyxl>=3.1.5
+defusedxml>=0.7.1
+google-cloud-storage>=3.1.0
+
+# pulled in through google-cloud-storage / google-auth; pinned to a minimum so old flawed versions are never installed
+requests>=2.32.4
+urllib3>=2.5.0
+certifi>=2025.1.31
+idna>=3.7
+waitress>=3.0.2

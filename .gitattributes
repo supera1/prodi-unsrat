@@ -1,0 +1,8 @@
+# Scripts and configuration run inside Linux containers: always LF, also when checked out on Windows.
+*.sh text eol=lf
+*.conf text eol=lf
+*.py text eol=lf
+*.csv text eol=lf
+Dockerfile text eol=lf
+*.Dockerfile text eol=lf
+docker-compose.yml text eol=lf

@@ -1,0 +1,104 @@
+/*
+ * UNSRAT 2026 — design tokens.
+ *
+ * The brand colours are the RGB values fixed by the Statuta chapter "Lambang,
+ * Bendera, Himne, Mars, Busana Akademik dan Busana Almamater". The neutral ramp
+ * is derived from the grey field of the lambang (#d6d0d2), keeping its hue of
+ * 340 degrees at every step so the greys read as one family with the emblem.
+ *
+ * These values are meant to be copied into theme.json (settings.color.palette,
+ * settings.spacing.spacingSizes, settings.typography.fontSizes) during Fase 02.
+ * Token slugs stay in Indonesian because theme.json slugs are part of the
+ * published design contract.
+ *
+ * Contrast ratios in the comments are measured WCAG 2.x values, not estimates.
+ * The reference background is abu-300, the lambang grey, because that is the
+ * page surface. It is the hardest light background in the ramp to sit on, so
+ * anything that passes there also passes on the lighter bands and on white.
+ */
+
+:root {
+	/* --- Color: brand ------------------------------------------------ */
+	/* warna:mulai — written by _bangun-tampilan.py from data/tampilan.json (superadmin › Warna).
+	   Ratios are WCAG 2.x values measured when this block was written. */
+	--unsrat-biru: #3500ff; /* warna utama (Statuta: garis tepi lambang). 5.32:1 on abu-300, white on it 8.09:1 */
+	--unsrat-biru-gelap: #2800c2; /* hover/active only. 7.39:1 on abu-300 */
+	--unsrat-biru-50: #efebff; /* tinted surface. biru on it: 6.93:1 */
+	--unsrat-biru-pucat: #c7bbff; /* links on dark surfaces. 8.52:1 on abu-900 */
+	--unsrat-kuning: #f2b705; /* warna aksen (bendera UNSRAT). abu-900 on it: 8.22:1 — never text on light */
+	--unsrat-kuning-gelap: #d9a404; /* hover of the yellow button. abu-900 on it: 6.59:1 */
+	--unsrat-kuning-pucat: #fef3c7; /* abu-900 on it: 13.42:1 */
+	/* warna:selesai */
+
+	/* --- Color: the lambang's own colours, fixed by the Statuta ------ */
+	/*
+	 * Ungu reaches 4.16:1 on abu-300, short of the 4.5:1 that normal text needs.
+	 * It carries white text on a filled badge (6.32:1) or sets large headings;
+	 * it is not a colour for body copy on the page surface.
+	 */
+	--unsrat-ungu: #9708d6; /* pohon kelapa dan mosaik. FILLS AND LARGE TEXT ONLY */
+	/*
+	 * Merah reaches only 2.63:1 on abu-300. Use it the way the lambang does —
+	 * fruit and shoots, never a field of copy: rules, icons, decorative accents.
+	 */
+	--unsrat-merah: #fe0032; /* buah dan tunas kelapa. ACCENTS ONLY, NEVER TEXT */
+
+	/* --- Color: neutrals, derived from the lambang field -------------- */
+	--unsrat-abu-900: #2d2527; /* 9.83:1 on abu-300 — body text, dark surfaces */
+	--unsrat-abu-700: #4e4145; /* 6.38:1 on abu-300 — headings on tinted bands */
+	--unsrat-abu-600: #635459; /* 4.69:1 on abu-300 — secondary text */
+	--unsrat-abu-500: #7e6d73; /* 3.20:1 on abu-300 — control borders only */
+	--unsrat-abu-300: #d6d0d2; /* the lambang field itself — THE PAGE SURFACE */
+	--unsrat-abu-200: #eae6e8; /* lighter relief band */
+	--unsrat-abu-100: #f3f1f2; /* lightest relief band */
+	--unsrat-abu-50: #f9f8f8; /* near-white, for panels that must read as paper */
+	--unsrat-putih: #ffffff;
+
+	/* --- Color: status ----------------------------------------------- */
+	--unsrat-sukses: #15803d;
+	--unsrat-peringatan: #b45309;
+	--unsrat-galat: #b91c1c;
+
+	/* --- Typography --------------------------------------------------- */
+	--unsrat-font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, "Segoe UI",
+		Roboto, "Helvetica Neue", Arial, sans-serif;
+	--unsrat-font-serif: "Source Serif 4", ui-serif, Georgia, "Times New Roman", serif;
+
+	/* Fluid between 320px and 1200px viewports. */
+	--unsrat-size-kecil: clamp(0.875rem, 0.852rem + 0.114vw, 0.9375rem); /* 14 → 15 */
+	--unsrat-size-isi: clamp(1rem, 0.955rem + 0.227vw, 1.125rem); /* 16 → 18 */
+	--unsrat-size-sedang: clamp(1.125rem, 1.08rem + 0.227vw, 1.25rem); /* 18 → 20 */
+	--unsrat-size-besar: clamp(1.375rem, 1.284rem + 0.455vw, 1.625rem); /* 22 → 26 */
+	--unsrat-size-xl: clamp(1.625rem, 1.443rem + 0.909vw, 2.125rem); /* 26 → 34 */
+	--unsrat-size-xxl: clamp(2rem, 1.636rem + 1.818vw, 3rem); /* 32 → 48 */
+	--unsrat-size-raksasa: clamp(2.5rem, 1.955rem + 2.727vw, 4rem); /* 40 → 64 */
+
+	--unsrat-leading-isi: 1.6;
+	--unsrat-leading-serif: 1.7;
+	--unsrat-leading-judul: 1.2;
+
+	/* --- Spacing ------------------------------------------------------ */
+	--unsrat-spasi-10: 0.25rem;
+	--unsrat-spasi-20: 0.5rem;
+	--unsrat-spasi-30: 1rem;
+	--unsrat-spasi-40: 1.5rem;
+	--unsrat-spasi-50: 2rem;
+	--unsrat-spasi-60: 3rem;
+	--unsrat-spasi-70: 4rem;
+	--unsrat-spasi-80: 6rem;
+
+	/* --- Layout ------------------------------------------------------- */
+	--unsrat-lebar-teks: 720px; /* contentSize */
+	--unsrat-lebar-luas: 1200px; /* wideSize */
+
+	/* --- Shape -------------------------------------------------------- */
+	--unsrat-radius-kontrol: 4px; /* inputs, buttons */
+	--unsrat-radius-kartu: 8px;
+	--unsrat-radius-gambar: 0; /* large images stay square */
+
+	/* --- Focus ring --------------------------------------------------- */
+	--unsrat-fokus-terang: var(--unsrat-biru);
+	--unsrat-fokus-gelap: var(--unsrat-kuning);
+	--unsrat-fokus-tebal: 3px;
+	--unsrat-fokus-offset: 2px;
+}
