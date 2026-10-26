@@ -1,0 +1,33 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Pengumuman — {{ pr.nama }}{% endblock %}
+{% block isi %}
+{{ nav_prodi(pr, 'pengumuman_daftar') }}
+<h1>Pengumuman dan berita</h1>
+<p><a class="tombol" href="{{ url_for('pengumuman_baru', kode=pr.kode) }}">Buat pengumuman</a></p>
+{% if admin and jumlah.menunggu %}<p class="pesan pesan--info">{{ jumlah.menunggu }} pengumuman menunggu persetujuan Anda.</p>{% endif %}
+<nav class="saring-status" aria-label="Saring status">
+	<a href="{{ url_for('pengumuman_daftar', kode=pr.kode) }}"{% if not status %} aria-current="page"{% endif %}>Semua ({{ jumlah.values() | sum }})</a>
+	{% for s in ['menunggu', 'draf', 'terbit', 'ditarik'] %}
+	<a href="{{ url_for('pengumuman_daftar', kode=pr.kode, status=s) }}"{% if status == s %} aria-current="page"{% endif %}>{{ NAMA_STATUS[s] }} ({{ jumlah[s] }})</a>
+	{% endfor %}
+</nav>
+<div class="tabel-gulir">
+	<table>
+		<thead><tr><th scope="col">Judul</th><th scope="col">Kategori</th><th scope="col">Tanggal</th><th scope="col">Status</th><th scope="col">Penulis</th></tr></thead>
+		<tbody>
+			{% for b in daftar %}
+			<tr>
+				<td><a href="{{ url_for('pengumuman_ubah', kode=pr.kode, id_=b.id) }}">{{ b.judul }}</a>{% if b.sematkan %} <span class="tanda">disematkan</span>{% endif %}</td>
+				<td>{{ label.get(b.kategori, b.kategori) }}</td>
+				<td>{{ b.tanggal }}{% if b.kedaluwarsa %}<br><span class="keterangan">s.d. {{ b.kedaluwarsa }}</span>{% endif %}</td>
+				<td><span class="status status--{{ b.status }}">{{ NAMA_STATUS[b.status] }}</span></td>
+				<td>{{ b.oleh }}</td>
+			</tr>
+			{% else %}
+			<tr><td colspan="5">Belum ada pengumuman{% if status %} berstatus {{ NAMA_STATUS[status] | lower }}{% endif %}.</td></tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}

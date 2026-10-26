@@ -1,0 +1,49 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Log audit{% if p %} — {{ p.nama }}{% endif %}{% endblock %}
+{% block isi %}
+{% if p %}{{ nav_prodi(p, 'audit_prodi') }}{% endif %}
+<h1>Log audit{% if p %} {{ p.nama }}{% endif %}</h1>
+{% if saring is not none %}
+<form method="get" action="{{ url_for('audit_semua') }}" class="saring">
+	<div class="isian">
+		<label for="s-prodi">Prodi</label>
+		<select id="s-prodi" name="prodi">
+			<option value="">Semua</option>
+			{% for x in semua_prodi %}<option value="{{ x.kode }}"{% if saring.prodi == x.kode %} selected{% endif %}>{{ x.nama }}</option>{% endfor %}
+		</select>
+	</div>
+	<div class="isian">
+		<label for="s-oleh">Akun</label>
+		<input id="s-oleh" name="oleh" type="text" value="{{ saring.oleh }}" maxlength="32" autocapitalize="none" spellcheck="false">
+	</div>
+	<div class="isian">
+		<label for="s-aksi">Aksi</label>
+		<select id="s-aksi" name="aksi">
+			<option value="">Semua</option>
+			{% for x in jenis_aksi %}<option value="{{ x }}"{% if saring.aksi == x %} selected{% endif %}>{{ x }}</option>{% endfor %}
+		</select>
+	</div>
+	<button type="submit" class="tombol tombol--kecil">Saring</button>
+</form>
+<p>{{ baris | length }} catatan terbaru{% if saring.prodi or saring.oleh or saring.aksi %} yang cocok{% endif %} (paling banyak 500).</p>
+{% else %}
+<p>200 catatan terbaru.</p>
+{% endif %}
+<div class="tabel-gulir">
+	<table>
+		<thead><tr><th scope="col">Waktu</th><th scope="col">Aksi</th><th scope="col">Oleh</th><th scope="col">Prodi</th><th scope="col">Rincian</th><th scope="col">Alamat IP</th></tr></thead>
+		<tbody>
+			{% for b in baris %}
+			<tr>
+				<td>{{ b.waktu }}</td><td>{{ b.aksi }}</td><td>{{ b.oleh }}</td><td>{% set pr = b.get('prodi') %}{% if pr is string %}{{ pr }}{% elif pr %}{{ pr | join(', ') }}{% endif %}</td>
+				<td>{% for k, v in b | dictsort if k not in ('waktu', 'aksi', 'oleh', 'prodi', 'ip') %}{{ k }}: {{ v }}{% if not loop.last %}; {% endif %}{% endfor %}</td>
+				<td>{{ b.ip }}</td>
+			</tr>
+			{% else %}
+			<tr><td colspan="6">Belum ada catatan.</td></tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{# Served by Nginx for any missing address, at any depth: its links start at the site root (mutlak). #}
+{% extends "dasar.html" %}
+{% block judul %}Halaman tidak ditemukan — Program Studi UNSRAT{% endblock %}
+{% block deskripsi %}Halaman yang dicari tidak ada di situs program studi Universitas Sam Ratulangi.{% endblock %}
+{% block isi %}
+<div class="wadah halaman">
+	<article class="halaman__isi">
+		<h1>Halaman tidak ditemukan</h1>
+		<p class="pengantar">Alamat yang Anda buka tidak ada atau sudah dipindahkan.</p>
+		<p><a class="tombol" href="{{ ke('') }}">Lihat semua program studi</a></p>
+	</article>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Identitas — {{ pr.nama }}{% endblock %}
+{% macro contoh(w) %}<svg class="contoh-palet" viewBox="0 0 120 44" width="120" height="44" aria-hidden="true" focusable="false"><rect width="120" height="44" rx="4" fill="{{ w.utama_pucat }}"/><rect width="120" height="14" rx="4" fill="{{ w.utama }}"/><rect y="12" width="120" height="3" fill="{{ w.aksen }}"/><text x="8" y="10" font-size="8" font-family="system-ui, sans-serif" font-weight="700" fill="#FFFFFF">Menu</text><text x="8" y="30" font-size="9" font-family="system-ui, sans-serif" font-weight="700" fill="{{ w.utama }}">Judul</text><rect x="64" y="22" width="48" height="14" rx="3" fill="{{ w.aksen }}"/><text x="70" y="32" font-size="8" font-family="system-ui, sans-serif" fill="#2D2527">Unggul</text></svg>{% endmacro %}
+{% block isi %}
+{{ nav_prodi(pr, 'identitas_prodi') }}
+<h1>Identitas</h1>
+<form method="post" action="{{ url_for('identitas_simpan', kode=pr.kode) }}" class="formulir">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<fieldset class="kartu pilih-palet">
+		<legend>Warna situs</legend>
+		<p class="keterangan">Setiap pilihan sudah diuji kontrasnya (WCAG AA), jadi teks selalu terbaca.</p>
+		<ul>
+			<li><label><input type="radio" name="palet" value="fakultas"{% if pilihan == 'fakultas' %} checked{% endif %}> <span class="palet-isi">{{ contoh(fakultas) }}<span>Warna bendera fakultas <span class="keterangan">(bawaan{% if fakultas.palet != 'fakultas' %}: {{ fakultas.keterangan }}{% endif %})</span></span></span></label></li>
+			{% for x in palet %}
+			<li><label><input type="radio" name="palet" value="{{ x.id }}"{% if pilihan == x.id %} checked{% endif %}> <span class="palet-isi">{{ contoh(x) }}<span>{{ x.nama }}</span></span></label></li>
+			{% endfor %}
+		</ul>
+	</fieldset>
+	<fieldset class="kartu">
+		<legend>Media sosial (ditampilkan di kaki halaman situs)</legend>
+		<p class="keterangan">Hanya alamat https di situs media sosial itu sendiri, mis. <code>https://www.instagram.com/akunprodi</code>. Kosongkan alamat untuk menghapus.</p>
+		{% for m in medsos %}
+		<div class="medsos-baris">
+			<div class="isian"><label for="medsos-{{ loop.index0 }}-jenis">Media ke-{{ loop.index }}</label>
+				<select id="medsos-{{ loop.index0 }}-jenis" name="medsos-{{ loop.index0 }}-jenis">
+					{% for k, v in jenis_medsos.items() %}<option value="{{ k }}"{% if m.jenis == k %} selected{% endif %}>{{ v[0] }}</option>{% endfor %}
+				</select></div>
+			<div class="isian"><label for="medsos-{{ loop.index0 }}-url">Alamat</label>
+				<input id="medsos-{{ loop.index0 }}-url" name="medsos-{{ loop.index0 }}-url" type="url" value="{{ m.url }}" maxlength="300" placeholder="https://"></div>
+		</div>
+		{% endfor %}
+	</fieldset>
+	<button type="submit" class="tombol">Simpan warna dan media sosial</button>
+</form>
+<section class="kartu">
+	<h2>Logo prodi</h2>
+	{% if s.logo %}
+	<p class="logo-sekarang">
+		{% if s.logo.format == 'svg' %}<img src="{{ url_berkas(pr.kode, s.logo.varian.svg) }}" alt="Logo prodi sekarang" height="56">
+		{% else %}<img src="{{ url_berkas(pr.kode, s.logo.varian['112']) }}" alt="Logo prodi sekarang" height="56">{% endif %}
+	</p>
+	<form method="post" action="{{ url_for('logo_hapus', kode=pr.kode) }}">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<button type="submit" class="tombol tombol--kecil tombol--garis">Lepas logo dari situs</button>
+	</form>
+	{% else %}<p>Belum ada logo; situs hanya menampilkan lambang UNSRAT.</p>{% endif %}
+	<form method="post" action="{{ url_for('logo_unggah', kode=pr.kode) }}" enctype="multipart/form-data" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<div class="isian"><label for="logo">{% if s.logo %}Ganti logo{% else %}Unggah logo{% endif %}</label>
+			<input id="logo" name="logo" type="file" accept=".svg,.png,.jpg,.jpeg,image/svg+xml,image/png,image/jpeg" required aria-describedby="logo-ket">
+			<p id="logo-ket" class="keterangan">{{ petunjuk_logo }}</p></div>
+		<button type="submit" class="tombol tombol--kecil">Unggah logo</button>
+	</form>
+</section>
+{% endblock %}

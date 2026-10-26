@@ -1,0 +1,16 @@
+{# Programme checkboxes grouped by faculty. kelompok: [(faculty, [{"kode", "nama"}])]; terpilih: codes. #}
+{% macro pilih_prodi(kelompok, terpilih, judul) %}
+<fieldset class="pilih-prodi">
+	<legend>{{ judul }}</legend>
+	{% for unit, isi in kelompok %}
+	<details class="pilih-prodi__unit"{% if isi | selectattr('kode', 'in', terpilih) | list %} open{% endif %}>
+		<summary>{{ unit }} <span class="keterangan">({{ isi | length }} prodi{% set n = isi | selectattr('kode', 'in', terpilih) | list | length %}{% if n %}, {{ n }} dipilih{% endif %})</span></summary>
+		<ul>
+			{% for x in isi %}
+			<li><label><input type="checkbox" name="prodi" value="{{ x.kode }}"{% if x.kode in terpilih %} checked{% endif %}> {{ x.nama }} <span class="keterangan">{{ x.kode }}</span></label></li>
+			{% endfor %}
+		</ul>
+	</details>
+	{% endfor %}
+</fieldset>
+{% endmacro %}

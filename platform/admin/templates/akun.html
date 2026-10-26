@@ -1,0 +1,73 @@
+{% extends "dasar.html" %}
+{% from "_pilih_prodi.html" import pilih_prodi %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Akun{% if p %} — {{ p.nama }}{% endif %}{% endblock %}
+{% block isi %}
+{% set a = akun_aktif() %}
+{% if p %}{{ nav_prodi(p, 'akun_prodi') }}{% endif %}
+<h1>Akun{% if p %} {{ p.nama }}{% endif %}</h1>
+<div class="tabel-gulir">
+	<table>
+		<thead><tr><th scope="col">Nama</th><th scope="col">Nama pengguna</th><th scope="col">Peran</th><th scope="col">Prodi</th><th scope="col">Status</th><th scope="col">Masuk terakhir</th><th scope="col">Tindakan</th></tr></thead>
+		<tbody>
+			{% for x in daftar %}
+			<tr>
+				<td>{% if a.peran == 'super' %}<a href="{{ url_for('super_akun_ubah', id_=x.id) }}">{{ x.nama_lengkap }}</a>{% else %}{{ x.nama_lengkap }}{% endif %}{% if x.id == a.id %} (Anda){% endif %}</td>
+				<td><code>{{ x.nama }}</code></td>
+				<td>{{ NAMA_PERAN[x.peran] }}</td>
+				<td>{{ x.prodi | join(', ') or 'semua' }}</td>
+				<td>{{ 'Aktif' if x.aktif else 'Nonaktif' }}{% if x.wajib_ganti %}, sandi sementara{% endif %}</td>
+				<td>{{ x.masuk_terakhir or '—' }}</td>
+				<td>
+					{% if boleh_kelola(x) %}
+					{% set dasar_url = url_for('akun_prodi_reset', kode=kode, id_=x.id) if kode else url_for('akun_semua_reset', id_=x.id) %}
+					{% set aktif_url = url_for('akun_prodi_aktif', kode=kode, id_=x.id) if kode else url_for('akun_semua_aktif', id_=x.id) %}
+					<form method="post" action="{{ dasar_url }}" class="sebaris">
+						<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+						<button type="submit" class="tombol tombol--kecil tombol--garis">Reset sandi</button>
+					</form>
+					<form method="post" action="{{ aktif_url }}" class="sebaris">
+						<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+						<input type="hidden" name="aktif" value="{{ '0' if x.aktif else '1' }}">
+						<button type="submit" class="tombol tombol--kecil tombol--garis">{{ 'Nonaktifkan' if x.aktif else 'Aktifkan' }}</button>
+					</form>
+					{% else %}—{% endif %}
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+<section class="kartu">
+	<h2>Buat akun {% if kode and a.peran != 'super' %}operator{% endif %}</h2>
+	<form method="post" action="{{ url_for('akun_prodi_baru', kode=kode) if kode else url_for('akun_semua_baru') }}" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<div class="isian">
+			<label for="nama_lengkap">Nama lengkap</label>
+			<input id="nama_lengkap" name="nama_lengkap" type="text" maxlength="100" required>
+		</div>
+		<div class="isian">
+			<label for="nama">Nama pengguna</label>
+			<input id="nama" name="nama" type="text" maxlength="32" pattern="[a-z][a-z0-9._\-]{2,31}" autocapitalize="none" spellcheck="false" required aria-describedby="nama-ket">
+			<p id="nama-ket" class="keterangan">3–32 karakter: huruf kecil, angka, titik, garis bawah, atau tanda hubung; diawali huruf.</p>
+		</div>
+		{% if a.peran == 'super' %}
+		<div class="isian">
+			<label for="peran">Peran</label>
+			<select id="peran" name="peran">
+				<option value="operator">{{ NAMA_PERAN.operator }}</option>
+				<option value="admin">{{ NAMA_PERAN.admin }}</option>
+				{% if not kode %}<option value="super">{{ NAMA_PERAN.super }}</option>{% endif %}
+			</select>
+		</div>
+		{% else %}
+		<input type="hidden" name="peran" value="operator">
+		{% endif %}
+		{% if not kode %}
+		{{ pilih_prodi(kelompok, [], "Prodi akun ini (kosongkan untuk superadmin)") }}
+		{% endif %}
+		<button type="submit" class="tombol">Buat akun</button>
+		<p class="keterangan">Kata sandi sementara ditampilkan sekali setelah akun dibuat; pemiliknya wajib menggantinya saat pertama masuk.</p>
+	</form>
+</section>
+{% endblock %}

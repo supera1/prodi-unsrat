@@ -1,0 +1,93 @@
+# prodi.unsrat.ac.id on its own UNSRAT VM (K-P17), deployed by UNSRAT's admin from this repository with
+# `docker compose up -d --build` in the checkout (no Portainer).
+# Guide (variables, first start, accounts, HTTPS, backups, troubleshooting): docs/deploy.md
+#
+#   web       Nginx: the programme sites (port PORT_SITUS) and the admin for UNSRAT's network only (PORT_ADMIN);
+#             with HTTPS_DI_VM=1 also TLS on PORT_SITUS_HTTPS and PORT_ADMIN_HTTPS
+#   admin     Flask admin + site builder (waitress); writes the sites into the volume "prodi-publik"; never published
+#   pemantau  integrity check of the published sites every 10 minutes (defacement, gambling spam)
+#
+# Variables are set in a .env file next to this one (copy of .env.example). The defaults below suit a first test deploy
+# behind a load balancer.
+
+# A fixed stack name: the containers are prodi-unsrat-<service>-1 and the volumes prodi-unsrat_<volume> wherever the
+# repository is checked out, as docker/cadangan-prodi.sh and pulihkan-prodi.sh expect (-p still overrides it for a test).
+name: prodi-unsrat
+
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        UJI_SAAT_BUILD: ${UJI_SAAT_BUILD:-1}             # every test suite runs while the image is built
+    image: prodi-unsrat-admin:latest
+    pull_policy: build                                    # rebuild on every (re)deploy, so new code from GitHub is used
+    restart: unless-stopped
+    environment:
+      PRODI_MODE: ${PRODI_MODE:-staging}                   # "produksi" once prodi.unsrat.ac.id points here
+      PRODI_ALAMAT: ${PRODI_ALAMAT:-https://prodi.unsrat.ac.id}
+      PRODI_ALAMAT_PUBLIK: ${PRODI_ALAMAT:-https://prodi.unsrat.ac.id}
+      ADMIN_IP_BOLEH: ${ADMIN_IP_BOLEH:-103.84.116.0/24}
+      ADMIN_HTTPS: ${ADMIN_HTTPS:-0}                       # "1" once the admin is opened over HTTPS
+      ADMIN_AWALAN: ${ADMIN_AWALAN:-}                      # path of the admin under a shared address, e.g. /admin
+      PROXY_TERPERCAYA: "1"                                # the web container (Nginx) is the one proxy in front
+      PRODI_BANGUN_HARIAN: ${PRODI_BANGUN_HARIAN:-02:30}   # daily rebuild (expired announcements leave the sites)
+    volumes:
+      - prodi-data:/srv/prodi
+      - prodi-rahasia:/srv/prodi-rahasia
+      - prodi-publik:/srv/publik
+      - prodi-nginx:/srv/nginx-buatan
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    image: prodi-unsrat-web:latest
+    pull_policy: build
+    restart: unless-stopped
+    depends_on:
+      - admin
+    environment:
+      ADMIN_IP_BOLEH: ${ADMIN_IP_BOLEH:-103.84.116.0/24}
+      PROKSI_DEPAN: ${PROKSI_DEPAN:-}                      # networks of the load balancer / reverse proxy, if any
+      ADMIN_AWALAN: ${ADMIN_AWALAN:-}
+      HTTPS_DI_VM: ${HTTPS_DI_VM:-0}                       # "1": TLS here, certificate in TLS_FOLDER
+      PORT_SITUS_HTTPS: ${PORT_SITUS_HTTPS:-8443}
+      PORT_ADMIN_HTTPS: ${PORT_ADMIN_HTTPS:-8444}
+    ports:
+      - "${PORT_SITUS:-8080}:80"
+      - "${PORT_ADMIN:-8081}:8081"
+      - "${PORT_SITUS_HTTPS:-8443}:443"                    # nothing listens there unless HTTPS_DI_VM=1
+      - "${PORT_ADMIN_HTTPS:-8444}:8443"
+    volumes:
+      - prodi-publik:/srv/publik:ro
+      - prodi-nginx:/srv/nginx-buatan:ro
+      - ${TLS_FOLDER:-prodi-tls}:/etc/nginx/tls:ro          # a folder on the VM with fullchain.pem and privkey.pem
+      - ${ACME_FOLDER:-prodi-acme}:/srv/acme:ro             # a folder on the VM for Let's Encrypt (certbot --webroot)
+
+  pemantau:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        UJI_SAAT_BUILD: ${UJI_SAAT_BUILD:-1}
+    image: prodi-unsrat-admin:latest
+    pull_policy: build
+    restart: unless-stopped
+    depends_on:
+      - admin
+    entrypoint: ["/usr/local/bin/pemantau"]
+    healthcheck:
+      disable: true
+    volumes:
+      - prodi-data:/srv/prodi:ro
+      - prodi-publik:/srv/publik:ro
+
+volumes:
+  prodi-data:       # data, history, audit log and uploads of every programme: back this one up every day
+  prodi-rahasia:    # accounts (password hashes) and the session key: back it up, keep the copy restricted
+  prodi-publik:     # the built sites; made again at every start of the admin container
+  prodi-nginx:      # redirects of old slugs written by the builder (filtered by the web container)
+  prodi-tls:        # unused unless TLS_FOLDER is left empty with HTTPS_DI_VM=1 (then put the certificate here)
+  prodi-acme:

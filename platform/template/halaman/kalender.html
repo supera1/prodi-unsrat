@@ -1,0 +1,35 @@
+{# The university's academic calendar, from www (warisan/kalender.json). #}
+{% extends "halaman.html" %}
+{% block isi_halaman %}
+{% if kalender.get('teks') %}<p class="pengantar">{{ kalender.teks | tautan_md }}</p>{% endif %}
+{% set ada = namespace(n=0) %}
+{% for s in kalender.get('semester', []) if s.get('tampil') %}
+{% set ada.n = ada.n + 1 %}
+<section class="kalender" aria-labelledby="semester-{{ loop.index }}">
+	<h2 id="semester-{{ loop.index }}">Semester {{ s.get('jenis', '') | capitalize }} {{ s.get('tahun_akademik', '') }}</h2>
+	{% if s.get('catatan') %}<p>{{ s.catatan | tautan_md }}</p>{% endif %}
+	{% for k in s.get('kelompok', []) %}
+	<h3>{{ k.get('judul', '') }}</h3>
+	{% if k.get('keterangan') %}<p>{{ k.keterangan | tautan_md }}</p>{% endif %}
+	{% if k.get('kegiatan') %}
+	<div class="tabel-gulir">
+		<table>
+			<thead><tr><th scope="col">Tanggal</th><th scope="col">Kegiatan</th></tr></thead>
+			<tbody>
+				{% for g in k.kegiatan %}
+				<tr><td>{{ g.get('tanggal', '') }}</td><td>{{ g.get('kegiatan', '') | tautan_md }}</td></tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% elif k.get('tanggal') %}
+	<p>{{ k.tanggal }}</p>
+	{% endif %}
+	{% endfor %}
+</section>
+{% endfor %}
+{% if not ada.n %}
+<p class="catatan catatan--menyusul">Kalender akademik sedang dilengkapi.</p>
+{% endif %}
+<p>Sumber: <a href="{{ www }}/kalender-akademik.html">kalender akademik di www.unsrat.ac.id</a>.</p>
+{% endblock %}

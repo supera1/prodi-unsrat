@@ -1,0 +1,22 @@
+{# Graduate profile and learning outcomes (CPL), from the official data. #}
+{% extends "halaman.html" %}
+{% block isi_halaman %}
+<p class="pengantar">{{ ini.deskripsi }}</p>
+<h2>Bidang kerja lulusan</h2>
+{% if p.bidang_kerja %}
+<p>{{ p.bidang_kerja }}</p>
+{% else %}
+<p class="catatan catatan--menyusul">Bidang kerja lulusan sedang dilengkapi.</p>
+{% endif %}
+<h2>Capaian pembelajaran lulusan</h2>
+{% if p.cpl %}
+{% if kurikulum %}<p>Kurikulum {{ kurikulum | join(', ') }}.</p>{% endif %}
+<ol class="daftar-cpl">
+	{% for c in p.cpl %}
+	<li>{% if c.kode %}<span class="daftar-cpl__kode">{{ c.kode }}</span> {% endif %}{{ c.isi }}</li>
+	{% endfor %}
+</ol>
+{% else %}
+<p class="catatan catatan--menyusul">Capaian pembelajaran lulusan sedang dilengkapi.</p>
+{% endif %}
+{% endblock %}

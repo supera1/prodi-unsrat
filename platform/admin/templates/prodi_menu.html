@@ -1,0 +1,39 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Menu — {{ pr.nama }}{% endblock %}
+{% block isi %}
+{{ nav_prodi(pr, 'menu_prodi') }}
+<h1>Menu</h1>
+<p>Menu semua situs prodi mengikuti template yang sama (kebutuhan akreditasi). Di sini Anda bisa mengganti label, mengubah urutan halaman di dalam satu kelompok, dan menyembunyikan halaman <strong>opsional</strong>. Halaman <strong>wajib</strong> dan <strong>otomatis</strong> selalu tampil. Label yang dikosongkan kembali ke label bawaan.</p>
+<form method="post" action="{{ url_for('menu_simpan', kode=pr.kode) }}" class="formulir">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	{% for b in templat %}
+	{% set ab = atur.get(b.id, {}) %}
+	<fieldset class="kartu menu-kelompok">
+		<legend>{{ b.label }}{% if not b.anak %} <span class="keterangan">({{ b.jenis }})</span>{% endif %}</legend>
+		<div class="isian"><label for="label-{{ b.id }}">Label {{ 'kelompok' if b.anak else 'halaman' }}</label>
+			<input id="label-{{ b.id }}" name="label-{{ b.id }}" type="text" value="{{ ab.get('label', '') }}" placeholder="{{ b.label }}" maxlength="{{ maks_label }}"></div>
+		{% if b.anak %}
+		<div class="tabel-gulir">
+			<table>
+				<thead><tr><th scope="col">Halaman</th><th scope="col">Jenis</th><th scope="col">Label</th><th scope="col">Urutan</th><th scope="col">Sembunyikan</th></tr></thead>
+				<tbody>
+					{% for a in b.anak %}
+					{% set aa = atur.get(a.id, {}) %}
+					<tr>
+						<td>{{ a.label }}</td>
+						<td><span class="tanda{% if a.jenis == 'wajib' %} tanda--bentrok{% endif %}">{{ a.jenis }}</span></td>
+						<td><label class="tersembunyi" for="label-{{ a.id }}">Label {{ a.label }}</label><input id="label-{{ a.id }}" name="label-{{ a.id }}" type="text" value="{{ aa.get('label', '') }}" placeholder="{{ a.label }}" maxlength="{{ maks_label }}"></td>
+						<td><label class="tersembunyi" for="urutan-{{ a.id }}">Urutan {{ a.label }}</label><input id="urutan-{{ a.id }}" name="urutan-{{ a.id }}" type="number" min="0" max="99" value="{{ aa.get('urutan', loop.index0) }}" class="angka-kecil"></td>
+						<td>{% if a.jenis == 'opsional' %}<label><input type="checkbox" name="sembunyi-{{ a.id }}" value="1"{% if aa.get('sembunyi') %} checked{% endif %}><span class="tersembunyi"> Sembunyikan {{ a.label }}</span></label>{% else %}—{% endif %}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		{% endif %}
+	</fieldset>
+	{% endfor %}
+	<button type="submit" class="tombol">Simpan menu</button>
+</form>
+{% endblock %}

@@ -1,0 +1,19 @@
+{# Programme specification: the official facts in one table. #}
+{% extends "halaman.html" %}
+{% block isi_halaman %}
+<p class="pengantar">{{ ini.deskripsi }}</p>
+<dl class="tabel-data">
+	<div><dt>Nama program studi</dt><dd>{{ p.nama }}</dd></div>
+	{% if p.nama_en %}<div><dt>Nama dalam bahasa Inggris</dt><dd lang="en">{{ p.nama_en }}</dd></div>{% endif %}
+	<div><dt>Jenjang</dt><dd>{{ JENJANG_PANJANG.get(p.jenjang, p.jenjang) }} ({{ p.jenjang }})</dd></div>
+	<div><dt>Gelar lulusan</dt><dd>{{ p.gelar or 'Sedang dilengkapi' }}</dd></div>
+	<div><dt>Beban studi</dt><dd>{% if p.sks %}{{ p.sks }} SKS{% else %}Sedang dilengkapi{% endif %}</dd></div>
+	<div><dt>Fakultas</dt><dd>{{ unit.nama }}</dd></div>
+	<div><dt>Perguruan tinggi</dt><dd>Universitas Sam Ratulangi, Manado</dd></div>
+	<div><dt>Kode program studi (PDDIKTI)</dt><dd>{{ p.kode_pddikti }}</dd></div>
+	<div><dt>Akreditasi</dt><dd>{% if p.akreditasi | akreditasi %}{{ p.akreditasi | akreditasi }}{% if p.lembaga_akreditasi %} ({{ p.lembaga_akreditasi }}){% endif %}{% else %}Sedang dilengkapi{% endif %}</dd></div>
+	{% if p.internasional %}<div><dt>Akreditasi internasional</dt><dd>{{ p.internasional }}</dd></div>{% endif %}
+	{% if kurikulum %}<div><dt>Kurikulum</dt><dd>{{ kurikulum | join(', ') }}</dd></div>{% endif %}
+	{% if p.surel %}<div><dt>Surel</dt><dd><a href="mailto:{{ p.surel }}">{{ p.surel }}</a></dd></div>{% endif %}
+</dl>
+{% endblock %}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="{{ csp }}">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block judul %}{% endblock %}</title>
+<meta name="description" content="{% block deskripsi %}{% endblock %}">
+{% if not produksi %}
+<meta name="robots" content="noindex, nofollow">
+{% endif %}
+{% if kanonik %}
+<link rel="canonical" href="{{ kanonik }}">
+{% endif %}
+<link rel="icon" type="image/png" href="{{ aset('aset/img/lambang-64.png') }}">
+<link rel="apple-touch-icon" href="{{ aset('aset/img/lambang-192.png') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="{{ font }}">
+<link rel="stylesheet" href="{{ aset('aset/css/tokens.css') }}">
+<link rel="stylesheet" href="{{ aset('aset/css/prodi.css') }}">
+<link rel="stylesheet" href="{{ aset(warna_css) }}">
+{% block kepala_tambahan %}{% endblock %}
+</head>
+<body>
+<a class="lewati" href="#konten">Langsung ke konten utama</a>
+{% if not produksi %}
+<p class="pita-staging">Pratinjau staging situs program studi UNSRAT. Halaman bertanda “sedang dilengkapi” akan diisi oleh program studi.</p>
+{% endif %}
+<div class="bar-atas">
+	<div class="wadah bar-atas__isi">
+		<a class="bar-atas__univ" href="{{ www }}/">{{ univ.get('identitas', {}).get('nama', {}).get('id') or 'Universitas Sam Ratulangi' }}</a>
+		<nav aria-label="Tautan universitas">
+			<ul class="bar-atas__daftar">
+				<li><a href="{{ ke('') }}">Semua program studi</a></li>
+				{% for t in univ.get('utilitas', []) %}
+				<li><a href="{{ t.href }}">{{ t.label }}</a></li>
+				{% endfor %}
+			</ul>
+		</nav>
+	</div>
+</div>
+{% block kepala_situs %}{% endblock %}
+<main id="konten" tabindex="-1">
+{% block isi %}{% endblock %}
+</main>
+{% block kaki %}{% endblock %}
+</body>
+</html>

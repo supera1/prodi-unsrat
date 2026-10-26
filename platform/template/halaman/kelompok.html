@@ -1,0 +1,13 @@
+{# Index page of a menu group (Profil, Akademik, ...): its pages as cards. #}
+{% extends "halaman.html" %}
+{% block isi_halaman %}
+<p class="pengantar">{{ ini.deskripsi }}</p>
+<ul class="kartu-daftar">
+	{% for a in ini.anak %}
+	<li class="kartu">
+		<h2 class="kartu__judul"><a href="{{ ke(slug ~ '/' ~ a.alamat) }}">{{ a.label }}</a></h2>
+		<p>{{ a.deskripsi }}</p>
+	</li>
+	{% endfor %}
+</ul>
+{% endblock %}

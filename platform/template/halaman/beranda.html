@@ -1,0 +1,65 @@
+{# Home page of a programme site: everything here comes from the official data (www) and the registry. #}
+{% extends "prodi.html" %}
+{% from "_kabar.html" import kartu_kabar with context %}
+{% block isi %}
+{# hero: the admin's settings (tampilan_prodi.py); the values of the official cards always come from www #}
+<section class="pahlawan pahlawan--{{ hero.latar.jenis }}" aria-labelledby="judul-prodi">
+	<div class="wadah pahlawan__isi">
+		{% if hero.label %}<p class="pahlawan__label">{{ hero.label }}</p>{% endif %}
+		<h1 id="judul-prodi">{{ hero.judul }}</h1>
+		{% if hero.subjudul %}<p class="pahlawan__en"{% if hero.subjudul_bawaan %} lang="en"{% endif %}>{{ hero.subjudul }}</p>{% endif %}
+		<p class="pahlawan__pengantar">{{ hero.pengantar }}</p>
+		{% if hero.kartu %}
+		<dl class="fakta">
+			{% for k in hero.kartu %}
+			<div class="fakta__butir{% if k.sorot %} fakta__butir--aksen{% endif %}">
+				<dt>{{ k.label }}</dt>
+				<dd>{{ k.nilai }}{% if k.keterangan %} <span class="fakta__kecil">{{ k.keterangan }}</span>{% endif %}</dd>
+			</div>
+			{% endfor %}
+		</dl>
+		{% endif %}
+	</div>
+</section>
+
+<div class="wadah beranda">
+	{% if kabar_beranda %}
+	<section class="beranda__bagian" aria-labelledby="judul-kabar">
+		<h2 id="judul-kabar">Pengumuman terbaru</h2>
+		<ul class="kabar-daftar kabar-daftar--ringkas">
+			{% for b in kabar_beranda %}{{ kartu_kabar(b, 3) }}{% endfor %}
+		</ul>
+		<p><a class="tombol tombol--garis" href="{{ ke(slug ~ '/pengumuman') }}">Semua pengumuman</a></p>
+	</section>
+	{% endif %}
+
+	<section class="beranda__bagian" aria-labelledby="judul-lulusan">
+		<h2 id="judul-lulusan">Profil lulusan</h2>
+		{% if p.bidang_kerja %}
+		<p>{{ p.bidang_kerja }}</p>
+		{% else %}
+		<p class="catatan catatan--menyusul">Profil lulusan sedang dilengkapi.</p>
+		{% endif %}
+		{% for e in menu if e.anak %}{% for a in e.anak if a.id == 'profil-lulusan' %}
+		<p><a class="tombol" href="{{ ke(slug ~ '/' ~ a.alamat) }}">{{ a.label }}{% if p.cpl %} ({{ p.cpl | length }} CPL){% endif %}</a></p>
+		{% endfor %}{% endfor %}
+	</section>
+
+	<section class="beranda__bagian" aria-labelledby="judul-jelajahi">
+		<h2 id="judul-jelajahi">Jelajahi program studi</h2>
+		<ul class="kartu-daftar kartu-daftar--tiga">
+			{% for e in menu if e.anak %}
+			<li class="kartu">
+				<h3 class="kartu__judul"><a href="{{ ke(slug ~ '/' ~ e.alamat) }}">{{ e.label }}</a></h3>
+				<p>{{ e.deskripsi }}</p>
+			</li>
+			{% endfor %}
+		</ul>
+	</section>
+
+	<section class="beranda__bagian" aria-labelledby="judul-kontak">
+		<h2 id="judul-kontak">Hubungi kami</h2>
+		<p>{% if p.surel %}Surel: <a href="mailto:{{ p.surel }}">{{ p.surel }}</a>. {% endif %}<a href="{{ ke(slug ~ '/kontak') }}">Kontak dan lokasi</a></p>
+	</section>
+</div>
+{% endblock %}

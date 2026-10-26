@@ -1,0 +1,14 @@
+{
+  "catatan": "Palet yang bisa dipilih admin prodi (K-P7, rencana §7). Setiap pasangan diuji kontras oleh uji/uji_bangun.py dengan aturan di platform/bangun/warna.py. Palet bawaan 'fakultas' dihitung dari warna bendera fakultas dan tidak dicantumkan di sini. 'unsrat' wajib ada: dipakai bila palet lain tidak lolos.",
+  "palet": [
+    {"id": "unsrat", "nama": "UNSRAT (biru dan kuning)", "utama": "#3500FF", "aksen": "#F2B705"},
+    {"id": "biru-laut", "nama": "Biru laut", "utama": "#0B3D91", "aksen": "#F2B705"},
+    {"id": "hijau-hutan", "nama": "Hijau hutan", "utama": "#0F6B3A", "aksen": "#F2B705"},
+    {"id": "toska", "nama": "Toska", "utama": "#0F5F66", "aksen": "#FFD166"},
+    {"id": "merah-marun", "nama": "Merah marun", "utama": "#8A1C2B", "aksen": "#F2C14E"},
+    {"id": "ungu-anggrek", "nama": "Ungu anggrek", "utama": "#5B2A86", "aksen": "#F2B705"},
+    {"id": "jingga-bata", "nama": "Jingga bata", "utama": "#A4410E", "aksen": "#FFD166"},
+    {"id": "cokelat-kopi", "nama": "Cokelat kopi", "utama": "#5D3A1A", "aksen": "#F2B705"},
+    {"id": "arang", "nama": "Arang", "utama": "#2D2527", "aksen": "#F2B705"}
+  ]
+}

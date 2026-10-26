@@ -1,0 +1,107 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Data prodi — {{ pr.nama }}{% endblock %}
+{% macro tanda(f) %}{% if f in data.timpaan %} <span class="tanda{% if f in bentrok %} tanda--bentrok{% endif %}">{{ 'bentrok dengan www' if f in bentrok else 'diubah di sini' }}</span>{% endif %}{% endmacro %}
+{% macro nilai_www(f) %}{% if f in data.timpaan %}<p class="keterangan">Data www: {% if f == 'cpl' %}{{ www.cpl | length }} butir{% else %}{{ www.get(f) if www.get(f) not in (none, '') else '(kosong)' }}{% endif %}</p>{% endif %}{% endmacro %}
+{% block isi %}
+{{ nav_prodi(pr, 'data_prodi_lihat') }}
+<h1>Data prodi</h1>
+<p>Data ini berasal dari www.unsrat.ac.id dan dipakai di seluruh situs prodi: bagian depan beranda, Spesifikasi, Akreditasi, Profil Lulusan dan CPL. Kolom yang Anda ubah di sini <strong>tetap dipakai</strong> walau data www berubah kemudian; kolom lain tetap mengikuti www. Sebaiknya perubahan yang benar juga disampaikan ke pengelola www agar kedua situs sama.</p>
+
+{% if data.timpaan %}
+<section class="kartu" aria-labelledby="judul-timpaan">
+	<h2 id="judul-timpaan">Kolom yang diubah di sini ({{ data.timpaan | length }})</h2>
+	{% if bentrok %}<p class="pesan pesan--info">{{ bentrok | length }} kolom berubah di www setelah diubah di sini. Data prodi tetap dipakai sampai Anda memilih.</p>{% endif %}
+	<div class="tabel-gulir">
+		<table>
+			<thead><tr><th scope="col">Kolom</th><th scope="col">Dipakai sekarang (data prodi)</th><th scope="col">Data www</th><th scope="col">Diubah</th><th scope="col">Tindakan</th></tr></thead>
+			<tbody>
+				{% for f, v in data.timpaan | dictsort %}
+				<tr>
+					<td>{{ field[f][0] }}{{ tanda(f) }}</td>
+					<td>{% if f == 'cpl' %}{{ v | length }} butir{% set beda = v | reject('in', www.cpl or []) | list | length %}{% if beda %} ({{ beda }} berbeda dari www){% endif %}{% else %}{{ v if v not in (none, '') else '(kosong)' }}{% endif %}</td>
+					<td>{% if f == 'cpl' %}{{ www.cpl | length }} butir{% else %}{{ www.get(f) if www.get(f) not in (none, '') else '(kosong)' }}{% endif %}
+						{% if f in bentrok %}<br><span class="keterangan">sebelumnya di www: {% if f == 'cpl' %}{{ bentrok[f][3] | length }} butir{% else %}{{ bentrok[f][3] if bentrok[f][3] not in (none, '') else '(kosong)' }}{% endif %}</span>{% endif %}</td>
+					<td>{{ data.diubah.get(f, {}).get('oleh', '') }}<br><span class="keterangan">{{ data.diubah.get(f, {}).get('waktu', '') }}</span></td>
+					<td>
+						<form method="post" action="{{ url_for('data_prodi_pakai_www', kode=pr.kode, f=f) }}" class="sebaris">
+							<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+							<button type="submit" class="tombol tombol--kecil tombol--garis">Pakai data www</button>
+						</form>
+						{% if f in bentrok %}
+						<form method="post" action="{{ url_for('data_prodi_tetap', kode=pr.kode, f=f) }}" class="sebaris">
+							<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+							<button type="submit" class="tombol tombol--kecil tombol--garis">Tetap data prodi</button>
+						</form>
+						{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</section>
+{% endif %}
+
+<form method="post" action="{{ url_for('data_prodi_simpan', kode=pr.kode) }}" class="formulir">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<section class="kartu" aria-labelledby="judul-identitas">
+		<h2 id="judul-identitas">Identitas</h2>
+		<div class="isian"><label for="nama">{{ field.nama[0] }}{{ tanda('nama') }}</label>
+			<input id="nama" name="nama" type="text" value="{{ p.nama }}" maxlength="{{ field.nama[1] }}" required>{{ nilai_www('nama') }}</div>
+		<div class="isian"><label for="nama_en">{{ field.nama_en[0] }}{{ tanda('nama_en') }}</label>
+			<input id="nama_en" name="nama_en" type="text" value="{{ p.nama_en or '' }}" maxlength="{{ field.nama_en[1] }}" lang="en">{{ nilai_www('nama_en') }}</div>
+		<div class="isian"><label for="jenjang">{{ field.jenjang[0] }}{{ tanda('jenjang') }}</label>
+			<select id="jenjang" name="jenjang">{% for j in jenjang %}<option value="{{ j }}"{% if p.jenjang == j %} selected{% endif %}>{{ j }}</option>{% endfor %}</select>{{ nilai_www('jenjang') }}</div>
+		<div class="isian"><label for="gelar">{{ field.gelar[0] }}{{ tanda('gelar') }}</label>
+			<input id="gelar" name="gelar" type="text" value="{{ p.gelar or '' }}" maxlength="{{ field.gelar[1] }}">{{ nilai_www('gelar') }}</div>
+		<div class="isian"><label for="sks">{{ field.sks[0] }}{{ tanda('sks') }}</label>
+			<input id="sks" name="sks" type="number" min="1" max="399" value="{{ p.sks if p.sks is not none else '' }}">{{ nilai_www('sks') }}</div>
+		<div class="isian"><label for="unit_kode">{{ field.unit_kode[0] }}{{ tanda('unit_kode') }}</label>
+			<select id="unit_kode" name="unit_kode">{% for u in unit %}<option value="{{ u.kode }}"{% if p.unit_kode == u.kode %} selected{% endif %}>{{ u.nama }}</option>{% endfor %}</select>{{ nilai_www('unit_kode') }}</div>
+		<div class="isian"><label for="surel">{{ field.surel[0] }}{{ tanda('surel') }}</label>
+			<input id="surel" name="surel" type="email" value="{{ p.surel or '' }}" maxlength="{{ field.surel[1] }}">{{ nilai_www('surel') }}</div>
+	</section>
+	<section class="kartu" aria-labelledby="judul-akreditasi">
+		<h2 id="judul-akreditasi">Akreditasi</h2>
+		<div class="isian"><label for="akreditasi">{{ field.akreditasi[0] }}{{ tanda('akreditasi') }}</label>
+			<input id="akreditasi" name="akreditasi" type="text" value="{{ p.akreditasi or '' }}" maxlength="{{ field.akreditasi[1] }}" list="daftar-akreditasi">{{ nilai_www('akreditasi') }}
+			<datalist id="daftar-akreditasi">{% for x in akreditasi_ada %}<option value="{{ x }}">{% endfor %}</datalist></div>
+		<div class="isian"><label for="lembaga_akreditasi">{{ field.lembaga_akreditasi[0] }}{{ tanda('lembaga_akreditasi') }}</label>
+			<input id="lembaga_akreditasi" name="lembaga_akreditasi" type="text" value="{{ p.lembaga_akreditasi or '' }}" maxlength="{{ field.lembaga_akreditasi[1] }}" list="daftar-lembaga">{{ nilai_www('lembaga_akreditasi') }}
+			<datalist id="daftar-lembaga">{% for x in lembaga_ada %}<option value="{{ x }}">{% endfor %}</datalist></div>
+		<div class="isian"><label for="berlaku_hingga">{{ field.berlaku_hingga[0] }}{{ tanda('berlaku_hingga') }}</label>
+			<input id="berlaku_hingga" name="berlaku_hingga" type="date" value="{{ p.berlaku_hingga or '' }}">{{ nilai_www('berlaku_hingga') }}</div>
+		<div class="isian"><label for="internasional">{{ field.internasional[0] }}{{ tanda('internasional') }}</label>
+			<input id="internasional" name="internasional" type="text" value="{{ p.internasional or '' }}" maxlength="{{ field.internasional[1] }}">{{ nilai_www('internasional') }}</div>
+	</section>
+	<section class="kartu" aria-labelledby="judul-lulusan">
+		<h2 id="judul-lulusan">Profil lulusan</h2>
+		<div class="isian"><label for="bidang_kerja">{{ field.bidang_kerja[0] }}{{ tanda('bidang_kerja') }}</label>
+			<textarea id="bidang_kerja" name="bidang_kerja" rows="4" maxlength="{{ field.bidang_kerja[1] }}">{{ p.bidang_kerja or '' }}</textarea>{{ nilai_www('bidang_kerja') }}</div>
+		<div class="isian"><label for="bidang_kerja_en">{{ field.bidang_kerja_en[0] }}{{ tanda('bidang_kerja_en') }}</label>
+			<textarea id="bidang_kerja_en" name="bidang_kerja_en" rows="4" maxlength="{{ field.bidang_kerja_en[1] }}" lang="en">{{ p.bidang_kerja_en or '' }}</textarea>{{ nilai_www('bidang_kerja_en') }}</div>
+	</section>
+	<section class="kartu" aria-labelledby="judul-cpl">
+		<h2 id="judul-cpl">{{ field.cpl[0] }}{{ tanda('cpl') }}</h2>
+		{{ nilai_www('cpl') }}
+		<p class="keterangan">Kosongkan isi sebuah CPL untuk menghapusnya. Baris kosong di bawah untuk CPL baru; simpan lalu baris kosong baru muncul lagi.</p>
+		{% set baris = (p.get('cpl') or []) + [{}] * kosong %}
+		<input type="hidden" name="cpl_jumlah" value="{{ baris | length }}">
+		{% for c in baris %}
+		{% set i = loop.index0 %}
+		<fieldset class="cpl-baris">
+			<legend>{% if c %}CPL ke-{{ loop.index }}{% if c.kode %} (kode {{ c.kode }}){% endif %}{% else %}CPL baru{% endif %}</legend>
+			<div class="cpl-baris__kecil">
+				<div class="isian"><label for="cpl-{{ i }}-kode">Kode</label><input id="cpl-{{ i }}-kode" name="cpl-{{ i }}-kode" type="text" value="{{ c.kode or '' }}" maxlength="20"></div>
+				<div class="isian"><label for="cpl-{{ i }}-kurikulum">Kurikulum</label><input id="cpl-{{ i }}-kurikulum" name="cpl-{{ i }}-kurikulum" type="text" value="{{ c.kurikulum or '' }}" maxlength="20" placeholder="2025/2026"></div>
+			</div>
+			<div class="isian"><label for="cpl-{{ i }}-isi">Isi</label><textarea id="cpl-{{ i }}-isi" name="cpl-{{ i }}-isi" rows="3" maxlength="2000">{{ c.isi or '' }}</textarea></div>
+			<div class="isian"><label for="cpl-{{ i }}-isi_en">Isi (bahasa Inggris)</label><textarea id="cpl-{{ i }}-isi_en" name="cpl-{{ i }}-isi_en" rows="3" maxlength="2000" lang="en">{{ c.isi_en or '' }}</textarea></div>
+		</fieldset>
+		{% endfor %}
+	</section>
+	<button type="submit" class="tombol">Simpan data prodi</button>
+	<p class="keterangan">Nilai yang sama dengan data www tidak dicatat sebagai perubahan. Setiap simpanan masuk riwayat dan log audit.</p>
+</form>
+{% endblock %}

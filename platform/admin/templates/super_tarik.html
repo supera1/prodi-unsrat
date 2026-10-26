@@ -1,0 +1,94 @@
+{% extends "dasar.html" %}
+{% block judul %}Data resmi dari www{% endblock %}
+{% block isi %}
+<h1>Data resmi dari www</h1>
+<p>Data prodi (nama, jenjang, gelar, SKS, CPL, akreditasi), fakultas, kalender, dan identitas universitas berasal dari www.unsrat.ac.id. Kolom yang diubah sendiri oleh prodi (halaman Data prodi) tetap memakai data prodi; kolom lain mengikuti www.</p>
+{% if meta.ditarik %}<p>Terakhir diperbarui {{ meta.ditarik | replace("T", " ") }} oleh {{ meta.oleh }}{% if meta.sumber %} ({{ meta.sumber }}){% endif %}.</p>{% endif %}
+
+{% if masalah %}
+<section class="kartu">
+	<h2>{{ judul_masalah }}</h2>
+	<p class="pesan pesan--galat">Tidak ada yang diubah. Masalah yang ditemukan ({{ masalah | length }}):</p>
+	<ul>{% for m in masalah[:100] %}<li>{{ m }}</li>{% endfor %}</ul>
+	{% if masalah | length > 100 %}<p>… dan {{ masalah | length - 100 }} lainnya.</p>{% endif %}
+</section>
+{% endif %}
+
+{% if laporan %}
+<section class="kartu">
+	<h2>Pratinjau{% if info %} unggahan{% else %} folder data www{% endif %}</h2>
+	{% if info %}
+	<p>Berkas: {% for b in info.berkas %}{{ b.nama }}{% if not loop.last %}, {% endif %}{% endfor %}.{% if info.dari_salinan %} Tidak diunggah, tetap memakai salinan sekarang: {% for j in info.dari_salinan %}{{ {"prodi": "data prodi", "unit": "fakultas", "kalender": "kalender akademik", "situs": "identitas universitas"}[j] }}{% if not loop.last %}, {% endif %}{% endfor %}.{% endif %}</p>
+	{% if info.peringatan %}
+	<p class="pesan pesan--info">Perlu diketahui:</p>
+	<ul>{% for m in info.peringatan[:50] %}<li>{{ m }}</li>{% endfor %}</ul>
+	{% endif %}
+	{% endif %}
+	{% if not ada %}
+	<p class="pesan pesan--ok">Tidak ada perubahan: data di sini sama dengan data {{ "berkas ini" if info else "www" }}.</p>
+	{% else %}
+	{% if laporan.pertama %}<p>Salinan pertama: {{ nama | length }} prodi.</p>{% endif %}
+	{% for judul, kunci in [("Prodi baru di www (perlu didaftarkan setelah diterapkan)", "baru"), ("Hilang dari www (ditandai, tidak dihapus)", "hilang"), ("Muncul kembali di www", "kembali")] %}
+	{% if laporan[kunci] %}
+	<h3>{{ judul }}: {{ laporan[kunci] | length }}</h3>
+	<ul>{% for k in laporan[kunci] %}<li>{{ nama.get(k, k) }} ({{ k }})</li>{% endfor %}</ul>
+	{% endif %}
+	{% endfor %}
+	{% if laporan.berubah %}
+	<h3>Berubah: {{ laporan.berubah | length }} prodi</h3>
+	<ul>
+		{% for k, beda in laporan.berubah | dictsort %}
+		<li>{{ nama.get(k, k) }}<ul>{% for x in beda %}<li><code>{{ x }}</code></li>{% endfor %}</ul></li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	{% if laporan.bentrok %}
+	<h3>Bentrok dengan data yang diubah prodi: {{ laporan.bentrok | length }} prodi</h3>
+	<p class="keterangan">Kolom ini juga diubah di www. Data prodi tetap dipakai; admin prodi atau superadmin memilih di halaman Data prodi.</p>
+	<ul>{% for k, f in laporan.bentrok | dictsort %}<li>{{ nama.get(k, k) }}: {{ f | join(', ') }}</li>{% endfor %}</ul>
+	{% endif %}
+	{% for kunci, judul in [("unit_berubah", "Data fakultas berubah."), ("kalender_berubah", "Kalender akademik berubah."), ("universitas_berubah", "Identitas atau kontak universitas berubah."), ("tampilan_berubah", "Pengaturan tampil 'berlaku hingga' berubah.")] %}
+	{% if laporan[kunci] %}<p>{{ judul }}</p>{% endif %}
+	{% endfor %}
+	{% if basi %}
+	<p class="pesan pesan--galat">Data resmi di platform berubah sejak berkas ini diunggah. Unggah ulang berkasnya, supaya perubahan itu tidak tertimpa.</p>
+	{% else %}
+	<form method="post" action="{{ url_for('super_tarik_terapkan') }}" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<input type="hidden" name="sidik" value="{{ sidik }}">
+		{% if token %}<input type="hidden" name="kiriman" value="{{ token }}">{% endif %}
+		{% if laporan.hilang_terlalu_banyak %}
+		<p class="pesan pesan--galat">{{ laporan.hilang | length }} prodi hilang sekaligus (lebih dari {{ batas_hilang }}%). Ini sering tanda berkasnya tidak lengkap atau data www sedang rusak. Periksa dulu.</p>
+		<p><label><input type="checkbox" name="paksa" value="1"> Saya sudah memeriksa www; terapkan juga</label></p>
+		{% endif %}
+		<button type="submit" class="tombol">Terapkan dan bangun ulang semua situs</button>
+	</form>
+	{% endif %}
+	{% endif %}
+</section>
+{% if laporan.kekurangan %}
+<section class="kartu">
+	<h2>Data resmi yang masih kosong ({{ laporan.kekurangan | length }} prodi)</h2>
+	<p class="keterangan">Dilengkapi di superadmin www, lalu diunggah lagi ke sini.</p>
+	<ul>{% for k, label in laporan.kekurangan | dictsort %}<li>{{ nama.get(k, k) }}: {{ label | join(', ') }}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+{% endif %}
+
+<section class="kartu">
+	<h2>Unggah data dari www</h2>
+	<p>Unduh berkasnya dari www, lalu unggah di sini. Perubahan ditampilkan dulu; tidak ada yang berubah sebelum Anda menekan Terapkan.</p>
+	<ul>
+		<li><strong>Data prodi dan CPL:</strong> berkas Excel dari superadmin www › Impor Excel › Program studi › <em>Unduh templat (.xlsx)</em>. Unggah apa adanya, tanpa diubah.</li>
+		<li><strong>Fakultas, kalender akademik, identitas universitas</strong> (jarang berubah): berkas <code>unit.json</code>, <code>kalender.json</code>, <code>situs.json</code> dari folder data www, diambilkan admin VM www. Boleh juga <code>prodi.json</code> sebagai pengganti berkas Excel.</li>
+		<li>Yang tidak diunggah tetap memakai salinan sekarang. Prodi yang tidak ada di berkas dianggap hilang dari www (ditandai, tidak dihapus).</li>
+	</ul>
+	<form method="post" action="{{ url_for('super_tarik_unggah') }}" enctype="multipart/form-data" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<p><label for="berkas-www">Berkas (.xlsx dan/atau .json, paling banyak {{ maks_berkas }}, masing-masing maksimal 5 MB)</label>
+		<input type="file" id="berkas-www" name="berkas" accept=".xlsx,.json" multiple required></p>
+		<button type="submit" class="tombol">Periksa berkas</button>
+	</form>
+	{% if folder_www and not info %}<p class="keterangan">Folder data www juga tersedia di komputer ini (WWW_DATA); pratinjaunya ada di atas.</p>{% endif %}
+</section>
+{% endblock %}

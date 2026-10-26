@@ -1,0 +1,93 @@
+{
+  "catatan": "Template menu induk semua situs prodi (rencana Fase 1 §7). jenis: otomatis = diisi dari data resmi www/registri; wajib = dibutuhkan untuk akreditasi, tidak bisa disembunyikan; opsional = boleh disembunyikan admin prodi. alamat = jalur di bawah prodi.unsrat.ac.id/<slug>/. deskripsi dipakai sebagai meta description, di halaman kelompok, dan sebagai petunjuk pengisian bagi admin prodi. Mengubah alamat yang sudah tayang memerlukan redirect.",
+  "menu": [
+    {"id": "beranda", "label": "Beranda", "jenis": "otomatis", "templat": "beranda", "alamat": "", "nav": false,
+     "deskripsi": "Profil singkat program studi."},
+    {"id": "profil", "label": "Profil", "alamat": "profil",
+     "deskripsi": "Sejarah, visi dan misi, tata pamong, penjaminan mutu, akreditasi, dan kerja sama program studi.",
+     "anak": [
+       {"id": "sejarah", "label": "Sejarah", "jenis": "wajib", "alamat": "profil/sejarah",
+        "deskripsi": "Sejarah berdirinya program studi dan perkembangannya."},
+       {"id": "visi-misi", "label": "Visi, Misi, Tujuan, dan Strategi", "jenis": "wajib", "alamat": "profil/visi-misi",
+        "deskripsi": "Visi keilmuan, misi, tujuan, sasaran, dan strategi pencapaian program studi, serta keterkaitannya dengan visi dan misi fakultas dan universitas."},
+       {"id": "struktur-organisasi", "label": "Struktur Organisasi dan Tata Pamong", "jenis": "wajib", "alamat": "profil/struktur-organisasi",
+        "deskripsi": "Struktur organisasi, tugas dan fungsi, serta sistem tata pamong dan tata kelola program studi."},
+       {"id": "penjaminan-mutu", "label": "Penjaminan Mutu", "jenis": "wajib", "alamat": "profil/penjaminan-mutu",
+        "deskripsi": "Pelaksanaan sistem penjaminan mutu internal: dokumen dan standar mutu, SOP, hasil audit mutu internal, dan tindak lanjutnya."},
+       {"id": "akreditasi", "label": "Akreditasi", "jenis": "otomatis", "templat": "akreditasi", "alamat": "profil/akreditasi",
+        "deskripsi": "Status akreditasi nasional dan internasional program studi."},
+       {"id": "kerja-sama", "label": "Kerja Sama", "jenis": "wajib", "alamat": "profil/kerja-sama",
+        "deskripsi": "Kerja sama dengan mitra dalam dan luar negeri beserta manfaatnya bagi program studi."}
+     ]},
+    {"id": "akademik", "label": "Akademik", "alamat": "akademik",
+     "deskripsi": "Profil lulusan, capaian pembelajaran, kurikulum, kalender, dan peraturan akademik.",
+     "anak": [
+       {"id": "profil-lulusan", "label": "Profil Lulusan dan CPL", "jenis": "otomatis", "templat": "profil_lulusan", "alamat": "akademik/profil-lulusan",
+        "deskripsi": "Profil lulusan dan capaian pembelajaran lulusan (CPL) program studi."},
+       {"id": "kurikulum", "label": "Kurikulum", "jenis": "wajib", "alamat": "akademik/kurikulum",
+        "deskripsi": "Struktur kurikulum, sebaran mata kuliah per semester, dan rencana pembelajaran semester (RPS)."},
+       {"id": "spesifikasi", "label": "Spesifikasi Program Studi", "jenis": "otomatis", "templat": "spesifikasi", "alamat": "akademik/spesifikasi",
+        "deskripsi": "Ringkasan program studi: jenjang, gelar, beban studi, dan akreditasi."},
+       {"id": "kalender", "label": "Kalender Akademik", "jenis": "otomatis", "templat": "kalender", "alamat": "akademik/kalender",
+        "deskripsi": "Kalender akademik Universitas Sam Ratulangi."},
+       {"id": "peraturan", "label": "Peraturan dan Panduan", "jenis": "wajib", "alamat": "akademik/peraturan-panduan",
+        "deskripsi": "Peraturan akademik, panduan pembimbingan akademik, dan panduan tugas akhir."},
+       {"id": "jadwal", "label": "Jadwal Kuliah dan Ujian", "jenis": "opsional", "alamat": "akademik/jadwal",
+        "deskripsi": "Jadwal kuliah, praktikum, dan ujian."}
+     ]},
+    {"id": "dosen", "label": "Dosen dan Tendik", "alamat": "dosen",
+     "deskripsi": "Dosen tetap, kelompok keahlian, tenaga kependidikan, serta prestasi dan pengembangan sumber daya manusia.",
+     "anak": [
+       {"id": "dosen-tetap", "label": "Dosen Tetap", "jenis": "otomatis", "templat": "dosen", "alamat": "dosen/dosen-tetap",
+        "deskripsi": "Daftar dosen tetap program studi di Direktori Dosen UNSRAT."},
+       {"id": "kelompok-keahlian", "label": "Kelompok Keahlian", "jenis": "opsional", "alamat": "dosen/kelompok-keahlian",
+        "deskripsi": "Kelompok bidang keahlian dosen dan topik penelitiannya."},
+       {"id": "tendik", "label": "Tenaga Kependidikan", "jenis": "wajib", "alamat": "dosen/tenaga-kependidikan",
+        "deskripsi": "Tenaga kependidikan yang mendukung layanan program studi: administrasi, laboran, teknisi, dan pustakawan."},
+       {"id": "pengembangan-sdm", "label": "Prestasi dan Pengembangan Dosen", "jenis": "wajib", "alamat": "dosen/prestasi-pengembangan",
+        "deskripsi": "Prestasi dosen serta pengembangan kompetensinya: studi lanjut, pelatihan, seminar, dan sertifikasi."}
+     ]},
+    {"id": "riset", "label": "Riset dan PkM", "alamat": "riset",
+     "deskripsi": "Penelitian, publikasi, pengabdian kepada masyarakat, dan luarannya.",
+     "anak": [
+       {"id": "penelitian", "label": "Penelitian", "jenis": "wajib", "alamat": "riset/penelitian",
+        "deskripsi": "Agenda, kegiatan, dan hasil penelitian dosen bersama mahasiswa."},
+       {"id": "publikasi", "label": "Publikasi Ilmiah", "jenis": "wajib", "alamat": "riset/publikasi",
+        "deskripsi": "Publikasi ilmiah dosen dan mahasiswa di jurnal, seminar, dan media lain."},
+       {"id": "pkm", "label": "Pengabdian kepada Masyarakat", "jenis": "wajib", "alamat": "riset/pengabdian-masyarakat",
+        "deskripsi": "Kegiatan pengabdian kepada masyarakat oleh dosen bersama mahasiswa."},
+       {"id": "luaran", "label": "Luaran dan HKI", "jenis": "wajib", "alamat": "riset/luaran-hki",
+        "deskripsi": "Luaran penelitian dan pengabdian: hak kekayaan intelektual, paten, buku, teknologi tepat guna, dan produk lainnya."}
+     ]},
+    {"id": "mahasiswa", "label": "Mahasiswa dan Alumni", "alamat": "mahasiswa",
+     "deskripsi": "Penerimaan, layanan kemahasiswaan, organisasi dan prestasi, alumni, dan survei kepuasan.",
+     "anak": [
+       {"id": "penerimaan", "label": "Penerimaan Mahasiswa Baru", "jenis": "wajib", "alamat": "mahasiswa/penerimaan",
+        "deskripsi": "Informasi penerimaan mahasiswa baru serta data calon mahasiswa dan mahasiswa baru."},
+       {"id": "layanan", "label": "Layanan Kemahasiswaan", "jenis": "wajib", "alamat": "mahasiswa/layanan",
+        "deskripsi": "Bimbingan dan konseling, beasiswa, kesehatan, minat dan bakat, serta layanan bagi mahasiswa berkebutuhan khusus."},
+       {"id": "organisasi-prestasi", "label": "Organisasi dan Prestasi", "jenis": "wajib", "alamat": "mahasiswa/organisasi-prestasi",
+        "deskripsi": "Organisasi kemahasiswaan serta prestasi akademik dan non-akademik mahasiswa."},
+       {"id": "alumni", "label": "Alumni dan Tracer Study", "jenis": "wajib", "alamat": "mahasiswa/alumni",
+        "deskripsi": "Data lulusan, organisasi alumni, dan hasil studi pelacakan lulusan (tracer study)."},
+       {"id": "survei-kepuasan", "label": "Survei Kepuasan", "jenis": "wajib", "alamat": "mahasiswa/survei-kepuasan",
+        "deskripsi": "Hasil survei kepuasan mahasiswa, alumni, dan pengguna lulusan, serta tindak lanjutnya."}
+     ]},
+    {"id": "fasilitas", "label": "Fasilitas", "alamat": "fasilitas",
+     "deskripsi": "Laboratorium, ruang kuliah, perpustakaan, dan sistem informasi.",
+     "anak": [
+       {"id": "laboratorium", "label": "Laboratorium", "jenis": "wajib", "alamat": "fasilitas/laboratorium",
+        "deskripsi": "Laboratorium dan studio: peralatan, kapasitas, jadwal, dan SOP penggunaannya."},
+       {"id": "ruang", "label": "Ruang Kuliah dan Ruang Pendukung", "jenis": "wajib", "alamat": "fasilitas/ruang",
+        "deskripsi": "Ruang kuliah, ruang dosen, ruang seminar, dan ruang pendukung lainnya."},
+       {"id": "perpustakaan", "label": "Perpustakaan dan Referensi", "jenis": "wajib", "alamat": "fasilitas/perpustakaan",
+        "deskripsi": "Perpustakaan, ruang baca, dan akses ke sumber referensi ilmiah."},
+       {"id": "sistem-informasi", "label": "Sistem Informasi", "jenis": "wajib", "alamat": "fasilitas/sistem-informasi",
+        "deskripsi": "Sistem informasi yang dipakai dalam layanan akademik dan pembelajaran daring."}
+     ]},
+    {"id": "pengumuman", "label": "Pengumuman", "jenis": "otomatis", "templat": "pengumuman", "alamat": "pengumuman",
+     "deskripsi": "Pengumuman, berita kegiatan, dan prestasi terbaru program studi."},
+    {"id": "kontak", "label": "Kontak", "jenis": "otomatis", "templat": "kontak", "alamat": "kontak",
+     "deskripsi": "Alamat surel, fakultas, dan lokasi program studi."}
+  ]
+}

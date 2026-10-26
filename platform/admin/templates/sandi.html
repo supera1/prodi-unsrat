@@ -1,0 +1,37 @@
+{% extends "dasar.html" %}
+{% block judul %}Kata sandi{% endblock %}
+{% block isi %}
+{% set a = akun_aktif() %}
+<section class="kartu kartu--sempit">
+	<h1>{% if a.wajib_ganti %}Buat kata sandi Anda{% else %}Ganti kata sandi{% endif %}</h1>
+	{% if a.wajib_ganti %}
+	<p>Akun Anda masih memakai kata sandi sementara. Buat kata sandi sendiri sebelum melanjutkan.</p>
+	{% endif %}
+	<form method="post" action="{{ url_for('sandi') }}" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<input type="text" name="pengguna" value="{{ a.nama }}" autocomplete="username" class="tersembunyi" tabindex="-1" aria-hidden="true">
+		<div class="isian">
+			<label for="lama">Kata sandi {% if a.wajib_ganti %}sementara{% else %}sekarang{% endif %}</label>
+			<input id="lama" name="lama" type="password" autocomplete="current-password" required>
+		</div>
+		<div class="isian">
+			<label for="baru">Kata sandi baru</label>
+			<input id="baru" name="baru" type="password" autocomplete="new-password" minlength="{{ SANDI_MIN[a.peran] }}" required aria-describedby="aturan-sandi">
+		</div>
+		<div class="isian">
+			<label for="ulang">Ulangi kata sandi baru</label>
+			<input id="ulang" name="ulang" type="password" autocomplete="new-password" required>
+		</div>
+		<div id="aturan-sandi" class="catatan">
+			<p>Kata sandi yang kuat:</p>
+			<ul>
+				<li>minimal {{ SANDI_MIN[a.peran] }} karakter, memuat huruf dan angka;</li>
+				<li>tidak memuat nama pengguna, nama Anda, atau nama prodi;</li>
+				<li>bukan kata atau pola umum (password, qwerty, 123456, unsrat, admin, …);</li>
+				<li>tidak dipakai di layanan lain. Rangkaian beberapa kata acak mudah diingat dan sulit ditebak.</li>
+			</ul>
+		</div>
+		<button type="submit" class="tombol">Simpan kata sandi</button>
+	</form>
+</section>
+{% endblock %}

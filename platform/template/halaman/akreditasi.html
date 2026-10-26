@@ -1,0 +1,20 @@
+{# Accreditation: from the official data. The certificate is added by the programme in phase 2. #}
+{% extends "halaman.html" %}
+{% block isi_halaman %}
+<p class="pengantar">{{ ini.deskripsi }}</p>
+{% if p.akreditasi | akreditasi %}
+<dl class="tabel-data">
+	<div><dt>Peringkat akreditasi</dt><dd><span class="lencana lencana--aksen">{{ p.akreditasi | akreditasi }}</span></dd></div>
+	<div><dt>Lembaga akreditasi</dt><dd>{{ p.lembaga_akreditasi or 'Sedang dilengkapi' }}</dd></div>
+	{% if tampil_berlaku and p.berlaku_hingga | tanggal %}
+	<div><dt>Berlaku hingga</dt><dd>{{ p.berlaku_hingga | tanggal }}</dd></div>
+	{% endif %}
+	{% if p.internasional %}
+	<div><dt>Akreditasi internasional</dt><dd>{{ p.internasional }}</dd></div>
+	{% endif %}
+</dl>
+{% else %}
+<p class="catatan catatan--menyusul">Status akreditasi sedang dilengkapi.</p>
+{% endif %}
+<p class="catatan catatan--menyusul">Sertifikat akreditasi sedang dilengkapi oleh Program Studi {{ nama }}.</p>
+{% endblock %}

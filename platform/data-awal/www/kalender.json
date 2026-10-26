@@ -1,0 +1,303 @@
+{
+  "judul": "Kalender akademik",
+  "teks": "Jadwal kegiatan akademik Universitas Sam Ratulangi tiap semester: administrasi, perkuliahan dan ujian, wisuda, KKT, audit mutu internal, dan dies natalis. Bila ada perubahan jadwal, ikuti [pengumuman resmi](pengumuman.html).",
+  "semester": [
+    {
+      "jenis": "gasal",
+      "tahun_akademik": "2026/2027",
+      "tampil": true,
+      "catatan": "",
+      "kelompok": [
+        {
+          "judul": "Administrasi awal semester",
+          "singkat": "Administrasi",
+          "tanggal": "",
+          "keterangan": "",
+          "kegiatan": [
+            {
+              "tanggal": "01 Juli – 12 Agustus 2026",
+              "kegiatan": "Pembayaran SPP/UKT"
+            },
+            {
+              "tanggal": "03 Juli – 26 Juli 2026",
+              "kegiatan": "Input Jadwal Kuliah oleh Korprodi pada Portal Inspire"
+            },
+            {
+              "tanggal": "12 – 31 Juli 2026",
+              "kegiatan": "Rapat Tim Pengampu Mata Kuliah/Pengisian RPS di Portal Inspire"
+            },
+            {
+              "tanggal": "23 Juni – 25 Juli 2026",
+              "kegiatan": "Pemrosesan mahasiswa pindah, melanjutkan studi dan cuti akademik"
+            },
+            {
+              "tanggal": "01 Juli – 13 Agustus 2026",
+              "kegiatan": "Registrasi Akademik/pendaftaran kembali"
+            },
+            {
+              "tanggal": "15 Juli – 13 Agustus 2026",
+              "kegiatan": "Pembimbingan Akademik"
+            },
+            {
+              "tanggal": "15 Juli – 13 Agustus 2026",
+              "kegiatan": "Pengisian KRS Online/Approve oleh sistem sesuai paket kurikulum Prodi (MK Semester 1 dikontrak oleh sistem sesuai paket kurikulum Prodi)"
+            }
+          ]
+        },
+        {
+          "judul": "Upacara penerimaan mahasiswa baru dan PKKMB",
+          "singkat": "PKKMB",
+          "tanggal": "13 – 14 Agustus 2026",
+          "keterangan": "",
+          "kegiatan": []
+        },
+        {
+          "judul": "Perkuliahan",
+          "singkat": "Perkuliahan",
+          "tanggal": "",
+          "keterangan": "",
+          "kegiatan": [
+            {
+              "tanggal": "18 Agustus 2026",
+              "kegiatan": "Awal Perkuliahan"
+            },
+            {
+              "tanggal": "1 September 2026",
+              "kegiatan": "Akhir Pembatalan/Perubahan MK pada KRS (Reguler dan Bimbingan Khusus)"
+            },
+            {
+              "tanggal": "18 Agustus – 05 Oktober 2026",
+              "kegiatan": "Masa Kuliah sebelum Ujian Tengah Semester (7 Minggu)"
+            },
+            {
+              "tanggal": "06 Oktober – 12 Oktober 2026",
+              "kegiatan": "Ujian Tengah Semester (1 Minggu)"
+            },
+            {
+              "tanggal": "13 Oktober – 30 November 2026",
+              "kegiatan": "Masa Kuliah sebelum Ujian Akhir Semester (7 Minggu)"
+            },
+            {
+              "tanggal": "30 November 2026",
+              "kegiatan": "Akhir Kuliah"
+            },
+            {
+              "tanggal": "01 Desember – 07 Desember 2026",
+              "kegiatan": "Ujian Akhir Semester Gasal"
+            },
+            {
+              "tanggal": "31 Desember 2026",
+              "kegiatan": "Akhir unggah nilai melalui Portal Inspire"
+            }
+          ]
+        },
+        {
+          "judul": "Evaluasi putus studi",
+          "singkat": "Evaluasi studi",
+          "tanggal": "",
+          "keterangan": "",
+          "kegiatan": [
+            {
+              "tanggal": "1 – 31 Agustus 2026",
+              "kegiatan": "Mahasiswa Semester IV S1 (Putus studi jika IPK < 2,00; Jumlah SKS < 45)"
+            },
+            {
+              "tanggal": "1 – 31 Agustus 2026",
+              "kegiatan": "Mahasiswa Semester VIII S1 (Peringatan oleh Dekan jika IPK < 2,00; SKS lulus < 96)"
+            },
+            {
+              "tanggal": "1 – 31 Agustus 2026",
+              "kegiatan": "4 Semester tidak registrasi"
+            },
+            {
+              "tanggal": "12 September 2026",
+              "kegiatan": "Penetapan SK Rektor tentang Mahasiswa Putus Studi"
+            }
+          ]
+        },
+        {
+          "judul": "Wisuda",
+          "singkat": "Wisuda",
+          "tanggal": "",
+          "keterangan": "",
+          "kegiatan": [
+            {
+              "tanggal": "Agustus 2026",
+              "kegiatan": "Periode I – Upacara Wisuda"
+            },
+            {
+              "tanggal": "Oktober 2026",
+              "kegiatan": "Periode II – Upacara Wisuda"
+            },
+            {
+              "tanggal": "Desember 2026",
+              "kegiatan": "Periode III – Upacara Wisuda"
+            }
+          ]
+        },
+        {
+          "judul": "Kuliah Kerja Terpadu (KKT) Tematik — Angkatan 149",
+          "singkat": "KKT 149",
+          "tanggal": "Agustus – September 2026",
+          "keterangan": "Bagi mahasiswa yang hanya kontrak KKT dan Tugas Akhir",
+          "kegiatan": [
+            {
+              "tanggal": "Agustus – September 2026",
+              "kegiatan": "Pendaftaran"
+            },
+            {
+              "tanggal": "Agustus – September 2026",
+              "kegiatan": "Pembekalan"
+            },
+            {
+              "tanggal": "Agustus – September 2026",
+              "kegiatan": "Pelepasan mahasiswa"
+            },
+            {
+              "tanggal": "Agustus – September 2026",
+              "kegiatan": "Kegiatan Lapangan"
+            },
+            {
+              "tanggal": "Agustus – September 2026",
+              "kegiatan": "Penarikan mahasiswa"
+            },
+            {
+              "tanggal": "Agustus – September 2026",
+              "kegiatan": "Evaluasi/Yudisium KKNT"
+            }
+          ]
+        },
+        {
+          "judul": "Kuliah Kerja Terpadu (KKT) Tematik — Angkatan 150",
+          "singkat": "KKT 150",
+          "tanggal": "Oktober – November 2026",
+          "keterangan": "Bagi mahasiswa yang hanya kontrak KKT dan Tugas Akhir",
+          "kegiatan": [
+            {
+              "tanggal": "Oktober – November 2026",
+              "kegiatan": "Pendaftaran"
+            },
+            {
+              "tanggal": "Oktober – November 2026",
+              "kegiatan": "Pembekalan"
+            },
+            {
+              "tanggal": "Oktober – November 2026",
+              "kegiatan": "Pelepasan mahasiswa"
+            },
+            {
+              "tanggal": "Oktober – November 2026",
+              "kegiatan": "Kegiatan Lapangan"
+            },
+            {
+              "tanggal": "Oktober – November 2026",
+              "kegiatan": "Penarikan mahasiswa"
+            },
+            {
+              "tanggal": "Oktober – November 2026",
+              "kegiatan": "Evaluasi/Yudisium KKT"
+            }
+          ]
+        },
+        {
+          "judul": "Kuliah Kerja Terpadu (KKT) Tematik MBKM — Angkatan 151",
+          "singkat": "KKT MBKM 151",
+          "tanggal": "Januari 2027",
+          "keterangan": "Bagi mahasiswa yang mengontrak KKT dan MK lain",
+          "kegiatan": []
+        },
+        {
+          "judul": "Pengukuhan guru besar",
+          "singkat": "Guru besar",
+          "tanggal": "September 2026",
+          "keterangan": "",
+          "kegiatan": []
+        },
+        {
+          "judul": "Kegiatan akademik lainnya",
+          "singkat": "Lainnya",
+          "tanggal": "",
+          "keterangan": "",
+          "kegiatan": [
+            {
+              "tanggal": "Juli – Desember 2026",
+              "kegiatan": "Program pembelajaran di luar kampus"
+            }
+          ]
+        },
+        {
+          "judul": "Audit Mutu Internal (AMI) Siklus 14",
+          "singkat": "AMI",
+          "tanggal": "",
+          "keterangan": "",
+          "kegiatan": [
+            {
+              "tanggal": "1 September 2026",
+              "kegiatan": "Awal Siklus 14 Audit Mutu Internal (AMI)"
+            },
+            {
+              "tanggal": "01 – 30 September 2026",
+              "kegiatan": "Pengisian EDPS oleh Korprodi/Gugus Mutu Program Studi"
+            },
+            {
+              "tanggal": "01 – 31 Oktober 2026",
+              "kegiatan": "Audit Sistem"
+            },
+            {
+              "tanggal": "02 – 19 November 2026",
+              "kegiatan": "Pekan AMI Siklus 14 (Audit Lapangan)"
+            },
+            {
+              "tanggal": "02 Desember 2026",
+              "kegiatan": "Rapat Tinjauan Manajemen (RTM) Fakultas"
+            },
+            {
+              "tanggal": "07 – 09 Januari 2027",
+              "kegiatan": "Rapat Tinjauan Manajemen (RTM) Universitas"
+            },
+            {
+              "tanggal": "21 Januari 2027",
+              "kegiatan": "Pemantauan Tindak Lanjut Hasil AMI"
+            }
+          ]
+        },
+        {
+          "judul": "Dies natalis",
+          "singkat": "Dies natalis",
+          "tanggal": "",
+          "keterangan": "",
+          "kegiatan": [
+            {
+              "tanggal": "1 Agustus 2026",
+              "kegiatan": "Fakultas Hukum"
+            },
+            {
+              "tanggal": "17 Agustus 2026",
+              "kegiatan": "Fakultas Peternakan"
+            },
+            {
+              "tanggal": "17 Agustus 2026",
+              "kegiatan": "Fakultas Ilmu Sosial dan Politik"
+            },
+            {
+              "tanggal": "17 Agustus 2026",
+              "kegiatan": "Fakultas Perikanan dan Ilmu Kelautan"
+            },
+            {
+              "tanggal": "1 September 2026",
+              "kegiatan": "Fakultas Teknik"
+            },
+            {
+              "tanggal": "1 September 2026",
+              "kegiatan": "Universitas Sam Ratulangi"
+            },
+            {
+              "tanggal": "23 September 2026",
+              "kegiatan": "Fakultas Ekonomi dan Bisnis"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

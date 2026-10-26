@@ -1,0 +1,37 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}{{ p.nama }}{% endblock %}
+{% block isi %}
+{{ nav_prodi(p, 'dasbor_prodi') }}
+<h1>{{ p.nama }}</h1>
+<p>{{ p.unit }} · <a href="{{ p.alamat }}">{{ p.alamat }}</a>{% if not p.aktif %} · <strong>situs nonaktif</strong>{% endif %}</p>
+{% if not operator and jumlah.menunggu %}
+<p class="pesan pesan--info"><a href="{{ url_for('pengumuman_daftar', kode=p.kode, status='menunggu') }}">{{ jumlah.menunggu }} pengumuman menunggu persetujuan Anda.</a></p>
+{% endif %}
+<section class="kartu">
+	<h2>{{ 'Pengumuman Anda' if operator else 'Pengumuman dan berita' }}</h2>
+	<ul class="angka">
+		{% for s in ['terbit', 'menunggu', 'draf', 'ditarik'] %}
+		<li><a href="{{ url_for('pengumuman_daftar', kode=p.kode, status=s) }}"><strong>{{ jumlah[s] }}</strong> {{ NAMA_STATUS[s] | lower }}</a></li>
+		{% endfor %}
+	</ul>
+	{% if terbaru %}
+	<ul>
+		{% for b in terbaru %}
+		<li><a href="{{ url_for('pengumuman_ubah', kode=p.kode, id_=b.id) }}">{{ b.judul }}</a> <span class="status status--{{ b.status }}">{{ NAMA_STATUS[b.status] }}</span>{% if b.catatan and b.status == 'draf' %} <span class="keterangan">ada catatan dari admin</span>{% endif %}</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	<p><a class="tombol" href="{{ url_for('pengumuman_baru', kode=p.kode) }}">Buat pengumuman</a></p>
+</section>
+{% if siap %}
+<section class="kartu">
+	<h2>Kesiapan situs</h2>
+	<ul class="daftar-periksa">
+		{% for ok, teks, url in siap %}
+		<li class="{{ 'ok' if ok else 'belum' }}"><span class="tersembunyi">{{ 'Selesai:' if ok else 'Belum:' }}</span>{% if url %}<a href="{{ url }}">{{ teks }}</a>{% else %}{{ teks }}{% endif %}</li>
+		{% endfor %}
+	</ul>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Riwayat — {{ pr.nama }}{% endblock %}
+{% block isi %}
+{{ nav_prodi(pr, 'riwayat_prodi') }}
+<h1>Riwayat</h1>
+<p>Sebelum data prodi, identitas, bagian depan, menu, atau pengumuman diubah, isinya disimpan sebagai versi. Versi mana pun bisa dibandingkan dengan isi sekarang dan dipulihkan.</p>
+<div class="tabel-gulir">
+	<table>
+		<thead><tr><th scope="col">Waktu</th><th scope="col">Berkas</th><th scope="col">Perubahan sesudahnya</th><th scope="col">Oleh</th><th scope="col">Tindakan</th></tr></thead>
+		<tbody>
+			{% for v in daftar %}
+			<tr><td>{{ v.waktu }}</td><td>{{ nama_berkas(v.berkas) }}</td><td>{{ v.aksi }}</td><td>{{ v.oleh }}</td>
+				<td><a href="{{ url_for('riwayat_prodi_lihat', kode=pr.kode, berkas=v.berkas, versi=v.versi) }}">Bandingkan / pulihkan</a></td></tr>
+			{% else %}
+			<tr><td colspan="5">Belum ada versi.</td></tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+kode_pddikti,jenjang,nama,fakultas_unit,slug_usulan,alamat_usulan,slug_di_www
+62201,S1,Akuntansi,Fakultas Ekonomi dan Bisnis,s1akuntansi,https://prodi.unsrat.ac.id/s1akuntansi/,s1-akuntansi
+60201,S1,Ekonomi Pembangunan,Fakultas Ekonomi dan Bisnis,s1ekonomipembangunan,https://prodi.unsrat.ac.id/s1ekonomipembangunan/,s1-ekonomi-pembangunan
+61201,S1,Manajemen,Fakultas Ekonomi dan Bisnis,s1manajemen,https://prodi.unsrat.ac.id/s1manajemen/,s1-manajemen
+74201,S1,Ilmu Hukum,Fakultas Hukum,s1hukum,https://prodi.unsrat.ac.id/s1hukum/,s1-ilmu-hukum
+80201,S1,Ilmu Sejarah,Fakultas Ilmu Budaya,s1sejarah,https://prodi.unsrat.ac.id/s1sejarah/,s1-ilmu-sejarah
+79201,S1,Sastra Indonesia,Fakultas Ilmu Budaya,s1sastraindonesia,https://prodi.unsrat.ac.id/s1sastraindonesia/,s1-sastra-indonesia
+79202,S1,Sastra Inggris,Fakultas Ilmu Budaya,s1sastrainggris,https://prodi.unsrat.ac.id/s1sastrainggris/,s1-sastra-inggris
+79206,S1,Sastra Jerman,Fakultas Ilmu Budaya,s1sastrajerman,https://prodi.unsrat.ac.id/s1sastrajerman/,s1-sastra-jerman
+82201,S1,Antropologi Sosial,Fakultas Ilmu Sosial dan Ilmu Politik,s1antropologisosial,https://prodi.unsrat.ac.id/s1antropologisosial/,s1-antropologi-sosial
+63211,S1,Ilmu Administrasi Bisnis,Fakultas Ilmu Sosial dan Ilmu Politik,s1administrasibisnis,https://prodi.unsrat.ac.id/s1administrasibisnis/,s1-ilmu-administrasi-bisnis
+63201,S1,Ilmu Administrasi Negara,Fakultas Ilmu Sosial dan Ilmu Politik,s1administrasinegara,https://prodi.unsrat.ac.id/s1administrasinegara/,s1-ilmu-administrasi-negara
+70201,S1,Ilmu Komunikasi,Fakultas Ilmu Sosial dan Ilmu Politik,s1komunikasi,https://prodi.unsrat.ac.id/s1komunikasi/,s1-ilmu-komunikasi
+65201,S1,Ilmu Pemerintahan,Fakultas Ilmu Sosial dan Ilmu Politik,s1pemerintahan,https://prodi.unsrat.ac.id/s1pemerintahan/,s1-ilmu-pemerintahan
+71201,S1,Ilmu Perpustakaan,Fakultas Ilmu Sosial dan Ilmu Politik,s1perpustakaan,https://prodi.unsrat.ac.id/s1perpustakaan/,s1-ilmu-perpustakaan
+67201,S1,Ilmu Politik,Fakultas Ilmu Sosial dan Ilmu Politik,s1politik,https://prodi.unsrat.ac.id/s1politik/,s1-ilmu-politik
+69201,S1,Sosiologi,Fakultas Ilmu Sosial dan Ilmu Politik,s1sosiologi,https://prodi.unsrat.ac.id/s1sosiologi/,s1-sosiologi
+14201,S1,Ilmu Keperawatan,Fakultas Kedokteran,s1keperawatan,https://prodi.unsrat.ac.id/s1keperawatan/,s1-ilmu-keperawatan
+11201,S1,Pendidikan Dokter,Fakultas Kedokteran,s1kedokteran,https://prodi.unsrat.ac.id/s1kedokteran/,s1-pendidikan-dokter
+12201,S1,Pendidikan Dokter Gigi,Fakultas Kedokteran,s1kedokterangigi,https://prodi.unsrat.ac.id/s1kedokterangigi/,s1-pendidikan-dokter-gigi
+13201,S1,Ilmu Kesehatan Masyarakat,Fakultas Kesehatan Masyarakat,s1kesmas,https://prodi.unsrat.ac.id/s1kesmas/,s1-ilmu-kesehatan-masyarakat
+46201,S1,Biologi,Fakultas Matematika dan Ilmu Pengetahuan Alam,s1biologi,https://prodi.unsrat.ac.id/s1biologi/,s1-biologi
+48201,S1,Farmasi,Fakultas Matematika dan Ilmu Pengetahuan Alam,s1farmasi,https://prodi.unsrat.ac.id/s1farmasi/,s1-farmasi
+45201,S1,Fisika,Fakultas Matematika dan Ilmu Pengetahuan Alam,s1fisika,https://prodi.unsrat.ac.id/s1fisika/,s1-fisika
+47201,S1,Kimia,Fakultas Matematika dan Ilmu Pengetahuan Alam,s1kimia,https://prodi.unsrat.ac.id/s1kimia/,s1-kimia
+44201,S1,Matematika,Fakultas Matematika dan Ilmu Pengetahuan Alam,s1matematika,https://prodi.unsrat.ac.id/s1matematika/,s1-matematika
+57201,S1,Sistem Informasi,Fakultas Matematika dan Ilmu Pengetahuan Alam,s1sisteminformasi,https://prodi.unsrat.ac.id/s1sisteminformasi/,s1-sistem-informasi
+54245,S1,Agrobisnis Perikanan,Fakultas Perikanan dan Ilmu Kelautan,s1agrobisnisperikanan,https://prodi.unsrat.ac.id/s1agrobisnisperikanan/,s1-agrobisnis-perikanan
+54243,S1,Budidaya Perairan,Fakultas Perikanan dan Ilmu Kelautan,s1budidayaperairan,https://prodi.unsrat.ac.id/s1budidayaperairan/,s1-budidaya-perairan
+54241,S1,Ilmu Kelautan,Fakultas Perikanan dan Ilmu Kelautan,s1kelautan,https://prodi.unsrat.ac.id/s1kelautan/,s1-ilmu-kelautan
+54242,S1,Manajemen Sumberdaya Perairan,Fakultas Perikanan dan Ilmu Kelautan,s1msp,https://prodi.unsrat.ac.id/s1msp/,s1-manajemen-sumberdaya-perairan
+54246,S1,Pemanfaatan Sumberdaya Perikanan,Fakultas Perikanan dan Ilmu Kelautan,s1psp,https://prodi.unsrat.ac.id/s1psp/,s1-pemanfaatan-sumberdaya-perikanan
+54244,S1,Teknologi Hasil Perikanan,Fakultas Perikanan dan Ilmu Kelautan,s1thp,https://prodi.unsrat.ac.id/s1thp/,s1-teknologi-hasil-perikanan
+54201,S1,Agribisnis,Fakultas Pertanian,s1agribisnis,https://prodi.unsrat.ac.id/s1agribisnis/,s1-agribisnis
+54204,S1,Agronomi,Fakultas Pertanian,s1agronomi,https://prodi.unsrat.ac.id/s1agronomi/,s1-agronomi
+54211,S1,Agroteknologi,Fakultas Pertanian,s1agroteknologi,https://prodi.unsrat.ac.id/s1agroteknologi/,s1-agroteknologi
+54294,S1,Ilmu Tanah,Fakultas Pertanian,s1tanah,https://prodi.unsrat.ac.id/s1tanah/,s1-ilmu-tanah
+54251,S1,Kehutanan,Fakultas Pertanian,s1kehutanan,https://prodi.unsrat.ac.id/s1kehutanan/,s1-kehutanan
+54295,S1,Proteksi Tanaman,Fakultas Pertanian,s1proteksitanaman,https://prodi.unsrat.ac.id/s1proteksitanaman/,s1-proteksi-tanaman
+41201,S1,Teknik Pertanian,Fakultas Pertanian,s1pertanian,https://prodi.unsrat.ac.id/s1pertanian/,s1-teknik-pertanian
+41231,S1,Teknologi Pangan,Fakultas Pertanian,s1teknologipangan,https://prodi.unsrat.ac.id/s1teknologipangan/,s1-teknologi-pangan
+54231,S1,Peternakan,Fakultas Peternakan,s1peternakan,https://prodi.unsrat.ac.id/s1peternakan/,s1-peternakan
+23201,S1,Arsitektur,Fakultas Teknik,s1arsitektur,https://prodi.unsrat.ac.id/s1arsitektur/,s1-arsitektur
+35201,S1,Perencanaan Wilayah dan Kota,Fakultas Teknik,s1pwk,https://prodi.unsrat.ac.id/s1pwk/,s1-perencanaan-wilayah-dan-kota
+20201,S1,Teknik Elektro,Fakultas Teknik,s1elektro,https://prodi.unsrat.ac.id/s1elektro/,s1-teknik-elektro
+26201,S1,Teknik Industri,Fakultas Teknik,s1industri,https://prodi.unsrat.ac.id/s1industri/,s1-teknik-industri
+55201,S1,Teknik Informatika,Fakultas Teknik,s1informatika,https://prodi.unsrat.ac.id/s1informatika/,s1-teknik-informatika
+352045,S1,Teknik Lingkungan,Fakultas Teknik,s1lingkungan,https://prodi.unsrat.ac.id/s1lingkungan/,s1-teknik-lingkungan
+21201,S1,Teknik Mesin,Fakultas Teknik,s1mesin,https://prodi.unsrat.ac.id/s1mesin/,s1-teknik-mesin
+31201,S1,Teknik Pertambangan,Fakultas Teknik,s1pertambangan,https://prodi.unsrat.ac.id/s1pertambangan/,s1-teknik-pertambangan
+22201,S1,Teknik Sipil,Fakultas Teknik,s1sipil,https://prodi.unsrat.ac.id/s1sipil/,s1-teknik-sipil
+63106,S2,Administrasi Publik,Program Pascasarjana,s2administrasipublik,https://prodi.unsrat.ac.id/s2administrasipublik/,s2-administrasi-publik
+54104,S2,Agronomi,Program Pascasarjana,s2agronomi,https://prodi.unsrat.ac.id/s2agronomi/,s2-agronomi
+62101,S2,Akuntansi,Program Pascasarjana,s2akuntansi,https://prodi.unsrat.ac.id/s2akuntansi/,s2-akuntansi
+23101,S2,Arsitektur,Program Pascasarjana,s2arsitektur,https://prodi.unsrat.ac.id/s2arsitektur/,s2-arsitektur
+46101,S2,Biologi,Program Pascasarjana,s2biologi,https://prodi.unsrat.ac.id/s2biologi/,s2-biologi
+54106,S2,Entomologi,Program Pascasarjana,s2entomologi,https://prodi.unsrat.ac.id/s2entomologi/,s2-entomologi
+60101,S2,Ilmu Ekonomi,Program Pascasarjana,s2ekonomi,https://prodi.unsrat.ac.id/s2ekonomi/,s2-ilmu-ekonomi
+74101,S2,Ilmu Hukum,Program Pascasarjana,s2hukum,https://prodi.unsrat.ac.id/s2hukum/,s2-ilmu-hukum
+13101,S2,Ilmu Kesehatan Masyarakat,Program Pascasarjana,s2kesmas,https://prodi.unsrat.ac.id/s2kesmas/,s2-ilmu-kesehatan-masyarakat
+41121,S2,Ilmu Pangan,Program Pascasarjana,s2pangan,https://prodi.unsrat.ac.id/s2pangan/,s2-ilmu-pangan
+65101,S2,Ilmu Pemerintahan,Program Pascasarjana,s2pemerintahan,https://prodi.unsrat.ac.id/s2pemerintahan/,s2-ilmu-pemerintahan
+54141,S2,Ilmu Perairan,Program Pascasarjana,s2perairan,https://prodi.unsrat.ac.id/s2perairan/,s2-ilmu-perairan
+95103,S2,Ilmu Perencanaan Pembangunan Wilayah,Program Pascasarjana,s2ppw,https://prodi.unsrat.ac.id/s2ppw/,s2-ilmu-perencanaan-pembangunan-wilayah
+55100,S2,Informatika,Program Pascasarjana,s2informatika,https://prodi.unsrat.ac.id/s2informatika/,s2-informatika
+79102,S2,Linguistik,Program Pascasarjana,s2linguistik,https://prodi.unsrat.ac.id/s2linguistik/,s2-linguistik
+61101,S2,Manajemen,Program Pascasarjana,s2manajemen,https://prodi.unsrat.ac.id/s2manajemen/,s2-manajemen
+95101,S2,Pengelolaan Sumberdaya Pembangunan,Program Pascasarjana,s2psdp,https://prodi.unsrat.ac.id/s2psdp/,s2-pengelolaan-sumberdaya-pembangunan
+54131,S2,Peternakan,Program Pascasarjana,s2peternakan,https://prodi.unsrat.ac.id/s2peternakan/,s2-peternakan
+22101,S2,Teknik Sipil,Program Pascasarjana,s2sipil,https://prodi.unsrat.ac.id/s2sipil/,s2-teknik-sipil
+23001,S3,Arsitektur,Program Pascasarjana,s3arsitektur,https://prodi.unsrat.ac.id/s3arsitektur/,s3-arsitektur
+54006,S3,Entomologi,Program Pascasarjana,s3entomologi,https://prodi.unsrat.ac.id/s3entomologi/,s3-entomologi
+62001,S3,Ilmu Akuntansi,Program Pascasarjana,s3akuntansi,https://prodi.unsrat.ac.id/s3akuntansi/,s3-ilmu-akuntansi
+74001,S3,Ilmu Hukum,Program Pascasarjana,s3hukum,https://prodi.unsrat.ac.id/s3hukum/,s3-ilmu-hukum
+54041,S3,Ilmu Kelautan,Program Pascasarjana,s3kelautan,https://prodi.unsrat.ac.id/s3kelautan/,s3-ilmu-kelautan
+79002,S3,Ilmu Linguistik,Program Pascasarjana,s3linguistik,https://prodi.unsrat.ac.id/s3linguistik/,s3-ilmu-linguistik
+61001,S3,Ilmu Manajemen,Program Pascasarjana,s3manajemen,https://prodi.unsrat.ac.id/s3manajemen/,s3-ilmu-manajemen
+54001,S3,Ilmu Pertanian,Program Pascasarjana,s3pertanian,https://prodi.unsrat.ac.id/s3pertanian/,s3-ilmu-pertanian
+22002,S3,Teknik Sipil,Program Pascasarjana,s3sipil,https://prodi.unsrat.ac.id/s3sipil/,s3-teknik-sipil
+62901,Profesi,Profesi Akuntan,Fakultas Ekonomi dan Bisnis,profesiakuntan,https://prodi.unsrat.ac.id/profesiakuntan/,profesi-akuntan
+11901,Profesi,Profesi Dokter,Fakultas Kedokteran,profesidokter,https://prodi.unsrat.ac.id/profesidokter/,profesi-dokter
+12901,Profesi,Profesi Dokter Gigi,Fakultas Kedokteran,profesidoktergigi,https://prodi.unsrat.ac.id/profesidoktergigi/,profesi-dokter-gigi
+14901,Profesi,Profesi Ners,Fakultas Kedokteran,profesiners,https://prodi.unsrat.ac.id/profesiners/,profesi-ners
+48901,Profesi,Profesi Apoteker,Fakultas Matematika dan Ilmu Pengetahuan Alam,profesiapoteker,https://prodi.unsrat.ac.id/profesiapoteker/,profesi-apoteker
+23906,Profesi,Pendidikan Profesi Arsitek,Fakultas Teknik,profesiarsitek,https://prodi.unsrat.ac.id/profesiarsitek/,pendidikan-profesi-arsitek
+23902,Profesi,Program Profesi Insinyur,Program Pascasarjana,profesiinsinyur,https://prodi.unsrat.ac.id/profesiinsinyur/,program-profesi-insinyur
+11706,Sp-1,Anestesiologi dan Terapi Intensif,Fakultas Kedokteran,sp1anestesi,https://prodi.unsrat.ac.id/sp1anestesi/,sp-1-anestesiologi-dan-terapi-intensif
+11707,Sp-1,Ilmu Bedah,Fakultas Kedokteran,sp1bedah,https://prodi.unsrat.ac.id/sp1bedah/,sp-1-ilmu-bedah
+11708,Sp-1,Ilmu Kebidanan dan Penyakit Kandungan,Fakultas Kedokteran,sp1obgin,https://prodi.unsrat.ac.id/sp1obgin/,sp-1-ilmu-kebidanan-dan-penyakit-kandungan
+11721,Sp-1,Ilmu Kedokteran Fisik dan Rehabilitasi,Fakultas Kedokteran,sp1rehabilitasimedik,https://prodi.unsrat.ac.id/sp1rehabilitasimedik/,sp-1-ilmu-kedokteran-fisik-dan-rehabilitasi
+11711,Sp-1,Ilmu Kesehatan Anak,Fakultas Kedokteran,sp1anak,https://prodi.unsrat.ac.id/sp1anak/,sp-1-ilmu-kesehatan-anak
+11702,Sp-1,Ilmu Penyakit Dalam,Fakultas Kedokteran,sp1penyakitdalam,https://prodi.unsrat.ac.id/sp1penyakitdalam/,sp-1-ilmu-penyakit-dalam
+11715,Sp-1,Ilmu Penyakit Jantung dan Pembuluh Darah,Fakultas Kedokteran,sp1jantung,https://prodi.unsrat.ac.id/sp1jantung/,sp-1-ilmu-penyakit-jantung-dan-pembuluh-darah
+11704,Sp-1,Ilmu Penyakit Kulit dan Kelamin,Fakultas Kedokteran,sp1kulitkelamin,https://prodi.unsrat.ac.id/sp1kulitkelamin/,sp-1-ilmu-penyakit-kulit-dan-kelamin
+11701,Sp-1,Ilmu Penyakit Mata,Fakultas Kedokteran,sp1mata,https://prodi.unsrat.ac.id/sp1mata/,sp-1-ilmu-penyakit-mata
+11759,Sp-1,Kedokteran Keluarga Layanan Primer,Fakultas Kedokteran,sp1kklp,https://prodi.unsrat.ac.id/sp1kklp/,sp-1-kedokteran-keluarga-layanan-primer
+11703,Sp-1,Neurologi,Fakultas Kedokteran,sp1neurologi,https://prodi.unsrat.ac.id/sp1neurologi/,sp-1-neurologi
+11733,Sp-2,Subspesialis Ilmu Kesehatan Anak,Fakultas Kedokteran,sp2anak,https://prodi.unsrat.ac.id/sp2anak/,sp-2-subspesialis-ilmu-kesehatan-anak

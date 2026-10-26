@@ -1,0 +1,20 @@
+{# One announcement in a list. Needs ke, slug, media_url, label_kategori, hari_ini; tingkat = heading level. #}
+{% macro kartu_kabar(b, tingkat=2) %}
+<li class="kabar">
+	{% if b.foto %}
+	{% set f = b.foto[0] %}
+	{% set kecil = f | foto_varian(400) %}
+	<img class="kabar__foto" src="{{ media_url(kecil) }}" alt="" width="{{ kecil.lebar }}" height="{{ kecil.tinggi }}" loading="lazy">
+	{% endif %}
+	<div class="kabar__teks">
+		<p class="kabar__meta">
+			<span class="lencana">{{ label_kategori.get(b.kategori, b.kategori) }}</span>
+			<time datetime="{{ b.tanggal }}">{{ b.tanggal | tanggal }}</time>
+			{% if b.kedaluwarsa and b.kedaluwarsa < hari_ini %}<span class="kabar__lewat">Berakhir {{ b.kedaluwarsa | tanggal }}</span>{% endif %}
+			{% if b.pdf %}<span class="kabar__pdf">PDF</span>{% endif %}
+		</p>
+		<h{{ tingkat }} class="kabar__judul"><a href="{{ ke(slug ~ '/pengumuman/' ~ b.id) }}">{{ b.judul }}</a></h{{ tingkat }}>
+		<p>{{ b.ringkasan }}</p>
+	</div>
+</li>
+{% endmacro %}

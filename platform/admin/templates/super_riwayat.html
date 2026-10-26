@@ -1,0 +1,34 @@
+{% extends "dasar.html" %}
+{% block judul %}Riwayat{% endblock %}
+{% block isi %}
+<h1>Riwayat versi</h1>
+<p>Sebelum berkas data diubah, isinya disimpan sebagai versi. Versi mana pun bisa dibandingkan dengan isi sekarang dan dipulihkan; pemulihan juga disimpan sebagai versi, jadi tidak ada yang hilang.</p>
+<form method="get" action="{{ url_for('super_riwayat') }}" class="saring">
+	<div class="isian">
+		<label for="berkas">Berkas</label>
+		<select id="berkas" name="berkas">
+			<option value="">Semua</option>
+			{% for b in pilihan %}<option value="{{ b }}"{% if saring == b %} selected{% endif %}>{{ nama_berkas(b) }}</option>{% endfor %}
+		</select>
+	</div>
+	<button type="submit" class="tombol tombol--kecil">Saring</button>
+</form>
+<div class="tabel-gulir">
+	<table>
+		<thead><tr><th scope="col">Waktu</th><th scope="col">Berkas</th><th scope="col">Perubahan sesudahnya</th><th scope="col">Oleh</th><th scope="col">Tindakan</th></tr></thead>
+		<tbody>
+			{% for v in daftar %}
+			<tr>
+				<td>{{ v.waktu }}</td>
+				<td>{{ nama_berkas(v.berkas) }}</td>
+				<td>{{ v.aksi }}</td>
+				<td>{{ v.oleh }}</td>
+				<td><a href="{{ url_for('super_riwayat_lihat', berkas=v.berkas, versi=v.versi) }}">Bandingkan / pulihkan</a></td>
+			</tr>
+			{% else %}
+			<tr><td colspan="5">Belum ada versi.</td></tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}
