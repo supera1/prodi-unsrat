@@ -10,11 +10,15 @@ PRODI_BANGUN chooses how builds run:
     latar    (default) in a background thread, so a form answers at once; the dashboard shows the status
     sinkron  inside the request (tests)
     mati     not at all (tests of the access rules, which change data without building)
+
+PRODI_BANGUN_HARIAN ("HH:MM", local time; empty: none) adds a full rebuild every day (Penjadwal), so announcements
+whose "berlaku sampai" date has passed leave the sites even when nobody changes anything.
 """
 from __future__ import print_function
 
 import datetime
 import os
+import re
 import subprocess
 import sys
 import threading
@@ -30,6 +34,7 @@ BANGUN_PY = os.path.join(PLATFORM, "bangun", "bangun.py")
 BATAS_SATUAN = 5
 BATAS_DETIK = 900
 MODE = ("latar", "sinkron", "mati")
+POLA_JAM = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
 
 
 class Antrean(object):
@@ -100,3 +105,43 @@ class Antrean(object):
                            pesan=(ringkas[-1] if ringkas else "Selesai.") if ok else "Bangun ulang GAGAL (%s)." % cakupan)
         audit.catat("bangun-selesai" if ok else "bangun-gagal", oleh=oleh, prodi=kode, cakupan=cakupan, detik=durasi,
                     peringatan=len(peringatan))
+
+
+class Penjadwal(object):
+    """A full rebuild every day at `jam` ("HH:MM", local time; the containers run in Asia/Makassar), through the same
+    queue as the admin's own rebuilds. Started by app.py when PRODI_BANGUN_HARIAN is set and builds run in the
+    background."""
+
+    def __init__(self, antrean, jam):
+        m = POLA_JAM.match(jam or "")
+        if not m:
+            raise ValueError("PRODI_BANGUN_HARIAN harus berbentuk JJ:MM, mis. 02:30")
+        self.antrean, self.jam, self.menit = antrean, int(m.group(1)), int(m.group(2))
+        self.terakhir = None
+
+    def berikutnya(self, sekarang=None):
+        """When the next daily rebuild runs."""
+        sekarang = sekarang or datetime.datetime.now()
+        hari_ini = sekarang.replace(hour=self.jam, minute=self.menit, second=0, microsecond=0)
+        return hari_ini if hari_ini > sekarang else hari_ini + datetime.timedelta(days=1)
+
+    def mulai(self):
+        threading.Thread(target=self._jalan, name="bangun-harian", daemon=True).start()
+        return self
+
+    def _jalan(self):
+        while True:
+            jadwal = self.berikutnya()
+            # short sleeps, so a changed clock (or a VM that was paused) does not move the rebuild by hours
+            while datetime.datetime.now() < jadwal:
+                time.sleep(min(60, max(1, (jadwal - datetime.datetime.now()).total_seconds())))
+            try:
+                self.bangun(jadwal)
+            except Exception as e:            # the thread must live on to the next day; the container log shows it
+                print("PERINGATAN: bangun ulang harian %s tidak dapat dimulai: %s" % (jadwal, e), flush=True)
+
+    def bangun(self, jadwal=None):
+        """The daily rebuild itself."""
+        self.terakhir = (jadwal or datetime.datetime.now()).isoformat(timespec="minutes")
+        audit.catat("bangun-terjadwal", oleh="penjadwal", cakupan="semua")
+        self.antrean.minta(None, "penjadwal")

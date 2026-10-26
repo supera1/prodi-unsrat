@@ -4,6 +4,7 @@
     python3 platform/admin/siapkan.py                                          <PRODI_RAHASIA>/.env with a new SECRET_KEY
     .venv/bin/python platform/admin/siapkan.py --superadmin nama --nama-lengkap "Nama Lengkap"
     .venv/bin/python platform/admin/siapkan.py --daftar                         list the accounts (no passwords)
+    python platform/admin/siapkan.py --ada-superadmin       exit status 0 when an active superadmin exists (Docker start)
 
 A temporary password is written once to <PRODI_RAHASIA>/.kredensial-<nama>.txt (readable by the owner only), never to
 the console or to Git. Read it, log in, set your own password (the admin asks for it), then delete the file.
@@ -47,8 +48,12 @@ def main(argv=None):
     ap.add_argument("--superadmin", metavar="NAMA", help="buat akun superadmin dengan nama pengguna ini")
     ap.add_argument("--nama-lengkap", default="", help="nama lengkap pemilik akun superadmin")
     ap.add_argument("--daftar", action="store_true", help="daftar akun")
+    ap.add_argument("--ada-superadmin", action="store_true", help="kode keluar 0 bila ada superadmin aktif")
     a = ap.parse_args(argv)
     siapkan_env()
+    if a.ada_superadmin:
+        import akun
+        return 0 if any(x["peran"] == "super" and x["aktif"] for x in akun.semua()) else 1
     if a.superadmin or a.daftar:
         import akun
         if a.superadmin:

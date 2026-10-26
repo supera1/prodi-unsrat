@@ -143,4 +143,31 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
 - **Konsekuensi:** volume data (termasuk unggahan) wajib dicadangkan setiap hari.
 
 ### K-P13 — Port di VM menyusul
-- **Status:** terbuka. Diisi saat langkah 7 (Docker & deploy staging).
+- **Status:** terbuka untuk nilai akhirnya. Langkah 7 menyiapkan bawaan yang bisa diganti lewat variabel stack
+  (`docs/deploy.md` §4): situs `PORT_SITUS=8080`, admin `PORT_ADMIN=8081`; dengan HTTPS di VM situs 80/443 dan admin
+  `PORT_ADMIN_HTTPS` (mis. 8444). Nilai akhir disepakati dengan admin VM.
+
+### K-P20 — Seluruh uji dijalankan saat image dibangun (langkah 7)
+- **Konteks:** deploy dikerjakan admin UNSRAT dari GitHub; pengembang tidak menyentuh server (K-P17). Rencana §11
+  meminta "seluruh uji lulus di dalam image".
+- **Keputusan** (usulan langkah 7, perlu dikonfirmasi): `Dockerfile` menjalankan `uji/jalankan-semua.py` di dalam image
+  itu sendiri, sebagai pengguna yang menjalankan admin. Bila satu uji gagal, build gagal dan stack lama tetap berjalan.
+  `UJI_SAAT_BUILD=0` hanya untuk perbaikan darurat. Pelari uji memberi setiap rangkaian folder sementara dan membuang
+  variabel `PRODI_*` stack, sehingga uji tidak pernah menyentuh volume.
+- **Konsekuensi:** setiap deploy bertambah ±1–3 menit; yang berjalan di server selalu versi yang lulus semua uji di
+  image yang sama. Uji data asli memakai salinan data www di repo (K-P22).
+
+### K-P21 — Pengalihan slug lama disaring kontainer web (langkah 7)
+- **Konteks:** generator (kontainer admin) menulis `slug-lama.conf` untuk Nginx. Bila Nginx memuat berkas itu langsung,
+  siapa pun yang menguasai kontainer admin bisa menyisipkan direktif Nginx lain (mis. menyajikan kunci TLS).
+- **Keputusan:** kontainer web hanya menyalin baris `rewrite` berbentuk tetap dengan slug yang sah, memeriksa
+  `nginx -t`, lalu memuat ulang Nginx sendiri (diperiksa setiap 30 detik). Tanpa soket Docker, tanpa restart. Cara
+  yang sama memuat ulang sertifikat TLS yang diperpanjang (HTTPS di VM).
+- **Konsekuensi:** slug baru aktif paling lama ±30 detik setelah bangun ulang.
+
+### K-P22 — VM baru mulai dari salinan data www di repo (langkah 7)
+- **Keputusan:** `platform/data-awal/www/` (salinan data www dalam format www, dari commit www `37b5e6d`) diterapkan
+  otomatis sekali pada VM yang belum punya data, bersama registri 97 prodi dari `slug.csv`, sehingga situs langsung
+  terbangun; superadmin lalu mengunggah data www terbaru (K-P18). Data ini memang tayang publik di www.
+- **Konsekuensi:** salinan diperbarui pengembang sesekali (`impor_www.py --tulis-data-awal`); `uji_impor_www.py` memberi
+  tahu bila salinan sudah berbeda dari data www di komputer pengembang.

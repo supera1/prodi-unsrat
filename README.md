@@ -3,17 +3,19 @@
 Situs ke-97 program studi Universitas Sam Ratulangi di `https://prodi.unsrat.ac.id/<slug>/`, dengan template seragam
 yang mengikuti kriteria akreditasi dan bisa disesuaikan oleh tiap prodi.
 
-> **Status 26 Oktober 2026:** Fase 1 langkah 6 (admin prodi): identitas, logo, bagian depan beranda, menu, pengumuman dengan alur operator → admin
-> prodi, dan riwayat bisa dikelola dari admin. Berikutnya langkah 7: Docker dan deploy staging.
+> **Status 26 Oktober 2026:** Fase 1 langkah 7 (Docker dan deploy di VM sendiri): stack `web` + `admin` + `pemantau`,
+> unggah data www (Excel/JSON) oleh superadmin, data awal VM baru, bangun ulang harian, HTTPS di load balancer atau di
+> VM, cadangan harian. Panduan admin VM: [docs/deploy.md](docs/deploy.md). Berikutnya langkah 8: uji menyeluruh.
 > Rencana: [docs/rencana-fase-01.md](docs/rencana-fase-01.md) · Keputusan: [docs/keputusan.md](docs/keputusan.md)
 
 ## Cara kerja singkat
 
-- Data resmi prodi (nama, gelar, SKS, CPL, akreditasi) dibaca dari data www.unsrat.ac.id dan tidak diubah di sini.
+- Data resmi prodi (nama, gelar, SKS, CPL, akreditasi) berasal dari www.unsrat.ac.id: diunggah superadmin (Excel
+  ekspor program studi dari www, atau berkas JSON www). Prodi boleh mengubahnya sebagai timpaan per kolom (K-P16).
 - Generator membangun halaman statis untuk setiap prodi dari data resmi itu ditambah isi yang diisi prodi.
 - Admin (hanya dari jaringan/VPN UNSRAT) punya tiga peran: superadmin, admin prodi, operator.
-- Produksi: stack Docker `prodi-unsrat` di VM sendiri, di-deploy admin UNSRAT dari GitHub (K-P17). Data www diunggah
-  superadmin (K-P18); unggahan disimpan di VM (K-P19).
+- Produksi: stack Docker `prodi-unsrat` di VM sendiri, di-deploy admin UNSRAT dari GitHub (K-P17) mengikuti
+  [docs/deploy.md](docs/deploy.md). Data www diunggah superadmin (K-P18); unggahan disimpan di VM (K-P19).
 
 ## Menjalankan uji
 
@@ -34,7 +36,8 @@ python3 platform/registri.py --siapkan
 python3 -m http.server 8790 --bind 127.0.0.1 --directory publik
 ```
 
-Lalu buka http://127.0.0.1:8790/.
+Lalu buka http://127.0.0.1:8790/. Tanpa repo www di sebelahnya, data awal yang ikut repo bisa dipakai:
+`python3 platform/impor_www.py --isi-awal` (menerapkan `platform/data-awal/www/` dan daftar slug).
 
 Admin (akun per orang, hanya dari jaringan UNSRAT; di komputer pengembang juga dari komputer itu sendiri):
 
@@ -46,6 +49,8 @@ python3 platform/admin/siapkan.py
 
 Kata sandi sementara ada di `rahasia/.kredensial-namaanda.txt`; buka http://127.0.0.1:8791/, masuk, buat kata sandi
 sendiri, lalu hapus berkas itu. Hasilnya di `data/`, `riwayat/`, `publik/`, dan `nginx-buatan/` (tidak masuk Git).
+
+Stack Docker lengkap di komputer sendiri: [docs/deploy.md §13](docs/deploy.md#13-mencoba-di-komputer-sendiri-pengembang).
 
 ## Urutan Fase 1
 
@@ -59,6 +64,6 @@ sendiri, lalu hapus berkas itu. Hasilnya di `data/`, `riwayat/`, `publik/`, dan 
 | 4 | Akun & peran | selesai |
 | 5 | Superadmin | selesai |
 | 5b | Data prodi bisa diubah (termasuk CPL), bentrok dengan www ditandai | selesai |
-| 6 | Admin prodi | selesai, menunggu tinjauan |
-| 7 | Docker & deploy staging | — |
+| 6 | Admin prodi | selesai |
+| 7 | Docker & deploy di VM sendiri | selesai, menunggu tinjauan |
 | 8 | Uji menyeluruh + log fase | — |

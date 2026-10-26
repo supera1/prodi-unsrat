@@ -24,10 +24,13 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
 ## Arsitektur (sudah diputuskan)
 - Generator halaman statis (Python + Jinja2) + admin Flask, pola yang sama dengan www (K-P7).
 - Stack Docker `prodi-unsrat` di **VM sendiri**, di-deploy admin UNSRAT dari GitHub `supera1/prodi-unsrat` (K-P17):
-  `prodi-web` (Nginx), `prodi-admin` (Flask + generator), `prodi-pemantau`. Port menyusul (K-P13). HTTPS di load
-  balancer (bawaan) atau di VM.
-- Data www **diunggah superadmin** (Excel ekspor prodi dari www, atau berkas JSON www; K-P18). Folder `WWW_DATA` hanya
-  untuk komputer pengembang. Repo ini tidak pernah menulis ke www.
+  `web` (Nginx), `admin` (Flask + generator, waitress), `pemantau`. Panduan admin VM: `docs/deploy.md`. Port bawaan
+  8080/8081, nilai akhir disepakati admin VM (K-P13). HTTPS di load balancer (bawaan) atau di VM (`HTTPS_DI_VM=1`).
+- Semua uji berjalan saat image admin dibangun (K-P20); kontainer web hanya menerima baris pengalihan slug yang sah
+  dari generator dan memuat ulang Nginx sendiri (K-P21).
+- Data www **diunggah superadmin** (Excel ekspor prodi dari www, atau berkas JSON www; K-P18; `platform/impor_www.py`).
+  VM baru mulai dari salinan `platform/data-awal/www/`. Folder `WWW_DATA` hanya untuk komputer pengembang. Repo ini
+  tidak pernah menulis ke www.
 - Akun per orang di SQLite (pustaka standar), sandi argon2, tanpa 2FA tetapi wajib sandi kuat (K-P10).
   Tanpa SMTP: sandi diganti pemilik akun atau direset superadmin (K-P12).
 - Logo dan unggahan di volume lokal VM prodi (`PRODI_PENYIMPANAN=lokal`, K-P19); kode GCS tetap ada sebagai pilihan.
@@ -39,10 +42,10 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
 platform/admin/      Flask: akun, peran, superadmin, admin prodi
 platform/bangun/     generator + perakit folder publik
 platform/template/   template induk: menu.json, halaman Jinja2, aset
-platform/data-awal/  slug.csv, palet warna
+platform/data-awal/  slug.csv, palet warna, www/ (salinan data www untuk VM baru)
 platform/pemantau/   cek integritas & saringan spam judi
 uji/                 skrip uji; python uji/jalankan-semua.py
-docker/              Dockerfile web, konfigurasi Nginx, skrip mulai
+docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pulihkan (Dockerfile admin di akar)
 ```
 
 ## Perintah
@@ -52,6 +55,11 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai
   `WWW_DATA` (bawaan `../website-unsrat-2026/site/mockup/data`, hanya dibaca).
 - Tarik data resmi dari www: `python3 platform/tarik_www.py` (pratinjau), `--terapkan` (tulis; salinan lama ke riwayat).
 - Registri awal 97 prodi dari `slug.csv`: `python3 platform/registri.py --siapkan` (sesudah tarik data pertama).
+- Unggahan data www (Excel/JSON) dibaca `platform/impor_www.py` lalu dipratinjau/diterapkan `tarik_www.py`.
+  Data awal VM baru: `python3 platform/impor_www.py --isi-awal` (platform kosong saja); perbarui salinannya setelah
+  menarik data www terbaru: `python3 platform/impor_www.py --tulis-data-awal --dari "..."`.
+- Stack Docker lokal: `docs/deploy.md` §13 (`docker compose -p prodi-uji ...`). `uji/uji_docker.py` memeriksa berkas
+  stack tanpa Docker; setiap variabel stack wajib ada di `.env.example` (tanpa nilai) dan `docs/deploy.md`.
 - Bangun situs ke `publik/`: `.venv/bin/python platform/bangun/bangun.py` (semua), `--prodi <kode>` (satu prodi),
   `--produksi`. Ganti slug atau nonaktifkan prodi: bangun semua, supaya folder lama terhapus.
 - Pengumuman (sebelum admin ada): `.venv/bin/python platform/pengumuman.py tambah|daftar|status --prodi <kode> ...`;

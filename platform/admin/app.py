@@ -53,7 +53,7 @@ KUNCI_MENIT = 15
 MAKS_TANPA_LOGIN = 64 * 1024  # largest request accepted before logging in (the login form)
 IP_BOLEH_BAWAAN = "103.84.116.0/24"
 PENGATURAN_LINGKUNGAN = ("ADMIN_IP_BOLEH", "ADMIN_HTTPS", "PROXY_TERPERCAYA", "ADMIN_AWALAN", "PORT", "PRODI_ALAMAT_PUBLIK",
-                         "PRODI_BANGUN")
+                         "PRODI_BANGUN", "PRODI_BANGUN_HARIAN")
 POLA_NAMA_AKUN = re.compile(r"^([a-z][a-z0-9._-]{2,31}|-|baris-perintah)$")
 POLA_AKSI = re.compile(r"^[a-z][a-z-]{1,40}$")
 POLA_KODE = re.compile(r"^[0-9A-Za-z]{3,12}$")
@@ -122,6 +122,14 @@ def buat_app(env=None):
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=proksi, x_proto=proksi, x_prefix=proksi)
 
     antrean = pembangun.Antrean(env.get("PRODI_BANGUN") or "latar")
+    penjadwal = None
+    if env.get("PRODI_BANGUN_HARIAN"):
+        try:
+            penjadwal = pembangun.Penjadwal(antrean, env["PRODI_BANGUN_HARIAN"])
+        except ValueError as e:
+            raise SystemExit(str(e))
+        if antrean.mode == "latar":            # tests build inside the request or not at all: no daily thread
+            penjadwal.mulai()
     gagal = {}                     # "ip:<address>" / "akun:<name>" -> times of failed logins within the window
     kunci_gagal = threading.Lock()
 
@@ -484,12 +492,12 @@ def buat_app(env=None):
     class Alat(object):
         pass
     alat = Alat()
-    alat.catat, alat.antrean, alat.info_prodi = catat, antrean, info_prodi
+    alat.catat, alat.antrean, alat.penjadwal, alat.info_prodi = catat, antrean, penjadwal, info_prodi
     alat.kelompok_prodi, alat.prodi_dari_formulir = kelompok_prodi, prodi_dari_formulir
     superadmin.pasang(app, alat)
     prodi_admin.pasang(app, alat)
     pengumuman_admin.pasang(app, alat)
-    app.antrean = antrean
+    app.antrean, app.penjadwal = antrean, penjadwal
 
     # -------------------------------------------------------------- errors
 

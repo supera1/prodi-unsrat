@@ -12,6 +12,7 @@ Needs the packages of platform/admin/requirements.txt: run with .venv/bin/python
 """
 from __future__ import print_function
 
+import datetime
 import io
 import json
 import os
@@ -348,6 +349,37 @@ try:
     cek(any(x["aksi"] == "bangun-gagal" for x in audit.baca()), "bangun gagal tercatat")
     teks = su.get("/super/bangun").get_data(as_text=True)
     cek(app.antrean.status["ok"] and "pesan--ok" in teks, "halaman status bangun")
+    cek("tidak dijadwalkan" in teks, "tanpa PRODI_BANGUN_HARIAN tidak ada bangun ulang harian")
+
+    # --- the daily rebuild (langkah 7)
+    for salah in ("2:30", "24:00", "02:60", "jam dua", ""):
+        try:
+            pembangun.Penjadwal(app.antrean, salah)
+            gagal.append("jam bangun harian %r harus ditolak" % salah)
+        except ValueError:
+            pass
+    j = pembangun.Penjadwal(app.antrean, "02:30")
+    for sekarang, harus in (("2026-10-26T01:00", "2026-10-26T02:30"), ("2026-10-26T02:30", "2026-10-27T02:30"),
+                            ("2026-10-26T23:59", "2026-10-27T02:30"), ("2026-12-31T03:00", "2027-01-01T02:30")):
+        hasil = j.berikutnya(datetime.datetime.fromisoformat(sekarang)).isoformat(timespec="minutes")
+        cek(hasil == harus, "bangun harian sesudah %s: %s, harus %s" % (sekarang, hasil, harus))
+    try:
+        app_mod.buat_app({"SECRET_KEY": "k" * 64, "PRODI_BANGUN": "mati", "PRODI_BANGUN_HARIAN": "25:00"})
+        gagal.append("PRODI_BANGUN_HARIAN yang salah harus menghentikan admin")
+    except SystemExit:
+        pass
+    app_harian = app_mod.buat_app({"SECRET_KEY": "k" * 64, "ADMIN_IP_BOLEH": "103.84.116.0/24", "PRODI_BANGUN": "sinkron",
+                                   "PRODI_BANGUN_HARIAN": "02:30"})
+    sebelum = len(audit.baca(aksi="bangun-selesai", batas=10000))
+    app_harian.penjadwal.bangun()
+    cek(app_harian.antrean.status["ok"] and app_harian.antrean.status["cakupan"] == "semua"
+        and len(audit.baca(aksi="bangun-selesai", batas=10000)) == sebelum + 1, "bangun ulang harian membangun semua")
+    cek(audit.baca(aksi="bangun-terjadwal")[0]["oleh"] == "penjadwal", "bangun ulang harian tercatat")
+    app = app_harian
+    su = klien()
+    cek(masuk(su, "superuji", SANDI_SUPER).status_code == 302, "superadmin masuk lagi")
+    teks = su.get("/super/bangun").get_data(as_text=True)
+    cek("setiap hari pukul 02:30" in teks and "terakhir" in teks, "halaman bangun menampilkan jadwal harian")
 
     jumlah, temuan = periksa_situs(lokasi.publik(), "superadmin")
     gagal.extend(temuan)

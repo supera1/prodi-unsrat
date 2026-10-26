@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """The approved slug list (platform/data-awal/slug.csv) and the slug rules in platform/slug.py.
 
-When the www repository sits next to this one (../website-unsrat-2026), the list is also compared with the
-official programme data there: the same 97 PDDIKTI codes, the same names and levels.
+The list is also compared with the official programme data: the same 97 PDDIKTI codes, the same names and levels,
+from the www repository when it sits next to this one (../website-unsrat-2026), else from the copy of www's data
+shipped with this repository (platform/data-awal/www/).
 """
 from __future__ import print_function
 
@@ -17,6 +18,8 @@ sys.path.insert(0, os.path.join(AKAR, "platform"))
 import slug  # noqa: E402
 
 WWW_PRODI = os.path.join(os.path.dirname(AKAR), "website-unsrat-2026", "site", "mockup", "data", "prodi.json")
+if not os.path.isfile(WWW_PRODI):        # inside the Docker image: the copy of www's data shipped with the repository
+    WWW_PRODI = os.path.join(AKAR, "platform", "data-awal", "www", "prodi.json")
 
 gagal = []
 

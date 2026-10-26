@@ -16,7 +16,7 @@
 <section class="kartu">
 	<h2>Data resmi dari www</h2>
 	{% if r.meta.ditarik %}
-	<p>Terakhir diperbarui {{ r.meta.ditarik }} ({{ r.umur_data }} hari lalu) oleh {{ r.meta.oleh }}, {{ r.meta.jumlah_prodi }} prodi{% if r.meta.sumber %}; sumber: {{ r.meta.sumber }}{% endif %}.</p>
+	<p>Terakhir diperbarui {{ r.meta.ditarik | replace("T", " ") }} ({{ r.umur_data }} hari lalu) oleh {{ r.meta.oleh }}, {{ r.meta.jumlah_prodi }} prodi{% if r.meta.sumber %}; sumber: {{ r.meta.sumber }}{% endif %}.</p>
 	{% if r.umur_data > 30 %}<p class="pesan pesan--info">Data www sudah lebih dari 30 hari. Unduh data terbaru dari superadmin www, lalu unggah di halaman Data www.</p>{% endif %}
 	{% else %}
 	<p>Belum ada data www.</p>

@@ -4,6 +4,11 @@
 {% block isi %}
 <h1>Bangun ulang situs</h1>
 <p>Situs dibangun ulang otomatis setelah setiap perubahan. Bangun ulang semua hanya perlu bila ada yang tampak tidak sesuai.</p>
+{% if penjadwal %}
+<p>Bangun ulang harian: setiap hari pukul {{ "%02d:%02d" | format(penjadwal.jam, penjadwal.menit) }} (berikutnya {{ penjadwal.berikutnya().isoformat(timespec="minutes") | replace("T", " ") }}{% if penjadwal.terakhir %}; terakhir {{ penjadwal.terakhir | replace("T", " ") }}{% endif %}), supaya pengumuman yang lewat masa berlakunya turun dari situs.</p>
+{% else %}
+<p>Bangun ulang harian tidak dijadwalkan (PRODI_BANGUN_HARIAN kosong).</p>
+{% endif %}
 {{ status_bangun(status) }}
 {% if status.peringatan %}
 <section class="kartu">

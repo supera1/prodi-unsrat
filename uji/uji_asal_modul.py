@@ -4,7 +4,8 @@
 Section "Salinan utuh": the copy must still match (a mismatch means it was changed without updating the table).
 Section "Diadaptasi": the copy was changed on purpose; only the source is watched.
 When the www repository sits next to this one, every source whose content has changed since it was copied is
-reported, so security fixes made in www are not missed here.
+reported, so security fixes made in www are not missed here. Inside the admin image (Dockerfile) only platform/ and
+uji/ are there: the files of the stack itself (Dockerfile, docker/, docs/) are what the image was built from.
 """
 from __future__ import print_function
 
@@ -17,6 +18,7 @@ import sys
 AKAR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WWW = os.path.join(os.path.dirname(AKAR), "website-unsrat-2026")
 BARIS = re.compile(r"^\| `([^`]+)` \| `([^`]+)` \| `([0-9a-f]{12})` \|")
+DI_IMAGE = not os.path.isfile(os.path.join(AKAR, "docker-compose.yml"))
 
 
 def sidik(path):
@@ -37,6 +39,8 @@ with io.open(os.path.join(AKAR, "docs", "asal-modul.md"), encoding="utf-8") as f
         dicek += 1
         path = os.path.join(AKAR, di_sini)
         if not os.path.isfile(path):
+            if DI_IMAGE and not di_sini.startswith(("platform/", "uji/")):
+                continue
             gagal.append("%s tidak ada" % di_sini)
             continue
         if bagian == "Salinan utuh" and sidik(path) != tercatat:

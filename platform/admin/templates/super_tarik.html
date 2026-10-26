@@ -3,7 +3,7 @@
 {% block isi %}
 <h1>Data resmi dari www</h1>
 <p>Data prodi (nama, jenjang, gelar, SKS, CPL, akreditasi), fakultas, kalender, dan identitas universitas berasal dari www.unsrat.ac.id. Kolom yang diubah sendiri oleh prodi (halaman Data prodi) tetap memakai data prodi; kolom lain mengikuti www.</p>
-{% if meta.ditarik %}<p>Terakhir diperbarui {{ meta.ditarik }} oleh {{ meta.oleh }}{% if meta.sumber %} ({{ meta.sumber }}){% endif %}.</p>{% endif %}
+{% if meta.ditarik %}<p>Terakhir diperbarui {{ meta.ditarik | replace("T", " ") }} oleh {{ meta.oleh }}{% if meta.sumber %} ({{ meta.sumber }}){% endif %}.</p>{% endif %}
 
 {% if masalah %}
 <section class="kartu">

@@ -482,7 +482,7 @@ def pasang(app, alat):
     @app.route("/super/bangun")
     @akses("super")
     def super_bangun():
-        return render_template("super_bangun.html", status=alat.antrean.status)
+        return render_template("super_bangun.html", status=alat.antrean.status, penjadwal=alat.penjadwal)
 
     @app.route("/super/bangun/semua", methods=["POST"])
     @akses("super")

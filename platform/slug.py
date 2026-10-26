@@ -18,8 +18,8 @@ POLA_SLUG = re.compile(r"^[a-z][a-z0-9]{2,23}$")
 
 # First path segments the platform itself uses (or will use): a programme may never take one of these.
 ALAMAT_CADANGAN = frozenset([
-    "404", "admin", "api", "aset", "assets", "cari", "data", "en", "id", "masuk", "robots", "search", "sitemap",
-    "static", "zz",
+    "404", "admin", "api", "aset", "assets", "cari", "data", "en", "id", "masuk", "robots", "search", "sehat",
+    "sitemap", "static", "unggahan", "zz",
 ])
 
 # Every slug starts with its level, so a visitor can tell S1 from S2 of the same field at a glance.
