@@ -3,9 +3,9 @@
 Situs ke-97 program studi Universitas Sam Ratulangi di `https://prodi.unsrat.ac.id/<slug>/`, dengan template seragam
 yang mengikuti kriteria akreditasi dan bisa disesuaikan oleh tiap prodi.
 
-> **Status 26 Oktober 2026:** Fase 1 langkah 7 (Docker dan deploy di VM sendiri): stack `web` + `admin` + `pemantau`,
-> unggah data www (Excel/JSON) oleh superadmin, data awal VM baru, bangun ulang harian, HTTPS di load balancer atau di
-> VM, cadangan harian. Panduan admin VM: [docs/deploy.md](docs/deploy.md). Berikutnya langkah 8: uji menyeluruh.
+> **Status 26 Oktober 2026:** Fase 1 selesai (langkah 8 menunggu tinjauan): 97 situs prodi, data resmi dari www yang
+> diuji sama persis, admin tiga peran, stack Docker untuk VM sendiri. Ringkasan, kriteria selesai, cara verifikasi
+> manual, dan sisa pekerjaan: [docs/log/fase-01.md](docs/log/fase-01.md). Panduan admin VM: [docs/deploy.md](docs/deploy.md).
 > Rencana: [docs/rencana-fase-01.md](docs/rencana-fase-01.md) · Keputusan: [docs/keputusan.md](docs/keputusan.md)
 
 ## Cara kerja singkat
@@ -65,5 +65,5 @@ Stack Docker lengkap di komputer sendiri: [docs/deploy.md §13](docs/deploy.md#1
 | 5 | Superadmin | selesai |
 | 5b | Data prodi bisa diubah (termasuk CPL), bentrok dengan www ditandai | selesai |
 | 6 | Admin prodi | selesai |
-| 7 | Docker & deploy di VM sendiri | selesai, menunggu tinjauan |
-| 8 | Uji menyeluruh + log fase | — |
+| 7 | Docker & deploy di VM sendiri | selesai |
+| 8 | Uji menyeluruh + log fase | selesai, menunggu tinjauan |

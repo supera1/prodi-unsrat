@@ -251,12 +251,17 @@ Catatan:
 
 ## 11. Kriteria selesai Fase 1
 
-- [ ] 97 situs prodi tayang di staging (noindex) di bawah slug yang disetujui.
-- [ ] Data resmi di situs prodi sama persis dengan www (diuji otomatis).
-- [ ] Akun per orang dengan 3 peran dan sandi kuat; uji matriks akses lulus tanpa kebocoran antar-prodi.
-- [ ] Admin prodi bisa mengganti tagline, warna, logo, dan menu; perubahannya tampil setelah bangun ulang otomatis.
-- [ ] Stack `prodi-unsrat` berjalan di VM tanpa mengubah stack www.
-- [ ] Seluruh uji lulus di dalam image; log fase ditulis.
+*Status 26 Oktober 2026 (langkah 8, `uji/uji_fase1.py`, rincian di `docs/log/fase-01.md`):*
+
+- [ ] 97 situs prodi tayang di staging (noindex) di bawah slug yang disetujui. *Siap dan diuji; tayang setelah deploy
+  admin VM.*
+- [x] Data resmi di situs prodi sama persis dengan www (diuji otomatis). *Kecuali perubahan yang sengaja dibuat prodi
+  (K-P16).*
+- [x] Akun per orang dengan 3 peran dan sandi kuat; uji matriks akses lulus tanpa kebocoran antar-prodi.
+- [x] Admin prodi bisa mengganti tagline, warna, logo, dan menu; perubahannya tampil setelah bangun ulang otomatis.
+- [ ] Stack `prodi-unsrat` berjalan di VM tanpa mengubah stack www. *Stack terpisah, dicoba utuh di Docker lokal;
+  menunggu deploy admin VM.*
+- [x] Seluruh uji lulus di dalam image; log fase ditulis.
 
 ## 12. Jawaban atas pertanyaan sebelum mulai (26 Oktober 2026)
 

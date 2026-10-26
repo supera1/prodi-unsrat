@@ -19,7 +19,8 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
 - `docs/keputusan.md` — log keputusan (K-P1, …). Tambahkan entri setiap ada keputusan baru.
 - `docs/asal-modul.md` — modul yang disalin dari repo www beserta versi asalnya.
 - `platform/data-awal/slug.csv` — slug 97 prodi yang disetujui. Kunci tetap prodi adalah `kode_pddikti`, bukan slug.
-- Log hasil setiap langkah/fase ditulis ke `docs/log/`.
+- Log hasil setiap langkah/fase ditulis ke `docs/log/`; ringkasan Fase 1 (kriteria, verifikasi manual, sisa pekerjaan):
+  `docs/log/fase-01.md`.
 
 ## Arsitektur (sudah diputuskan)
 - Generator halaman statis (Python + Jinja2) + admin Flask, pola yang sama dengan www (K-P7).
@@ -51,6 +52,8 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
 ## Perintah
 - Lingkungan Python sekali saja: `python3 -m venv .venv && .venv/bin/pip install -r platform/admin/requirements.txt -c platform/admin/constraints.txt`.
 - Semua uji: `.venv/bin/python uji/jalankan-semua.py` (dari akar repo). Uji memakai folder sementara, tidak menyentuh `data/`.
+  `uji/uji_fase1.py` adalah uji penerimaan Fase 1 (kriteria rencana §11 pada data www asli, termasuk setiap nilai resmi
+  ke-97 prodi dibandingkan dengan `prodi.json` www).
 - Lokasi data (`platform/lokasi.py`): `PRODI_DATA` (bawaan `data/`), `PRODI_RIWAYAT` (bawaan `riwayat/` di sampingnya),
   `WWW_DATA` (bawaan `../website-unsrat-2026/site/mockup/data`, hanya dibaca).
 - Tarik data resmi dari www: `python3 platform/tarik_www.py` (pratinjau), `--terapkan` (tulis; salinan lama ke riwayat).

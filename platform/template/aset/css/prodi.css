@@ -43,6 +43,7 @@ body {
 	font-family: var(--unsrat-font-sans);
 	font-size: var(--unsrat-size-isi);
 	line-height: var(--unsrat-leading-isi);
+	overflow-wrap: break-word;  /* a long e-mail address or link breaks instead of widening a 320 px screen */
 }
 
 img {
