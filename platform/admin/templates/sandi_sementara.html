@@ -1,0 +1,15 @@
+{% extends "dasar.html" %}
+{% block judul %}Kata sandi sementara{% endblock %}
+{% block isi %}
+<section class="kartu kartu--sempit">
+	<h1>Kata sandi sementara</h1>
+	<p>Untuk <strong>{{ sasaran.nama_lengkap }}</strong> (<code>{{ sasaran.nama }}</code>):</p>
+	<p class="sandi-sementara"><code>{{ sandi }}</code></p>
+	<ul>
+		<li>Halaman ini hanya muncul sekali; kata sandi ini tidak disimpan dalam bentuk yang bisa dibaca.</li>
+		<li>Sampaikan langsung atau lewat pesan pribadi kepada pemilik akun, jangan di grup.</li>
+		<li>Pemilik akun wajib menggantinya saat pertama masuk.</li>
+	</ul>
+	<p><a class="tombol" href="{{ kembali }}">Kembali ke daftar akun</a></p>
+</section>
+{% endblock %}

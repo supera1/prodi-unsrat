@@ -1,0 +1,33 @@
+{% extends "dasar.html" %}
+{% block judul %}{{ p.nama }}{% endblock %}
+{% block isi %}
+{% set a = akun_aktif() %}
+<h1>{{ p.nama }}</h1>
+<p>{{ p.unit }} · <a href="{{ p.alamat }}">{{ p.alamat }}</a>{% if not p.aktif %} · <strong>situs nonaktif</strong>{% endif %}</p>
+<nav class="sub-navigasi" aria-label="Menu prodi">
+	{% if a.peran != 'operator' %}
+	<a href="{{ url_for('akun_prodi', kode=p.kode) }}">Akun prodi</a>
+	<a href="{{ url_for('audit_prodi', kode=p.kode) }}">Log audit prodi</a>
+	{% endif %}
+</nav>
+<section class="kartu">
+	<h2>Pengumuman dan berita</h2>
+	<ul class="angka">
+		<li><strong>{{ jumlah.terbit }}</strong> terbit</li>
+		<li><strong>{{ jumlah.menunggu }}</strong> menunggu persetujuan</li>
+		<li><strong>{{ jumlah.draf }}</strong> draf</li>
+		<li><strong>{{ jumlah.ditarik }}</strong> ditarik</li>
+	</ul>
+	<p class="catatan">Formulir pengumuman, identitas, bagian depan beranda, dan menu tersedia di tahap berikutnya.</p>
+</section>
+{% if anggota %}
+<section class="kartu">
+	<h2>Akun prodi ini</h2>
+	<ul>
+		{% for x in anggota %}
+		<li>{{ x.nama_lengkap }} (<code>{{ x.nama }}</code>) — {{ NAMA_PERAN[x.peran] }}{% if not x.aktif %}, nonaktif{% endif %}</li>
+		{% endfor %}
+	</ul>
+</section>
+{% endif %}
+{% endblock %}

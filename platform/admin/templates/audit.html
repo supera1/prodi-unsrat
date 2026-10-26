@@ -1,0 +1,22 @@
+{% extends "dasar.html" %}
+{% block judul %}Log audit{% if p %} — {{ p.nama }}{% endif %}{% endblock %}
+{% block isi %}
+<h1>Log audit{% if p %} {{ p.nama }}{% endif %}</h1>
+<p>200 catatan terbaru.</p>
+<div class="tabel-gulir">
+	<table>
+		<thead><tr><th scope="col">Waktu</th><th scope="col">Aksi</th><th scope="col">Oleh</th><th scope="col">Prodi</th><th scope="col">Rincian</th><th scope="col">Alamat IP</th></tr></thead>
+		<tbody>
+			{% for b in baris %}
+			<tr>
+				<td>{{ b.waktu }}</td><td>{{ b.aksi }}</td><td>{{ b.oleh }}</td><td>{% set pr = b.get('prodi') %}{% if pr is string %}{{ pr }}{% elif pr %}{{ pr | join(', ') }}{% endif %}</td>
+				<td>{% for k, v in b | dictsort if k not in ('waktu', 'aksi', 'oleh', 'prodi', 'ip') %}{{ k }}: {{ v }}{% if not loop.last %}; {% endif %}{% endfor %}</td>
+				<td>{{ b.ip }}</td>
+			</tr>
+			{% else %}
+			<tr><td colspan="6">Belum ada catatan.</td></tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}

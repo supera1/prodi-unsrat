@@ -1,0 +1,294 @@
+/* Admin of prodi.unsrat.ac.id: plain, readable, keyboard-friendly. Colours from the UNSRAT tokens (tokens.css). */
+
+:root {
+	--biru: #3500ff;
+	--biru-gelap: #2800c2;
+	--biru-50: #efebff;
+	--kuning-pucat: #fef3c7;
+	--abu-900: #2d2527;
+	--abu-600: #635459;
+	--abu-200: #eae6e8;
+	--abu-50: #f9f8f8;
+	--merah: #b91c1c;
+	--hijau: #15803d;
+	--font: "Plus Jakarta Sans", ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: var(--abu-50);
+	color: var(--abu-900);
+	font: 1rem/1.6 var(--font);
+}
+
+a {
+	color: var(--biru);
+}
+
+a:hover {
+	color: var(--biru-gelap);
+}
+
+:focus-visible {
+	outline: 3px solid var(--biru);
+	outline-offset: 2px;
+}
+
+h1 {
+	font-size: 1.75rem;
+	line-height: 1.2;
+	margin: 1.5rem 0 1rem;
+}
+
+h2 {
+	font-size: 1.25rem;
+	margin: 0 0 0.75rem;
+}
+
+.wadah {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 1rem;
+}
+
+.lewati {
+	position: absolute;
+	left: 1rem;
+	top: -10rem;
+	padding: 0.5rem 1rem;
+	background: var(--abu-900);
+	color: #fff;
+}
+
+.lewati:focus {
+	top: 0.5rem;
+	color: #fff;
+}
+
+.tersembunyi {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+}
+
+.kepala {
+	background: #fff;
+	border-bottom: 4px solid var(--biru);
+}
+
+.kepala__isi {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem 1.5rem;
+	padding-top: 0.75rem;
+	padding-bottom: 0.75rem;
+}
+
+.merek {
+	margin: 0;
+	font-weight: 800;
+}
+
+.merek a {
+	color: var(--abu-900);
+	text-decoration: none;
+}
+
+.navigasi,
+.sub-navigasi {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem 1rem;
+}
+
+.sub-navigasi {
+	margin-bottom: 1rem;
+}
+
+.keluar {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-left: auto;
+}
+
+.pengguna {
+	font-size: 0.875rem;
+}
+
+.peran {
+	display: block;
+	color: var(--abu-600);
+}
+
+.kartu {
+	margin: 1rem 0;
+	padding: 1.25rem 1.5rem;
+	background: #fff;
+	border: 1px solid var(--abu-200);
+	border-radius: 8px;
+}
+
+.kartu--sempit {
+	max-width: 36rem;
+	margin: 2rem auto;
+}
+
+.formulir .isian {
+	margin-bottom: 1rem;
+}
+
+.formulir label {
+	display: block;
+	margin-bottom: 0.25rem;
+	font-weight: 700;
+}
+
+.formulir input:not([type="hidden"]),
+.formulir select {
+	width: 100%;
+	max-width: 32rem;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--abu-600);
+	border-radius: 4px;
+	font: inherit;
+}
+
+.keterangan {
+	margin: 0.25rem 0 0;
+	color: var(--abu-600);
+	font-size: 0.875rem;
+}
+
+.catatan {
+	padding: 0.75rem 1rem;
+	background: var(--abu-50);
+	border-left: 4px solid var(--abu-600);
+	font-size: 0.9375rem;
+}
+
+.catatan p,
+.catatan ul {
+	margin: 0.25rem 0;
+}
+
+.tombol {
+	display: inline-block;
+	padding: 0.5rem 1.25rem;
+	background: var(--biru);
+	border: 2px solid var(--biru);
+	border-radius: 4px;
+	color: #fff;
+	font: inherit;
+	font-weight: 700;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.tombol:hover {
+	background: var(--biru-gelap);
+	border-color: var(--biru-gelap);
+	color: #fff;
+}
+
+.tombol--garis {
+	background: #fff;
+	color: var(--biru);
+}
+
+.tombol--garis:hover {
+	background: var(--biru-50);
+	color: var(--biru);
+}
+
+.tombol--kecil {
+	padding: 0.25rem 0.75rem;
+	font-size: 0.875rem;
+}
+
+.sebaris {
+	display: inline-block;
+	margin: 0 0.25rem 0.25rem 0;
+}
+
+.pesan {
+	padding: 0.75rem 1rem;
+	border-radius: 4px;
+	border-left: 4px solid var(--biru);
+	background: var(--biru-50);
+}
+
+.pesan--galat {
+	border-color: var(--merah);
+	background: #fdecec;
+}
+
+.pesan--ok {
+	border-color: var(--hijau);
+	background: #e8f5ec;
+}
+
+.pesan--info {
+	border-color: #b45309;
+	background: var(--kuning-pucat);
+}
+
+.sandi-sementara code {
+	display: inline-block;
+	padding: 0.75rem 1rem;
+	background: var(--kuning-pucat);
+	border: 2px dashed #b45309;
+	border-radius: 4px;
+	font-size: 1.5rem;
+	letter-spacing: 0.05em;
+	user-select: all;
+}
+
+.tabel-gulir {
+	overflow-x: auto;
+	background: #fff;
+	border: 1px solid var(--abu-200);
+	border-radius: 8px;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.9375rem;
+}
+
+th,
+td {
+	padding: 0.5rem 0.75rem;
+	border-bottom: 1px solid var(--abu-200);
+	text-align: left;
+	vertical-align: top;
+}
+
+th {
+	background: var(--abu-50);
+}
+
+.angka {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem 2rem;
+	padding: 0;
+	list-style: none;
+}
+
+.kaki {
+	margin-top: 3rem;
+	padding-bottom: 2rem;
+	color: var(--abu-600);
+	font-size: 0.875rem;
+}

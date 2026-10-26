@@ -3,8 +3,8 @@
 Situs ke-97 program studi Universitas Sam Ratulangi di `https://prodi.unsrat.ac.id/<slug>/`, dengan template seragam
 yang mengikuti kriteria akreditasi dan bisa disesuaikan oleh tiap prodi.
 
-> **Status 26 Oktober 2026:** Fase 1 langkah 3c (bagian depan beranda per prodi): 97 situs prodi lengkap dengan pengumuman dan bagian depan
-> yang bisa disesuaikan, bisa dibangun dan dilihat di komputer pengembang.
+> **Status 26 Oktober 2026:** Fase 1 langkah 4 (akun dan peran): admin dengan akun per orang (superadmin, admin prodi, operator) berjalan di
+> komputer pengembang; formulir isi situs menyusul di langkah 5–6.
 > Rencana: [docs/rencana-fase-01.md](docs/rencana-fase-01.md) · Keputusan: [docs/keputusan.md](docs/keputusan.md)
 
 ## Cara kerja singkat
@@ -33,7 +33,18 @@ python3 platform/registri.py --siapkan
 python3 -m http.server 8790 --bind 127.0.0.1 --directory publik
 ```
 
-Lalu buka http://127.0.0.1:8790/. Hasilnya di `data/`, `riwayat/`, `publik/`, dan `nginx-buatan/` (tidak masuk Git).
+Lalu buka http://127.0.0.1:8790/.
+
+Admin (akun per orang, hanya dari jaringan UNSRAT; di komputer pengembang juga dari komputer itu sendiri):
+
+```bash
+python3 platform/admin/siapkan.py
+.venv/bin/python platform/admin/siapkan.py --superadmin namaanda --nama-lengkap "Nama Anda"
+.venv/bin/python platform/admin/app.py
+```
+
+Kata sandi sementara ada di `rahasia/.kredensial-namaanda.txt`; buka http://127.0.0.1:8791/, masuk, buat kata sandi
+sendiri, lalu hapus berkas itu. Hasilnya di `data/`, `riwayat/`, `publik/`, dan `nginx-buatan/` (tidak masuk Git).
 
 ## Urutan Fase 1
 
@@ -43,8 +54,8 @@ Lalu buka http://127.0.0.1:8790/. Hasilnya di `data/`, `riwayat/`, `publik/`, da
 | 2 | Model data + tarik data www | selesai |
 | 3 | Template induk + generator | selesai |
 | 3b | Pengumuman dan berita | selesai |
-| 3c | Bagian depan beranda per prodi | selesai, menunggu tinjauan |
-| 4 | Akun & peran | — |
+| 3c | Bagian depan beranda per prodi | selesai |
+| 4 | Akun & peran | selesai, menunggu tinjauan |
 | 5 | Superadmin | — |
 | 6 | Admin prodi | — |
 | 7 | Docker & deploy staging | — |

@@ -8,6 +8,9 @@
     PRODI_PUBLIK    the built site, the only folder the web server serves (default: <repo>/publik)
     PRODI_MANIFES   SHA-256 of every published file, for the integrity check (default: <repo>/manifes-publik.json)
     PRODI_NGINX     configuration the builder writes for Nginx, e.g. redirects of old slugs (default: <repo>/nginx-buatan)
+    PRODI_RAHASIA   secrets of the admin: .env (session key) and akun.sqlite (accounts) (default: <repo>/rahasia;
+                    in Docker the volume prodi-rahasia, never published, never in Git)
+    PRODI_LOG       audit log of the admin, audit.jsonl (default: <repo>/log)
     PRODI_UNGGAHAN  uploaded photos and PDFs when PRODI_PENYIMPANAN=lokal (default: <repo>/unggahan); the builder
                     publishes them under publik/unggahan/. With PRODI_PENYIMPANAN=gcs they go to Google Cloud Storage.
 
@@ -60,6 +63,14 @@ def manifes():
 
 def nginx_buatan():
     return os.path.abspath(os.environ.get("PRODI_NGINX") or os.path.join(AKAR, "nginx-buatan"))
+
+
+def rahasia():
+    return os.path.abspath(os.environ.get("PRODI_RAHASIA") or os.path.join(AKAR, "rahasia"))
+
+
+def log():
+    return os.path.abspath(os.environ.get("PRODI_LOG") or os.path.join(AKAR, "log"))
 
 
 def unggahan():

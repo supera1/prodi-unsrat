@@ -26,3 +26,5 @@ __pycache__/
 .DS_Store
 /nginx-buatan/
 /unggahan/
+/rahasia/
+/log/

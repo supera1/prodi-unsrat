@@ -55,6 +55,11 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai
   foto/PDF lewat `platform/media.py` (`PRODI_PENYIMPANAN=lokal` ke `unggahan/`, `gcs` ke bucket). Lalu bangun `--prodi`.
 - Bagian depan beranda (sebelum admin ada): `.venv/bin/python platform/tampilan_prodi.py lihat|atur|foto --prodi <kode>`.
   Nilai kartu resmi (akreditasi, gelar, SKS) tidak pernah boleh ditimpa (K-P15).
+- Admin (langkah 4): sekali `python3 platform/admin/siapkan.py` (kunci sesi di `rahasia/.env`), lalu
+  `.venv/bin/python platform/admin/siapkan.py --superadmin <nama> --nama-lengkap "..."` (sandi sementara ditulis ke
+  `rahasia/.kredensial-<nama>.txt`); jalankan `.venv/bin/python platform/admin/app.py` → http://127.0.0.1:8791/.
+- Setiap rute admin wajib `@akses(...)` dan wajib masuk matriks di `uji/uji_admin.py` (uji gagal bila ada rute baru
+  yang belum diuji untuk semua peran).
 - Template: `platform/template/menu.json` (menu induk), `platform/template/kategori.json` (kategori pengumuman), `platform/template/halaman/*.html` (Jinja2, autoescape),
   `platform/template/aset/css/prodi.css`; palet pilihan `platform/data-awal/palet.json`, uji kontras di `platform/bangun/warna.py`.
 

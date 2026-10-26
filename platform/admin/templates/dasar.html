@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{% block judul %}Admin{% endblock %} — Admin situs prodi UNSRAT</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+<a class="lewati" href="#isi">Langsung ke isi</a>
+<header class="kepala">
+	<div class="wadah kepala__isi">
+		<p class="merek"><a href="{{ url_for('dasbor') if akun_aktif() else url_for('masuk') }}">Admin situs prodi UNSRAT</a></p>
+		{% set a = akun_aktif() %}
+		{% if a %}
+		<nav class="navigasi" aria-label="Menu admin">
+			<a href="{{ url_for('dasbor') }}">Dasbor</a>
+			{% if a.peran == 'super' %}
+			<a href="{{ url_for('akun_semua') }}">Akun</a>
+			<a href="{{ url_for('audit_semua') }}">Log audit</a>
+			{% endif %}
+			<a href="{{ url_for('sandi') }}">Kata sandi</a>
+		</nav>
+		<form method="post" action="{{ url_for('keluar') }}" class="keluar">
+			<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+			<span class="pengguna">{{ a.nama_lengkap }} <span class="peran">{{ NAMA_PERAN[a.peran] }}</span></span>
+			<button type="submit" class="tombol tombol--kecil">Keluar</button>
+		</form>
+		{% endif %}
+	</div>
+</header>
+<main id="isi" class="wadah">
+	{% with pesan = get_flashed_messages(with_categories=true) %}
+	{% for jenis, teks in pesan %}
+	<p class="pesan pesan--{{ jenis }}" role="{{ 'alert' if jenis == 'galat' else 'status' }}">{{ teks }}</p>
+	{% endfor %}
+	{% endwith %}
+	{% block isi %}{% endblock %}
+</main>
+<footer class="kaki wadah">
+	<p>Admin situs program studi UNSRAT. Hanya dapat dibuka dari jaringan kampus atau VPN UNSRAT.</p>
+</footer>
+</body>
+</html>

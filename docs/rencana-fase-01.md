@@ -227,6 +227,9 @@ Catatan:
    - **3c. Bagian depan beranda** (ditambahkan 26 Oktober 2026, K-P15): latar warna/foto, teks, dan kartu fakta per
      prodi; nilai resmi tetap dari www. Formulirnya di langkah 6.
 4. **Akun & peran**: SQLite, login, aturan sandi kuat, ganti/reset sandi, dekorator akses per prodi, audit log.
+   *Pelaksanaan:* halaman Akun (buat, reset sandi, aktif/nonaktif) untuk superadmin dan admin prodi ikut dibuat di
+   langkah ini, karena reset sandi tanpa surel (K-P12) memerlukannya; langkah 5 tinggal prodi, slug, tarik data,
+   riwayat, dan impor tautan dosen.
 5. **Superadmin**: prodi, slug, akun, tarik data, riwayat, impor `dosen_url`.
 6. **Admin prodi**: identitas, palet, logo, menu, bagian depan beranda (latar, foto, teks, kartu), operator, formulir
    pengumuman (operator menulis, admin prodi menyetujui).

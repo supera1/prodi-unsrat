@@ -33,7 +33,9 @@ bila asal di www berubah sesudahnya, supaya perbaikan keamanannya bisa diterapka
 
 Akan dipakai sebagai pola (ditulis ulang, bukan disalin) di langkah berikutnya:
 - `site/mockup/_rakit-publik.py` — mode staging/produksi, versi aset `?v=`, manifes SHA-256: dipakai di `platform/bangun/bangun.py` (langkah 3).
-- `site/admin/app.py` — penguncian login, batas sesi, CSRF, pembatasan IP, CSP (langkah 4).
+- `site/admin/app.py` — penguncian login, batas sesi, CSRF, pembatasan IP, CSP, halaman luar jaringan: ditulis ulang
+  di `platform/admin/app.py` (langkah 4) untuk akun per orang; `siapkan.py` mengikuti pola berkas kredensial sekali
+  pakai dari www.
 - `site/admin/pratinjau_warna.py` dan `modul_situs/tampilan.py` — uji kontras warna: rumus WCAG ditulis ulang di `platform/bangun/warna.py` (langkah 3); pratinjau di admin (langkah 6).
 - `site/admin/media.py` dan unggahan GCS di `app.py` — logo ke GCS (langkah 6).
 - `docker/`, `docker-compose.yml`, `docs/deploy-portainer.md` — stack terpisah (langkah 7).

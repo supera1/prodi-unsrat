@@ -1,0 +1,25 @@
+{% extends "dasar.html" %}
+{% block judul %}Dasbor{% endblock %}
+{% block isi %}
+<h1>Dasbor</h1>
+{% if daftar %}
+<p>{{ daftar | length }} program studi{% if akun_aktif().peran == 'super' %} terdaftar{% endif %}.</p>
+<div class="tabel-gulir">
+	<table>
+		<thead><tr><th scope="col">Program studi</th><th scope="col">Fakultas</th><th scope="col">Alamat</th><th scope="col">Status</th></tr></thead>
+		<tbody>
+			{% for x in daftar %}
+			<tr>
+				<td><a href="{{ url_for('dasbor_prodi', kode=x.kode) }}">{{ x.nama }}</a></td>
+				<td>{{ x.unit }}</td>
+				<td><code>/{{ x.slug }}/</code></td>
+				<td>{{ 'Aktif' if x.aktif else 'Nonaktif' }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% else %}
+<p class="pesan pesan--info">Akun Anda belum terhubung ke program studi mana pun. Hubungi superadmin UPA TIK.</p>
+{% endif %}
+{% endblock %}

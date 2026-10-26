@@ -1,0 +1,8 @@
+{% extends "dasar.html" %}
+{% block judul %}{{ kode }}{% endblock %}
+{% block isi %}
+<section class="kartu kartu--sempit">
+	<h1>{{ pesan or 'Terjadi kesalahan.' }}</h1>
+	<p>Kode {{ kode }}. <a href="{{ url_for('dasbor') if akun_aktif() else url_for('masuk') }}">Kembali</a></p>
+</section>
+{% endblock %}

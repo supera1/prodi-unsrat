@@ -1,0 +1,20 @@
+{% extends "dasar.html" %}
+{% block judul %}Masuk{% endblock %}
+{% block isi %}
+<section class="kartu kartu--sempit">
+	<h1>Masuk</h1>
+	<form method="post" action="{{ url_for('masuk') }}" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<div class="isian">
+			<label for="pengguna">Nama pengguna</label>
+			<input id="pengguna" name="pengguna" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+		</div>
+		<div class="isian">
+			<label for="sandi">Kata sandi</label>
+			<input id="sandi" name="sandi" type="password" autocomplete="current-password" required>
+		</div>
+		<button type="submit" class="tombol">Masuk</button>
+	</form>
+	<p class="catatan">Lupa kata sandi? Minta admin prodi Anda (untuk operator) atau superadmin UPA TIK untuk meresetnya.</p>
+</section>
+{% endblock %}

@@ -48,6 +48,8 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
 - **Keputusan:** minimal 12 karakter, memuat huruf dan angka, bukan sandi umum, tidak memuat nama pengguna atau nama
   prodi. Sandi sementara wajib diganti saat pertama masuk. Penguncian login dan batas sesi dari www tetap dipakai.
 - **Konsekuensi:** pembatasan IP admin (jaringan/VPN UNSRAT) menjadi lapisan pelindung utama selain sandi.
+- **Pelaksanaan (langkah 4):** superadmin minimal 16 karakter (admin prodi dan operator 12), karena akunnya
+  menjangkau semua prodi; kata umum seperti "unsrat", "admin", "qwerty", "123456" ditolak di bagian mana pun.
 - **Disetujui:** pengguna, 26 Oktober 2026.
 
 ### K-P11 — Logo dan unggahan di Google Cloud Storage
