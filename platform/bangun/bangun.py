@@ -15,6 +15,9 @@ Output (PRODI_PUBLIK, the only folder the web server serves):
     <slug>/index.html                programme home page
     <slug>/<group>/[<page>/]index.html
     <slug>/warna.css                 the programme's colours (custom properties only)
+    <slug>/pengumuman/               announcements and news (pengumuman.py): list pages (/halaman/<n>/), one page per
+                                     item (/<id>/), per category (/kategori/<id>/), per year (/arsip/<yyyy>/), rss.xml
+    unggahan/<kode>/...              uploaded photos and PDFs of published items (PRODI_PENYIMPANAN=lokal only)
 
 plus PRODI_MANIFES (SHA-256 of every published file, for pemantau/cek_integritas.py) and
 PRODI_NGINX/slug-lama.conf (301 redirects of old slugs, included by Nginx).
@@ -30,6 +33,7 @@ from __future__ import print_function
 
 import argparse
 import datetime
+import email.utils
 import hashlib
 import io
 import json
@@ -50,6 +54,8 @@ from markupsafe import Markup, escape  # noqa: E402
 
 import lokasi  # noqa: E402
 import menu as menu_mod  # noqa: E402
+import media  # noqa: E402
+import pengumuman as pengumuman_mod  # noqa: E402
 import warna as warna_mod  # noqa: E402
 from slug import POLA_SLUG  # noqa: E402
 
@@ -59,7 +65,8 @@ DOSEN_UMUM = "https://dosen.unsrat.ac.id"
 
 CSP = ("default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; "
        "font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://storage.googleapis.com; "
-       "connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'")
+       "frame-src 'self' https://storage.googleapis.com; connect-src 'self'; object-src 'none'; base-uri 'self'; "
+       "form-action 'self'")
 FONT = ("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..700"
         "&display=swap")
 
@@ -73,6 +80,11 @@ BULAN = ("Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustu
          "November", "Desember")
 BERKAS_AKAR = ("index.html", "404.html", "robots.txt", "sitemap.xml")
 MD_TAUTAN = re.compile(r"\[([^\]\n]{1,200})\]\(([^)\s]{1,500})\)")
+URL_ISI = re.compile(r"https://[^\s<>\"']+")
+PER_HALAMAN = 12          # items per list page of announcements
+DI_BERANDA = 3            # newest announcements on a programme's home page, besides the pinned ones
+TERKAIT = 5               # items under "Kabar terkait" on an accreditation page
+WITA = datetime.timezone(datetime.timedelta(hours=8))
 
 
 class GagalBangun(Exception):
@@ -110,6 +122,51 @@ def tautan_md(teks):
     return Markup("").join(hasil)
 
 
+def _tautkan(teks):
+    """Escape a line of text and turn its https:// addresses into links (trailing punctuation stays text)."""
+    hasil, awal = [], 0
+    for m in URL_ISI.finditer(teks):
+        url = m.group(0).rstrip(".,;:!?)")
+        hasil.append(escape(teks[awal:m.start()]))
+        hasil.append(Markup('<a href="%s">%s</a>') % (url, url))
+        awal = m.start() + len(url)
+    hasil.append(escape(teks[awal:]))
+    return Markup("").join(hasil)
+
+
+def teks_isi(teks):
+    """The body of an announcement: paragraphs (separated by an empty line) and "- " lists; never raw HTML."""
+    blok = []
+    for bagian in re.split(r"\n\s*\n", (teks or "").strip()):
+        baris = [b.strip() for b in bagian.splitlines() if b.strip()]
+        if not baris:
+            continue
+        if all(b.startswith("- ") for b in baris):
+            blok.append(Markup("<ul>%s</ul>") % Markup("").join(Markup("<li>%s</li>") % _tautkan(b[2:]) for b in baris))
+        else:
+            blok.append(Markup("<p>%s</p>") % Markup("<br>").join(_tautkan(b) for b in baris))
+    return Markup("\n").join(blok)
+
+
+def foto_varian(f, lebar=None):
+    """A stored size of a photo: the one made for `lebar` if there is one, else the largest one not wider than it,
+    else the smallest (lebar=None: the largest)."""
+    v = sorted(f["varian"].values(), key=lambda r: r["lebar"])
+    if lebar is None:
+        return v[-1]
+    if str(lebar) in f["varian"]:
+        return f["varian"][str(lebar)]
+    cocok = [r for r in v if r["lebar"] <= lebar]
+    return cocok[-1] if cocok else v[0]
+
+
+def ukuran(n):
+    """1234567 -> '1,2 MB'."""
+    if n >= 1024 * 1024:
+        return ("%.1f MB" % (n / 1024.0 / 1024.0)).replace(".", ",")
+    return "%d KB" % max(1, round(n / 1024.0))
+
+
 def json_ld(isi):
     """A JSON-LD block that cannot end the <script> element early."""
     teks = json.dumps(isi, ensure_ascii=False, indent=1).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
@@ -123,8 +180,9 @@ def sha(isi):
 # ------------------------------------------------------------------ the builder
 
 class Pembangun(object):
-    def __init__(self, produksi=False, alamat=None):
+    def __init__(self, produksi=False, alamat=None, hari_ini=None):
         self.produksi = produksi
+        self.hari_ini = hari_ini or datetime.date.today().isoformat()
         self.alamat = (alamat or os.environ.get("PRODI_ALAMAT") or ALAMAT_BAWAAN).rstrip("/")
         warisan = lokasi.baca("warisan/prodi")
         if not warisan:
@@ -137,9 +195,12 @@ class Pembangun(object):
         self.registri = (lokasi.baca("registri") or {}).get("prodi", [])
         self.templat = menu_mod.baca_templat()
         self.palet = warna_mod.baca_palet()
+        self.kategori = pengumuman_mod.baca_kategori()
+        self.label_kategori = {k["id"]: k["label"] for k in self.kategori}
         self.env = Environment(loader=FileSystemLoader(os.path.join(TEMPLATE, "halaman")), autoescape=True,
                                undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True, keep_trailing_newline=True)
-        self.env.filters.update(tanggal=tanggal, tautan_md=tautan_md, json_ld=json_ld)
+        self.env.filters.update(tanggal=tanggal, tautan_md=tautan_md, json_ld=json_ld, teks_isi=teks_isi, ukuran=ukuran,
+                                foto_varian=foto_varian)
         self.env.globals.update(nama_tampil=nama_tampil, JENJANG_PANJANG=JENJANG_PANJANG)
         self.berkas = {}      # published path -> bytes
         self.versi = {}       # published asset path -> short hash, for ?v=
@@ -213,9 +274,18 @@ class Pembangun(object):
     def render(self, templat, jalur, **konteks):
         mutlak = konteks.pop("mutlak", False)
         ke, aset = self.penaut(jalur, mutlak)
-        konteks.update(ke=ke, aset=aset, produksi=self.produksi, csp=CSP, font=FONT, univ=self.univ, www=WWW,
+        def media_url(rekam):
+            return rekam["url"] if "url" in rekam else ke("unggahan/" + rekam["jalur"])
+
+        konteks.setdefault("sub", False)
+        konteks.update(ke=ke, aset=aset, media_url=media_url, media_mutlak=self.media_mutlak, alamat=self.alamat,
+                       produksi=self.produksi, csp=CSP, font=FONT, univ=self.univ, www=WWW,
                        tahun=self.univ.get("identitas", {}).get("tahun_hak_cipta") or str(datetime.date.today().year))
         self.simpan(jalur, self.env.get_template(templat).render(**konteks))
+
+    def media_mutlak(self, rekam):
+        """Full address of a stored file (link previews, RSS)."""
+        return rekam["url"] if "url" in rekam else "%s/unggahan/%s" % (self.alamat, rekam["jalur"])
 
     # -------------------------------------------------------------- one programme
 
@@ -242,13 +312,27 @@ class Pembangun(object):
         self.versi[warna_css] = sha(self.berkas[warna_css])[:10]
         menu = self.menu_prodi(kode)
         tagline = (situs.get("tagline") or "").strip()
+        kabar = self.pengumuman_prodi(kode)
+        berlaku = [b for b in kabar if pengumuman_mod.masih_berlaku(b, self.hari_ini)]
+        di_beranda = [b for b in berlaku if b.get("sematkan")] + [b for b in berlaku if not b.get("sematkan")][:DI_BERANDA]
+        terkait = {}
+        for k in self.kategori:
+            isi = [b for b in kabar if b["kategori"] == k["id"]]
+            for halaman_id in k["halaman"]:
+                if isi:
+                    terkait.setdefault(halaman_id, []).append({"kategori": k, "butir": isi[:TERKAIT], "jumlah": len(isi)})
         umum = dict(p=p, r=r, slug=slug, situs=situs, tagline=tagline, unit=unit, menu=menu,
                     nama=nama_tampil(p), warna_css=warna_css, tampil_berlaku=self.tampil_berlaku,
                     dosen_url=r.get("dosen_url") or "", dosen_umum=DOSEN_UMUM, kalender=self.kalender,
-                    kurikulum=sorted({c["kurikulum"] for c in p.get("cpl", []) if c.get("kurikulum")}))
+                    kurikulum=sorted({c["kurikulum"] for c in p.get("cpl", []) if c.get("kurikulum")}),
+                    kabar_beranda=di_beranda, terkait=terkait, label_kategori=self.label_kategori,
+                    hari_ini=self.hari_ini)
         for e in menu:
             for ini in [e] + e.get("anak", []):
                 kelompok = e if e["kelompok"] and ini is not e else None
+                if ini["templat"] == "pengumuman":
+                    self.bangun_pengumuman(slug, ini, kabar, umum)
+                    continue
                 if ini["kelompok"]:
                     templat = "kelompok.html"
                 elif ini["templat"]:
@@ -260,6 +344,87 @@ class Pembangun(object):
                 if ini["alamat"] == "":
                     konteks["json_ld"] = self.json_ld_prodi(p, unit, folder)
                 self.render(templat, self.jalur_halaman(slug, ini["alamat"]), **konteks)
+
+    def pengumuman_prodi(self, kode):
+        """Published announcements of a programme whose files are all there (local files are published here)."""
+        hasil = []
+        for b in pengumuman_mod.terbit(pengumuman_mod.baca(kode)):
+            rekam = [v for f in b.get("foto", []) for v in f["varian"].values()] + list(b.get("pdf", []))
+            if all(self.terbitkan_media(r) for r in rekam):
+                hasil.append(b)
+            else:
+                self.peringatan.append("prodi %s: pengumuman %s dilewati, berkasnya tidak ada" % (kode, b["id"]))
+        return hasil
+
+    def terbitkan_media(self, rekam):
+        if "url" in rekam:
+            return media.url_sah(rekam["url"])
+        jalur = rekam.get("jalur")
+        path = os.path.join(lokasi.unggahan(), *jalur.split("/")) if media.jalur_sah(jalur) else None
+        if not path or not os.path.isfile(path):
+            return False
+        if "unggahan/" + jalur not in self.berkas:
+            with open(path, "rb") as f:
+                self.simpan("unggahan/" + jalur, f.read())
+        return True
+
+    def bangun_pengumuman(self, slug, ini, kabar, umum):
+        """List pages, one page per item, category and year archives, and the RSS feed."""
+        dasar = ini["alamat"]
+        kategori_ada = [dict(k, jumlah=sum(1 for b in kabar if b["kategori"] == k["id"])) for k in self.kategori]
+        kategori_ada = [k for k in kategori_ada if k["jumlah"]]
+        tahun_ada = sorted({b["tanggal"][:4] for b in kabar}, reverse=True)
+        bersama = dict(umum, ini=ini, kelompok=None, kategori_ada=kategori_ada, tahun_ada=tahun_ada,
+                       dasar_pengumuman=dasar)
+        self.daftar_berhalaman(slug, dasar, kabar, dict(bersama, saring=None))
+        for k in kategori_ada:
+            self.daftar_berhalaman(slug, "%s/kategori/%s" % (dasar, k["id"]),
+                                   [b for b in kabar if b["kategori"] == k["id"]],
+                                   dict(bersama, saring={"jenis": "kategori", "id": k["id"], "label": k["label"]}))
+        for t in tahun_ada:
+            self.daftar_berhalaman(slug, "%s/arsip/%s" % (dasar, t), [b for b in kabar if b["tanggal"][:4] == t],
+                                   dict(bersama, saring={"jenis": "tahun", "id": t, "label": "Arsip %s" % t}))
+        for b in kabar:
+            folder = posixpath.join(slug, dasar, b["id"])
+            lain = [x for x in kabar if x["id"] != b["id"]][:3]
+            foto = b.get("foto", [])
+            og = self.media_mutlak(foto_varian(foto[0])) if foto else None
+            self.render("pengumuman_detail.html", posixpath.join(folder, "index.html"),
+                        **dict(bersama, b=b, lain=lain, sub=True, kanonik=self.kanonik(folder), og_gambar=og,
+                               og_jenis="article"))
+        self.simpan(posixpath.join(slug, dasar, "rss.xml"), self.rss(slug, dasar, kabar, umum["nama"]))
+
+    def daftar_berhalaman(self, slug, dasar, butir, konteks):
+        potong = [butir[i:i + PER_HALAMAN] for i in range(0, len(butir), PER_HALAMAN)] or [[]]
+        for nomor, isi in enumerate(potong, 1):
+            alamat = dasar if nomor == 1 else "%s/halaman/%d" % (dasar, nomor)
+            folder = posixpath.join(slug, alamat)
+            self.render("pengumuman_daftar.html", posixpath.join(folder, "index.html"),
+                        **dict(konteks, butir=isi, nomor=nomor, jumlah_halaman=len(potong), dasar_daftar=dasar,
+                               sub=bool(konteks["saring"]) or nomor > 1, kanonik=self.kanonik(folder)))
+
+    def rss(self, slug, dasar, kabar, nama):
+        """RSS 2.0 of the newest 20 items, with full addresses (feeds need them, also on staging)."""
+        situs = "%s/%s/%s/" % (self.alamat, slug, dasar)
+
+        def x(t):
+            return xml_escape(t or "")
+        baris = ['<?xml version="1.0" encoding="UTF-8"?>',
+                 '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">', "<channel>",
+                 "<title>%s</title>" % x("Pengumuman %s — Universitas Sam Ratulangi" % nama),
+                 "<link>%s</link>" % x(situs),
+                 "<description>%s</description>" % x("Pengumuman, berita kegiatan, dan prestasi Program Studi %s." % nama),
+                 "<language>id</language>",
+                 '<atom:link href="%srss.xml" rel="self" type="application/rss+xml"/>' % x(situs)]
+        for b in kabar[:20]:
+            waktu = datetime.datetime.fromisoformat(b["tanggal"]).replace(tzinfo=WITA)
+            alamat = "%s%s/" % (situs, b["id"])
+            baris += ["<item>", "<title>%s</title>" % x(b["judul"]), "<link>%s</link>" % x(alamat),
+                      '<guid isPermaLink="true">%s</guid>' % x(alamat),
+                      "<pubDate>%s</pubDate>" % email.utils.format_datetime(waktu),
+                      "<category>%s</category>" % x(self.label_kategori.get(b["kategori"], "")),
+                      "<description>%s</description>" % x(b["ringkasan"]), "</item>"]
+        return "\n".join(baris + ["</channel>", "</rss>"]) + "\n"
 
     def json_ld_prodi(self, p, unit, folder):
         isi = {"@context": "https://schema.org", "@type": "EducationalOccupationalProgram", "name": nama_tampil(p),
@@ -292,15 +457,17 @@ class Pembangun(object):
         self.render("404.html", "404.html", mutlak=True, kanonik="", warna_css="aset/css/warna-unsrat.css")
         if self.produksi:
             self.simpan("robots.txt", "User-agent: *\nAllow: /\nSitemap: %s/sitemap.xml\n" % self.alamat)
-            self.simpan("sitemap.xml", self.peta_situs(aktif))
         else:
             self.simpan("robots.txt", "# Staging: tidak untuk diindeks.\nUser-agent: *\nDisallow: /\n")
 
-    def peta_situs(self, aktif):
-        alamat = [self.alamat + "/"]
-        for r in sorted(aktif, key=lambda r: r["slug"]):
-            for ini in menu_mod.halaman(self.menu_prodi(r["kode_pddikti"])):
-                alamat.append("%s/%s/%s" % (self.alamat, r["slug"], ini["alamat"] + "/" if ini["alamat"] else ""))
+    def peta_situs(self):
+        """sitemap.xml of every page now in PRODI_PUBLIK (also those a one-programme build did not touch)."""
+        akar, alamat = lokasi.publik(), []
+        for folder, _d, nama in os.walk(akar):
+            if "index.html" in nama:
+                rel = os.path.relpath(folder, akar).replace(os.sep, "/")
+                alamat.append("%s/%s" % (self.alamat, "" if rel == "." else rel + "/"))
+        alamat.sort(key=lambda a: (a.count("/"), a))
         baris = ['<?xml version="1.0" encoding="UTF-8"?>',
                  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
         baris += ["<url><loc>%s</loc></url>" % xml_escape(a) for a in alamat]
@@ -329,11 +496,14 @@ class Pembangun(object):
             sasaran = [r for r in aktif if r["kode_pddikti"] == kode]
             if not sasaran:
                 raise GagalBangun("prodi %s tidak aktif atau tidak terdaftar" % kode)
-            cakupan = [sasaran[0]["slug"] + "/", "aset/"] + list(BERKAS_AKAR)
+            cakupan = [sasaran[0]["slug"] + "/", "unggahan/%s/" % kode, "aset/"] + list(BERKAS_AKAR)
         for r in sasaran:
             self.bangun_prodi(r)
         self.bangun_akar(aktif)
-        hasil = tulis_keluaran(self.berkas, cakupan)
+        # production: sitemap.xml is written below, once every page is in place, so it is not removed here
+        hasil = tulis_keluaran(self.berkas, cakupan, tetap=("sitemap.xml",) if self.produksi else ())
+        if self.produksi:
+            _tulis_jika_beda(os.path.join(lokasi.publik(), "sitemap.xml"), self.peta_situs().encode("utf-8"))
         tulis_manifes()
         os.makedirs(lokasi.nginx_buatan(), exist_ok=True)
         _tulis_jika_beda(os.path.join(lokasi.nginx_buatan(), "slug-lama.conf"),
@@ -360,9 +530,10 @@ def _dalam_cakupan(rel, cakupan):
     return cakupan is None or any(rel == c or (c.endswith("/") and rel.startswith(c)) for c in cakupan)
 
 
-def tulis_keluaran(berkas, cakupan=None):
+def tulis_keluaran(berkas, cakupan=None, tetap=()):
     """Write the built files that changed and remove files in scope that the build no longer makes.
-    cakupan: None (the whole site) or a list of published paths and folder prefixes ending in "/"."""
+    cakupan: None (the whole site) or a list of published paths and folder prefixes ending in "/".
+    tetap: published paths never removed here (written separately)."""
     akar = lokasi.publik()
     ditulis = sum(1 for rel, isi in sorted(berkas.items()) if _tulis_jika_beda(os.path.join(akar, *rel.split("/")), isi))
     dihapus = 0
@@ -370,7 +541,7 @@ def tulis_keluaran(berkas, cakupan=None):
         for n in nama:
             path = os.path.join(folder, n)
             rel = os.path.relpath(path, akar).replace(os.sep, "/")
-            if rel not in berkas and _dalam_cakupan(rel, cakupan):
+            if rel not in berkas and rel not in tetap and _dalam_cakupan(rel, cakupan):
                 os.remove(path)
                 dihapus += 1
         if folder != akar and not os.listdir(folder):
@@ -397,6 +568,7 @@ def main(argv=None):
     ap.add_argument("--produksi", action="store_true", help="bentuk produksi (juga PRODI_MODE=produksi)")
     a = ap.parse_args(argv)
     produksi = a.produksi or os.environ.get("PRODI_MODE") == "produksi"
+    # a scheduled daily rebuild (langkah 7) takes expired announcements off the home pages
     try:
         b = Pembangun(produksi=produksi)
         ditulis, dihapus, cakupan = b.bangun(a.prodi)

@@ -59,5 +59,20 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   mereset sandi operator prodinya. Setiap reset dicatat di log audit.
 - **Disetujui:** pengguna, 26 Oktober 2026.
 
+### K-P14 — Pengumuman dan berita per prodi masuk Fase 1 (langkah 3b)
+- **Konteks:** prodi perlu memuat pengumuman (jadwal kuliah, ujian) dan berita (kegiatan, prestasi). Kabar yang bertanggal
+  juga menjadi bukti kegiatan untuk akreditasi.
+- **Keputusan:**
+  - Satu jenis konten dengan 7 kategori tetap (`platform/template/kategori.json`). Kategori prestasi mahasiswa, prestasi
+    dosen, penelitian, PkM, dan kerja sama otomatis tampil sebagai "Kabar terkait" di halaman akreditasi yang sesuai.
+  - Foto JPEG/PNG (dikodekan ulang, EXIF/GPS dibuang) dan PDF (tanpa skrip, formulir aktif, sisipan, atau teks judi).
+  - PDF dibaca dengan pembaca bawaan browser (bukan PDF.js); di ponsel hanya tombol Buka/Unduh.
+  - Pratinjau tautan (Open Graph), umpan RSS per prodi, tanggal kedaluwarsa, sematkan, dan tanpa hapus permanen
+    (hanya "ditarik").
+  - Formulir admin dan alur operator → admin prodi dikerjakan di langkah 6; sampai itu lewat `platform/pengumuman.py`.
+- **Konsekuensi:** pengumuman yang kedaluwarsa baru turun dari beranda saat situs dibangun ulang, jadi langkah 7 perlu
+  bangun ulang terjadwal harian.
+- **Disetujui:** pengguna, 26 Oktober 2026.
+
 ### K-P13 — Port di VM menyusul
 - **Status:** terbuka. Diisi saat langkah 7 (Docker & deploy staging).

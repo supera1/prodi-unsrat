@@ -1,0 +1,12 @@
+{
+  "catatan": "Kategori pengumuman dan berita, sama untuk semua prodi (langkah 3b). halaman: id butir menu (menu.json) yang menampilkan kabar kategori ini sebagai 'Kabar terkait', supaya bukti kegiatan untuk akreditasi terkumpul tanpa diketik dua kali. Id kategori dipakai di alamat (/pengumuman/kategori/<id>/): jangan diubah setelah tayang.",
+  "kategori": [
+    {"id": "akademik", "label": "Pengumuman Akademik", "halaman": []},
+    {"id": "kegiatan", "label": "Berita Kegiatan", "halaman": []},
+    {"id": "prestasi-mahasiswa", "label": "Prestasi Mahasiswa", "halaman": ["organisasi-prestasi"]},
+    {"id": "prestasi-dosen", "label": "Prestasi Dosen", "halaman": ["pengembangan-sdm"]},
+    {"id": "penelitian", "label": "Penelitian dan Publikasi", "halaman": ["penelitian", "publikasi"]},
+    {"id": "pkm", "label": "Pengabdian kepada Masyarakat", "halaman": ["pkm"]},
+    {"id": "kerja-sama", "label": "Kerja Sama", "halaman": ["kerja-sama"]}
+  ]
+}

@@ -846,3 +846,262 @@ td:first-child {
 		display: none;
 	}
 }
+
+/* ---------------------------------------------------------------- announcements and news */
+
+.tersembunyi {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.halaman__isi--lebar {
+	max-width: 60rem;
+}
+
+.kabar-daftar {
+	display: grid;
+	gap: var(--unsrat-spasi-30);
+	margin: 0 0 var(--unsrat-spasi-40);
+	padding: 0;
+	list-style: none;
+}
+
+.kabar {
+	position: relative;
+	display: grid;
+	gap: var(--unsrat-spasi-30);
+	padding: var(--unsrat-spasi-30);
+	background: var(--unsrat-putih);
+	border: 1px solid var(--garis);
+	border-radius: var(--unsrat-radius-kartu);
+}
+
+.kabar:hover {
+	border-color: var(--unsrat-abu-500);
+}
+
+@media (min-width: 640px) {
+	.kabar:has(.kabar__foto) {
+		grid-template-columns: 12rem minmax(0, 1fr);
+	}
+}
+
+.kabar__foto {
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+	border-radius: var(--unsrat-radius-kontrol);
+	background: var(--unsrat-abu-100);
+}
+
+.kabar__teks p {
+	margin-bottom: var(--unsrat-spasi-20);
+	color: var(--unsrat-abu-700);
+}
+
+.kabar__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--unsrat-spasi-10) var(--unsrat-spasi-30);
+	font-size: var(--unsrat-size-kecil);
+}
+
+.kabar__meta,
+.kabar__teks .kabar__meta {
+	color: var(--unsrat-abu-600);
+}
+
+.kabar__lewat,
+.kabar__pdf {
+	padding: 0 0.5em;
+	border: 1px solid var(--unsrat-abu-500);
+	border-radius: var(--unsrat-radius-kontrol);
+	font-weight: 600;
+}
+
+.kabar__judul {
+	margin: var(--unsrat-spasi-10) 0 var(--unsrat-spasi-20);
+	font-size: var(--unsrat-size-sedang);
+}
+
+/* the whole item is clickable through its title link */
+.kabar__judul a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.kabar__judul a:focus-visible {
+	outline: none;
+}
+
+.kabar:has(.kabar__judul a:focus-visible) {
+	outline: var(--unsrat-fokus-tebal) solid var(--prodi-utama);
+	outline-offset: var(--unsrat-fokus-offset);
+}
+
+@media (min-width: 960px) {
+	.kabar-daftar--ringkas {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.kabar-daftar--ringkas .kabar:has(.kabar__foto) {
+		grid-template-columns: 8rem minmax(0, 1fr);
+	}
+}
+
+.halaman__isi .kabar-daftar--ringkas,
+.terkait .kabar-daftar--ringkas {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.saring ul,
+ul.saring {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--unsrat-spasi-20);
+	margin: 0 0 var(--unsrat-spasi-40);
+	padding: 0;
+	list-style: none;
+}
+
+.saring a {
+	display: inline-block;
+	padding: var(--unsrat-spasi-10) var(--unsrat-spasi-30);
+	border: 1px solid var(--garis);
+	border-radius: 999px;
+	font-size: var(--unsrat-size-kecil);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.saring a:hover {
+	border-color: var(--prodi-utama);
+}
+
+.saring a.saring--aktif {
+	background: var(--prodi-utama);
+	border-color: var(--prodi-utama);
+	color: var(--unsrat-putih);
+}
+
+.saring__jumlah {
+	opacity: 0.8;
+}
+
+.halaman-nomor ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--unsrat-spasi-20);
+	padding: 0;
+	list-style: none;
+}
+
+.halaman-nomor a {
+	display: inline-block;
+	min-width: 2.5rem;
+	padding: var(--unsrat-spasi-20);
+	border: 1px solid var(--garis);
+	border-radius: var(--unsrat-radius-kontrol);
+	text-align: center;
+	text-decoration: none;
+}
+
+.halaman-nomor a[aria-current] {
+	background: var(--prodi-utama);
+	border-color: var(--prodi-utama);
+	color: var(--unsrat-putih);
+}
+
+.kabar-bawah {
+	margin-top: var(--unsrat-spasi-50);
+	padding-top: var(--unsrat-spasi-30);
+	border-top: 1px solid var(--garis);
+}
+
+.kabar-bawah__judul {
+	margin-bottom: var(--unsrat-spasi-20);
+	font-weight: 700;
+}
+
+.kabar-isi__foto {
+	margin: 0 0 var(--unsrat-spasi-40);
+}
+
+.kabar-isi__foto img {
+	display: block;
+	width: 100%;
+	border-radius: var(--unsrat-radius-kartu);
+}
+
+.kabar-isi__teks ul {
+	padding-left: 1.25em;
+}
+
+.pdf {
+	margin-bottom: var(--unsrat-spasi-50);
+}
+
+.pdf__judul {
+	margin: 0 0 var(--unsrat-spasi-10);
+}
+
+.pdf__info {
+	color: var(--unsrat-abu-600);
+	font-size: var(--unsrat-size-kecil);
+}
+
+.pdf__tombol {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--unsrat-spasi-20);
+}
+
+/* the browser's own PDF viewer, on wide screens only: phones (Chrome on Android) cannot show a PDF inside a page,
+   and a hidden lazy iframe is not loaded at all, which saves their data */
+.pdf__pembaca {
+	display: none;
+}
+
+@media (min-width: 760px) {
+	.pdf__pembaca {
+		display: block;
+		width: 100%;
+		height: 80vh;
+		min-height: 32rem;
+		border: 1px solid var(--garis);
+		border-radius: var(--unsrat-radius-kontrol);
+		background: var(--unsrat-abu-100);
+	}
+}
+
+.galeri {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+	gap: var(--unsrat-spasi-20);
+	padding: 0;
+	list-style: none;
+}
+
+.galeri img {
+	display: block;
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+	border-radius: var(--unsrat-radius-kontrol);
+}
+
+.kabar-lain {
+	margin-top: var(--unsrat-spasi-50);
+	padding-top: var(--unsrat-spasi-40);
+	border-top: 1px solid var(--garis);
+}
+
+.terkait {
+	margin-top: var(--unsrat-spasi-50);
+}

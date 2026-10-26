@@ -1,5 +1,6 @@
 {# Home page of a programme site: everything here comes from the official data (www) and the registry. #}
 {% extends "prodi.html" %}
+{% from "_kabar.html" import kartu_kabar with context %}
 {% block isi %}
 <section class="pahlawan" aria-labelledby="judul-prodi">
 	<div class="wadah pahlawan__isi">
@@ -28,6 +29,16 @@
 </section>
 
 <div class="wadah beranda">
+	{% if kabar_beranda %}
+	<section class="beranda__bagian" aria-labelledby="judul-kabar">
+		<h2 id="judul-kabar">Pengumuman terbaru</h2>
+		<ul class="kabar-daftar kabar-daftar--ringkas">
+			{% for b in kabar_beranda %}{{ kartu_kabar(b, 3) }}{% endfor %}
+		</ul>
+		<p><a class="tombol tombol--garis" href="{{ ke(slug ~ '/pengumuman') }}">Semua pengumuman</a></p>
+	</section>
+	{% endif %}
+
 	<section class="beranda__bagian" aria-labelledby="judul-lulusan">
 		<h2 id="judul-lulusan">Profil lulusan</h2>
 		{% if p.bidang_kerja %}

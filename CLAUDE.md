@@ -51,7 +51,9 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai
 - Registri awal 97 prodi dari `slug.csv`: `python3 platform/registri.py --siapkan` (sesudah tarik data pertama).
 - Bangun situs ke `publik/`: `.venv/bin/python platform/bangun/bangun.py` (semua), `--prodi <kode>` (satu prodi),
   `--produksi`. Ganti slug atau nonaktifkan prodi: bangun semua, supaya folder lama terhapus.
-- Template: `platform/template/menu.json` (menu induk), `platform/template/halaman/*.html` (Jinja2, autoescape),
+- Pengumuman (sebelum admin ada): `.venv/bin/python platform/pengumuman.py tambah|daftar|status --prodi <kode> ...`;
+  foto/PDF lewat `platform/media.py` (`PRODI_PENYIMPANAN=lokal` ke `unggahan/`, `gcs` ke bucket). Lalu bangun `--prodi`.
+- Template: `platform/template/menu.json` (menu induk), `platform/template/kategori.json` (kategori pengumuman), `platform/template/halaman/*.html` (Jinja2, autoescape),
   `platform/template/aset/css/prodi.css`; palet pilihan `platform/data-awal/palet.json`, uji kontras di `platform/bangun/warna.py`.
 
 ## Cara kerja

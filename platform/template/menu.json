@@ -85,6 +85,8 @@
        {"id": "sistem-informasi", "label": "Sistem Informasi", "jenis": "wajib", "alamat": "fasilitas/sistem-informasi",
         "deskripsi": "Sistem informasi yang dipakai dalam layanan akademik dan pembelajaran daring."}
      ]},
+    {"id": "pengumuman", "label": "Pengumuman", "jenis": "otomatis", "templat": "pengumuman", "alamat": "pengumuman",
+     "deskripsi": "Pengumuman, berita kegiatan, dan prestasi terbaru program studi."},
     {"id": "kontak", "label": "Kontak", "jenis": "otomatis", "templat": "kontak", "alamat": "kontak",
      "deskripsi": "Alamat surel, fakultas, dan lokasi program studi."}
   ]

@@ -8,6 +8,8 @@
     PRODI_PUBLIK    the built site, the only folder the web server serves (default: <repo>/publik)
     PRODI_MANIFES   SHA-256 of every published file, for the integrity check (default: <repo>/manifes-publik.json)
     PRODI_NGINX     configuration the builder writes for Nginx, e.g. redirects of old slugs (default: <repo>/nginx-buatan)
+    PRODI_UNGGAHAN  uploaded photos and PDFs when PRODI_PENYIMPANAN=lokal (default: <repo>/unggahan); the builder
+                    publishes them under publik/unggahan/. With PRODI_PENYIMPANAN=gcs they go to Google Cloud Storage.
 
 Layout of PRODI_DATA (docs/rencana-fase-01.md §4):
 
@@ -18,6 +20,7 @@ Layout of PRODI_DATA (docs/rencana-fase-01.md §4):
     warisan/universitas.json      UNSRAT's name, address, phone numbers, social media and utility links
     warisan/meta.json             when the copy was taken and from where
     prodi/<kode>/situs.json       per programme: tagline, palette, logo, social media, menu settings
+    prodi/<kode>/pengumuman.json  per programme: announcements and news (pengumuman.py)
 """
 from __future__ import print_function
 
@@ -57,6 +60,10 @@ def manifes():
 
 def nginx_buatan():
     return os.path.abspath(os.environ.get("PRODI_NGINX") or os.path.join(AKAR, "nginx-buatan"))
+
+
+def unggahan():
+    return os.path.abspath(os.environ.get("PRODI_UNGGAHAN") or os.path.join(AKAR, "unggahan"))
 
 
 def path_data(berkas):

@@ -2,7 +2,20 @@
 {% extends "dasar.html" %}
 {% block judul %}{% if ini.alamat %}{{ ini.label }} — {{ nama }} — UNSRAT{% else %}{{ nama }} — Universitas Sam Ratulangi{% endif %}{% endblock %}
 {% block deskripsi %}{{ ini.deskripsi }} Program Studi {{ nama }}, {{ unit.nama }}, Universitas Sam Ratulangi.{% endblock %}
-{% block kepala_tambahan %}{% if json_ld is defined %}{{ json_ld | json_ld }}{% endif %}{% endblock %}
+{% block kepala_tambahan %}
+<link rel="alternate" type="application/rss+xml" title="Pengumuman {{ nama }}" href="{{ ke(slug ~ '/pengumuman/rss.xml') }}">
+<meta property="og:site_name" content="{{ nama }} — Universitas Sam Ratulangi">
+<meta property="og:locale" content="id_ID">
+<meta property="og:type" content="{{ og_jenis | default('website') }}">
+<meta property="og:title" content="{{ self.judul() }}">
+<meta property="og:description" content="{{ self.deskripsi() }}">
+<meta property="og:image" content="{{ og_gambar | default(alamat ~ '/aset/img/lambang-192.png', true) }}">
+{% if kanonik %}
+<meta property="og:url" content="{{ kanonik }}">
+{% endif %}
+<meta name="twitter:card" content="{{ 'summary_large_image' if og_gambar | default(none) else 'summary' }}">
+{% if json_ld is defined %}{{ json_ld | json_ld }}{% endif %}
+{% endblock %}
 {% block kepala_situs %}
 <header class="kepala">
 	<div class="wadah kepala__isi">
@@ -19,7 +32,7 @@
 		<div class="wadah">
 			<ul class="nav-utama__daftar">
 				{% for e in menu if e.nav %}
-				<li><a href="{{ ke(slug ~ '/' ~ e.alamat) }}"{% if (kelompok and kelompok.id == e.id) or ini.id == e.id %} aria-current="{{ 'page' if ini.id == e.id else 'true' }}"{% endif %}>{{ e.label }}</a></li>
+				<li><a href="{{ ke(slug ~ '/' ~ e.alamat) }}"{% if (kelompok and kelompok.id == e.id) or ini.id == e.id %} aria-current="{{ 'page' if ini.id == e.id and not sub else 'true' }}"{% endif %}>{{ e.label }}</a></li>
 				{% endfor %}
 			</ul>
 			<details class="nav-ponsel">

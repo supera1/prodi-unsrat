@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.join(PLATFORM, "pemantau"))
 import saringan_spam  # noqa: E402
 
 JENIS = ("otomatis", "wajib", "opsional")
-TEMPLAT = ("beranda", "akreditasi", "profil_lulusan", "spesifikasi", "kalender", "dosen", "kontak")
+TEMPLAT = ("beranda", "akreditasi", "profil_lulusan", "spesifikasi", "kalender", "dosen", "kontak", "pengumuman")
 POLA_ID = re.compile(r"^[a-z][a-z0-9-]{1,40}$")
 POLA_ALAMAT = re.compile(r"^([a-z][a-z0-9-]*(/[a-z][a-z0-9-]*)*)?$")
 MAKS_LABEL = 60

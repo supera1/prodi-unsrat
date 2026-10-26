@@ -1,0 +1,61 @@
+{# List of announcements: all, one category, or one year; PER_HALAMAN per page. #}
+{% extends "prodi.html" %}
+{% from "_kabar.html" import kartu_kabar with context %}
+{% block judul %}{% if saring %}{{ saring.label }} — {% endif %}{{ ini.label }}{% if nomor > 1 %} (halaman {{ nomor }}){% endif %} — {{ nama }} — UNSRAT{% endblock %}
+{% block deskripsi %}{% if saring %}{{ saring.label }}: {% endif %}{{ ini.deskripsi }} Program Studi {{ nama }}, {{ unit.nama }}, Universitas Sam Ratulangi.{% endblock %}
+{% block isi %}
+<div class="wadah halaman">
+	<nav class="jejak" aria-label="Jejak halaman">
+		<ol>
+			<li><a href="{{ ke(slug) }}">{{ nama }}</a></li>
+			<li><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman) }}"{% if not saring and nomor == 1 %} aria-current="page"{% endif %}>{{ ini.label }}</a></li>
+			{% if saring %}
+			<li><a href="{{ ke(slug ~ '/' ~ dasar_daftar) }}"{% if nomor == 1 %} aria-current="page"{% endif %}>{{ saring.label }}</a></li>
+			{% endif %}
+		</ol>
+	</nav>
+	<div class="halaman__isi halaman__isi--lebar">
+		<h1>{% if saring %}{{ saring.label }}{% else %}{{ ini.label }}{% endif %}</h1>
+		<p class="pengantar">{% if saring and saring.jenis == 'kategori' %}{{ saring.label }} Program Studi {{ nama }}.{% elif saring %}Pengumuman dan berita Program Studi {{ nama }} tahun {{ saring.id }}.{% else %}{{ ini.deskripsi }}{% endif %}</p>
+		{% if kategori_ada %}
+		<nav class="saring" aria-label="Kategori">
+			<ul>
+				<li><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman) }}"{% if not saring %} class="saring--aktif"{% endif %}>Semua</a></li>
+				{% for k in kategori_ada %}
+				<li><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman ~ '/kategori/' ~ k.id) }}"{% if saring and saring.id == k.id %} class="saring--aktif"{% endif %}>{{ k.label }} <span class="saring__jumlah">{{ k.jumlah }}</span></a></li>
+				{% endfor %}
+			</ul>
+		</nav>
+		{% endif %}
+		{% if butir %}
+		<ul class="kabar-daftar">
+			{% for b in butir %}{{ kartu_kabar(b, 2) }}{% endfor %}
+		</ul>
+		{% else %}
+		<p class="catatan catatan--menyusul">Belum ada pengumuman dari Program Studi {{ nama }}.</p>
+		{% endif %}
+		{% if jumlah_halaman > 1 %}
+		<nav class="halaman-nomor" aria-label="Halaman daftar">
+			<ul>
+				{% for n in range(1, jumlah_halaman + 1) %}
+				<li><a href="{{ ke(slug ~ '/' ~ dasar_daftar ~ ('' if n == 1 else '/halaman/' ~ n)) }}"{% if n == nomor %} aria-current="page"{% endif %}>{% if n == nomor %}<span class="tersembunyi">Halaman </span>{% endif %}{{ n }}</a></li>
+				{% endfor %}
+			</ul>
+		</nav>
+		{% endif %}
+		<div class="kabar-bawah">
+			{% if tahun_ada %}
+			<nav aria-label="Arsip per tahun">
+				<p class="kabar-bawah__judul">Arsip</p>
+				<ul class="saring saring--kecil">
+					{% for t in tahun_ada %}
+					<li><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman ~ '/arsip/' ~ t) }}"{% if saring and saring.id == t %} class="saring--aktif"{% endif %}>{{ t }}</a></li>
+					{% endfor %}
+				</ul>
+			</nav>
+			{% endif %}
+			<p><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman ~ '/rss.xml') }}">Langganan lewat RSS</a></p>
+		</div>
+	</div>
+</div>
+{% endblock %}

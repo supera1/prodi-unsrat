@@ -1,6 +1,16 @@
 {# A page the programme fills itself ("wajib" / "opsional"). Phase 1: the frame only; the editor comes in phase 2. #}
 {% extends "halaman.html" %}
+{% from "_kabar.html" import kartu_kabar with context %}
 {% block isi_halaman %}
 <p class="pengantar">{{ ini.deskripsi }}</p>
 <p class="catatan catatan--menyusul">Informasi ini sedang dilengkapi oleh Program Studi {{ nama }}.</p>
+{% for t in terkait.get(ini.id, []) %}
+<section class="terkait" aria-labelledby="terkait-{{ t.kategori.id }}">
+	<h2 id="terkait-{{ t.kategori.id }}">Kabar terkait: {{ t.kategori.label }}</h2>
+	<ul class="kabar-daftar kabar-daftar--ringkas">
+		{% for b in t.butir %}{{ kartu_kabar(b, 3) }}{% endfor %}
+	</ul>
+	<p><a href="{{ ke(slug ~ '/pengumuman/kategori/' ~ t.kategori.id) }}">Semua kabar {{ t.kategori.label | lower }} ({{ t.jumlah }})</a></p>
+</section>
+{% endfor %}
 {% endblock %}

@@ -40,7 +40,7 @@ Membangun **fondasi** yang dipakai semua fase berikutnya. Setelah Fase 1 selesai
 
 | Pekerjaan | Fase |
 |---|---|
-| Editor isi halaman (sejarah, VMTS, kurikulum, dokumen mutu, fasilitas, dll.), berita/pengumuman, unggah dokumen | 2 (pilot 3 prodi) |
+| Editor isi halaman (sejarah, VMTS, kurikulum, dokumen mutu, fasilitas, dll.), unggah dokumen | 2 (pilot 3 prodi) |
 | Alur persetujuan isi operator → admin prodi | 2 |
 | Usulan perubahan data resmi (CPL dll.) dari prodi ke superadmin | 2 |
 | Halaman "Dokumen Akreditasi" dan label kriteria per lembaga akreditasi | 2 |
@@ -222,10 +222,14 @@ Catatan:
 2. **Model data + tarik data www** + registri awal dari `usulan-slug.csv` yang sudah disetujui.
 3. **Template induk + generator**: menu.json, halaman Jinja2, token desain, palet warna, root daftar prodi,
    perakit folder publik, sitemap/robots per mode.
+   - **3b. Pengumuman dan berita** (ditambahkan 26 Oktober 2026, K-P14): model data, foto/PDF aman, halaman daftar,
+     detail, kategori, arsip, RSS, beranda, kabar terkait. Formulirnya di langkah 6.
 4. **Akun & peran**: SQLite, login, aturan sandi kuat, ganti/reset sandi, dekorator akses per prodi, audit log.
 5. **Superadmin**: prodi, slug, akun, tarik data, riwayat, impor `dosen_url`.
-6. **Admin prodi**: identitas, palet, logo, menu, operator.
-7. **Docker & deploy staging**: compose stack terpisah, Nginx, pemantau, panduan Portainer + catatan DNS/LB untuk admin VM.
+6. **Admin prodi**: identitas, palet, logo, menu, operator, formulir pengumuman (operator menulis, admin prodi
+   menyetujui).
+7. **Docker & deploy staging**: compose stack terpisah, Nginx, pemantau, panduan Portainer + catatan DNS/LB untuk admin VM,
+   bangun ulang terjadwal harian (pengumuman kedaluwarsa).
 8. **Uji menyeluruh + `docs/log/fase-01.md`** (cara verifikasi manual, sisa pekerjaan, keputusan yang perlu dikonfirmasi).
 
 ## 11. Kriteria selesai Fase 1
