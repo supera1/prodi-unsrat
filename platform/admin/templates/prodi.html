@@ -1,32 +1,35 @@
 {% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
 {% block judul %}{{ p.nama }}{% endblock %}
 {% block isi %}
-{% set a = akun_aktif() %}
+{{ nav_prodi(p, 'dasbor_prodi') }}
 <h1>{{ p.nama }}</h1>
 <p>{{ p.unit }} · <a href="{{ p.alamat }}">{{ p.alamat }}</a>{% if not p.aktif %} · <strong>situs nonaktif</strong>{% endif %}</p>
-<nav class="sub-navigasi" aria-label="Menu prodi">
-	{% if a.peran != 'operator' %}
-	<a href="{{ url_for('data_prodi_lihat', kode=p.kode) }}">Data prodi (CPL, akreditasi, …)</a>
-	<a href="{{ url_for('akun_prodi', kode=p.kode) }}">Akun prodi</a>
-	<a href="{{ url_for('audit_prodi', kode=p.kode) }}">Log audit prodi</a>
-	{% endif %}
-</nav>
+{% if not operator and jumlah.menunggu %}
+<p class="pesan pesan--info"><a href="{{ url_for('pengumuman_daftar', kode=p.kode, status='menunggu') }}">{{ jumlah.menunggu }} pengumuman menunggu persetujuan Anda.</a></p>
+{% endif %}
 <section class="kartu">
-	<h2>Pengumuman dan berita</h2>
+	<h2>{{ 'Pengumuman Anda' if operator else 'Pengumuman dan berita' }}</h2>
 	<ul class="angka">
-		<li><strong>{{ jumlah.terbit }}</strong> terbit</li>
-		<li><strong>{{ jumlah.menunggu }}</strong> menunggu persetujuan</li>
-		<li><strong>{{ jumlah.draf }}</strong> draf</li>
-		<li><strong>{{ jumlah.ditarik }}</strong> ditarik</li>
+		{% for s in ['terbit', 'menunggu', 'draf', 'ditarik'] %}
+		<li><a href="{{ url_for('pengumuman_daftar', kode=p.kode, status=s) }}"><strong>{{ jumlah[s] }}</strong> {{ NAMA_STATUS[s] | lower }}</a></li>
+		{% endfor %}
 	</ul>
-	<p class="catatan">Formulir pengumuman, identitas, bagian depan beranda, dan menu tersedia di tahap berikutnya.</p>
-</section>
-{% if anggota %}
-<section class="kartu">
-	<h2>Akun prodi ini</h2>
+	{% if terbaru %}
 	<ul>
-		{% for x in anggota %}
-		<li>{{ x.nama_lengkap }} (<code>{{ x.nama }}</code>) — {{ NAMA_PERAN[x.peran] }}{% if not x.aktif %}, nonaktif{% endif %}</li>
+		{% for b in terbaru %}
+		<li><a href="{{ url_for('pengumuman_ubah', kode=p.kode, id_=b.id) }}">{{ b.judul }}</a> <span class="status status--{{ b.status }}">{{ NAMA_STATUS[b.status] }}</span>{% if b.catatan and b.status == 'draf' %} <span class="keterangan">ada catatan dari admin</span>{% endif %}</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	<p><a class="tombol" href="{{ url_for('pengumuman_baru', kode=p.kode) }}">Buat pengumuman</a></p>
+</section>
+{% if siap %}
+<section class="kartu">
+	<h2>Kesiapan situs</h2>
+	<ul class="daftar-periksa">
+		{% for ok, teks, url in siap %}
+		<li class="{{ 'ok' if ok else 'belum' }}"><span class="tersembunyi">{{ 'Selesai:' if ok else 'Belum:' }}</span>{% if url %}<a href="{{ url }}">{{ teks }}</a>{% else %}{{ teks }}{% endif %}</li>
 		{% endfor %}
 	</ul>
 </section>

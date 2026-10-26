@@ -203,6 +203,14 @@ a:hover {
 	height: 48px;
 }
 
+.merek__logo {
+	flex: none;
+	width: auto;
+	height: 48px;
+	max-width: 12rem;
+	object-fit: contain;
+}
+
 .merek__teks {
 	display: flex;
 	flex-direction: column;
@@ -339,6 +347,10 @@ a:hover {
 
 	.merek__nama {
 		font-size: var(--unsrat-size-besar);
+	}
+
+	.merek__logo {
+		height: 56px;
 	}
 }
 
@@ -830,6 +842,16 @@ td:first-child {
 
 .kaki li + li {
 	margin-top: var(--unsrat-spasi-10);
+}
+
+.kaki__medsos {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--unsrat-spasi-10) var(--unsrat-spasi-30);
+}
+
+.kaki .kaki__medsos li + li {
+	margin-top: 0;
 }
 
 .kaki__bawah {

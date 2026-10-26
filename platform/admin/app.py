@@ -30,6 +30,7 @@ ADMIN = os.path.dirname(os.path.abspath(__file__))
 PLATFORM = os.path.dirname(ADMIN)
 sys.path.insert(0, PLATFORM)
 sys.path.insert(0, ADMIN)
+sys.path.insert(0, os.path.join(PLATFORM, "bangun"))
 
 from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for  # noqa: E402
 
@@ -38,6 +39,7 @@ import audit  # noqa: E402
 import lokasi  # noqa: E402
 import data_prodi  # noqa: E402
 import pembangun  # noqa: E402
+import pengumuman_admin  # noqa: E402
 import prodi_admin  # noqa: E402
 import registri  # noqa: E402
 import superadmin  # noqa: E402
@@ -224,9 +226,10 @@ def buat_app(env=None):
 
     @app.after_request
     def header_keamanan(resp):
-        resp.headers["Content-Security-Policy"] = (
+        # a route may set a stricter policy of its own (an uploaded SVG opened by itself, prodi_admin.berkas_prodi)
+        resp.headers.setdefault("Content-Security-Policy", (
             "default-src 'self'; img-src 'self' data: https://storage.googleapis.com; style-src 'self'; "
-            "script-src 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'")
+            "script-src 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'"))
         resp.headers["X-Content-Type-Options"] = "nosniff"
         resp.headers["X-Frame-Options"] = "DENY"
         resp.headers["Referrer-Policy"] = "same-origin"
@@ -335,10 +338,35 @@ def buat_app(env=None):
     @akses("prodi")
     def dasbor_prodi(kode):
         import pengumuman
-        butir = pengumuman.baca(kode)["butir"]
+        import tarik_www
+        operator = g.akun["peran"] == "operator"
+        butir = [b for b in pengumuman.baca(kode)["butir"] if not operator or b.get("oleh") == g.akun["nama"]]
         jumlah = {s: sum(1 for b in butir if b.get("status") == s) for s in pengumuman.STATUS}
-        anggota = akun_mod.terlihat_oleh(g.akun, kode) if g.akun["peran"] != "operator" else []
-        return render_template("prodi.html", p=g.prodi, jumlah=jumlah, anggota=anggota)
+        terbaru = sorted(butir, key=lambda b: b.get("diubah", ""), reverse=True)[:5]
+        siap = []
+        if not operator:
+            situs = lokasi.baca("prodi/%s/situs" % kode) or {}
+            r = registri_per_kode().get(kode, {})
+            p = data_prodi.efektif(kode)
+            kurang = tarik_www.kekurangan(p) if p else []
+            import menu as menu_mod
+            wajib = sum(1 for b in menu_mod.halaman(menu_mod.susun(menu_mod.baca_templat())) if b.get("jenis") == "wajib")
+            operator_n = sum(1 for a in akun_mod.terlihat_oleh(g.akun, kode) if a["peran"] == "operator" and a["aktif"])
+            siap = [
+                (not kurang, "Data prodi lengkap" if not kurang else "Data prodi masih kosong: %s" % ", ".join(kurang),
+                 url_for("data_prodi_lihat", kode=kode)),
+                (bool(r.get("dosen_url")), "Tautan dosen tetap " + ("terpasang" if r.get("dosen_url") else
+                                                                   "belum ada (diisi superadmin UPA TIK)"), None),
+                (bool(situs.get("logo")), "Logo prodi " + ("terpasang" if situs.get("logo") else "belum ada (opsional)"),
+                 url_for("identitas_prodi", kode=kode)),
+                (bool(situs.get("beranda") or situs.get("tagline")), "Bagian depan beranda " + (
+                    "sudah disesuaikan" if situs.get("beranda") or situs.get("tagline") else "masih bawaan (opsional)"),
+                 url_for("beranda_prodi", kode=kode)),
+                (operator_n > 0, "%d akun operator aktif" % operator_n, url_for("akun_prodi", kode=kode)),
+                (False, "%d halaman wajib akreditasi menunggu isi (penyunting halaman di Fase 2)" % wajib, None),
+            ]
+        return render_template("prodi.html", p=g.prodi, jumlah=jumlah, terbaru=terbaru, siap=siap, operator=operator,
+                               NAMA_STATUS=pengumuman_admin.NAMA_STATUS)
 
     # -------------------------------------------------------------- accounts
 
@@ -460,6 +488,7 @@ def buat_app(env=None):
     alat.kelompok_prodi, alat.prodi_dari_formulir = kelompok_prodi, prodi_dari_formulir
     superadmin.pasang(app, alat)
     prodi_admin.pasang(app, alat)
+    pengumuman_admin.pasang(app, alat)
     app.antrean = antrean
 
     # -------------------------------------------------------------- errors

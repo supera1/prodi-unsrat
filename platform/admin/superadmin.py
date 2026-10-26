@@ -15,7 +15,6 @@ lecturer link or a restored file of its own, everything for a slug, an active sw
 """
 from __future__ import print_function
 
-import difflib
 import hashlib
 import io
 import json
@@ -32,6 +31,7 @@ sys.path.insert(0, ADMIN)
 from flask import abort, flash, g, make_response, redirect, render_template, request, url_for  # noqa: E402
 
 import akun as akun_mod  # noqa: E402
+import beda  # noqa: E402
 import data_prodi  # noqa: E402
 import impor_dosen  # noqa: E402
 import lokasi  # noqa: E402
@@ -45,7 +45,6 @@ POLA_KODE = re.compile(r"^[0-9A-Za-z]{3,12}$")
 POLA_TOKEN = re.compile(r"^[A-Za-z0-9_-]{20,64}$")
 POLA_FILTER_BERKAS = re.compile(r"^(registri|warisan(/[a-z]+)?|prodi/[0-9A-Za-z]{3,12}(/[a-z][a-z0-9-]*)?)$")
 SEMENTARA_DETIK = 30 * 60
-MAKS_BARIS_BEDA = 600
 
 
 def pasang(app, alat):
@@ -90,6 +89,7 @@ def pasang(app, alat):
                 "bentrok": [r for r in baris if r["bentrok"]], "timpaan": sum(1 for r in baris if r["timpaan"]),
                 "meta": lokasi.baca("warisan/meta") or {}, "bangun": alat.antrean.status}
     alat.ringkasan = ringkasan
+    alat.nama_berkas = lambda berkas: nama_berkas(berkas)
 
     def oleh():
         return g.akun["nama"]
@@ -361,19 +361,12 @@ def pasang(app, alat):
     def super_riwayat_lihat():
         berkas, versi = request.args.get("berkas", ""), request.args.get("versi", "")
         try:
-            path = riwayat.baca_versi(berkas, versi)
+            hasil = beda.beda_versi(berkas, versi)
         except ValueError:
             abort(404)
-        with io.open(path, encoding="utf-8") as f:
-            lama = json.load(f)
-        kini = lokasi.baca(berkas)
-        beda = list(difflib.unified_diff(json.dumps(lama, ensure_ascii=False, indent=1).splitlines(),
-                                         json.dumps(kini, ensure_ascii=False, indent=1).splitlines() if kini is not None else [],
-                                         "versi %s" % versi, "sekarang", n=4, lineterm=""))   # 4: shows the code
-        catatan = [v for v in riwayat.daftar(5000) if v["berkas"] == berkas and v["versi"] == versi]
-        return render_template("super_riwayat_lihat.html", berkas=berkas, versi=versi, beda=beda[:MAKS_BARIS_BEDA],
-                               terpotong=len(beda) > MAKS_BARIS_BEDA, catatan=catatan[0] if catatan else None,
-                               nama_berkas=nama_berkas)
+        return render_template("riwayat_lihat.html", berkas=berkas, versi=versi, judul_berkas=nama_berkas(berkas),
+                               kembali=url_for("super_riwayat", berkas=berkas),
+                               pulihkan=url_for("super_riwayat_pulihkan"), **hasil)
 
     @app.route("/super/riwayat/pulihkan", methods=["POST"])
     @akses("super")

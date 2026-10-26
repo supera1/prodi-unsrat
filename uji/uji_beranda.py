@@ -189,8 +189,8 @@ try:
     except tp.GagalTampilan:
         pass
     try:
-        tp.atur("21201", {"menu": {}}, "penguji")
-        gagal.append("atur hanya untuk tagline dan beranda")
+        tp.atur("21201", {"warna_bebas": "#ffffff"}, "penguji")
+        gagal.append("atur hanya untuk pengaturan yang dikenal")
     except tp.GagalTampilan:
         pass
     # settings written past the checks (e.g. by hand) are ignored with a warning, never published

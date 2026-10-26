@@ -21,6 +21,13 @@
 	<div class="wadah kepala__isi">
 		<a class="merek" href="{{ ke(slug) }}">
 			<img class="merek__lambang" src="{{ aset('aset/img/lambang-128.png') }}" alt="" width="56" height="56">
+			{% if logo %}
+			{% if logo.format == 'svg' %}
+			<img class="merek__logo" src="{{ media_url(logo.varian.svg) }}" alt="" height="56" width="{{ (56 * logo.lebar / logo.tinggi) | round | int }}">
+			{% else %}
+			<img class="merek__logo" src="{{ media_url(logo.varian['56']) }}" srcset="{{ media_url(logo.varian['56']) }} 1x, {{ media_url(logo.varian['112']) }} 2x, {{ media_url(logo.varian['168']) }} 3x" alt="" height="56" width="{{ logo.varian['56'].lebar }}">
+			{% endif %}
+			{% endif %}
 			<span class="merek__teks">
 				<span class="merek__jenjang">Program Studi {{ JENJANG_PANJANG.get(p.jenjang, p.jenjang) }}</span>
 				<span class="merek__nama">{{ nama }}</span>
@@ -64,6 +71,11 @@
 			<h2 id="kaki-prodi" class="kaki__judul">{{ nama }}</h2>
 			<p>{{ unit.nama }}<br>Universitas Sam Ratulangi</p>
 			{% if p.surel %}<p><a href="mailto:{{ p.surel }}">{{ p.surel }}</a></p>{% endif %}
+			{% if media_sosial %}
+			<ul class="kaki__medsos" aria-label="Media sosial {{ nama }}">
+				{% for m in media_sosial %}<li><a href="{{ m.url }}" rel="me">{{ NAMA_MEDIA_SOSIAL[m.jenis] }}</a></li>{% endfor %}
+			</ul>
+			{% endif %}
 		</section>
 		<nav class="kaki__kolom" aria-labelledby="kaki-menu">
 			<h2 id="kaki-menu" class="kaki__judul">Jelajahi</h2>

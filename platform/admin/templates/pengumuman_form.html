@@ -1,0 +1,137 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}{{ b.judul if b else 'Pengumuman baru' }} — {{ pr.nama }}{% endblock %}
+{% macro tombol_status(aksi, label, garis=true) %}
+<form method="post" action="{{ url_for('pengumuman_status', kode=pr.kode, id_=b.id) }}" class="sebaris">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<input type="hidden" name="aksi" value="{{ aksi }}">
+	<button type="submit" class="tombol tombol--kecil{% if garis %} tombol--garis{% endif %}">{{ label }}</button>
+</form>
+{% endmacro %}
+{% block isi %}
+{% set a = akun_aktif() %}
+{{ nav_prodi(pr, 'pengumuman_daftar') }}
+<h1>{{ b.judul if b else 'Pengumuman baru' }}</h1>
+{% if b %}
+<p><span class="status status--{{ b.status }}">{{ NAMA_STATUS[b.status] }}</span> · ditulis {{ b.oleh }} · {{ b.dibuat }}{% if b.diubah != b.dibuat %} · diubah {{ b.diubah }}{% endif %}
+	{% if b.status == 'terbit' %} · <a href="{{ pr.alamat }}pengumuman/{{ b.id }}/">lihat di situs ↗</a>{% endif %}</p>
+{% if b.catatan and b.status == 'draf' %}<p class="pesan pesan--info"><strong>Catatan dari admin prodi:</strong> {{ b.catatan }}</p>{% endif %}
+<section class="kartu tindakan-status" aria-label="Status">
+	{% if admin %}
+		{% if b.status in ('draf', 'menunggu', 'ditarik') %}{{ tombol_status('terbitkan', 'Terbitkan' if b.status != 'ditarik' else 'Terbitkan lagi', false) }}{% endif %}
+		{% if b.status == 'terbit' %}{{ tombol_status('tarik', 'Tarik dari situs') }}{% endif %}
+		{% if b.status == 'draf' %}{{ tombol_status('arsipkan', 'Arsipkan draf') }}{% endif %}
+		{% if b.status == 'menunggu' %}
+		<form method="post" action="{{ url_for('pengumuman_status', kode=pr.kode, id_=b.id) }}" class="formulir kembalikan">
+			<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+			<input type="hidden" name="aksi" value="kembalikan">
+			<div class="isian"><label for="catatan">Kembalikan ke penulis dengan catatan</label>
+				<textarea id="catatan" name="catatan" rows="2" maxlength="{{ maks.catatan }}" required></textarea></div>
+			<button type="submit" class="tombol tombol--kecil tombol--garis">Kembalikan</button>
+		</form>
+		{% endif %}
+	{% else %}
+		{% if b.status == 'draf' %}{{ tombol_status('ajukan', 'Ajukan untuk diterbitkan', false) }}{{ tombol_status('arsipkan', 'Arsipkan draf') }}{% endif %}
+		{% if b.status == 'menunggu' %}<p>Menunggu persetujuan admin prodi.</p>{{ tombol_status('batal', 'Batalkan pengajuan') }}{% endif %}
+		{% if b.status in ('terbit', 'ditarik') %}<p>Pengumuman ini {{ NAMA_STATUS[b.status] | lower }}; hanya admin prodi yang dapat mengubahnya.</p>{% endif %}
+	{% endif %}
+</section>
+{% endif %}
+
+<p class="pesan pesan--info">{{ privasi }}</p>
+
+{% if boleh %}
+<form method="post" action="{{ url_for('pengumuman_simpan', kode=pr.kode, id_=b.id) if b else url_for('pengumuman_buat', kode=pr.kode) }}" enctype="multipart/form-data" class="formulir">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<section class="kartu">
+		<div class="isian"><label for="judul">Judul</label>
+			<input id="judul" name="judul" type="text" value="{{ isian.get('judul', '') }}" maxlength="{{ maks.judul }}" required></div>
+		<div class="medsos-baris">
+			<div class="isian"><label for="tanggal">Tanggal</label>
+				<input id="tanggal" name="tanggal" type="date" value="{{ isian.get('tanggal') or hari_ini }}" required></div>
+			<div class="isian"><label for="kategori">Kategori</label>
+				<select id="kategori" name="kategori">{% for k in kategori %}<option value="{{ k.id }}"{% if isian.get('kategori') == k.id %} selected{% endif %}>{{ k.label }}</option>{% endfor %}</select></div>
+			<div class="isian"><label for="kedaluwarsa">Berlaku sampai (opsional)</label>
+				<input id="kedaluwarsa" name="kedaluwarsa" type="date" value="{{ isian.get('kedaluwarsa', '') }}" aria-describedby="kedaluwarsa-ket">
+				<p id="kedaluwarsa-ket" class="keterangan">Setelah tanggal ini turun dari beranda, tetap ada di arsip.</p></div>
+		</div>
+		<div class="isian"><label for="ringkasan">Ringkasan</label>
+			<textarea id="ringkasan" name="ringkasan" rows="2" maxlength="{{ maks.ringkasan }}" required aria-describedby="ringkasan-ket">{{ isian.get('ringkasan', '') }}</textarea>
+			<p id="ringkasan-ket" class="keterangan">1–2 kalimat; tampil di daftar, di mesin pencari, dan saat tautan dibagikan ke WhatsApp.</p></div>
+		<div class="isian"><label for="isi">Isi</label>
+			<textarea id="isi" name="isi" rows="10" maxlength="{{ maks.isi }}" aria-describedby="isi-ket">{{ isian.get('isi', '') }}</textarea>
+			<p id="isi-ket" class="keterangan">Teks biasa: pisahkan paragraf dengan satu baris kosong; baris yang diawali "- " menjadi daftar; alamat yang diawali https:// menjadi tautan. HTML tidak diterima.</p></div>
+		<p><label><input type="checkbox" name="sematkan" value="1"{% if isian.get('sematkan') %} checked{% endif %}> Sematkan di atas beranda selama masih berlaku</label></p>
+	</section>
+
+	<section class="kartu">
+		<h2>Foto</h2>
+		{% if b and b.foto %}
+		<ul class="media-daftar">
+			{% for x in b.foto %}
+			{% set kecil = x.varian.get('400') or (x.varian.values() | list | first) %}
+			<li>
+				<img src="{{ url_berkas(pr.kode, kecil) }}" alt="" width="160" height="{{ (160 * kecil.tinggi / kecil.lebar) | round | int }}">
+				<div>
+					<div class="isian"><label for="foto-{{ loop.index0 }}-alt">Teks alternatif foto ke-{{ loop.index }}</label>
+						<input id="foto-{{ loop.index0 }}-alt" name="foto-{{ loop.index0 }}-alt" type="text" value="{{ x.alt }}" maxlength="{{ maks.alt }}" required></div>
+					<p><label><input type="radio" name="foto_utama" value="{{ loop.index0 }}"{% if loop.first %} checked{% endif %}> Foto utama</label>
+						<label><input type="checkbox" name="foto-{{ loop.index0 }}-hapus" value="1"> Lepas dari pengumuman</label></p>
+				</div>
+			</li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+		{% if not b or b.foto | length < maks_foto %}
+		<div class="isian"><label for="foto">{{ 'Tambah foto' if b and b.foto else 'Foto utama' }} (opsional)</label>
+			<input id="foto" name="foto" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" aria-describedby="foto-ket">
+			<p id="foto-ket" class="keterangan">JPG atau PNG, paling besar 10 MB, lebar minimal 600 piksel; paling banyak {{ maks_foto }} foto. Data lokasi (GPS) di foto dibuang otomatis.</p></div>
+		<div class="isian"><label for="foto_alt">Teks alternatif foto (wajib bila mengunggah foto)</label>
+			<input id="foto_alt" name="foto_alt" type="text" maxlength="{{ maks.alt }}" aria-describedby="alt-ket">
+			<p id="alt-ket" class="keterangan">Gambarkan isi foto untuk pembaca layar, mis. "Tim mahasiswa menerima piala di panggung".</p></div>
+		{% endif %}
+	</section>
+
+	<section class="kartu">
+		<h2>Lampiran PDF</h2>
+		{% if b and b.pdf %}
+		<ul class="media-daftar">
+			{% for x in b.pdf %}
+			<li><div>
+				<div class="isian"><label for="pdf-{{ loop.index0 }}-judul">Judul PDF ke-{{ loop.index }} (<a href="{{ url_berkas(pr.kode, x) }}">buka</a>, {{ x.halaman }} halaman)</label>
+					<input id="pdf-{{ loop.index0 }}-judul" name="pdf-{{ loop.index0 }}-judul" type="text" value="{{ x.judul }}" maxlength="{{ maks.judul_pdf }}" required></div>
+				<p><label><input type="checkbox" name="pdf-{{ loop.index0 }}-hapus" value="1"> Lepas dari pengumuman</label></p>
+			</div></li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+		{% if not b or b.pdf | length < maks_pdf %}
+		<div class="isian"><label for="pdf">Tambah PDF (opsional)</label>
+			<input id="pdf" name="pdf" type="file" accept=".pdf,application/pdf" aria-describedby="pdf-ket">
+			<p id="pdf-ket" class="keterangan">Paling besar 20 MB; paling banyak {{ maks_pdf }} PDF. PDF yang terkunci sandi atau berisi skrip, formulir aktif, atau berkas sisipan ditolak. Ditampilkan dengan pembaca PDF bawaan browser.</p></div>
+		<div class="isian"><label for="pdf_judul">Judul PDF (wajib bila mengunggah PDF)</label>
+			<input id="pdf_judul" name="pdf_judul" type="text" maxlength="{{ maks.judul_pdf }}"></div>
+		{% endif %}
+	</section>
+
+	<p class="tombol-baris">
+		{% if not b %}
+		<button type="submit" name="aksi_simpan" value="draf" class="tombol tombol--garis">Simpan draf</button>
+		{% if admin %}<button type="submit" name="aksi_simpan" value="terbit" class="tombol">Terbitkan</button>
+		{% else %}<button type="submit" name="aksi_simpan" value="ajukan" class="tombol">Ajukan untuk diterbitkan</button>{% endif %}
+		{% else %}
+		<button type="submit" name="aksi_simpan" value="simpan" class="tombol{% if b.status != 'terbit' %} tombol--garis{% endif %}">Simpan perubahan</button>
+		{% if b.status == 'draf' and not admin %}<button type="submit" name="aksi_simpan" value="ajukan" class="tombol">Simpan dan ajukan</button>{% endif %}
+		{% if admin and b.status != 'terbit' %}<button type="submit" name="aksi_simpan" value="terbit" class="tombol">Simpan dan terbitkan</button>{% endif %}
+		{% endif %}
+	</p>
+</form>
+{% endif %}
+
+{% if pratinjau %}
+<section class="kartu pratinjau-isi" aria-labelledby="judul-pratinjau">
+	<h2 id="judul-pratinjau">Pratinjau isi (tersimpan)</h2>
+	{{ pratinjau }}
+</section>
+{% endif %}
+{% endblock %}

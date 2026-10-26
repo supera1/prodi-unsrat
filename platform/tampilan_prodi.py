@@ -48,6 +48,17 @@ import saringan_spam  # noqa: E402
 import warna as warna_mod  # noqa: E402
 
 JENIS_LATAR = ("pucat", "utama", "warna", "foto")
+# social media a programme may link to (footer of its site), with the addresses each one accepts
+MEDIA_SOSIAL = {
+    "instagram": ("Instagram", r"^https://(www\.)?instagram\.com/[A-Za-z0-9_.]{1,60}/?$"),
+    "facebook": ("Facebook", r"^https://(www\.|m\.|web\.)?facebook\.com/[^\s\"'<>\\]{1,200}$"),
+    "youtube": ("YouTube", r"^https://(www\.)?(youtube\.com/(@|channel/|c/)[A-Za-z0-9_.\-]{1,100}|youtu\.be/[A-Za-z0-9_\-]{1,40})/?$"),
+    "tiktok": ("TikTok", r"^https://(www\.)?tiktok\.com/@[A-Za-z0-9_.]{1,60}/?$"),
+    "x": ("X (Twitter)", r"^https://(www\.)?(x|twitter)\.com/[A-Za-z0-9_]{1,30}/?$"),
+    "linkedin": ("LinkedIn", r"^https://(www\.)?linkedin\.com/(company|school|in)/[A-Za-z0-9_.\-%]{1,100}/?$"),
+}
+MAKS_MEDIA_SOSIAL = 6
+KUNCI_SITUS = ("tagline", "beranda", "palet", "logo", "media_sosial", "menu")
 KARTU_RESMI = ("akreditasi", "gelar", "sks", "internasional")
 MAKS = {"label": 80, "judul": 100, "subjudul": 120, "tagline": 300, "kartu_label": 30, "kartu_nilai": 24,
         "kartu_keterangan": 40}
@@ -162,6 +173,58 @@ def periksa(beranda, tagline=""):
     return masalah
 
 
+def periksa_identitas(situs):
+    """Problems with a programme's palette, logo, social media and menu settings (empty list when usable)."""
+    import media
+    import menu as menu_mod
+    masalah = []
+    palet = situs.get("palet")
+    if palet not in (None, warna_mod.BAWAAN) and palet not in {p["id"] for p in warna_mod.baca_palet()}:
+        masalah.append("palet %r tidak dikenal" % (palet,))
+    logo = situs.get("logo")
+    if logo is not None:
+        if not isinstance(logo, dict) or logo.get("jenis") != "logo" or logo.get("format") not in ("svg", "png") \
+                or not isinstance(logo.get("varian"), dict) or not logo["varian"]:
+            masalah.append("logo tidak sah")
+        elif not all(media.url_sah(v.get("url")) if "url" in v else media.jalur_sah(v.get("jalur")) for v in logo["varian"].values()):
+            masalah.append("alamat berkas logo tidak sah")
+        elif not (isinstance(logo.get("lebar"), int) and isinstance(logo.get("tinggi"), int) and logo["tinggi"] > 0):
+            masalah.append("ukuran logo tidak sah")
+    medsos = situs.get("media_sosial") or []
+    if not isinstance(medsos, list) or len(medsos) > MAKS_MEDIA_SOSIAL:
+        masalah.append("media sosial paling banyak %d" % MAKS_MEDIA_SOSIAL)
+        medsos = []
+    for i, m in enumerate(medsos, 1):
+        if not isinstance(m, dict) or m.get("jenis") not in MEDIA_SOSIAL:
+            masalah.append("media sosial ke-%d tidak dikenal" % i)
+        elif not re.match(MEDIA_SOSIAL[m["jenis"]][1], m.get("url") or ""):
+            masalah.append("alamat %s ke-%d tidak sah (harus alamat https di situs %s)" % (
+                MEDIA_SOSIAL[m["jenis"]][0], i, MEDIA_SOSIAL[m["jenis"]][0]))
+    masalah += menu_mod.periksa_pengaturan(menu_mod.baca_templat(), situs.get("menu") or {})
+    return masalah
+
+
+def bawaan_dan_resmi(p, nama_unit):
+    """(default texts, official cards) of a programme's front section, from its effective data (data_prodi.py)."""
+    import registri
+    jenjang = registri.JENJANG_PANJANG.get(p["jenjang"], p["jenjang"])
+    bawaan = {"label": "Program Studi %s · %s" % (jenjang, nama_unit), "judul": registri.nama_tampil(p),
+              "subjudul": p.get("nama_en") or "",
+              "pengantar": "Program studi %s di %s, Universitas Sam Ratulangi, Manado." % (jenjang.lower(), nama_unit)}
+    resmi = []
+    if p.get("akreditasi"):
+        resmi.append({"id": "akreditasi", "label": "Akreditasi", "nilai": p["akreditasi"],
+                      "keterangan": p.get("lembaga_akreditasi") or "", "sorot": True})
+    if p.get("gelar"):
+        resmi.append({"id": "gelar", "label": "Gelar", "nilai": p["gelar"], "keterangan": "", "sorot": False})
+    if p.get("sks"):
+        resmi.append({"id": "sks", "label": "Beban studi", "nilai": "%s SKS" % p["sks"], "keterangan": "", "sorot": False})
+    if p.get("internasional"):
+        resmi.append({"id": "internasional", "label": "Akreditasi internasional", "nilai": p["internasional"],
+                      "keterangan": "", "sorot": False})
+    return bawaan, resmi
+
+
 def susun(bawaan, kartu_resmi, situs, w):
     """What the builder shows. bawaan: {"label", "judul", "subjudul"} from the official data; kartu_resmi:
     [{"id", "label", "nilai", "keterangan", "sorot"}] for the official values that exist; w: warna.warna_prodi().
@@ -227,16 +290,16 @@ def _simpan(kode, situs, oleh, aksi):
     lokasi.tulis("prodi/%s/situs" % kode, situs, oleh, "Beranda", aksi)
 
 
-def atur(kode, perubahan, oleh):
-    """Replace "tagline" and/or "beranda" of a programme's settings after checking them."""
-    if set(perubahan) - {"tagline", "beranda"}:
-        raise GagalTampilan("hanya tagline dan beranda yang diatur di sini")
+def atur(kode, perubahan, oleh, aksi=None):
+    """Replace settings of a programme (keys of KUNCI_SITUS) after checking them all."""
+    if set(perubahan) - set(KUNCI_SITUS):
+        raise GagalTampilan("pengaturan tidak dikenal: %s" % ", ".join(sorted(set(perubahan) - set(KUNCI_SITUS))))
     situs = lokasi.baca("prodi/%s/situs" % kode) or {}
     baru = dict(situs, **perubahan)
-    masalah = periksa(baru.get("beranda"), baru.get("tagline") or "")
+    masalah = periksa(baru.get("beranda"), baru.get("tagline") or "") + periksa_identitas(baru)
     if masalah:
         raise GagalTampilan("; ".join(masalah))
-    _simpan(kode, baru, oleh, "atur beranda")
+    _simpan(kode, baru, oleh, aksi or "atur %s" % ", ".join(sorted(perubahan)))
 
 
 def ganti_foto(kode, data, fokus, oleh):

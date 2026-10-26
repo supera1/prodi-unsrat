@@ -234,7 +234,8 @@ Catatan:
    riwayat, dan impor tautan dosen.
 5. **Superadmin**: prodi, slug, akun, tarik data, riwayat, impor `dosen_url`.
 6. **Admin prodi**: identitas, palet, logo, menu, bagian depan beranda (latar, foto, teks, kartu), operator, formulir
-   pengumuman (operator menulis, admin prodi menyetujui).
+   pengumuman (operator menulis, admin prodi menyetujui). *Pelaksanaan:* juga riwayat isi prodi (bandingkan,
+   pulihkan) untuk admin prodi dan daftar periksa kesiapan situs di dasbor prodi.
 7. **Docker & deploy staging**: compose stack terpisah, Nginx, pemantau, panduan Portainer + catatan DNS/LB untuk admin VM,
    bangun ulang terjadwal harian (pengumuman kedaluwarsa), dan cara Nginx memuat ulang `nginx-buatan/slug-lama.conf`
    setelah slug diubah (pengalihan 301 baru berlaku setelah itu).

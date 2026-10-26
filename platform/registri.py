@@ -36,6 +36,8 @@ def baca():
 
 
 URUTAN_JENJANG = ("S1", "S2", "S3", "Profesi", "Sp-1", "Sp-2")
+JENJANG_PANJANG = {"S1": "Sarjana", "S2": "Magister", "S3": "Doktor", "Profesi": "Profesi", "Sp-1": "Spesialis",
+                   "Sp-2": "Subspesialis"}
 
 
 def nama_tampil(p):

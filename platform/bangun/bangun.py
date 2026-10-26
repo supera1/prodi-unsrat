@@ -74,8 +74,7 @@ CSP = ("default-src 'self'; script-src 'self'; style-src 'self' https://fonts.go
 FONT = ("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..700"
         "&display=swap")
 
-JENJANG_PANJANG = {"S1": "Sarjana", "S2": "Magister", "S3": "Doktor", "Profesi": "Profesi", "Sp-1": "Spesialis",
-                   "Sp-2": "Subspesialis"}
+JENJANG_PANJANG = registri.JENJANG_PANJANG
 # sections of the root page, in this order
 KELOMPOK_JENJANG = (("sarjana", "Sarjana (S1)", ("S1",)), ("magister", "Magister (S2)", ("S2",)),
                     ("doktor", "Doktor (S3)", ("S3",)), ("profesi", "Profesi", ("Profesi",)),
@@ -202,7 +201,8 @@ class Pembangun(object):
                                undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True, keep_trailing_newline=True)
         self.env.filters.update(tanggal=tanggal, tautan_md=tautan_md, json_ld=json_ld, teks_isi=teks_isi, ukuran=ukuran,
                                 foto_varian=foto_varian)
-        self.env.globals.update(nama_tampil=nama_tampil, JENJANG_PANJANG=JENJANG_PANJANG)
+        self.env.globals.update(nama_tampil=nama_tampil, JENJANG_PANJANG=JENJANG_PANJANG,
+                                NAMA_MEDIA_SOSIAL={k: v[0] for k, v in tampilan_prodi.MEDIA_SOSIAL.items()})
         self.berkas = {}      # published path -> bytes
         self.versi = {}       # published asset path -> short hash, for ?v=
         self.peringatan = []
@@ -309,6 +309,7 @@ class Pembangun(object):
         if situs.get("palet") not in (None, warna_mod.BAWAAN, w["palet"]):
             self.peringatan.append("prodi %s: %s" % (kode, w["keterangan"]))
         hero = self.hero_prodi(kode, p, unit, situs, w)
+        logo, media_sosial = self.identitas_prodi(kode, situs)
 
         def url_foto(rekam):      # from <slug>/warna.css
             return rekam["url"] if "url" in rekam else posixpath.relpath("unggahan/" + rekam["jalur"], slug)
@@ -331,6 +332,7 @@ class Pembangun(object):
                     dosen_url=r.get("dosen_url") or "", dosen_umum=DOSEN_UMUM, kalender=self.kalender,
                     kurikulum=sorted({c["kurikulum"] for c in p.get("cpl", []) if c.get("kurikulum")}),
                     kabar_beranda=di_beranda, terkait=terkait, label_kategori=self.label_kategori, hero=hero,
+                    logo=logo, media_sosial=media_sosial,
                     hari_ini=self.hari_ini)
         for e in menu:
             for ini in [e] + e.get("anak", []):
@@ -352,23 +354,24 @@ class Pembangun(object):
                         konteks["og_gambar"] = self.media_mutlak(hero["latar"]["foto"]["varian"]["1600"])
                 self.render(templat, self.jalur_halaman(slug, ini["alamat"]), **konteks)
 
+    def identitas_prodi(self, kode, situs):
+        """(logo, social media) of a programme, each only when its settings pass the checks."""
+        logo = situs.get("logo")
+        if logo is not None:
+            masalah = tampilan_prodi.periksa_identitas({"logo": logo})
+            if masalah or not all(self.terbitkan_media(v) for v in logo["varian"].values()):
+                self.peringatan.append("prodi %s: logo diabaikan (%s)" % (kode, "; ".join(masalah) or "berkasnya tidak ada"))
+                logo = None
+        media_sosial = situs.get("media_sosial") or []
+        masalah = tampilan_prodi.periksa_identitas({"media_sosial": media_sosial})
+        if masalah:
+            self.peringatan.append("prodi %s: media sosial diabaikan (%s)" % (kode, "; ".join(masalah)))
+            media_sosial = []
+        return logo, media_sosial
+
     def hero_prodi(self, kode, p, unit, situs, w):
         """The front section of the home page: the admin's settings over the defaults from the official data."""
-        jenjang = JENJANG_PANJANG.get(p["jenjang"], p["jenjang"])
-        bawaan = {"label": "Program Studi %s · %s" % (jenjang, unit["nama"]), "judul": nama_tampil(p),
-                  "subjudul": p.get("nama_en") or "",
-                  "pengantar": "Program studi %s di %s, Universitas Sam Ratulangi, Manado." % (jenjang.lower(), unit["nama"])}
-        resmi = []
-        if p.get("akreditasi"):
-            resmi.append({"id": "akreditasi", "label": "Akreditasi", "nilai": p["akreditasi"],
-                          "keterangan": p.get("lembaga_akreditasi") or "", "sorot": True})
-        if p.get("gelar"):
-            resmi.append({"id": "gelar", "label": "Gelar", "nilai": p["gelar"], "keterangan": "", "sorot": False})
-        if p.get("sks"):
-            resmi.append({"id": "sks", "label": "Beban studi", "nilai": "%s SKS" % p["sks"], "keterangan": "", "sorot": False})
-        if p.get("internasional"):
-            resmi.append({"id": "internasional", "label": "Akreditasi internasional", "nilai": p["internasional"],
-                          "keterangan": "", "sorot": False})
+        bawaan, resmi = tampilan_prodi.bawaan_dan_resmi(p, unit["nama"])
         try:
             hero = tampilan_prodi.susun(bawaan, resmi, situs, w)
         except tampilan_prodi.GagalTampilan as e:

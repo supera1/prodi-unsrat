@@ -61,6 +61,8 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai
   `rahasia/.kredensial-<nama>.txt`); jalankan `.venv/bin/python platform/admin/app.py` → http://127.0.0.1:8791/.
 - Setiap rute admin wajib `@akses(...)` (`platform/admin/akses.py`) dan wajib masuk matriks di `uji/uji_admin.py`
   (uji gagal bila ada rute baru yang belum diuji untuk semua peran).
+- Halaman admin prodi di `platform/admin/prodi_admin.py` (data, identitas, beranda, menu, riwayat, berkas) dan
+  `platform/admin/pengumuman_admin.py` (operator menulis/mengajukan, admin menerbitkan/mengembalikan/menarik).
 - Halaman superadmin di `platform/admin/superadmin.py`. Perubahan yang memengaruhi situs memanggil bangun ulang lewat
   `platform/admin/pembangun.py`; `PRODI_BANGUN=latar` (bawaan, utas latar), `sinkron` (uji), `mati` (uji akses).
 - Template: `platform/template/menu.json` (menu induk), `platform/template/kategori.json` (kategori pengumuman), `platform/template/halaman/*.html` (Jinja2, autoescape),

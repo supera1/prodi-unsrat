@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
-"""Pages of a programme's admin (akses("prodi", "admin"): the programme's admins and the superadmin).
+"""Pages of a programme's admin (akses("prodi", "admin"): the programme's admins and the superadmin), langkah 5b-6.
 
     /prodi/<kode>/data                     the programme's data (name, degree, credits, accreditation, CPL, ...):
-                                           change it here; www's value stays visible next to every changed field
+                                           change it here; www's value stays visible next to every changed field (K-P16)
     /prodi/<kode>/data/<field>/www         use www's value again for a field (drop the local change)
     /prodi/<kode>/data/<field>/tetap       keep the local value after www changed the field (end the conflict)
+    /prodi/<kode>/identitas                palette, social media; /identitas/logo (upload), /identitas/logo/hapus
+    /prodi/<kode>/beranda                  the front section of the home page (K-P15); /beranda/foto (upload)
+    /prodi/<kode>/menu                     labels, order, hidden optional items
+    /prodi/<kode>/riwayat                  versions of the programme's own data files: compare, restore
+    /prodi/<kode>/berkas/<path>            an uploaded file of the programme, for previews in the admin
+                                           (akses("prodi"): operators see the photos of their drafts too)
 
-Langkah 5b (K-P16). The rest of the programme admin's pages come in langkah 6.
+Every change is checked by the module that owns the data (data_prodi, tampilan_prodi, menu) before it is written,
+logged, and followed by a rebuild of the programme's site.
 """
 from __future__ import print_function
 
@@ -18,12 +25,22 @@ ADMIN = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(ADMIN))
 sys.path.insert(0, ADMIN)
 
-from flask import abort, flash, g, redirect, render_template, request, url_for  # noqa: E402
+from flask import abort, flash, g, redirect, render_template, request, send_file, url_for  # noqa: E402
 
+import beda  # noqa: E402
 import data_prodi  # noqa: E402
 import lokasi  # noqa: E402
+import media  # noqa: E402
 import registri  # noqa: E402
+import riwayat  # noqa: E402
+import tampilan_prodi  # noqa: E402
+import warna as warna_mod  # noqa: E402
 from akses import akses  # noqa: E402
+
+sys.path.insert(0, os.path.join(os.path.dirname(ADMIN), "bangun"))
+import menu as menu_mod  # noqa: E402
+
+TIPE_BERKAS = {"jpg": "image/jpeg", "png": "image/png", "svg": "image/svg+xml", "pdf": "application/pdf"}
 
 JUMLAH_CPL_KOSONG = 3          # empty CPL rows offered for new items (no JavaScript)
 
@@ -131,3 +148,268 @@ def pasang(app, alat):
             alat.catat("data-prodi-tetap", prodi=kode, kolom=f)
             flash("%s tetap memakai data prodi; tanda bentrok dihapus." % data_prodi.FIELD_UBAH[f][0], "ok")
         return redirect(url_for("data_prodi_lihat", kode=kode))
+
+    # -------------------------------------------------------------- uploaded files, for previews in the admin
+
+    def url_berkas(kode, rekam):
+        return rekam["url"] if "url" in rekam else url_for("berkas_prodi", kode=kode, jalur=rekam["jalur"])
+    app.jinja_env.globals["url_berkas"] = url_berkas
+
+    @app.route("/prodi/<kode>/berkas/<path:jalur>")
+    @akses("prodi")
+    def berkas_prodi(kode, jalur):
+        # only files the platform named itself, and only this programme's
+        if not media.jalur_sah(jalur) or not jalur.startswith(kode + "/"):
+            abort(404)
+        path = os.path.join(lokasi.unggahan(), *jalur.split("/"))
+        if not os.path.isfile(path):
+            abort(404)
+        akhiran = jalur.rsplit(".", 1)[1]
+        resp = send_file(path, mimetype=TIPE_BERKAS[akhiran], max_age=0)
+        if akhiran == "svg":            # an SVG opened by itself may not run anything
+            resp.headers["Content-Security-Policy"] = "default-src 'none'; style-src 'unsafe-inline'; img-src data:"
+        return resp
+
+    # -------------------------------------------------------------- settings of the site (situs.json)
+
+    def situs(kode):
+        return lokasi.baca("prodi/%s/situs" % kode) or {}
+
+    def simpan_situs(kode, perubahan, aksi, pesan, **rinci):
+        tampilan_prodi.atur(kode, perubahan, g.akun["nama"], aksi)
+        alat.catat(aksi, prodi=kode, **rinci)
+        bangun(kode)
+        flash(pesan + " Situs prodi dibangun ulang.", "ok")
+
+    def unit_prodi(kode):
+        p = data_prodi.efektif(kode)
+        return p, data_prodi.unit_per_kode().get(p.get("unit_kode"), {"nama": p.get("unit", "")})
+
+    # identity: palette, social media, logo
+
+    def halaman_identitas(kode, kode_status=200):
+        s = situs(kode)
+        _p, unit = unit_prodi(kode)
+        fakultas = warna_mod.warna_prodi(None, unit.get("bendera"))
+        palet = [dict(warna_mod.turunan(x["utama"], x["aksen"]), id=x["id"], nama=x["nama"]) for x in warna_mod.baca_palet()]
+        medsos = list(s.get("media_sosial") or [])
+        medsos += [{"jenis": "", "url": ""}] * (tampilan_prodi.MAKS_MEDIA_SOSIAL - len(medsos))
+        return render_template("prodi_identitas.html", pr=g.prodi, s=s, fakultas=fakultas, palet=palet, medsos=medsos,
+                               jenis_medsos=tampilan_prodi.MEDIA_SOSIAL, pilihan=s.get("palet") or warna_mod.BAWAAN,
+                               petunjuk_logo="Logo prodi (opsional): SVG, PNG, atau JPG, paling besar 5 MB; tinggi minimal "
+                               "168 piksel untuk PNG/JPG; lebar dibagi tinggi 0,5–4. Ditampilkan setinggi 56 piksel di "
+                               "samping lambang UNSRAT."), kode_status
+
+    @app.route("/prodi/<kode>/identitas")
+    @akses("prodi", "admin")
+    def identitas_prodi(kode):
+        return halaman_identitas(kode)
+
+    @app.route("/prodi/<kode>/identitas", methods=["POST"])
+    @akses("prodi", "admin")
+    def identitas_simpan(kode):
+        palet = request.form.get("palet") or warna_mod.BAWAAN
+        medsos = []
+        for i in range(tampilan_prodi.MAKS_MEDIA_SOSIAL):
+            jenis, url = request.form.get("medsos-%d-jenis" % i, ""), request.form.get("medsos-%d-url" % i, "").strip()
+            if url:
+                medsos.append({"jenis": jenis, "url": url})
+        try:
+            simpan_situs(kode, {"palet": None if palet == warna_mod.BAWAAN else palet, "media_sosial": medsos},
+                         "identitas-diubah", "Identitas disimpan.", palet=palet, media_sosial=len(medsos))
+        except tampilan_prodi.GagalTampilan as e:
+            flash("Identitas tidak disimpan: %s" % e, "galat")
+            return halaman_identitas(kode, 400)
+        return redirect(url_for("identitas_prodi", kode=kode))
+
+    @app.route("/prodi/<kode>/identitas/logo", methods=["POST"])
+    @akses("prodi", "admin")
+    def logo_unggah(kode):
+        berkas = request.files.get("logo")
+        try:
+            if not berkas or not berkas.filename:
+                raise ValueError("Pilih berkas logo.")
+            logo = media.simpan_logo(kode, berkas.read(media.MAKS_LOGO + 1), berkas.filename)
+            simpan_situs(kode, {"logo": logo}, "logo-diunggah", "Logo disimpan.", format=logo["format"])
+        except (ValueError, tampilan_prodi.GagalTampilan) as e:
+            flash("Logo tidak disimpan: %s" % e, "galat")
+            return halaman_identitas(kode, 400)
+        return redirect(url_for("identitas_prodi", kode=kode))
+
+    @app.route("/prodi/<kode>/identitas/logo/hapus", methods=["POST"])
+    @akses("prodi", "admin")
+    def logo_hapus(kode):
+        if situs(kode).get("logo"):
+            simpan_situs(kode, {"logo": None}, "logo-dilepas", "Logo dilepas dari situs (berkasnya tetap tersimpan).")
+        return redirect(url_for("identitas_prodi", kode=kode))
+
+    # the front section of the home page
+
+    def halaman_beranda(kode, kode_status=200, isian=None):
+        s = situs(kode)
+        p, unit = unit_prodi(kode)
+        bawaan, resmi = tampilan_prodi.bawaan_dan_resmi(p, unit["nama"])
+        beranda = isian if isian is not None else (s.get("beranda") or {})
+        return render_template("prodi_beranda.html", pr=g.prodi, s=s, b=beranda, bawaan=bawaan, resmi=resmi,
+                               semua_resmi=tampilan_prodi.KARTU_RESMI, maks_tambahan=tampilan_prodi.MAKS_KARTU_TAMBAHAN,
+                               petunjuk=media.PETUNJUK_HERO, fokus=media.FOKUS, maks=tampilan_prodi.MAKS,
+                               foto=(s.get("beranda") or {}).get("latar", {}).get("foto")), kode_status
+
+    @app.route("/prodi/<kode>/beranda")
+    @akses("prodi", "admin")
+    def beranda_prodi(kode):
+        return halaman_beranda(kode)
+
+    @app.route("/prodi/<kode>/beranda", methods=["POST"])
+    @akses("prodi", "admin")
+    def beranda_simpan(kode):
+        f = request.form
+        lama = situs(kode).get("beranda") or {}
+        jenis = f.get("latar", "pucat")
+        latar = {"jenis": jenis}
+        if jenis == "warna":
+            latar["warna"] = (f.get("warna") or "").strip().upper()
+        elif jenis == "foto":
+            foto = (lama.get("latar") or {}).get("foto")
+            if not foto:
+                flash("Unggah foto latar dulu (formulir di bawah), lalu pilih latar foto.", "galat")
+                return halaman_beranda(kode, 400)
+            latar["foto"] = foto
+        beranda = {"latar": latar}
+        for k in ("label", "judul", "subjudul"):
+            if f.get(k, "").strip():
+                beranda[k] = f.get(k).strip()
+        kartu = {}
+        for id_ in tampilan_prodi.KARTU_RESMI:
+            atur = {}
+            if f.get("kartu-%s-label" % id_, "").strip():
+                atur["label"] = f.get("kartu-%s-label" % id_).strip()
+            if f.get("kartu-%s-urutan" % id_, "").strip():
+                try:
+                    atur["urutan"] = int(f.get("kartu-%s-urutan" % id_))
+                except ValueError:
+                    atur["urutan"] = -1                      # refused with the module's message
+            if f.get("kartu-%s-sembunyi" % id_):
+                atur["sembunyi"] = True
+            if atur:
+                kartu[id_] = atur
+        if kartu:
+            beranda["kartu"] = kartu
+        tambahan = []
+        for i in range(tampilan_prodi.MAKS_KARTU_TAMBAHAN):
+            label, nilai = f.get("tambahan-%d-label" % i, "").strip(), f.get("tambahan-%d-nilai" % i, "").strip()
+            if label or nilai:
+                k = {"label": label, "nilai": nilai, "keterangan": f.get("tambahan-%d-keterangan" % i, "").strip()}
+                if f.get("tambahan-%d-urutan" % i, "").strip():
+                    try:
+                        k["urutan"] = int(f.get("tambahan-%d-urutan" % i))
+                    except ValueError:
+                        k["urutan"] = -1
+                tambahan.append(k)
+        if tambahan:
+            beranda["kartu_tambahan"] = tambahan
+        try:
+            simpan_situs(kode, {"tagline": f.get("pengantar", "").strip(), "beranda": beranda}, "beranda-diubah",
+                         "Bagian depan beranda disimpan.", latar=jenis)
+        except tampilan_prodi.GagalTampilan as e:
+            flash("Bagian depan tidak disimpan: %s" % e, "galat")
+            return halaman_beranda(kode, 400, isian=beranda)
+        return redirect(url_for("beranda_prodi", kode=kode))
+
+    @app.route("/prodi/<kode>/beranda/foto", methods=["POST"])
+    @akses("prodi", "admin")
+    def beranda_foto(kode):
+        berkas = request.files.get("foto")
+        try:
+            if not berkas or not berkas.filename:
+                raise ValueError("Pilih foto latar.")
+            tampilan_prodi.ganti_foto(kode, berkas.read(media.MAKS_HERO + 1), request.form.get("fokus", "tengah"),
+                                      g.akun["nama"])
+        except (ValueError, tampilan_prodi.GagalTampilan) as e:
+            flash("Foto latar tidak disimpan: %s" % e, "galat")
+            return halaman_beranda(kode, 400)
+        alat.catat("foto-latar-diunggah", prodi=kode, fokus=request.form.get("fokus", "tengah"))
+        bangun(kode)
+        flash("Foto latar disimpan dan dipakai sebagai latar bagian depan. Situs prodi dibangun ulang.", "ok")
+        return redirect(url_for("beranda_prodi", kode=kode))
+
+    # menu
+
+    def halaman_menu(kode, kode_status=200, pengaturan=None):
+        templat = menu_mod.baca_templat()
+        atur = pengaturan if pengaturan is not None else (situs(kode).get("menu") or {})
+        return render_template("prodi_menu.html", pr=g.prodi, templat=templat, atur=atur,
+                               maks_label=menu_mod.MAKS_LABEL), kode_status
+
+    @app.route("/prodi/<kode>/menu")
+    @akses("prodi", "admin")
+    def menu_prodi(kode):
+        return halaman_menu(kode)
+
+    @app.route("/prodi/<kode>/menu", methods=["POST"])
+    @akses("prodi", "admin")
+    def menu_simpan(kode):
+        f = request.form
+        pengaturan = {}
+        for b in menu_mod.baca_templat():
+            butir = [(b, None)] + [(a, i) for i, a in enumerate(b.get("anak", []))]
+            for x, posisi in butir:
+                atur = {}
+                label = f.get("label-%s" % x["id"], "").strip()
+                if label and label != x["label"]:
+                    atur["label"] = label
+                if posisi is not None and f.get("urutan-%s" % x["id"], "").strip():
+                    try:
+                        urutan = int(f.get("urutan-%s" % x["id"]))
+                    except ValueError:
+                        urutan = -1                          # refused with the module's message
+                    if urutan != posisi:
+                        atur["urutan"] = urutan
+                if f.get("sembunyi-%s" % x["id"]):
+                    atur["sembunyi"] = True
+                if atur:
+                    pengaturan[x["id"]] = atur
+        try:
+            simpan_situs(kode, {"menu": pengaturan}, "menu-diubah", "Menu disimpan.", butir=len(pengaturan))
+        except tampilan_prodi.GagalTampilan as e:
+            flash("Menu tidak disimpan: %s" % e, "galat")
+            return halaman_menu(kode, 400, pengaturan)
+        return redirect(url_for("menu_prodi", kode=kode))
+
+    # -------------------------------------------------------------- the programme's version history
+
+    def berkas_milik(kode, berkas):
+        if not (berkas or "").startswith("prodi/%s/" % kode):
+            abort(404)
+        return berkas
+
+    @app.route("/prodi/<kode>/riwayat")
+    @akses("prodi", "admin")
+    def riwayat_prodi(kode):
+        daftar = [v for v in riwayat.daftar(5000) if v["berkas"].startswith("prodi/%s/" % kode)][:300]
+        return render_template("riwayat_prodi.html", pr=g.prodi, daftar=daftar, nama_berkas=alat.nama_berkas)
+
+    @app.route("/prodi/<kode>/riwayat/lihat")
+    @akses("prodi", "admin")
+    def riwayat_prodi_lihat(kode):
+        berkas, versi = berkas_milik(kode, request.args.get("berkas", "")), request.args.get("versi", "")
+        try:
+            hasil = beda.beda_versi(berkas, versi)
+        except ValueError:
+            abort(404)
+        return render_template("riwayat_lihat.html", berkas=berkas, versi=versi, judul_berkas=alat.nama_berkas(berkas),
+                               kembali=url_for("riwayat_prodi", kode=kode),
+                               pulihkan=url_for("riwayat_prodi_pulihkan", kode=kode), **hasil)
+
+    @app.route("/prodi/<kode>/riwayat/pulihkan", methods=["POST"])
+    @akses("prodi", "admin")
+    def riwayat_prodi_pulihkan(kode):
+        berkas, versi = berkas_milik(kode, request.form.get("berkas", "")), request.form.get("versi", "")
+        try:
+            riwayat.pulihkan(berkas, versi, g.akun["nama"], "Riwayat prodi")
+        except ValueError:
+            abort(404)
+        alat.catat("versi-dipulihkan", prodi=kode, berkas=berkas, versi=versi)
+        bangun(kode)
+        flash("Versi %s dipulihkan (isi sebelumnya disimpan sebagai versi baru); situs prodi dibangun ulang." % versi, "ok")
+        return redirect(url_for("riwayat_prodi", kode=kode))

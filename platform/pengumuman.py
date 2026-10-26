@@ -9,7 +9,10 @@ An item:
      "foto": [media.simpan_foto records; the first is the main photo], "pdf": [media.simpan_pdf records],
      "sematkan": bool (kept at the top of the home page), "kedaluwarsa": "" or YYYY-MM-DD (leaves the home page
      after that day, stays in the archive), "status": draf | menunggu | terbit | ditarik,
-     "dibuat", "diubah", "oleh"}
+     "dibuat", "diubah", "oleh" (who wrote it), "catatan" (the admin's note when sending it back; never published)}
+
+Workflow (langkah 6): an operator writes a draft and submits it ("menunggu"); a programme admin publishes it
+("terbit") or sends it back to draft with a note (kembalikan). Admins may also write and publish directly.
 
 "isi" is plain text: paragraphs separated by an empty line, lines starting with "- " form a list, https:// addresses
 become links (bangun.py teks_isi). No HTML is accepted anywhere. Published items are never deleted, only withdrawn
@@ -46,7 +49,7 @@ KATEGORI_JSON = os.path.join(PLATFORM, "template", "kategori.json")
 STATUS = ("draf", "menunggu", "terbit", "ditarik")
 POLA_ID = re.compile(r"^\d{4}-\d{2}-\d{2}-[a-z0-9]+(-[a-z0-9]+)*$")
 POLA_TANGGAL = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-MAKS = {"judul": 150, "ringkasan": 300, "isi": 20000, "alt": 200, "judul_pdf": 150}
+MAKS = {"judul": 150, "ringkasan": 300, "isi": 20000, "alt": 200, "judul_pdf": 150, "catatan": 500}
 MAKS_FOTO = 7             # the main photo + 6 in the gallery
 MAKS_PDF = 3
 MAKS_ID = 70
@@ -109,6 +112,8 @@ def periksa(b, kategori=None):
     _periksa_teks("Judul", b.get("judul"), MAKS["judul"], True, masalah)
     _periksa_teks("Ringkasan", b.get("ringkasan"), MAKS["ringkasan"], True, masalah)
     _periksa_teks("Isi", b.get("isi", ""), MAKS["isi"], False, masalah)
+    if b.get("catatan"):
+        _periksa_teks("Catatan", b["catatan"], MAKS["catatan"], False, masalah)
     if not _tanggal_sah(b.get("tanggal")):
         masalah.append("tanggal tidak sah")
     if b.get("kedaluwarsa") and not _tanggal_sah(b["kedaluwarsa"]):
@@ -218,6 +223,26 @@ def ganti_status(kode, id_, status, oleh):
     b["status"] = status
     b["diubah"] = _sekarang()
     _simpan(kode, data, oleh, "%s: %s -> %s" % (id_, lama, status))
+
+
+def kembalikan(kode, id_, catatan, oleh):
+    """Send a submitted item back to draft with a note for its writer."""
+    catatan = (catatan or "").strip()
+    masalah = []
+    _periksa_teks("Catatan", catatan, MAKS["catatan"], True, masalah)
+    if masalah:
+        raise GagalPengumuman("; ".join(masalah))
+    data = baca(kode)
+    b = _cari(data, id_)
+    b.update(status="draf", catatan=catatan, diubah=_sekarang())
+    _simpan(kode, data, oleh, "%s dikembalikan ke draf" % id_)
+
+
+def cari(kode, id_):
+    """The item `id_` of a programme (GagalPengumuman when there is none)."""
+    if not POLA_ID.match(id_ or ""):
+        raise GagalPengumuman("pengumuman tidak ditemukan")
+    return _cari(baca(kode), id_)
 
 
 def masih_berlaku(b, hari_ini):

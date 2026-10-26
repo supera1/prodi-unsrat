@@ -1,9 +1,10 @@
 {% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
 {% block judul %}Data prodi — {{ pr.nama }}{% endblock %}
 {% macro tanda(f) %}{% if f in data.timpaan %} <span class="tanda{% if f in bentrok %} tanda--bentrok{% endif %}">{{ 'bentrok dengan www' if f in bentrok else 'diubah di sini' }}</span>{% endif %}{% endmacro %}
 {% macro nilai_www(f) %}{% if f in data.timpaan %}<p class="keterangan">Data www: {% if f == 'cpl' %}{{ www.cpl | length }} butir{% else %}{{ www.get(f) if www.get(f) not in (none, '') else '(kosong)' }}{% endif %}</p>{% endif %}{% endmacro %}
 {% block isi %}
-<p class="jejak-admin"><a href="{{ url_for('dasbor_prodi', kode=pr.kode) }}">{{ pr.nama }}</a> › Data prodi</p>
+{{ nav_prodi(pr, 'data_prodi_lihat') }}
 <h1>Data prodi</h1>
 <p>Data ini berasal dari www.unsrat.ac.id dan dipakai di seluruh situs prodi: bagian depan beranda, Spesifikasi, Akreditasi, Profil Lulusan dan CPL. Kolom yang Anda ubah di sini <strong>tetap dipakai</strong> walau data www berubah kemudian; kolom lain tetap mengikuti www. Sebaiknya perubahan yang benar juga disampaikan ke pengelola www agar kedua situs sama.</p>
 

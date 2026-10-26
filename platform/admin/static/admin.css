@@ -153,7 +153,7 @@ h2 {
 	font-weight: 700;
 }
 
-.formulir input:not([type="hidden"]),
+.formulir input:not([type="hidden"]):not([type="radio"]):not([type="checkbox"]):not([type="color"]),
 .formulir select {
 	width: 100%;
 	max-width: 32rem;
@@ -161,6 +161,31 @@ h2 {
 	border: 1px solid var(--abu-600);
 	border-radius: 4px;
 	font: inherit;
+}
+
+/* a radio button or checkbox sits in front of its text, which reads as normal text */
+.formulir label:has(> input[type="radio"]),
+.formulir label:has(> input[type="checkbox"]) {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-weight: 400;
+}
+
+.formulir input[type="radio"],
+.formulir input[type="checkbox"] {
+	width: 1.1rem;
+	height: 1.1rem;
+	margin: 0;
+	flex: none;
+}
+
+.formulir input[type="color"] {
+	width: 4rem;
+	height: 2.5rem;
+	padding: 0.15rem;
+	border: 1px solid var(--abu-600);
+	border-radius: 4px;
 }
 
 .keterangan {
@@ -499,4 +524,176 @@ dl.data dd {
 
 .cpl-baris__kecil input {
 	max-width: 12rem;
+}
+
+/* ---------------------------------------------------------------- programme admin (langkah 6) */
+
+.sub-navigasi a[aria-current] {
+	font-weight: 700;
+	text-decoration-thickness: 2px;
+}
+
+.pilih-palet ul {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+	gap: 0.5rem 1rem;
+	padding: 0;
+	list-style: none;
+}
+
+.pilih-palet label {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	font-weight: 400;
+}
+
+.palet-isi {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.contoh-palet {
+	flex: none;
+	border: 1px solid var(--abu-200);
+	border-radius: 4px;
+}
+
+.medsos-baris {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 1rem;
+}
+
+.medsos-baris .isian input,
+.medsos-baris .isian select {
+	max-width: 22rem;
+}
+
+.angka-kecil {
+	max-width: 5rem;
+}
+
+.formulir td input[type="text"] {
+	max-width: 16rem;
+}
+
+.logo-sekarang img,
+.pratinjau-foto img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	border: 1px solid var(--abu-200);
+	border-radius: 4px;
+	background: var(--abu-50);
+}
+
+.pratinjau-foto {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	align-items: flex-end;
+}
+
+.pratinjau-foto figure {
+	margin: 0;
+}
+
+.pratinjau-foto figcaption {
+	color: var(--abu-600);
+	font-size: 0.875rem;
+}
+
+.saring-status {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem 1rem;
+	margin-bottom: 1rem;
+}
+
+.saring-status a[aria-current] {
+	font-weight: 700;
+}
+
+.status {
+	display: inline-block;
+	padding: 0 0.6em;
+	border-radius: 999px;
+	font-size: 0.8125rem;
+	font-weight: 700;
+	background: var(--abu-200);
+}
+
+.status--menunggu {
+	background: var(--kuning-pucat);
+	color: #8a4b00;
+}
+
+.status--terbit {
+	background: #e8f5ec;
+	color: var(--hijau);
+}
+
+.status--ditarik {
+	color: var(--abu-600);
+}
+
+.media-daftar {
+	padding: 0;
+	list-style: none;
+}
+
+.media-daftar li {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	align-items: flex-start;
+	padding: 0.75rem 0;
+	border-bottom: 1px solid var(--abu-200);
+}
+
+.media-daftar img {
+	border: 1px solid var(--abu-200);
+	border-radius: 4px;
+}
+
+.tombol-baris {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.tindakan-status .kembalikan {
+	margin-top: 0.75rem;
+}
+
+.pratinjau-isi ul {
+	padding-left: 1.25rem;
+}
+
+.daftar-periksa {
+	padding: 0;
+	list-style: none;
+}
+
+.daftar-periksa li {
+	padding: 0.35rem 0 0.35rem 1.75rem;
+	position: relative;
+}
+
+.daftar-periksa li::before {
+	position: absolute;
+	left: 0;
+	font-weight: 700;
+}
+
+.daftar-periksa li.ok::before {
+	content: "✓";
+	color: var(--hijau);
+}
+
+.daftar-periksa li.belum::before {
+	content: "○";
+	color: #8a4b00;
 }

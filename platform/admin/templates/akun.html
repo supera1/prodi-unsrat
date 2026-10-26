@@ -1,8 +1,10 @@
 {% extends "dasar.html" %}
 {% from "_pilih_prodi.html" import pilih_prodi %}
+{% from "_nav_prodi.html" import nav_prodi %}
 {% block judul %}Akun{% if p %} — {{ p.nama }}{% endif %}{% endblock %}
 {% block isi %}
 {% set a = akun_aktif() %}
+{% if p %}{{ nav_prodi(p, 'akun_prodi') }}{% endif %}
 <h1>Akun{% if p %} {{ p.nama }}{% endif %}</h1>
 <div class="tabel-gulir">
 	<table>

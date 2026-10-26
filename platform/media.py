@@ -9,6 +9,9 @@ PDFs: at most MAKS_PDF bytes, a real PDF with pages, not password-protected, wit
 actions, forms that submit, embedded files, rich media, XFA) and without gambling text in its first pages. The
 active-content check is adapted from the www admin (site/admin/app.py periksa_pdf / konten_aktif_pdf, commit 37b5e6d).
 
+Programme logos (langkah 6): SVG cleaned by admin/svg_aman.py (from www) and kept as it is, or JPEG/PNG re-encoded as
+PNG (transparency kept) in the heights of TINGGI_LOGO; the width follows the logo (at most 4 times its height).
+
 Hero backgrounds (langkah 3c, K-P15): JPEG or PNG, at least HERO_MIN pixels, cropped at upload to 3:1 for wide
 screens (2400 and 1600 px) and 4:3 for phones (1200 x 900), around the chosen focus (FOKUS).
 
@@ -31,6 +34,7 @@ sys.path.insert(0, os.path.join(PLATFORM, "admin"))
 sys.path.insert(0, os.path.join(PLATFORM, "pemantau"))
 
 import gambar_aman  # noqa: E402
+import svg_aman  # noqa: E402
 import lokasi  # noqa: E402
 import saringan_spam  # noqa: E402
 
@@ -47,7 +51,10 @@ PETUNJUK_HERO = ("Foto latar bagian depan: JPEG atau PNG, paling besar 15 MB, mi
                  "Foto dipotong otomatis menjadi 3:1 untuk layar lebar dan 4:3 untuk ponsel di sekitar titik fokus "
                  "(tengah, kiri, kanan, atas, atau bawah), lalu diberi lapisan warna prodi agar teks tetap terbaca.")
 HALAMAN_DIPERIKSA = 30            # pages whose text is checked for gambling spam
-POLA_JALUR = re.compile(r"^[0-9A-Za-z]{3,12}/[0-9]{6}-[0-9a-f]{12}(-[0-9]{3,4})?\.(jpg|pdf)$")
+POLA_JALUR = re.compile(r"^[0-9A-Za-z]{3,12}/[0-9]{6}-[0-9a-f]{12}(-[0-9]{2,4})?\.(jpg|png|svg|pdf)$")
+MAKS_LOGO = 5 * 1024 * 1024
+TINGGI_LOGO = (56, 112, 168)
+RASIO_LOGO = (0.5, 4.0)               # width / height
 
 KUNCI_PDF_AKTIF = {"/JS", "/JavaScript", "/Launch", "/EmbeddedFile", "/EmbeddedFiles", "/RichMedia", "/XFA"}
 AKSI_PDF_AKTIF = {"/JavaScript", "/Launch", "/ImportData", "/RichMediaExecute", "/SubmitForm"}
@@ -267,6 +274,47 @@ def simpan_foto_hero(kode, data, fokus="tengah", gudang=None):
         rekam.update(lebar=w, tinggi=h)
         hasil[kunci] = rekam
     return {"jenis": "hero", "fokus": fokus, "varian": hasil}
+
+
+def _adalah_svg(nama_berkas, data):
+    return (nama_berkas or "").lower().endswith(".svg") or data.lstrip()[:300].lower().find(b"<svg") >= 0
+
+
+def simpan_logo(kode, data, nama_berkas="", gudang=None):
+    """Check and store a programme logo. Returns {"jenis": "logo", "format": "svg"|"png", "lebar", "tinggi",
+    "varian": {"svg": {...}} or {"56": {...}, "112": {...}, "168": {...}}}."""
+    if not data:
+        raise ValueError("Pilih berkas logo.")
+    if len(data) > MAKS_LOGO:
+        raise ValueError("Berkas logo terlalu besar (maksimal 5 MB).")
+    gudang = gudang or penyimpanan()
+    if _adalah_svg(nama_berkas, data):
+        try:
+            bersih, w, h, _dibuang = svg_aman.bersihkan(data)
+        except ValueError:
+            raise
+        except Exception:
+            raise ValueError("SVG rusak atau tidak dapat dibaca.")
+        if not w or not h or not RASIO_LOGO[0] <= w / float(h) <= RASIO_LOGO[1]:
+            raise ValueError("Bentuk logo tidak sesuai (lebar dibagi tinggi harus 0,5–4).")
+        rekam = gudang.simpan(kode, _nama_acak(".svg"), bersih, "image/svg+xml")
+        return {"jenis": "logo", "format": "svg", "lebar": int(round(w)), "tinggi": int(round(h)), "varian": {"svg": rekam}}
+    from PIL import Image
+    im = gambar_aman.buka(data, "Logo harus %s, atau SVG." % gambar_aman.TEKS_FORMAT, MAKS_PIKSEL).convert("RGBA")
+    if im.height < max(TINGGI_LOGO):
+        raise ValueError("Logo terlalu kecil (tinggi minimal %d piksel; disarankan SVG atau PNG 512 piksel)." % max(TINGGI_LOGO))
+    if not RASIO_LOGO[0] <= im.width / float(im.height) <= RASIO_LOGO[1]:
+        raise ValueError("Bentuk logo tidak sesuai (lebar dibagi tinggi harus 0,5–4; sekarang %d × %d)." % im.size)
+    dasar = _nama_acak("")
+    hasil = {}
+    for t in TINGGI_LOGO:
+        salin = im.resize((max(1, round(im.width * t / im.height)), t), Image.LANCZOS)
+        buf = io.BytesIO()
+        salin.save(buf, "PNG", optimize=True)
+        rekam = gudang.simpan(kode, "%s-%d.png" % (dasar, t), buf.getvalue(), "image/png")
+        rekam.update(lebar=salin.width, tinggi=t)
+        hasil[str(t)] = rekam
+    return {"jenis": "logo", "format": "png", "lebar": im.width, "tinggi": im.height, "varian": hasil}
 
 
 def simpan_pdf(kode, data, judul, gudang=None):

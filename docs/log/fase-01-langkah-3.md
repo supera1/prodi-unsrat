@@ -7,7 +7,8 @@ Branch: `fase/01-3-template` (bercabang dari `fase/01-2-data`).
   Mahasiswa dan Alumni, Fasilitas), dan Kontak; 36 halaman per prodi.
   - 8 halaman `otomatis` (dari data www/registri): beranda, akreditasi, profil lulusan & CPL, spesifikasi, kalender,
     dosen tetap, kontak, ditambah halaman indeks tiap kelompok.
-  - 23 halaman `wajib` (kebutuhan akreditasi) dan 2 `opsional` (jadwal, kelompok keahlian). Di Fase 1 halaman wajib
+  - 22 halaman `wajib` (kebutuhan akreditasi) dan 2 `opsional` (jadwal, kelompok keahlian). *(Dikoreksi di langkah 6:
+    sebelumnya tertulis 23.)* Di Fase 1 halaman wajib
     berisi deskripsi + catatan "sedang dilengkapi"; isinya diedit di Fase 2.
 - **Aturan menu** `platform/bangun/menu.py`: admin prodi boleh mengganti label (1–60 karakter, tanpa teks judi atau
   `< >`), mengurutkan dalam kelompok, dan menyembunyikan butir opsional. Pengaturan yang melanggar aturan diabaikan

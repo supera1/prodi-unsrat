@@ -1,7 +1,7 @@
 {% extends "dasar.html" %}
 {% block judul %}Versi {{ versi }}{% endblock %}
 {% block isi %}
-<p class="jejak-admin"><a href="{{ url_for('super_riwayat', berkas=berkas) }}">Riwayat</a> › {{ nama_berkas(berkas) }}</p>
+<p class="jejak-admin"><a href="{{ kembali }}">Riwayat</a> › {{ judul_berkas }}</p>
 <h1>Versi {{ versi }}</h1>
 {% if catatan %}<p>Disimpan {{ catatan.waktu }} sebelum perubahan "{{ catatan.aksi }}" oleh {{ catatan.oleh }}.</p>{% endif %}
 <h2>Perbedaan dengan isi sekarang</h2>
@@ -10,7 +10,7 @@
 {% endfor %}</pre>
 {% if terpotong %}<p class="keterangan">Perbedaan dipotong; hanya {{ beda | length }} baris pertama yang ditampilkan.</p>{% endif %}
 <p class="keterangan">Baris berawalan <code>-</code> ada di versi ini, baris berawalan <code>+</code> ada di isi sekarang.</p>
-<form method="post" action="{{ url_for('super_riwayat_pulihkan') }}" class="formulir">
+<form method="post" action="{{ pulihkan }}" class="formulir">
 	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
 	<input type="hidden" name="berkas" value="{{ berkas }}">
 	<input type="hidden" name="versi" value="{{ versi }}">

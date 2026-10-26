@@ -266,6 +266,8 @@ try:
         cek(r.status_code == 302, "%s masuk untuk matriks: %s" % (nama, r.status_code))
         sesi[nama] = k
     ids = {n: akun.ambil_nama(n)["id"] for n in sesi}
+    import pengumuman
+    kabar = pengumuman.tambah(A, {"judul": "Kabar admin A", "ringkasan": "R", "kategori": "kegiatan"}, "adma", "draf")
     semua_nama = list(sesi)
 
     def hanya(*nama, ya=200, tidak=403):
@@ -299,6 +301,31 @@ try:
         ("POST", "/prodi/%s/data/akreditasi/www" % A, "data_prodi_pakai_www", hanya("superuji", "adma", ya=302)),
         ("POST", "/prodi/%s/data/akreditasi/tetap" % A, "data_prodi_tetap", hanya("superuji", "adma", ya=302)),
         ("GET", "/prodi/%s/data" % B, "data_prodi_lihat", hanya("superuji", "admb")),
+        # a programme admin's pages (langkah 6): its admins and the superadmin
+        ("GET", "/prodi/%s/identitas" % A, "identitas_prodi", hanya("superuji", "adma")),
+        ("POST", "/prodi/%s/identitas" % A, "identitas_simpan", hanya("superuji", "adma", ya=302)),
+        ("POST", "/prodi/%s/identitas/logo" % A, "logo_unggah", hanya("superuji", "adma", ya=400)),
+        ("POST", "/prodi/%s/identitas/logo/hapus" % A, "logo_hapus", hanya("superuji", "adma", ya=302)),
+        ("GET", "/prodi/%s/beranda" % A, "beranda_prodi", hanya("superuji", "adma")),
+        ("POST", "/prodi/%s/beranda" % A, "beranda_simpan", hanya("superuji", "adma", ya=302)),
+        ("POST", "/prodi/%s/beranda/foto" % A, "beranda_foto", hanya("superuji", "adma", ya=400)),
+        ("GET", "/prodi/%s/menu" % A, "menu_prodi", hanya("superuji", "adma")),
+        ("POST", "/prodi/%s/menu" % A, "menu_simpan", hanya("superuji", "adma", ya=302)),
+        ("GET", "/prodi/%s/riwayat" % A, "riwayat_prodi", hanya("superuji", "adma")),
+        ("GET", "/prodi/%s/riwayat/lihat?berkas=prodi/%s/situs&versi=20000101-000000-000000" % (A, A), "riwayat_prodi_lihat",
+         hanya("superuji", "adma", ya=404)),
+        ("POST", "/prodi/%s/riwayat/pulihkan" % A, "riwayat_prodi_pulihkan", hanya("superuji", "adma", ya=404)),
+        # announcements: operators of the programme too; an item only by its writer or an admin
+        ("GET", "/prodi/%s/pengumuman" % A, "pengumuman_daftar", hanya("superuji", "adma", "opa", "opab")),
+        ("GET", "/prodi/%s/pengumuman/baru" % A, "pengumuman_baru", hanya("superuji", "adma", "opa", "opab")),
+        ("POST", "/prodi/%s/pengumuman/baru" % A, "pengumuman_buat", hanya("superuji", "adma", "opa", "opab", ya=400)),
+        ("GET", "/prodi/%s/pengumuman/%s" % (A, kabar), "pengumuman_ubah", hanya("superuji", "adma")),
+        ("POST", "/prodi/%s/pengumuman/%s" % (A, kabar), "pengumuman_simpan", hanya("superuji", "adma", ya=400)),
+        ("POST", "/prodi/%s/pengumuman/%s/status" % (A, kabar), "pengumuman_status", hanya("superuji", "adma", ya=400)),
+        ("GET", "/prodi/%s/berkas/%s/202610-0123456789ab.pdf" % (A, A), "berkas_prodi",
+         hanya("superuji", "adma", "opa", "opab", ya=404)),
+        ("GET", "/prodi/%s/berkas/%s/202610-0123456789ab.pdf" % (A, B), "berkas_prodi",
+         hanya("superuji", "adma", "opa", "opab", ya=404)),
         # superadmin pages (langkah 5); harmless inputs, so the rows only test who gets in
         ("GET", "/super/prodi", "super_prodi", hanya("superuji")),
         ("GET", "/super/prodi/%s" % A, "super_prodi_detail", hanya("superuji")),
