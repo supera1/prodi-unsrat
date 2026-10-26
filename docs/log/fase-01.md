@@ -100,7 +100,8 @@ Buka http://127.0.0.1:8790/ lalu periksa:
 3. Prodi dengan data resmi kosong (mis. tanpa CPL) menulis "sedang dilengkapi", bukan nilai karangan.
 4. Setiap halaman berpita "Pratinjau staging"; di ponsel tidak ada gulir ke samping.
 
-**Dengan stack Docker** (komputer sendiri: `docs/deploy.md` §13; staging: §5 setelah deploy):
+**Dengan stack Docker** (komputer sendiri: `docs/deploy.md` §13; staging: §5 setelah admin VM men-deploy dengan
+`docker compose`):
 1. Masuk sebagai superadmin → dasbor: 97 situs aktif, sumber data www.
 2. Data www → unggah ekspor Excel terbaru dari superadmin www → pratinjau → Terapkan.
 3. Akun → buat admin prodi untuk satu prodi; masuk sebagai admin itu → ubah palet, kalimat pengantar, logo, label menu
@@ -128,8 +129,7 @@ Buka http://127.0.0.1:8790/ lalu periksa:
   di www.
 - Pengalihan situs prodi lama (K-P4).
 
-**Belum dicoba:** alur Portainer itu sendiri (yang dicoba `docker compose`), Let's Encrypt sungguhan (perlu DNS dan VM
-publik), pemindaian kerentanan image (trivy).
+**Belum dicoba:** Let's Encrypt sungguhan (perlu DNS dan VM publik) dan pemindaian kerentanan image (trivy).
 
 **Fase berikutnya** (rencana §2): editor isi 22 halaman wajib dan unggah dokumen, alur persetujuan isi, usulan
 perubahan data resmi ke superadmin, halaman Dokumen Akreditasi (Fase 2, pilot 3 prodi); halaman akar dengan pencarian

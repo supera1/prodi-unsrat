@@ -116,6 +116,8 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   - Stack `prodi-unsrat` berjalan di **VM sendiri**. Deploy dilakukan **admin UNSRAT** dengan mengambil kode dari
     GitHub `supera1/prodi-unsrat`; repo menyediakan berkas Docker dan panduannya, Claude tidak menjalankan apa pun ke
     server.
+  - **Dengan `docker compose` di VM UNSRAT lain, tanpa Portainer** (pengguna, 26 Oktober 2026, sesudah langkah 8).
+    `docs/deploy.md` hanya memuat cara itu; nama stack `prodi-unsrat` ditetapkan di `docker-compose.yml`.
   - **HTTPS: disiapkan dua cara.** Bawaan: stack melayani HTTP di belakang load balancer/reverse proxy yang memegang
     sertifikat (seperti www). Panduan deploy juga menjelaskan cara memasang sertifikat di VM itu sendiri bila tidak ada
     load balancer.

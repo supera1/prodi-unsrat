@@ -100,6 +100,11 @@ Halaman Data www (pratinjau unggahan dan formulir unggah) dan dasbor juga diperi
 - Belum dicoba: alur Portainer itu sendiri (yang dicoba `docker compose`, perintah yang sama dijalankan Portainer) dan
   Let's Encrypt sungguhan (perlu DNS dan VM publik; alurnya didokumentasikan).
 
+## Tambahan (26 Oktober 2026, sesudah langkah 8)
+Pengguna memastikan stack di-deploy admin UNSRAT dengan `docker compose` di VM UNSRAT lain, **tanpa Portainer**.
+Pilihan Portainer dihapus dari `docs/deploy.md`, `docker-compose.yml`, `.env.example`, dan pesan skrip mulai admin;
+nama stack `prodi-unsrat` kini ditetapkan di `docker-compose.yml` (K-P17).
+
 ## Langkah berikutnya
 Langkah 8 — uji menyeluruh dan `docs/log/fase-01.md` (cara verifikasi manual, sisa pekerjaan, keputusan yang perlu
 dikonfirmasi).

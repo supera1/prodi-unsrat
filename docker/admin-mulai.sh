@@ -18,8 +18,8 @@ if ! python platform/bangun/bangun.py; then
 fi
 
 if ! python platform/admin/siapkan.py --ada-superadmin > /dev/null; then
-    echo "Belum ada akun superadmin. Di Portainer: Containers > (kontainer admin) > Console > /bin/bash, lalu jalankan"
-    echo "  python platform/admin/siapkan.py --superadmin <nama> --nama-lengkap \"Nama Lengkap\""
+    echo "Belum ada akun superadmin. Di VM, dari folder repositori (mis. /opt/prodi-unsrat), jalankan:"
+    echo "  sudo docker compose exec admin python platform/admin/siapkan.py --superadmin <nama> --nama-lengkap \"Nama Lengkap\""
     echo "Admin tetap berjalan; halaman masuknya menunggu akun itu (docs/deploy.md)."
 fi
 

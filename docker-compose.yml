@@ -1,5 +1,5 @@
-# prodi.unsrat.ac.id on its own VM with Docker (K-P17), deployed by UNSRAT's admin from this repository: Portainer
-# (Stacks > Add stack > Repository) or `docker compose up -d --build`.
+# prodi.unsrat.ac.id on its own UNSRAT VM (K-P17), deployed by UNSRAT's admin from this repository with
+# `docker compose up -d --build` in the checkout (no Portainer).
 # Guide (variables, first start, accounts, HTTPS, backups, troubleshooting): docs/deploy.md
 #
 #   web       Nginx: the programme sites (port PORT_SITUS) and the admin for UNSRAT's network only (PORT_ADMIN);
@@ -7,8 +7,12 @@
 #   admin     Flask admin + site builder (waitress); writes the sites into the volume "prodi-publik"; never published
 #   pemantau  integrity check of the published sites every 10 minutes (defacement, gambling spam)
 #
-# Variables are set in Portainer (Stack > Environment variables) or in a .env file next to this one (.env.example).
-# The defaults below suit a first test deploy behind a load balancer.
+# Variables are set in a .env file next to this one (copy of .env.example). The defaults below suit a first test deploy
+# behind a load balancer.
+
+# A fixed stack name: the containers are prodi-unsrat-<service>-1 and the volumes prodi-unsrat_<volume> wherever the
+# repository is checked out, as docker/cadangan-prodi.sh and pulihkan-prodi.sh expect (-p still overrides it for a test).
+name: prodi-unsrat
 
 services:
   admin:

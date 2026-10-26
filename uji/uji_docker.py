@@ -120,6 +120,10 @@ for nama, isi in (("web", web), ("pemantau", pemantau)):
     volume = re.findall(r"^      - (\S+)$", isi.split("volumes:")[1], re.M) if "volumes:" in isi else []
     cek(volume and all(v.endswith(":ro") for v in volume), "semua volume %s harus hanya-baca: %r" % (nama, volume))
 cek('PROXY_TERPERCAYA: "1"' in admin, "admin hanya di belakang satu proksi (Nginx)")
+nama_stack = re.search(r"^name: (\S+)$", compose, re.M)
+cek(nama_stack and nama_stack.group(1) == "prodi-unsrat", "nama stack ditetapkan di docker-compose.yml: prodi-unsrat")
+for rel in ("docker/cadangan-prodi.sh", "docker/pulihkan-prodi.sh"):
+    cek('STACK="${STACK:-prodi-unsrat}"' in baca(rel), "%s memakai nama stack docker-compose.yml" % rel)
 cek("8791" in baca("docker/nginx/lokasi-admin.conf") and "PORT=8791" in baca("Dockerfile"), "port admin sama di semua tempat")
 ignore = baca(".dockerignore").split()
 for x in (".git", ".venv", "data/", "rahasia/", "log/", "unggahan/", "publik/", ".env", ".kredensial*", "*.sqlite"):
@@ -131,6 +135,9 @@ for v in variabel:
     cek(re.search(r"^%s=$" % v, contoh, re.M), "%s harus ada (tanpa nilai) di .env.example" % v)
     cek("`%s`" % v in panduan, "%s harus dijelaskan di docs/deploy.md" % v)
 cek(not re.search(r"^[A-Z_]+=\S", contoh, re.M), ".env.example tanpa nilai")
+# deployed with docker compose on UNSRAT's VM, without Portainer (K-P17): the guide offers no other way
+cek("portainer" not in (panduan + compose + contoh).lower().replace("tanpa portainer", "").replace("no portainer", ""),
+    "panduan dan berkas stack tidak menawarkan Portainer (K-P17)")
 
 # --- the start scripts of the web container, run with their paths moved to a temporary folder, in every POSIX shell
 # this machine has (the image runs busybox sh): a wrong value must stop the start (exit 1, nothing written)

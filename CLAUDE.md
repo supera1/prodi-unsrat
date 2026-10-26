@@ -24,7 +24,8 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
 
 ## Arsitektur (sudah diputuskan)
 - Generator halaman statis (Python + Jinja2) + admin Flask, pola yang sama dengan www (K-P7).
-- Stack Docker `prodi-unsrat` di **VM sendiri**, di-deploy admin UNSRAT dari GitHub `supera1/prodi-unsrat` (K-P17):
+- Stack Docker `prodi-unsrat` di **VM sendiri**, di-deploy admin UNSRAT dari GitHub `supera1/prodi-unsrat` dengan
+  `docker compose`, tanpa Portainer (K-P17):
   `web` (Nginx), `admin` (Flask + generator, waitress), `pemantau`. Panduan admin VM: `docs/deploy.md`. Port bawaan
   8080/8081, nilai akhir disepakati admin VM (K-P13). HTTPS di load balancer (bawaan) atau di VM (`HTTPS_DI_VM=1`).
 - Semua uji berjalan saat image admin dibangun (K-P20); kontainer web hanya menerima baris pengalihan slug yang sah

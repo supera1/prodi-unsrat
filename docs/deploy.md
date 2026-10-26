@@ -1,8 +1,8 @@
 # Deploy prodi.unsrat.ac.id di VM sendiri
 
-Panduan untuk admin VM/jaringan UNSRAT yang memasang platform situs program studi dari GitHub
-(`supera1/prodi-unsrat`) ke VM-nya sendiri (K-P17). Pengembang tidak menjalankan apa pun di server; semua langkah di
-bawah dikerjakan admin VM.
+Panduan untuk admin VM UNSRAT yang memasang platform situs program studi dari GitHub (`supera1/prodi-unsrat`) di VM
+UNSRAT tersendiri dengan `docker compose` (K-P17; tanpa Portainer). Pengembang tidak menjalankan apa pun di server;
+semua langkah di bawah dikerjakan admin VM, dari folder repositori di VM (di panduan ini `/opt/prodi-unsrat`).
 
 ## 1. Gambaran
 
@@ -14,7 +14,8 @@ Stack Docker `prodi-unsrat` berisi tiga kontainer:
 | `admin` | Flask + generator situs. Membangun semua situs ke volume `prodi-publik` saat mulai, setelah setiap perubahan, dan setiap hari pukul 02.30 | tidak |
 | `pemantau` | Cek integritas situs publik setiap 10 menit (halaman diubah, berkas tanaman, teks judi) | tidak |
 
-Volume (nama di VM diawali nama stack, mis. `prodi-unsrat_prodi-data`):
+Nama stack tetap `prodi-unsrat` (ditulis di `docker-compose.yml`), jadi kontainernya `prodi-unsrat-admin-1`,
+`prodi-unsrat-web-1`, `prodi-unsrat-pemantau-1`, dan volumenya diawali `prodi-unsrat_` (mis. `prodi-unsrat_prodi-data`):
 
 | Volume | Isi | Dicadangkan? |
 |---|---|---|
@@ -24,44 +25,52 @@ Volume (nama di VM diawali nama stack, mis. `prodi-unsrat_prodi-data`):
 | `prodi-nginx` | pengalihan slug lama buatan generator | tidak |
 | `prodi-tls`, `prodi-acme` | hanya untuk HTTPS di VM (§7B) | tidak |
 
-Kebutuhan: VM Linux dengan Docker Engine + plugin compose (atau Portainer). Platform ini kecil: admin ±40 MB RAM
-saat diam, situs ±60 MB, image 320 MB + 100 MB. 2 vCPU, 2–4 GB RAM, dan 20 GB disk sudah cukup; unggahan prodi
-(foto, PDF) menambah isi `prodi-data` dari waktu ke waktu.
+Kebutuhan: VM Linux dengan Docker Engine, plugin compose (`docker compose`, versi 2), dan `git`. Platform ini kecil:
+admin ±40 MB RAM saat diam, situs ±60 MB, image 320 MB + 100 MB. 2 vCPU, 2–4 GB RAM, dan 20 GB disk sudah cukup;
+unggahan prodi (foto, PDF) menambah isi `prodi-data` dari waktu ke waktu.
 
 ## 2. Yang disiapkan
 
-1. **VM** dengan Docker (atau agen Portainer). Zona waktu kontainer sudah Asia/Makassar.
+1. **VM** UNSRAT dengan Docker Engine, plugin compose, dan `git`. Zona waktu kontainer sudah Asia/Makassar.
 2. **Firewall:**
    - `PORT_SITUS` (situs) hanya dari load balancer, atau dari internet bila HTTPS dipasang di VM (§7B, port 80 dan 443);
    - `PORT_ADMIN` (admin) hanya dari jaringan UNSRAT/VPN dan dari load balancer. Admin juga menolak sendiri alamat di
      luar `ADMIN_IP_BOLEH`.
-3. **Akses GitHub** bila repositori privat: *fine-grained token* untuk `supera1/prodi-unsrat` dengan izin
-   **Contents: Read-only** saja (jangan beri hak tulis). Username `supera1`, password = token.
+3. **Akses GitHub** bila repositori privat, salah satu (keduanya hanya-baca, jangan beri hak tulis):
+   - **kunci deploy** (disarankan untuk VM): buat kunci SSH di VM, kirim kunci publiknya ke pemilik repositori untuk
+     ditambahkan di GitHub (repositori → Settings → Deploy keys, tanpa *Allow write access*):
+
+     ```bash
+     sudo ssh-keygen -t ed25519 -N "" -C "deploy prodi-unsrat" -f /root/.ssh/prodi-unsrat
+     sudo cat /root/.ssh/prodi-unsrat.pub
+     ```
+
+     Perintah `git clone` dengan kunci ini ada di §3;
+   - *fine-grained token* untuk repositori ini dengan izin **Contents: Read-only**, diketik saat `git` memintanya.
 4. **Port** disepakati dengan pengembang (K-P13). Bawaan: situs `8080`, admin `8081`.
 
 ## 3. Ambil kode dan nyalakan
 
-**A. Portainer** — Stacks → Add stack → **Repository**:
+```bash
+sudo git clone --branch main https://github.com/supera1/prodi-unsrat /opt/prodi-unsrat   # branch yang disepakati
+cd /opt/prodi-unsrat
+sudo cp .env.example .env          # isi nilai yang berbeda dari bawaan (§4); untuk uji pertama cukup port dan ADMIN_IP_BOLEH
+sudo docker compose up -d --build
+sudo docker compose ps             # web dan admin harus "healthy" (±1–5 menit setelah start)
+```
 
-| Isian | Nilai |
-|---|---|
-| Name | `prodi-unsrat` (nama ini menjadi awalan volume dan kontainer; skrip cadangan memakainya) |
-| Repository URL | `https://github.com/supera1/prodi-unsrat` |
-| Repository reference | branch yang disepakati, mis. `refs/heads/main` |
-| Compose path | `docker-compose.yml` |
-| Authentication | bila privat: `supera1` + token (§2) |
-| Environment variables | lihat §4; untuk uji pertama cukup `PORT_SITUS`, `PORT_ADMIN`, `ADMIN_IP_BOLEH` |
-
-Tekan **Deploy the stack**.
-
-**B. Baris perintah di VM:**
+Repositori privat dengan kunci deploy (§2): ganti baris `git clone` di atas dengan
 
 ```bash
-sudo git clone https://github.com/supera1/prodi-unsrat /opt/prodi-unsrat
-cd /opt/prodi-unsrat
-sudo cp .env.example .env          # isi nilai yang berbeda dari bawaan (§4); yang kosong memakai bawaan
-sudo docker compose -p prodi-unsrat up -d --build
+sudo GIT_SSH_COMMAND="ssh -i /root/.ssh/prodi-unsrat -o IdentitiesOnly=yes" \
+     git clone --branch main git@github.com:supera1/prodi-unsrat.git /opt/prodi-unsrat
+sudo git -C /opt/prodi-unsrat config core.sshCommand "ssh -i /root/.ssh/prodi-unsrat -o IdentitiesOnly=yes"
 ```
+
+(baris terakhir supaya `git pull` berikutnya juga memakai kunci itu).
+
+Variabel stack disimpan di `/opt/prodi-unsrat/.env` (tidak ikut `git pull`, tidak memuat rahasia). Log:
+`sudo docker compose logs -f admin` (atau `web`, `pemantau`).
 
 Build pertama memakan beberapa menit: mengunduh image Python dan Nginx, memasang pustaka, lalu **menjalankan seluruh
 uji otomatis di dalam image** (±1–3 menit). Bila satu uji saja gagal, build berhenti dan stack lama (bila ada) tetap
@@ -69,7 +78,8 @@ berjalan; kirim log build ke pengembang.
 
 ## 4. Variabel stack
 
-Semua boleh dikosongkan; yang kosong memakai bawaan.
+Diisi di `/opt/prodi-unsrat/.env` (salinan `.env.example`). Semua boleh dikosongkan; yang kosong memakai bawaan.
+Perubahan berlaku setelah `sudo docker compose up -d`.
 
 | Variabel | Bawaan | Arti |
 |---|---|---|
@@ -103,8 +113,8 @@ Saat pertama kali, kontainer admin dengan sendirinya:
 
 Langkah 2 hanya terjadi sekali; setelah itu data dan registri di volume yang dipakai.
 
-**Buat akun superadmin** (sekali): Portainer → Containers → `prodi-unsrat-admin-1` → Console → `/bin/bash` → Connect
-(atau `sudo docker exec -it prodi-unsrat-admin-1 /bin/bash`), lalu:
+**Buat akun superadmin** (sekali): `cd /opt/prodi-unsrat && sudo docker compose exec admin /bin/bash`, lalu di dalam
+kontainer:
 
 ```bash
 python platform/admin/siapkan.py --superadmin <nama> --nama-lengkap "Nama Lengkap"
@@ -180,8 +190,8 @@ port 80/8081 hanya mengalihkan ke HTTPS (kecuali `/sehat` dan tantangan Let's En
 
      Perpanjangan otomatis: simpan dua perintah `install` di atas sebagai
      `/etc/letsencrypt/renewal-hooks/deploy/prodi-tls.sh` (`chmod 755`). Timer certbot memperpanjang sendiri.
-3. Variabel: `HTTPS_DI_VM=1`, `TLS_FOLDER=/srv/prodi-tls`, `ACME_FOLDER=/srv/prodi-acme`, `PORT_SITUS=80`,
-   `PORT_SITUS_HTTPS=443`, `PORT_ADMIN_HTTPS` (mis. `8444`), `ADMIN_HTTPS=1`. Deploy ulang.
+3. Variabel di `.env`: `HTTPS_DI_VM=1`, `TLS_FOLDER=/srv/prodi-tls`, `ACME_FOLDER=/srv/prodi-acme`, `PORT_SITUS=80`,
+   `PORT_SITUS_HTTPS=443`, `PORT_ADMIN_HTTPS` (mis. `8444`), `ADMIN_HTTPS=1`, lalu `sudo docker compose up -d`.
 
 Sertifikat yang diganti di `TLS_FOLDER` dipakai Nginx dalam 30 detik tanpa restart (log `web`:
 `sertifikat TLS diperbarui`). Bila `HTTPS_DI_VM=1` tetapi sertifikat tidak ada, kontainer `web` berhenti dengan pesan
@@ -189,19 +199,22 @@ Sertifikat yang diganti di `TLS_FOLDER` dipakai Nginx dalam 30 detik tanpa resta
 
 ## 8. Memperbarui ke versi baru
 
-- **Portainer:** Stack → *Pull and redeploy* (atau GitOps: polling/webhook).
-- **Baris perintah:** `cd /opt/prodi-unsrat && sudo git pull && sudo docker compose -p prodi-unsrat up -d --build`.
+```bash
+cd /opt/prodi-unsrat
+sudo git pull
+sudo docker compose up -d --build
+```
 
 Uji otomatis berjalan di setiap build; bila gagal, versi lama tetap berjalan. Volume tidak tersentuh oleh pembaruan.
 
 Build memakai image dasar (Python, Nginx) yang sudah ada di VM. Sebulan sekali, dan setiap ada pengumuman keamanan
-Python/Nginx/OpenSSL, bangun dengan image dasar terbaru: `sudo docker compose -p prodi-unsrat build --pull` lalu
-`up -d` (Portainer: pilihan *re-pull image* saat deploy ulang).
+Python/Nginx/OpenSSL, bangun dengan image dasar terbaru: `sudo docker compose build --pull` lalu
+`sudo docker compose up -d`.
 Bila build terpaksa dilewati ujinya (`UJI_SAAT_BUILD=0`), jalankan uji sesudahnya; uji memakai folder sementara dan
 tidak menyentuh volume:
 
 ```bash
-sudo docker exec prodi-unsrat-admin-1 python uji/jalankan-semua.py
+sudo docker compose exec admin python uji/jalankan-semua.py
 ```
 
 ## 9. Cadangan harian dan pemulihan
@@ -212,36 +225,36 @@ Kontainer admin dihentikan beberapa detik selama penyalinan (situs tetap tayang)
 penyalinan gagal.
 
 ```bash
-sudo install -m 755 /opt/prodi-unsrat/docker/cadangan-prodi.sh /usr/local/sbin/cadangan-prodi
-sudo install -m 755 /opt/prodi-unsrat/docker/pulihkan-prodi.sh /usr/local/sbin/pulihkan-prodi
-echo '30 1 * * * root /usr/local/sbin/cadangan-prodi >> /var/log/cadangan-prodi.log 2>&1' | sudo tee /etc/cron.d/cadangan-prodi
+echo '30 1 * * * root /opt/prodi-unsrat/docker/cadangan-prodi.sh >> /var/log/cadangan-prodi.log 2>&1' | sudo tee /etc/cron.d/cadangan-prodi
+sudo /opt/prodi-unsrat/docker/cadangan-prodi.sh     # sekali dengan tangan, untuk memastikan
 ```
 
-(Bila stack dibuat lewat Portainer, ambil kedua skrip dari GitHub; isinya pendek dan bisa diperiksa dulu.) Jalankan
-sekali dengan tangan untuk memastikan, lalu **salin `/srv/cadangan-prodi` ke luar VM** secara berkala (mis. ke
-penyimpanan cadangan UPA TIK). Salinan `prodi-rahasia` berisi hash kata sandi: simpan terbatas.
+Cron menjalankan skrip langsung dari folder repositori, jadi pembaruan skrip ikut dengan `git pull`. Lalu **salin
+`/srv/cadangan-prodi` ke luar VM** secara berkala (mis. ke penyimpanan cadangan UPA TIK). Salinan `prodi-rahasia`
+berisi hash kata sandi: simpan terbatas.
 
 **Pemulihan** (mengganti seluruh isi kedua volume dengan cadangan tanggal itu; yang ditulis sesudahnya hilang):
 
 ```bash
-sudo pulihkan-prodi                 # menampilkan tanggal cadangan yang ada
-sudo pulihkan-prodi 2026-11-01      # meminta konfirmasi "PULIHKAN"
+sudo /opt/prodi-unsrat/docker/pulihkan-prodi.sh               # menampilkan tanggal cadangan yang ada
+sudo /opt/prodi-unsrat/docker/pulihkan-prodi.sh 2026-11-01    # meminta konfirmasi "PULIHKAN"
 ```
 
 Ketiga kontainer dihentikan selama pemulihan lalu dinyalakan lagi; admin membangun ulang semua situs saat mulai.
-Variabel `STACK` dan `TUJUAN` kedua skrip bisa diubah bila nama stack atau folder cadangan berbeda.
+Variabel `TUJUAN` kedua skrip bisa diubah bila folder cadangan berbeda (dan `STACK` bila nama stack di
+`docker-compose.yml` pernah diubah).
 
 Untuk mengembalikan satu berkas data saja (mis. data satu prodi yang terhapus), tidak perlu pemulihan volume: pakai
 admin → **Riwayat** (setiap berkas data punya versi sebelumnya).
 
 ## 10. Pemantauan dan log
 
-- **Pemantau:** Containers → `prodi-unsrat-pemantau-1` → Logs. Normal: `… 3889 berkas diperiksa, 0 temuan` setiap
+- **Pemantau:** `sudo docker compose logs --tail 20 pemantau`. Normal: `… 3889 berkas diperiksa, 0 temuan` setiap
   10 menit. Temuan sesaat saat bangun ulang diperiksa ulang semenit kemudian dan tidak dilaporkan.
 - **Log admin:** setiap bangun ulang, dan `PERINGATAN: bangun ulang gagal` bila gagal (situs tetap menyajikan hasil
   terakhir).
 - **Log audit admin** (siapa mengubah apa): admin → Log audit, atau `prodi-data` → `log/audit.jsonl`. Tinjau mingguan.
-- **Log Nginx** (`prodi-unsrat-web-1`): alamat pengunjung asli bila `PROKSI_DEPAN` benar.
+- **Log Nginx** (`sudo docker compose logs web`): alamat pengunjung asli bila `PROKSI_DEPAN` benar.
 
 ### Bila pemantau menemukan sesuatu
 
@@ -250,7 +263,7 @@ Baris di atas `PEMANTAU: ADA TEMUAN` menyebut jenisnya: `BERUBAH` (halaman berbe
 1. Catat baris temuannya. Jangan langsung menghapus apa pun di VM.
 2. Admin → Bangun ulang → **Bangun ulang semua situs**: hasil bangun menimpa halaman yang diubah dan menghapus berkas
    asing. Periksa log pemantau berikutnya (atau jalankan
-   `sudo docker exec prodi-unsrat-pemantau-1 python /app/platform/pemantau/cek_integritas.py --folder /srv/publik --manifes /srv/prodi/manifes-publik.json`).
+   `sudo docker compose exec pemantau python /app/platform/pemantau/cek_integritas.py --folder /srv/publik --manifes /srv/prodi/manifes-publik.json`).
 3. Bila `SPAM` ada di data (muncul lagi setelah bangun ulang): admin → Log audit dan Riwayat untuk melihat siapa
    mengubahnya; pulihkan versi sebelumnya, nonaktifkan akun yang dipakai, reset kata sandinya.
 4. Laporkan ke UPA TIK; bila ada tanda VM disusupi (berkas asing muncul lagi tanpa jejak di log audit), pulihkan dari
@@ -258,7 +271,8 @@ Baris di atas `PEMANTAU: ADA TEMUAN` menyebut jenisnya: `BERUBAH` (halaman berbe
 
 ## 11. Tayang sebagai prodi.unsrat.ac.id
 
-Setelah staging disetujui: `PRODI_MODE=produksi` dan `PRODI_ALAMAT=https://prodi.unsrat.ac.id`, lalu deploy ulang.
+Setelah staging disetujui: `PRODI_MODE=produksi` dan `PRODI_ALAMAT=https://prodi.unsrat.ac.id` di `.env`, lalu
+`sudo docker compose up -d`.
 Pita "Pratinjau staging" dan `noindex` hilang, `sitemap.xml` dibuat, `robots.txt` mengizinkan mesin pencari. Pengalihan dari
 situs prodi lama (mis. `informatika.unsrat.ac.id`) diatur di luar stack ini (K-P4).
 
@@ -275,7 +289,7 @@ situs prodi lama (mis. `informatika.unsrat.ac.id`) diatur di luar stack ini (K-P
 | Log admin: `PERINGATAN: bangun ulang gagal` | Situs tetap menyajikan hasil terakhir. Baca baris galat di atasnya; biasanya data yang tidak sah; pulihkan lewat Riwayat |
 | Slug lama tidak dialihkan | Tunggu 30 detik; log `web` harus menulis `pengalihan slug lama diperbarui` |
 | Data www tidak bisa diterapkan | Pesan di halaman Data www menyebut baris/berkas yang bermasalah; data tidak berubah sampai berkasnya benar |
-| Semua superadmin lupa kata sandi | Console admin: buat superadmin baru dengan `siapkan.py --superadmin` (§5), masuk, reset akun lama di menu Akun |
+| Semua superadmin lupa kata sandi | `sudo docker compose exec admin python platform/admin/siapkan.py --superadmin <nama-baru> ...` (§5), masuk, reset akun lama di menu Akun |
 | Unggahan gagal "terlalu besar" | Batas per berkas: foto 10 MB, foto latar 15 MB, PDF 20 MB, logo 5 MB, data www 5 MB; per formulir 40 MB (Nginx menjawab 413) |
 
 **Jangan:**

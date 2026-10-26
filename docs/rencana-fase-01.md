@@ -84,7 +84,7 @@ VM www.unsrat.ac.id (tidak diubah)          VM prodi.unsrat.ac.id (baru, di-depl
 ```
 prodi-unsrat/
 ├── CLAUDE.md, README.md
-├── docs/  keputusan.md · keamanan.md · deploy-portainer.md · log/fase-01.md
+├── docs/  keputusan.md · deploy.md · log/fase-01.md
 ├── docker-compose.yml · Dockerfile · docker/ (nginx, skrip mulai)
 ├── platform/
 │   ├── admin/          Flask: akun, peran, superadmin, admin prodi
@@ -246,7 +246,7 @@ Catatan:
    - `docker-compose.yml` untuk VM sendiri: `web` (Nginx: situs + admin hanya IP UNSRAT, pengalihan slug lama yang
      dimuat ulang otomatis), `admin` (waitress), `pemantau`; volume data (+ unggahan lokal), rahasia, publik;
    - bangun ulang terjadwal harian (pengumuman kedaluwarsa); HTTPS di belakang load balancer (bawaan) atau sertifikat
-     di VM; panduan deploy untuk admin UNSRAT (Portainer atau `docker compose`), cadangan harian, dan uji di image.
+     di VM; panduan deploy untuk admin UNSRAT (`docker compose`, tanpa Portainer), cadangan harian, dan uji di image.
 8. **Uji menyeluruh + `docs/log/fase-01.md`** (cara verifikasi manual, sisa pekerjaan, keputusan yang perlu dikonfirmasi).
 
 ## 11. Kriteria selesai Fase 1
