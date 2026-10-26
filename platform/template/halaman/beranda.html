@@ -2,29 +2,23 @@
 {% extends "prodi.html" %}
 {% from "_kabar.html" import kartu_kabar with context %}
 {% block isi %}
-<section class="pahlawan" aria-labelledby="judul-prodi">
+{# hero: the admin's settings (tampilan_prodi.py); the values of the official cards always come from www #}
+<section class="pahlawan pahlawan--{{ hero.latar.jenis }}" aria-labelledby="judul-prodi">
 	<div class="wadah pahlawan__isi">
-		<p class="pahlawan__label">Program Studi {{ JENJANG_PANJANG.get(p.jenjang, p.jenjang) }} · {{ unit.nama }}</p>
-		<h1 id="judul-prodi">{{ nama }}</h1>
-		{% if p.nama_en %}<p class="pahlawan__en" lang="en">{{ p.nama_en }}</p>{% endif %}
-		<p class="pahlawan__pengantar">{% if tagline %}{{ tagline }}{% else %}Program studi {{ JENJANG_PANJANG.get(p.jenjang, p.jenjang) | lower }} di {{ unit.nama }}, Universitas Sam Ratulangi, Manado.{% endif %}</p>
+		{% if hero.label %}<p class="pahlawan__label">{{ hero.label }}</p>{% endif %}
+		<h1 id="judul-prodi">{{ hero.judul }}</h1>
+		{% if hero.subjudul %}<p class="pahlawan__en"{% if hero.subjudul_bawaan %} lang="en"{% endif %}>{{ hero.subjudul }}</p>{% endif %}
+		<p class="pahlawan__pengantar">{{ hero.pengantar }}</p>
+		{% if hero.kartu %}
 		<dl class="fakta">
-			{% if p.akreditasi %}
-			<div class="fakta__butir fakta__butir--aksen">
-				<dt>Akreditasi</dt>
-				<dd>{{ p.akreditasi }}{% if p.lembaga_akreditasi %} <span class="fakta__kecil">{{ p.lembaga_akreditasi }}</span>{% endif %}</dd>
+			{% for k in hero.kartu %}
+			<div class="fakta__butir{% if k.sorot %} fakta__butir--aksen{% endif %}">
+				<dt>{{ k.label }}</dt>
+				<dd>{{ k.nilai }}{% if k.keterangan %} <span class="fakta__kecil">{{ k.keterangan }}</span>{% endif %}</dd>
 			</div>
-			{% endif %}
-			{% if p.gelar %}
-			<div class="fakta__butir"><dt>Gelar</dt><dd>{{ p.gelar }}</dd></div>
-			{% endif %}
-			{% if p.sks %}
-			<div class="fakta__butir"><dt>Beban studi</dt><dd>{{ p.sks }} SKS</dd></div>
-			{% endif %}
-			{% if p.internasional %}
-			<div class="fakta__butir"><dt>Akreditasi internasional</dt><dd>{{ p.internasional }}</dd></div>
-			{% endif %}
+			{% endfor %}
 		</dl>
+		{% endif %}
 	</div>
 </section>
 

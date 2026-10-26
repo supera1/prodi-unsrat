@@ -203,17 +203,21 @@ try:
 
     # --- staging build of the made-up programmes
     siapkan_fiktif()
-    lokasi.tulis("prodi/55201/situs", {"tagline": "<script>alert(1)</script> Unggul berbudaya", "palet": "toska", "logo": None,
+    lokasi.tulis("prodi/55201/situs", {"tagline": "Unggul \"berbudaya\" & berdaya saing", "palet": "toska", "logo": None,
                                        "media_sosial": [], "menu": {"jadwal": {"sembunyi": True},
                                                                     "sejarah": {"label": "Riwayat Kami"}}}, "penguji", "uji", "uji")
     lokasi.tulis("prodi/67201/situs", {"menu": {"sejarah": {"sembunyi": True}}}, "penguji", "uji", "uji")
+    # a tagline with markup written past the admin's checks is never published (uji_beranda covers the rules)
+    lokasi.tulis("prodi/11901/situs", {"tagline": "<script>alert(1)</script>"}, "penguji", "uji", "uji")
     b = bangun_semua()
     n = periksa_situs(lokasi.publik(), "staging")
     halaman_per_prodi = sum(1 for _ in menu_mod.halaman(menu_mod.susun(templat)))
     cek(n == 3 * halaman_per_prodi - 1 + 2, "jumlah halaman staging %d tidak sesuai" % n)
     beranda = baca_halaman("s1informatika/index.html")
-    cek("&lt;script&gt;alert(1)&lt;/script&gt; Unggul berbudaya" in beranda, "tagline harus di-escape")
-    cek("<script>alert" not in beranda, "tagline tidak boleh menjadi skrip")
+    cek("Unggul &#34;berbudaya&#34; &amp; berdaya saing" in beranda, "tagline harus di-escape")
+    dokter = baca_halaman("profesidokter/index.html")
+    cek("<script>alert" not in dokter and "alert(1)" not in dokter, "tagline bermarkah tidak pernah diterbitkan")
+    cek(any("11901" in x and "pengaturan beranda diabaikan" in x for x in b.peringatan), "tagline bermarkah diperingatkan")
     cek('content="noindex, nofollow"' in beranda and "pita-staging" in beranda, "staging harus noindex dan berpita")
     cek('rel="canonical"' not in beranda, "staging tanpa canonical")
     cek("Riwayat Kami" in baca_halaman("s1informatika/profil/index.html"), "label menu baru harus tampil")

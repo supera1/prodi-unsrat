@@ -224,10 +224,12 @@ Catatan:
    perakit folder publik, sitemap/robots per mode.
    - **3b. Pengumuman dan berita** (ditambahkan 26 Oktober 2026, K-P14): model data, foto/PDF aman, halaman daftar,
      detail, kategori, arsip, RSS, beranda, kabar terkait. Formulirnya di langkah 6.
+   - **3c. Bagian depan beranda** (ditambahkan 26 Oktober 2026, K-P15): latar warna/foto, teks, dan kartu fakta per
+     prodi; nilai resmi tetap dari www. Formulirnya di langkah 6.
 4. **Akun & peran**: SQLite, login, aturan sandi kuat, ganti/reset sandi, dekorator akses per prodi, audit log.
 5. **Superadmin**: prodi, slug, akun, tarik data, riwayat, impor `dosen_url`.
-6. **Admin prodi**: identitas, palet, logo, menu, operator, formulir pengumuman (operator menulis, admin prodi
-   menyetujui).
+6. **Admin prodi**: identitas, palet, logo, menu, bagian depan beranda (latar, foto, teks, kartu), operator, formulir
+   pengumuman (operator menulis, admin prodi menyetujui).
 7. **Docker & deploy staging**: compose stack terpisah, Nginx, pemantau, panduan Portainer + catatan DNS/LB untuk admin VM,
    bangun ulang terjadwal harian (pengumuman kedaluwarsa).
 8. **Uji menyeluruh + `docs/log/fase-01.md`** (cara verifikasi manual, sisa pekerjaan, keputusan yang perlu dikonfirmasi).

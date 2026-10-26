@@ -74,5 +74,20 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   bangun ulang terjadwal harian.
 - **Disetujui:** pengguna, 26 Oktober 2026.
 
+### K-P15 — Bagian depan beranda bisa disesuaikan prodi; nilai resmi tetap dikunci (langkah 3c)
+- **Konteks:** setiap prodi ingin bagian depan berandanya lebih khas. K-P6 mengunci data resmi dari www.
+- **Keputusan** (pengguna, 26 Oktober 2026, dari dua pilihan):
+  - Admin prodi boleh mengganti latar (warna pucat, warna utama penuh, warna pilihan, atau foto), label kecil, judul,
+    subjudul, kalimat pengantar, label/urutan/tampil kartu fakta, dan menambah 2 kartu sendiri.
+  - **Nilai** kartu resmi (akreditasi dan lembaganya, gelar, SKS, akreditasi internasional) tetap dari www dan tidak
+    bisa ditimpa; judul halaman (`<title>`), kepala situs, dan halaman Spesifikasi tetap memakai nama resmi.
+  - Foto latar: JPEG/PNG minimal 2400 × 800 piksel, dipotong otomatis 3:1 (2400 dan 1600 px) dan 4:3 untuk ponsel
+    (1200 × 900) di sekitar titik fokus (tengah, kiri, kanan, atas, bawah).
+  - Keterbacaan dijamin: warna pilihan mendapat teks putih atau gelap yang mencapai 4,5:1 (warna yang tidak bisa
+    ditolak); foto diberi lapisan warna gelap prodi dengan opasitas yang dihitung agar teks putih tetap 4,5:1 di atas
+    bagian foto yang putih sekalipun.
+- **Konsekuensi:** formulir di langkah 6 menampilkan petunjuk ukuran foto (`media.PETUNJUK_HERO`) dan pratinjau.
+- **Disetujui:** pengguna, 26 Oktober 2026.
+
 ### K-P13 — Port di VM menyusul
 - **Status:** terbuka. Diisi saat langkah 7 (Docker & deploy staging).

@@ -18,6 +18,11 @@
 	--prodi-aksen: var(--unsrat-kuning);
 	--prodi-aksen-pucat: var(--unsrat-kuning-pucat);
 	--garis: var(--unsrat-abu-200);
+	/* hero colours; <slug>/warna.css overrides them for a full-colour, chosen-colour or photo background */
+	--hero-latar: var(--prodi-utama-pucat);
+	--hero-teks: var(--unsrat-abu-900);
+	--hero-label: var(--prodi-utama);
+	--hero-redup: var(--unsrat-abu-600);
 }
 
 *,
@@ -340,8 +345,18 @@ a:hover {
 /* ---------------------------------------------------------------- hero (home and root page) */
 
 .pahlawan {
-	background: var(--prodi-utama-pucat);
+	background-color: var(--hero-latar);
+	color: var(--hero-teks);
 	border-bottom: 1px solid var(--garis);
+}
+
+.pahlawan--foto {
+	background-position: center;
+	background-size: cover;
+}
+
+.pahlawan :focus-visible {
+	outline-color: var(--hero-teks);
 }
 
 .pahlawan__isi {
@@ -351,7 +366,7 @@ a:hover {
 
 .pahlawan__label {
 	margin-bottom: var(--unsrat-spasi-20);
-	color: var(--prodi-utama);
+	color: var(--hero-label);
 	font-size: var(--unsrat-size-kecil);
 	font-weight: 700;
 	letter-spacing: 0.04em;
@@ -361,7 +376,7 @@ a:hover {
 .pahlawan h1 {
 	margin-bottom: var(--unsrat-spasi-10);
 	font-size: var(--unsrat-size-xxl);
-	color: var(--unsrat-abu-900);
+	color: var(--hero-teks);
 	overflow-wrap: break-word;
 }
 
@@ -373,7 +388,7 @@ a:hover {
 
 .pahlawan__en {
 	margin-bottom: var(--unsrat-spasi-30);
-	color: var(--unsrat-abu-600);
+	color: var(--hero-redup);
 	font-size: var(--unsrat-size-sedang);
 	font-style: italic;
 }
@@ -393,6 +408,7 @@ a:hover {
 
 .fakta__butir {
 	padding: var(--unsrat-spasi-30);
+	color: var(--unsrat-abu-900);
 	background: var(--unsrat-putih);
 	border: 1px solid var(--garis);
 	border-radius: var(--unsrat-radius-kartu);

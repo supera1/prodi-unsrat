@@ -142,9 +142,10 @@ def susun(templat, pengaturan=None):
     for b in templat:
         e = jadi(b)
         if "anak" in b:
-            anak = [(pengaturan.get(a["id"], {}).get("urutan", i), i, a) for i, a in enumerate(b["anak"])
-                    if not pengaturan.get(a["id"], {}).get("sembunyi")]
-            e["anak"] = [jadi(a) for _u, _i, a in sorted(anak, key=lambda x: (x[0], x[1]))]
+            # an order the admin chose wins over a default position with the same number
+            anak = [(pengaturan.get(a["id"], {}).get("urutan", i), "urutan" not in pengaturan.get(a["id"], {}), i, a)
+                    for i, a in enumerate(b["anak"]) if not pengaturan.get(a["id"], {}).get("sembunyi")]
+            e["anak"] = [jadi(x[3]) for x in sorted(anak, key=lambda x: x[:3])]
         hasil.append(e)
     return hasil
 

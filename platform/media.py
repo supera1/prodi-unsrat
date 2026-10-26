@@ -9,6 +9,9 @@ PDFs: at most MAKS_PDF bytes, a real PDF with pages, not password-protected, wit
 actions, forms that submit, embedded files, rich media, XFA) and without gambling text in its first pages. The
 active-content check is adapted from the www admin (site/admin/app.py periksa_pdf / konten_aktif_pdf, commit 37b5e6d).
 
+Hero backgrounds (langkah 3c, K-P15): JPEG or PNG, at least HERO_MIN pixels, cropped at upload to 3:1 for wide
+screens (2400 and 1600 px) and 4:3 for phones (1200 x 900), around the chosen focus (FOKUS).
+
 Storage (K-P11), chosen with PRODI_PENYIMPANAN:
     lokal (default)  files under PRODI_UNGGAHAN/<kode>/; the builder publishes them under publik/unggahan/<kode>/
     gcs              Google Cloud Storage, bucket GCS_BUCKET, folder <GCS_PREFIX>prodi/<kode>/, key file GCS_KUNCI
@@ -36,6 +39,13 @@ MAKS_PIKSEL = 60 * 1000 * 1000
 LEBAR_MIN = 600
 LEBAR = (1600, 800, 400)
 MAKS_PDF = 20 * 1024 * 1024
+MAKS_HERO = 15 * 1024 * 1024
+HERO_MIN = (2400, 800)
+VARIAN_HERO = {"2400": ((2400, 800), 3.0), "1600": ((1600, 533), 3.0), "ponsel": ((1200, 900), 4 / 3.0)}
+FOKUS = ("tengah", "kiri", "kanan", "atas", "bawah")
+PETUNJUK_HERO = ("Foto latar bagian depan: JPEG atau PNG, paling besar 15 MB, minimal 2400 × 800 piksel (rasio 3:1). "
+                 "Foto dipotong otomatis menjadi 3:1 untuk layar lebar dan 4:3 untuk ponsel di sekitar titik fokus "
+                 "(tengah, kiri, kanan, atas, atau bawah), lalu diberi lapisan warna prodi agar teks tetap terbaca.")
 HALAMAN_DIPERIKSA = 30            # pages whose text is checked for gambling spam
 POLA_JALUR = re.compile(r"^[0-9A-Za-z]{3,12}/[0-9]{6}-[0-9a-f]{12}(-[0-9]{3,4})?\.(jpg|pdf)$")
 
@@ -72,6 +82,40 @@ def olah_foto(data):
         buf = io.BytesIO()
         salin.save(buf, "JPEG", quality=82, optimize=True, progressive=True)
         hasil[lebar] = (buf.getvalue(), salin.size)
+    return hasil
+
+
+def potong(im, rasio, fokus="tengah"):
+    """The largest box of the given width/height ratio inside the picture, placed by the focus."""
+    lebar, tinggi = im.size
+    if lebar / float(tinggi) > rasio:                 # too wide: cut the sides
+        w = int(round(tinggi * rasio))
+        x = {"kiri": 0, "kanan": lebar - w}.get(fokus, (lebar - w) // 2)
+        return im.crop((x, 0, x + w, tinggi))
+    h = int(round(lebar / rasio))                     # too tall: cut top and bottom
+    y = {"atas": 0, "bawah": tinggi - h}.get(fokus, (tinggi - h) // 2)
+    return im.crop((0, y, lebar, y + h))
+
+
+def olah_hero(data, fokus="tengah"):
+    """{key of VARIAN_HERO: (jpeg bytes, (w, h))}, or ValueError with a message for the admin."""
+    from PIL import Image
+    if fokus not in FOKUS:
+        raise ValueError("Titik fokus harus salah satu dari: %s." % ", ".join(FOKUS))
+    if not data:
+        raise ValueError("Pilih foto latar.")
+    if len(data) > MAKS_HERO:
+        raise ValueError("Foto latar terlalu besar (maksimal %d MB)." % (MAKS_HERO // 1024 // 1024))
+    im = gambar_aman.buka(data, "Foto latar harus %s." % gambar_aman.TEKS_FORMAT, MAKS_PIKSEL).convert("RGB")
+    if im.width < HERO_MIN[0] or im.height < HERO_MIN[1]:
+        raise ValueError("Foto latar terlalu kecil (%d × %d piksel); minimal %d × %d piksel." % (
+            im.width, im.height, HERO_MIN[0], HERO_MIN[1]))
+    hasil = {}
+    for kunci, (ukuran, rasio) in VARIAN_HERO.items():
+        salin = potong(im, rasio, fokus).resize(ukuran, Image.LANCZOS)
+        buf = io.BytesIO()
+        salin.save(buf, "JPEG", quality=80, optimize=True, progressive=True)
+        hasil[kunci] = (buf.getvalue(), salin.size)
     return hasil
 
 
@@ -212,6 +256,19 @@ def simpan_foto(kode, data, alt, gudang=None):
     return {"jenis": "gambar", "alt": alt, "lebar": besar["lebar"], "tinggi": besar["tinggi"], "varian": hasil}
 
 
+def simpan_foto_hero(kode, data, fokus="tengah", gudang=None):
+    """Check, crop and store a hero background. Returns {"jenis": "hero", "fokus", "varian": {"2400": {...}, ...}}."""
+    varian = olah_hero(data, fokus)
+    gudang = gudang or penyimpanan()
+    dasar = _nama_acak("")
+    hasil = {}
+    for kunci, (isi, (w, h)) in varian.items():
+        rekam = gudang.simpan(kode, "%s-%d.jpg" % (dasar, w), isi, "image/jpeg")
+        rekam.update(lebar=w, tinggi=h)
+        hasil[kunci] = rekam
+    return {"jenis": "hero", "fokus": fokus, "varian": hasil}
+
+
 def simpan_pdf(kode, data, judul, gudang=None):
     """Check and store a PDF. Returns {"jenis": "pdf", "judul", "halaman", "ukuran", "jalur"|"url"}."""
     judul = (judul or "").strip()
@@ -230,4 +287,5 @@ def jalur_sah(jalur):
 
 
 def url_sah(url):
-    return isinstance(url, str) and url.startswith("https://storage.googleapis.com/") and not re.search(r"[\s\"'<>]", url)
+    # nothing that could end an HTML attribute or a CSS url("...") early
+    return isinstance(url, str) and url.startswith("https://storage.googleapis.com/") and not re.search(r"[\s\"'<>\\()]", url)

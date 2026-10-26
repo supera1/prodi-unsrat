@@ -56,6 +56,7 @@ import lokasi  # noqa: E402
 import menu as menu_mod  # noqa: E402
 import media  # noqa: E402
 import pengumuman as pengumuman_mod  # noqa: E402
+import tampilan_prodi  # noqa: E402
 import warna as warna_mod  # noqa: E402
 from slug import POLA_SLUG  # noqa: E402
 
@@ -307,8 +308,12 @@ class Pembangun(object):
         w = warna_mod.warna_prodi(situs.get("palet"), unit.get("bendera"), self.palet)
         if situs.get("palet") not in (None, warna_mod.BAWAAN, w["palet"]):
             self.peringatan.append("prodi %s: %s" % (kode, w["keterangan"]))
+        hero = self.hero_prodi(kode, p, unit, situs, w)
+
+        def url_foto(rekam):      # from <slug>/warna.css
+            return rekam["url"] if "url" in rekam else posixpath.relpath("unggahan/" + rekam["jalur"], slug)
         warna_css = posixpath.join(slug, "warna.css")
-        self.simpan(warna_css, warna_mod.css(w))
+        self.simpan(warna_css, warna_mod.css(w) + tampilan_prodi.css(hero["latar"], w, url_foto))
         self.versi[warna_css] = sha(self.berkas[warna_css])[:10]
         menu = self.menu_prodi(kode)
         tagline = (situs.get("tagline") or "").strip()
@@ -325,7 +330,7 @@ class Pembangun(object):
                     nama=nama_tampil(p), warna_css=warna_css, tampil_berlaku=self.tampil_berlaku,
                     dosen_url=r.get("dosen_url") or "", dosen_umum=DOSEN_UMUM, kalender=self.kalender,
                     kurikulum=sorted({c["kurikulum"] for c in p.get("cpl", []) if c.get("kurikulum")}),
-                    kabar_beranda=di_beranda, terkait=terkait, label_kategori=self.label_kategori,
+                    kabar_beranda=di_beranda, terkait=terkait, label_kategori=self.label_kategori, hero=hero,
                     hari_ini=self.hari_ini)
         for e in menu:
             for ini in [e] + e.get("anak", []):
@@ -343,7 +348,37 @@ class Pembangun(object):
                 konteks = dict(umum, ini=ini, kelompok=kelompok, kanonik=self.kanonik(folder))
                 if ini["alamat"] == "":
                     konteks["json_ld"] = self.json_ld_prodi(p, unit, folder)
+                    if hero["latar"]["jenis"] == "foto":
+                        konteks["og_gambar"] = self.media_mutlak(hero["latar"]["foto"]["varian"]["1600"])
                 self.render(templat, self.jalur_halaman(slug, ini["alamat"]), **konteks)
+
+    def hero_prodi(self, kode, p, unit, situs, w):
+        """The front section of the home page: the admin's settings over the defaults from the official data."""
+        jenjang = JENJANG_PANJANG.get(p["jenjang"], p["jenjang"])
+        bawaan = {"label": "Program Studi %s · %s" % (jenjang, unit["nama"]), "judul": nama_tampil(p),
+                  "subjudul": p.get("nama_en") or "",
+                  "pengantar": "Program studi %s di %s, Universitas Sam Ratulangi, Manado." % (jenjang.lower(), unit["nama"])}
+        resmi = []
+        if p.get("akreditasi"):
+            resmi.append({"id": "akreditasi", "label": "Akreditasi", "nilai": p["akreditasi"],
+                          "keterangan": p.get("lembaga_akreditasi") or "", "sorot": True})
+        if p.get("gelar"):
+            resmi.append({"id": "gelar", "label": "Gelar", "nilai": p["gelar"], "keterangan": "", "sorot": False})
+        if p.get("sks"):
+            resmi.append({"id": "sks", "label": "Beban studi", "nilai": "%s SKS" % p["sks"], "keterangan": "", "sorot": False})
+        if p.get("internasional"):
+            resmi.append({"id": "internasional", "label": "Akreditasi internasional", "nilai": p["internasional"],
+                          "keterangan": "", "sorot": False})
+        try:
+            hero = tampilan_prodi.susun(bawaan, resmi, situs, w)
+        except tampilan_prodi.GagalTampilan as e:
+            self.peringatan.append("prodi %s: pengaturan beranda diabaikan (%s)" % (kode, e))
+            return tampilan_prodi.susun(bawaan, resmi, {}, w)
+        if hero["latar"]["jenis"] == "foto" and not all(
+                self.terbitkan_media(v) for v in hero["latar"]["foto"]["varian"].values()):
+            self.peringatan.append("prodi %s: foto latar beranda tidak ditemukan, dipakai latar bawaan" % kode)
+            hero["latar"] = {"jenis": "pucat"}
+        return hero
 
     def pengumuman_prodi(self, kode):
         """Published announcements of a programme whose files are all there (local files are published here)."""
