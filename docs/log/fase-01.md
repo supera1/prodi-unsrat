@@ -80,6 +80,10 @@ memastikan perbandingan menemukannya.
 - Desktop 1280 px dan ponsel: tata letak, pita staging, kartu fakta; fokus keyboard terlihat, tautan pertama "Langsung
   ke konten utama", satu `h1`, `lang="id"`.
 - Ukuran: halaman terbesar 4,7 KB gzip (profil lulusan S2 Biologi), CSS 6,5 KB gzip, tanpa JavaScript.
+- **Skrip awal kontainer web** (ditemukan saat perbaikan yang sama disiapkan untuk www): `ADMIN_IP_BOLEH` yang hanya
+  berisi tab lolos pemeriksaan sehingga admin diam-diam tertutup, dan `ADMIN_AWALAN` yang salah baru diperiksa setelah
+  berkas lain ditulis. Diperbaiki; `uji_docker` kini menjalankan `40-prodi-jaringan.sh` dengan 18 nilai dan
+  `45-prodi-https.sh` dengan 5 keadaan di setiap shell yang ada (`sh`, `dash`, juga `busybox` bila ada).
 
 ## Cara verifikasi manual
 
@@ -118,9 +122,10 @@ Buka http://127.0.0.1:8790/ lalu periksa:
 **Dikerjakan admin VM / pihak lain:**
 - Deploy staging mengikuti `docs/deploy.md`; buat minimal dua superadmin; unggah data www terbaru.
 - Admin VM www mengambilkan `unit.json`, `kalender.json`, `situs.json` www bila berubah (`docs/deploy.md` §6).
-- www: perbaikan validasi jaringan di `docker/nginx/40-unsrat-jaringan.sh` sudah disiapkan di branch www
-  `fase/praproduksi-cek-jaringan` (belum di-commit, menunggu persetujuan); penulisan lembaga akreditasi di www belum
-  seragam (`LAM-Tek`/`LAM-Teknik`); data resmi 10 prodi masih kosong sebagian (CPL atau akreditasi), dilengkapi di www.
+- www: perbaikan validasi jaringan di `docker/nginx/40-unsrat-jaringan.sh` sudah di-commit di branch lokal www
+  `fase/praproduksi-cek-jaringan` (`5db66ff`), belum di-push dan belum digabung; penulisan lembaga akreditasi di www
+  belum seragam (`LAM-Tek`/`LAM-Teknik`); data resmi 10 prodi masih kosong sebagian (CPL atau akreditasi), dilengkapi
+  di www.
 - Pengalihan situs prodi lama (K-P4).
 
 **Belum dicoba:** alur Portainer itu sendiri (yang dicoba `docker compose`), Let's Encrypt sungguhan (perlu DNS dan VM

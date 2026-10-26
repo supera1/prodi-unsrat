@@ -132,6 +132,79 @@ for v in variabel:
     cek("`%s`" % v in panduan, "%s harus dijelaskan di docs/deploy.md" % v)
 cek(not re.search(r"^[A-Z_]+=\S", contoh, re.M), ".env.example tanpa nilai")
 
+# --- the start scripts of the web container, run with their paths moved to a temporary folder, in every POSIX shell
+# this machine has (the image runs busybox sh): a wrong value must stop the start (exit 1, nothing written)
+def jalankan(rel, env, kerja, shell):
+    with io.open(os.path.join(AKAR, *rel.split("/")), encoding="utf-8") as f:
+        skrip = f.read().replace("/etc/nginx", kerja)
+    path = os.path.join(kerja, "skrip.sh")
+    with io.open(path, "w", encoding="utf-8") as f:
+        f.write(skrip)
+    lingkungan = {"PATH": os.environ.get("PATH", "/usr/bin:/bin")}
+    lingkungan.update(env)
+    r = subprocess.run(shell + [path], env=lingkungan, capture_output=True, text=True)
+
+    def isi(nama):
+        p = os.path.join(kerja, *nama.split("/"))
+        return io.open(p, encoding="utf-8").read() if os.path.isfile(p) else None
+    return r.returncode, isi, r.stderr
+
+
+TAB = "\t"
+JARINGAN = [  # (env, exit status, expected admin-ip.conf, expected real-ip.conf, expected admin-awalan.conf)
+    ({}, 0, "allow 103.84.116.0/24;\ndeny all;\n", "", 'proxy_set_header X-Forwarded-Prefix "";\n'),
+    ({"ADMIN_IP_BOLEH": "103.84.116.0/24, 10.0.0.0/8"}, 0, "allow 103.84.116.0/24;\nallow 10.0.0.0/8;\ndeny all;\n", "", None),
+    ({"ADMIN_IP_BOLEH": "103.84.116.0/24" + TAB + "10.0.0.0/8"}, 0, "allow 103.84.116.0/24;\nallow 10.0.0.0/8;\ndeny all;\n", "", None),
+    ({"ADMIN_IP_BOLEH": "2001:db8::/32,,103.84.116.0/24"}, 0, "allow 2001:db8::/32;\nallow 103.84.116.0/24;\ndeny all;\n", "", None),
+    ({"PROKSI_DEPAN": "130.211.0.0/22,35.191.0.0/16,103.157.55.250/32", "ADMIN_AWALAN": "/admin/"}, 0, None,
+     "set_real_ip_from 130.211.0.0/22;\nset_real_ip_from 35.191.0.0/16;\nset_real_ip_from 103.157.55.250/32;\n"
+     "real_ip_header X-Forwarded-For;\nreal_ip_recursive on;\n", 'proxy_set_header X-Forwarded-Prefix "/admin";\n'),
+] + [({"ADMIN_IP_BOLEH": v}, 1, None, None, None) for v in (
+    "1.2.3.4;include /etc/passwd", "*", ",", TAB, "," + TAB + ",", " ", "103.84.116.0/24 x", "103.84.116.0/24\nallow all")] + [
+    ({"PROKSI_DEPAN": v}, 1, None, None, None) for v in ("10.0.0.0/8 x", "10.0.0.0/8,*")] + [
+    ({"ADMIN_AWALAN": v}, 1, None, None, None) for v in ('/admin";proxy_pass http://x', "admin", "/a//b")]
+shell_ada = [[x] for x in ("sh", "dash") if shutil.which(x)] + ([["busybox", "sh"]] if shutil.which("busybox") else [])
+for shell in shell_ada:
+    for env, kode, admin_ip, real_ip, awalan in JARINGAN:
+        kerja = tempfile.mkdtemp(prefix="prodi-uji-jaringan-")
+        try:
+            k, isi, galat = jalankan("docker/nginx/40-prodi-jaringan.sh", env, kerja, shell)
+            label = "%s 40-prodi-jaringan %r" % (shell[0], env)
+            cek(k == kode, "%s: kode keluar %s, harus %s (%s)" % (label, k, kode, galat.strip()))
+            if kode:
+                cek(galat.strip() and isi("prodi/admin-ip.conf") is None, "%s: harus berhenti dengan pesan, tanpa berkas" % label)
+            for nama, harap in (("admin-ip.conf", admin_ip), ("real-ip.conf", real_ip), ("admin-awalan.conf", awalan)):
+                if harap is not None:
+                    cek(isi("prodi/" + nama) == harap, "%s: %s = %r" % (label, nama, isi("prodi/" + nama)))
+        finally:
+            shutil.rmtree(kerja, ignore_errors=True)
+
+    def https(env, sertifikat=False):
+        kerja = tempfile.mkdtemp(prefix="prodi-uji-https-")
+        os.makedirs(os.path.join(kerja, "conf.d"))
+        if sertifikat:
+            os.makedirs(os.path.join(kerja, "tls"))
+            for n in ("fullchain.pem", "privkey.pem"):
+                with io.open(os.path.join(kerja, "tls", n), "w") as f:
+                    f.write("uji\n")
+        try:
+            k, isi, _g = jalankan("docker/nginx/45-prodi-https.sh", env, kerja, shell)
+            return k, {n: isi(n) for n in ("prodi/port-80.conf", "prodi/port-8081.conf", "conf.d/https.conf")}
+        finally:
+            shutil.rmtree(kerja, ignore_errors=True)
+    k, isi = https({})
+    cek(k == 0 and "lokasi-situs.conf" in isi["prodi/port-80.conf"] and "lokasi-admin.conf" in isi["prodi/port-8081.conf"]
+        and isi["conf.d/https.conf"] is None, "%s 45-prodi-https: HTTP di belakang load balancer: %r" % (shell[0], isi))
+    k, isi = https({"HTTPS_DI_VM": "1", "PORT_SITUS_HTTPS": "443", "PORT_ADMIN_HTTPS": "8444"}, sertifikat=True)
+    cek(k == 0 and "return 301 https://$host$request_uri;" in isi["prodi/port-80.conf"]
+        and "return 301 https://$host:8444$request_uri;" in isi["prodi/port-8081.conf"]
+        and "listen 443 ssl;" in isi["conf.d/https.conf"] and "listen 8443 ssl;" in isi["conf.d/https.conf"],
+        "%s 45-prodi-https: HTTPS di VM: %r" % (shell[0], isi))
+    for env, sertifikat in (({"HTTPS_DI_VM": "1"}, False), ({"HTTPS_DI_VM": "ya"}, True),
+                            ({"HTTPS_DI_VM": "1", "PORT_ADMIN_HTTPS": "84a"}, True)):
+        cek(https(env, sertifikat)[0] == 1, "%s 45-prodi-https %r harus berhenti" % (shell[0], env))
+cek(shell_ada, "tidak ada shell POSIX untuk menguji skrip awal web")
+
 # --- the shell scripts parse
 sh = shutil.which("sh")
 for rel in ("docker/admin-mulai.sh", "docker/pemantau.sh", "docker/nginx/40-prodi-jaringan.sh",
