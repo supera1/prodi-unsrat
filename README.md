@@ -3,7 +3,7 @@
 Situs ke-97 program studi Universitas Sam Ratulangi di `https://prodi.unsrat.ac.id/<slug>/`, dengan template seragam
 yang mengikuti kriteria akreditasi dan bisa disesuaikan oleh tiap prodi.
 
-> **Status 26 Oktober 2026:** Fase 1 langkah 1 (kerangka repo). Belum ada situs yang bisa dijalankan.
+> **Status 26 Oktober 2026:** Fase 1 langkah 2 (model data + tarik data www). Belum ada situs yang bisa dijalankan.
 > Rencana: [docs/rencana-fase-01.md](docs/rencana-fase-01.md) · Keputusan: [docs/keputusan.md](docs/keputusan.md)
 
 ## Cara kerja singkat
@@ -19,12 +19,23 @@ yang mengikuti kriteria akreditasi dan bisa disesuaikan oleh tiap prodi.
 python3 uji/jalankan-semua.py
 ```
 
+## Menyiapkan data di komputer pengembang
+
+Dengan repo www di folder sebelahnya (`../website-unsrat-2026`):
+
+```bash
+python3 platform/tarik_www.py --terapkan
+python3 platform/registri.py --siapkan
+```
+
+Hasilnya di `data/` dan `riwayat/` (tidak masuk Git).
+
 ## Urutan Fase 1
 
 | Langkah | Isi | Status |
 |---|---|---|
-| 1 | Kerangka repo, dokumen, modul aman dari www, uji slug | dikerjakan |
-| 2 | Model data + tarik data www | — |
+| 1 | Kerangka repo, dokumen, modul aman dari www, uji slug | selesai |
+| 2 | Model data + tarik data www | selesai, menunggu tinjauan |
 | 3 | Template induk + generator | — |
 | 4 | Akun & peran | — |
 | 5 | Superadmin | — |

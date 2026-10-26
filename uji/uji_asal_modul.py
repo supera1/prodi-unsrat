@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Modules copied from the www repository still match the SHA-256 recorded in docs/asal-modul.md.
+"""Modules copied from the www repository against the SHA-256 recorded in docs/asal-modul.md.
 
-A mismatch means a copy was changed without updating the table (or the table was not updated after porting a fix
-from www). When the www repository sits next to this one, it also reports copies whose source has since changed.
+Section "Salinan utuh": the copy must still match (a mismatch means it was changed without updating the table).
+Section "Diadaptasi": the copy was changed on purpose; only the source is watched.
+When the www repository sits next to this one, every source whose content has changed since it was copied is
+reported, so security fixes made in www are not missed here.
 """
 from __future__ import print_function
 
@@ -22,9 +24,12 @@ def sidik(path):
         return hashlib.sha256(f.read()).hexdigest()[:12]
 
 
-gagal, dicek = [], 0
+gagal, dicek, bagian = [], 0, None
 with io.open(os.path.join(AKAR, "docs", "asal-modul.md"), encoding="utf-8") as f:
     for teks in f:
+        if teks.startswith("## "):
+            bagian = teks[3:].strip()
+            continue
         m = BARIS.match(teks)
         if not m:
             continue
@@ -34,13 +39,13 @@ with io.open(os.path.join(AKAR, "docs", "asal-modul.md"), encoding="utf-8") as f
         if not os.path.isfile(path):
             gagal.append("%s tidak ada" % di_sini)
             continue
-        if sidik(path) != tercatat:
+        if bagian == "Salinan utuh" and sidik(path) != tercatat:
             gagal.append("%s berubah (%s, tercatat %s): perbarui docs/asal-modul.md" % (di_sini, sidik(path), tercatat))
         path_asal = os.path.join(WWW, asal)
         if os.path.isfile(path_asal) and sidik(path_asal) != tercatat:
             print("PERHATIAN %s di www sudah berubah sejak disalin: tinjau apakah perlu diterapkan di sini" % asal)
 
-if dicek == 0:
+if dicek == 0 or bagian is None:
     gagal.append("tabel di docs/asal-modul.md tidak terbaca")
 for g in gagal:
     print("GAGAL", g)
