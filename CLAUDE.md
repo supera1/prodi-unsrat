@@ -69,6 +69,10 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   `--produksi`. Ganti slug atau nonaktifkan prodi: bangun semua, supaya folder lama terhapus.
 - Pengumuman (sebelum admin ada): `.venv/bin/python platform/pengumuman.py tambah|daftar|status --prodi <kode> ...`;
   foto/PDF lewat `platform/media.py` (`PRODI_PENYIMPANAN=lokal` ke `unggahan/`, `gcs` ke bucket). Lalu bangun `--prodi`.
+- Isi halaman wajib/opsional (Fase 2, K-P23): templat, pemeriksaan, dan tampilannya di `platform/isi_halaman.py`;
+  disimpan di `data/prodi/<kode>/halaman-<id>.json`. Sebelum penyunting ada:
+  `.venv/bin/python platform/isi_halaman.py daftar|contoh|tarik --prodi <kode>` (`contoh` hanya untuk melihat tampilan,
+  bertanda `[CONTOH]`, ditolak di produksi). Templat situs: `platform/template/halaman/isi.html` + `_isi.html`.
 - Bagian depan beranda (sebelum admin ada): `.venv/bin/python platform/tampilan_prodi.py lihat|atur|foto --prodi <kode>`.
   Nilai kartu resmi (akreditasi, gelar, SKS) tidak pernah boleh ditimpa (K-P15).
 - Admin (langkah 4): sekali `python3 platform/admin/siapkan.py` (kunci sesi di `rahasia/.env`), lalu

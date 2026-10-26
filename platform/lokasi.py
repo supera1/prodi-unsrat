@@ -25,6 +25,7 @@ Layout of PRODI_DATA (docs/rencana-fase-01.md §4):
     warisan/meta.json             when the copy was taken and from where
     prodi/<kode>/situs.json       per programme: tagline, palette, logo, social media, menu settings
     prodi/<kode>/pengumuman.json  per programme: announcements and news (pengumuman.py)
+    prodi/<kode>/halaman-<id>.json per programme and own page: its content (isi_halaman.py, Fase 2)
 """
 from __future__ import print_function
 

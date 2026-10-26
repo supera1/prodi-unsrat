@@ -18,7 +18,7 @@ Output (PRODI_PUBLIK, the only folder the web server serves):
     <slug>/warna.css                 the programme's colours (custom properties only)
     <slug>/pengumuman/               announcements and news (pengumuman.py): list pages (/halaman/<n>/), one page per
                                      item (/<id>/), per category (/kategori/<id>/), per year (/arsip/<yyyy>/), rss.xml
-    unggahan/<kode>/...              uploaded photos and PDFs of published items (PRODI_PENYIMPANAN=lokal only)
+    unggahan/<kode>/...              uploaded photos and PDFs of published items and pages (PRODI_PENYIMPANAN=lokal only)
 
 plus PRODI_MANIFES (SHA-256 of every published file, for pemantau/cek_integritas.py) and
 PRODI_NGINX/slug-lama.conf (301 redirects of old slugs, included by Nginx).
@@ -54,6 +54,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined  # noqa: E402
 from markupsafe import Markup, escape  # noqa: E402
 
 import data_prodi  # noqa: E402
+import isi_halaman  # noqa: E402
 import lokasi  # noqa: E402
 import menu as menu_mod  # noqa: E402
 import media  # noqa: E402
@@ -348,11 +349,30 @@ class Pembangun(object):
                     templat = "isi.html"
                 folder = posixpath.join(slug, ini["alamat"]) if ini["alamat"] else slug
                 konteks = dict(umum, ini=ini, kelompok=kelompok, kanonik=self.kanonik(folder))
+                if templat == "isi.html":
+                    konteks["isi_bagian"] = self.isi_halaman_prodi(kode, ini["id"])
                 if ini["alamat"] == "":
                     konteks["json_ld"] = self.json_ld_prodi(p, unit, folder)
                     if hero["latar"]["jenis"] == "foto":
                         konteks["og_gambar"] = self.media_mutlak(hero["latar"]["foto"]["varian"]["1600"])
                 self.render(templat, self.jalur_halaman(slug, ini["alamat"]), **konteks)
+
+    def isi_halaman_prodi(self, kode, id_halaman):
+        """The sections of a programme's own page (isi_halaman.py, Fase 2), or None while it has no content to show:
+        the page then says the programme is still filling it. Content that fails the checks is not shown at all."""
+        if id_halaman not in isi_halaman.TEMPLAT:
+            return None
+        isi = isi_halaman.terbit(kode, id_halaman)
+        if isi is None:
+            return None
+        masalah = isi_halaman.periksa(id_halaman, isi, kode)
+        if masalah:
+            self.peringatan.append("prodi %s: isi halaman %s diabaikan (%s)" % (kode, id_halaman, "; ".join(masalah[:3])))
+            return None
+        bagian, hilang = isi_halaman.tampilan(id_halaman, isi, self.terbitkan_media)
+        if hilang:
+            self.peringatan.append("prodi %s: halaman %s: %d berkas tidak ditemukan, dilewati" % (kode, id_halaman, hilang))
+        return bagian or None
 
     def identitas_prodi(self, kode, situs):
         """(logo, social media) of a programme, each only when its settings pass the checks."""

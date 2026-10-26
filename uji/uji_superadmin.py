@@ -296,6 +296,12 @@ try:
         cek(su.get(url).status_code == 404, "jalur aneh di riwayat ditolak: %s" % url)
     cek(kirim(su, "/super/riwayat/pulihkan", berkas="prodi/../registri", versi=v).status_code == 404, "pulihkan jalur aneh ditolak")
     cek(su.get("/super/riwayat?berkas=prodi/%s" % A).status_code == 200, "saringan riwayat per prodi")
+    # a page's own content (Fase 2) is named after the page in the history
+    import isi_halaman
+    isi_halaman.terbitkan(A, "sejarah", {"uraian": "Versi pertama."}, "superuji")
+    isi_halaman.terbitkan(A, "sejarah", {"uraian": "Versi kedua."}, "superuji")
+    cek("Teknik Informatika — halaman Sejarah" in su.get("/super/riwayat?berkas=prodi/%s" % A).get_data(as_text=True),
+        "riwayat menamai isi halaman dengan nama halamannya")
 
     # --- accounts: role and programmes; the change applies to running sessions
     r = ad.get("/prodi/%s/" % C)

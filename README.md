@@ -5,8 +5,8 @@ yang mengikuti kriteria akreditasi dan bisa disesuaikan oleh tiap prodi.
 
 > **Status 27 Oktober 2026:** Fase 1 selesai dan digabung ke `main` (PR #1): 97 situs prodi, data resmi dari www yang
 > diuji sama persis, admin tiga peran, stack Docker untuk VM sendiri ([log](docs/log/fase-01.md), panduan admin VM:
-> [docs/deploy.md](docs/deploy.md)). Fase 2 (penyunting halaman wajib dan pilot 3 prodi): rencana menunggu tinjauan,
-> [docs/rencana-fase-02.md](docs/rencana-fase-02.md).
+> [docs/deploy.md](docs/deploy.md)). Fase 2 (penyunting halaman wajib dan pilot 3 prodi,
+> [rencana](docs/rencana-fase-02.md), disetujui): langkah 1 (model data dan templat isi 24 halaman) menunggu tinjauan.
 > Rencana: [docs/rencana-fase-01.md](docs/rencana-fase-01.md) · Keputusan: [docs/keputusan.md](docs/keputusan.md)
 
 ## Cara kerja singkat
@@ -68,3 +68,16 @@ Stack Docker lengkap di komputer sendiri: [docs/deploy.md §13](docs/deploy.md#1
 | 6 | Admin prodi | selesai |
 | 7 | Docker & deploy di VM sendiri | selesai |
 | 8 | Uji menyeluruh + log fase | selesai (digabung ke `main`, PR #1) |
+
+## Urutan Fase 2
+
+| Langkah | Isi | Status |
+|---|---|---|
+| 0 | Rencana Fase 2 | disetujui |
+| 1 | Model data dan templat isi 22 halaman wajib + 2 opsional, tampilan di situs | selesai, menunggu tinjauan |
+| 2 | Penyunting di admin | — |
+| 3 | Alur ajukan/terbitkan dan kelengkapan | — |
+| 4 | Dokumen Akreditasi dan label kriteria | — |
+| 5–6 | Panduan dan pilot 3 prodi | menunggu staging |
+| 7 | Pilihan tambahan (bila pilot memerlukan) | — |
+| 8 | Uji menyeluruh + log fase | — |

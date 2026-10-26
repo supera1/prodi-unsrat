@@ -428,12 +428,19 @@ def pasang(app, alat):
 
     # -------------------------------------------------------------- version history
 
+    def label_halaman():
+        import menu as menu_mod
+        return {k: b["label"] for k, b in menu_mod.semua_butir(menu_mod.baca_templat()).items()}
+
     def nama_berkas(berkas):
         m = re.match(r"^prodi/([0-9A-Za-z]{3,12})/(.+)$", berkas)
         if m:
-            return "%s — %s" % (nama_semua().get(m.group(1), m.group(1)), {"situs": "identitas dan beranda",
-                                                                            "pengumuman": "pengumuman",
-                                                                            "data": "data prodi"}.get(m.group(2), m.group(2)))
+            if m.group(2).startswith("halaman-"):                 # a page's own content (isi_halaman.py)
+                bagian = "halaman %s" % label_halaman().get(m.group(2)[len("halaman-"):], m.group(2))
+            else:
+                bagian = {"situs": "identitas dan beranda", "pengumuman": "pengumuman",
+                          "data": "data prodi"}.get(m.group(2), m.group(2))
+            return "%s — %s" % (nama_semua().get(m.group(1), m.group(1)), bagian)
         return {"registri": "Registri prodi (slug, aktif, tautan dosen)", "warisan/prodi": "Data resmi prodi dari www",
                 "warisan/unit": "Data fakultas dari www", "warisan/kalender": "Kalender akademik dari www",
                 "warisan/universitas": "Identitas universitas dari www", "warisan/meta": "Catatan tarik data"}.get(berkas, berkas)
