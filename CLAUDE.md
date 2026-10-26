@@ -15,7 +15,8 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
 - Bahasa: Indonesia; bahasa Inggris di `/<slug>/en/` menyusul (Fase 5, alamatnya sudah dicadangkan).
 
 ## Dokumen (baca bagian yang relevan sebelum mengerjakan fitur)
-- `docs/rencana-fase-01.md` — rencana Fase 1 yang disetujui: arsitektur, model data, peran, template, urutan kerja.
+- `docs/rencana-fase-01.md` — rencana Fase 1 (selesai): arsitektur, model data, peran, template, urutan kerja.
+- `docs/rencana-fase-02.md` — rencana Fase 2: penyunting halaman wajib, alur isi, kelengkapan, pilot 3 prodi.
 - `docs/keputusan.md` — log keputusan (K-P1, …). Tambahkan entri setiap ada keputusan baru.
 - `docs/asal-modul.md` — modul yang disalin dari repo www beserta versi asalnya.
 - `platform/data-awal/slug.csv` — slug 97 prodi yang disetujui. Kunci tetap prodi adalah `kode_pddikti`, bukan slug.

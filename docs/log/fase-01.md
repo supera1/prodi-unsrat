@@ -20,7 +20,8 @@ Fase 1 menghasilkan platform satu sumber untuk situs ke-97 program studi UNSRAT 
 ## Langkah
 
 Setiap langkah satu branch, bertumpuk (setiap branch bercabang dari langkah sebelumnya), semuanya sudah di-push ke
-`supera1/prodi-unsrat`. `fase/01-8-uji` memuat seluruh Fase 1; `main` belum digabung.
+`supera1/prodi-unsrat`. `fase/01-8-uji` memuat seluruh Fase 1 dan digabung ke `main` lewat PR #1 (27 Oktober 2026,
+merge commit `ae406af`).
 
 | Langkah | Branch | Hasil utama |
 |---|---|---|
@@ -118,7 +119,6 @@ Buka http://127.0.0.1:8790/ lalu periksa:
   superadmin); bila berupa daftar per dosen, perlu model data tambahan.
 - Port akhir di VM (K-P13), nama domain/alamat admin, dan load balancer: bersama admin VM.
 - Konfirmasi K-P20 (uji saat build) dan keputusan kecil lain di bawah.
-- Penggabungan ke `main` (deploy disarankan dari `main`).
 
 **Dikerjakan admin VM / pihak lain:**
 - Deploy staging mengikuti `docs/deploy.md`; buat minimal dua superadmin; unggah data www terbaru.
