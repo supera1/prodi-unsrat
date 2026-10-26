@@ -1,6 +1,7 @@
 # Rencana Fase 2 — Penyunting halaman wajib dan pilot 3 prodi
 
-Status: **usulan, menunggu tinjauan** (27 Oktober 2026). Hal yang perlu diputuskan sebelum mulai: §11.
+Status: **disetujui** (27 Oktober 2026) dengan semua usulan §11; dua prodi pilot selain S1 Teknik Informatika menyusul
+dari pengguna. Dikerjakan per langkah (§8). Keputusan: K-P23–K-P26.
 Dasar: [rencana Fase 1](rencana-fase-01.md) §2 dan [log Fase 1](log/fase-01.md).
 
 ---
@@ -262,3 +263,9 @@ Langkah 1–4 tidak bergantung pada staging. Langkah 5–6 menunggu staging taya
 | 7 | Impor Excel untuk tabel besar | Dikerjakan di Fase 2 hanya bila pilot memerlukannya |
 | 8 | Ukuran keberhasilan pilot | Minimal 15 dari 22 halaman wajib terbit per prodi pilot, tanpa bantuan pengembang |
 | 9 | Jadwal deploy staging oleh admin VM | Diperlukan sebelum langkah 5 |
+
+### Jawaban (pengguna, 27 Oktober 2026)
+
+Semua usulan di atas disetujui: pertanyaan 2–8 sesuai kolom "Usulan". Untuk pertanyaan 1, prodi pilot pertama adalah
+S1 Teknik Informatika, dan dua lainnya akan disebutkan pengguna. Pertanyaan 9 (jadwal deploy staging) tetap mengikuti
+admin VM; pilot dimulai setelah staging tayang.

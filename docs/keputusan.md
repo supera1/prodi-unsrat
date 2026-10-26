@@ -173,3 +173,29 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   terbangun; superadmin lalu mengunggah data www terbaru (K-P18). Data ini memang tayang publik di www.
 - **Konsekuensi:** salinan diperbarui pengembang sesekali (`impor_www.py --tulis-data-awal`); `uji_impor_www.py` memberi
   tahu bila salinan sudah berbeda dari data www di komputer pengembang.
+
+### K-P23 — Isi halaman wajib terstruktur per halaman (Fase 2)
+- **Konteks:** 22 halaman wajib akreditasi per prodi diisi prodi sendiri; asesor perlu menemukan informasi yang sama di
+  tempat yang sama di 97 situs.
+- **Keputusan** (pengguna, 27 Oktober 2026, rencana Fase 2 §3): setiap halaman wajib dan opsional punya **templat isi**
+  (bagian, isian, tabel) ditambah bagian tambahan bebas. Formulirnya dibentuk dari templat dengan pola penyunting
+  superadmin www (`editor.py`), tanpa HTML; teks hanya dengan markah tautan `https://` dan huruf tebal.
+- **Konsekuensi:** templat bisa direvisi setelah pilot tanpa menghapus isi (kunci yang tidak dikenal disimpan).
+
+### K-P24 — Alur isi halaman operator → admin prodi, dan kelengkapan per prodi (Fase 2)
+- **Keputusan** (pengguna, 27 Oktober 2026): operator dan admin prodi mengisi; admin prodi menerbitkan atau
+  mengembalikan dengan catatan, seperti pengumuman (K-P14). Satu isi terbit dan satu draf per halaman; simpanan yang
+  saling menimpa ditolak. Kelengkapan halaman wajib tampil di dasbor prodi dan superadmin.
+
+### K-P25 — Dokumen akreditasi hanya yang boleh publik; label kriteria dari LPMPP (Fase 2)
+- **Keputusan** (pengguna, 27 Oktober 2026): halaman Dokumen Akreditasi memuat dokumen yang boleh publik saja
+  (sertifikat, SK, ringkasan); dokumen berisi data pribadi tidak diunggah ke situs. Label kriteria akreditasi per
+  lembaga disiapkan atau dikonfirmasi LPMPP UNSRAT; sebelum itu tidak ditampilkan.
+
+### K-P26 — Pilot 3 prodi dan pilihan tambahan (Fase 2)
+- **Keputusan** (pengguna, 27 Oktober 2026):
+  - pilot di staging: S1 Teknik Informatika dan dua prodi lain yang disebutkan pengguna; ukuran keberhasilan minimal 15
+    dari 22 halaman wajib terbit per prodi pilot tanpa bantuan pengembang;
+  - butir "usulan perubahan data resmi" (rencana Fase 1 §2) diganti laporan perubahan data prodi untuk diteruskan ke
+    pengelola www;
+  - impor Excel untuk tabel besar hanya bila pilot memerlukannya.
