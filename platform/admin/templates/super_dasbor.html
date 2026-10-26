@@ -16,11 +16,12 @@
 <section class="kartu">
 	<h2>Data resmi dari www</h2>
 	{% if r.meta.ditarik %}
-	<p>Terakhir ditarik {{ r.meta.ditarik }} oleh {{ r.meta.oleh }} ({{ r.meta.jumlah_prodi }} prodi).</p>
+	<p>Terakhir diperbarui {{ r.meta.ditarik }} ({{ r.umur_data }} hari lalu) oleh {{ r.meta.oleh }}, {{ r.meta.jumlah_prodi }} prodi{% if r.meta.sumber %}; sumber: {{ r.meta.sumber }}{% endif %}.</p>
+	{% if r.umur_data > 30 %}<p class="pesan pesan--info">Data www sudah lebih dari 30 hari. Unduh data terbaru dari superadmin www, lalu unggah di halaman Data www.</p>{% endif %}
 	{% else %}
-	<p>Belum pernah ditarik.</p>
+	<p>Belum ada data www.</p>
 	{% endif %}
-	<p><a class="tombol tombol--garis" href="{{ url_for('super_tarik') }}">Periksa perubahan dari www</a></p>
+	<p><a class="tombol tombol--garis" href="{{ url_for('super_tarik') }}">Unggah data www terbaru</a></p>
 </section>
 <section class="kartu">
 	<h2>Bangun ulang situs</h2>
@@ -28,7 +29,7 @@
 	<p><a href="{{ url_for('super_bangun') }}">Rincian dan bangun ulang semua</a></p>
 </section>
 {% for id_, judul, daftar, ket in [("tanpa-admin", "Situs aktif tanpa admin prodi", r.tanpa_admin, "Buat akun admin prodi lewat menu Akun."),
-	("kurang", "Data resmi yang masih kosong", r.kurang, "Dilengkapi di superadmin www, lalu tarik data lagi."),
+	("kurang", "Data resmi yang masih kosong", r.kurang, "Dilengkapi di superadmin www, lalu diunggah lagi di halaman Data www."),
 	("hilang", "Hilang dari data www", r.hilang, "Periksa di www; nonaktifkan situsnya bila prodi memang ditutup."),
 	("bentrok", "Data prodi bentrok dengan www", r.bentrok, "Data prodi tetap dipakai; pilih di halaman Data prodi: pakai data www atau tetap.")] %}
 {% if daftar %}

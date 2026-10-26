@@ -1,0 +1,265 @@
+{
+  "unit": [
+    {
+      "kode": "fk",
+      "nama": "Fakultas Kedokteran",
+      "nama_en": "Faculty of Medicine",
+      "jenis": "fakultas",
+      "website": "https://fk.unsrat.ac.id",
+      "surel": "kedokteran@unsrat.ac.id",
+      "bendera": {
+        "dasar": "#013300",
+        "tulisan": "#FFFF00"
+      }
+    },
+    {
+      "kode": "ft",
+      "nama": "Fakultas Teknik",
+      "nama_en": "Faculty of Engineering",
+      "jenis": "fakultas",
+      "website": "https://fatek.unsrat.ac.id",
+      "surel": "fatek@unsrat.ac.id",
+      "bendera": {
+        "dasar": "#000099",
+        "tulisan": "#FFFF00"
+      }
+    },
+    {
+      "kode": "faperta",
+      "nama": "Fakultas Pertanian",
+      "nama_en": "Faculty of Agriculture",
+      "jenis": "fakultas",
+      "website": "https://faperta.unsrat.ac.id",
+      "surel": "faperta@unsrat.ac.id",
+      "bendera": {
+        "dasar": "#00FF01",
+        "tulisan": "#3500FF"
+      }
+    },
+    {
+      "kode": "fapet",
+      "nama": "Fakultas Peternakan",
+      "nama_en": "Faculty of Animal Husbandry",
+      "jenis": "fakultas",
+      "website": "https://fapet.unsrat.ac.id",
+      "surel": "peternakan@unsrat.ac.id",
+      "bendera": {
+        "dasar": "#663200",
+        "tulisan": "#FFFF00"
+      }
+    },
+    {
+      "kode": "fpik",
+      "nama": "Fakultas Perikanan dan Ilmu Kelautan",
+      "nama_en": "Faculty of Fisheries and Marine Science",
+      "jenis": "fakultas",
+      "website": "https://fpik.unsrat.ac.id",
+      "surel": "fpik@unsrat.ac.id",
+      "bendera": {
+        "dasar": "#0000FE",
+        "tulisan": "#00FFFF"
+      }
+    },
+    {
+      "kode": "feb",
+      "nama": "Fakultas Ekonomi dan Bisnis",
+      "nama_en": "Faculty of Economics and Business",
+      "jenis": "fakultas",
+      "website": "https://feb.unsrat.ac.id",
+      "surel": "feb@unsrat.ac.id",
+      "bendera": {
+        "dasar": "#C6C6C6",
+        "tulisan": "#3500FF"
+      }
+    },
+    {
+      "kode": "fh",
+      "nama": "Fakultas Hukum",
+      "nama_en": "Faculty of Law",
+      "jenis": "fakultas",
+      "website": "https://fh.unsrat.ac.id",
+      "surel": "fhukum@unsrat.ac.id",
+      "bendera": {
+        "dasar": "#FE0002",
+        "tulisan": "#FFFFFF"
+      }
+    },
+    {
+      "kode": "fisip",
+      "nama": "Fakultas Ilmu Sosial dan Ilmu Politik",
+      "nama_en": "Faculty of Social and Political Sciences",
+      "jenis": "fakultas",
+      "website": "https://fisip.unsrat.ac.id",
+      "surel": "fisip@unsrat.ac.id",
+      "bendera": {
+        "dasar": "#FF8500",
+        "tulisan": "#3500FF"
+      }
+    },
+    {
+      "kode": "fib",
+      "nama": "Fakultas Ilmu Budaya",
+      "nama_en": "Faculty of Cultural Sciences",
+      "jenis": "fakultas",
+      "website": "https://fib.unsrat.ac.id",
+      "surel": "ilmubudaya@unsrat.ac.id",
+      "bendera": {
+        "dasar": "#9A00FF",
+        "tulisan": "#FFFF00"
+      }
+    },
+    {
+      "kode": "fmipa",
+      "nama": "Fakultas Matematika dan Ilmu Pengetahuan Alam",
+      "nama_en": "Faculty of Mathematics and Natural Sciences",
+      "jenis": "fakultas",
+      "website": "https://fmipa.unsrat.ac.id",
+      "surel": "fmipa@unsrat.ac.id",
+      "bendera": {
+        "dasar": "#FFFFFF",
+        "tulisan": "#3500FF"
+      }
+    },
+    {
+      "kode": "fkm",
+      "nama": "Fakultas Kesehatan Masyarakat",
+      "nama_en": "Faculty of Public Health",
+      "jenis": "fakultas",
+      "website": "https://fkm.unsrat.ac.id",
+      "surel": "fkm@unsrat.ac.id",
+      "bendera": {
+        "dasar": "#381873",
+        "tulisan": "#FFFF00"
+      }
+    },
+    {
+      "kode": "pps",
+      "nama": "Program Pascasarjana",
+      "nama_en": "Graduate School",
+      "jenis": "pascasarjana",
+      "website": "https://pasca-new.unsrat.ac.id",
+      "surel": "pascasarjana@unsrat.ac.id",
+      "bendera": {
+        "dasar": "#503003",
+        "tulisan": "#FFFFFF"
+      }
+    },
+    {
+      "kode": "lppm",
+      "nama": "Lembaga Penelitian dan Pengabdian kepada Masyarakat",
+      "nama_en": "Institute for Research and Community Service",
+      "jenis": "lembaga",
+      "website": "https://lppm.unsrat.ac.id",
+      "surel": "",
+      "bendera": null
+    },
+    {
+      "kode": "lpmpp",
+      "nama": "Lembaga Penjaminan Mutu dan Pengembangan Pembelajaran",
+      "nama_en": "Institute for Quality Assurance and Learning Development",
+      "jenis": "lembaga",
+      "website": "https://lpmpp.unsrat.ac.id",
+      "surel": "",
+      "bendera": null
+    },
+    {
+      "kode": "biro-akademik",
+      "nama": "Biro Akademik dan Kemahasiswaan",
+      "nama_en": "Bureau of Academic and Student Affairs",
+      "jenis": "biro",
+      "website": "",
+      "surel": "",
+      "bendera": null
+    },
+    {
+      "kode": "biro-keuangan",
+      "nama": "Biro Keuangan dan Umum",
+      "nama_en": "Bureau of Finance and General Affairs",
+      "jenis": "biro",
+      "website": "",
+      "surel": "",
+      "bendera": null
+    },
+    {
+      "kode": "biro-perencanaan",
+      "nama": "Biro Perencanaan, Kerja Sama dan Hubungan Masyarakat",
+      "nama_en": "Bureau of Planning, Cooperation and Public Relations",
+      "jenis": "biro",
+      "website": "",
+      "surel": "",
+      "bendera": null
+    },
+    {
+      "kode": "upa-perpustakaan",
+      "nama": "UPA Perpustakaan",
+      "nama_en": "University Library",
+      "jenis": "upa",
+      "website": "https://perpustakaan.unsrat.ac.id/",
+      "surel": "",
+      "bendera": null
+    },
+    {
+      "kode": "upa-tik",
+      "nama": "UPA Teknologi Informasi dan Komunikasi",
+      "nama_en": "Information and Communication Technology Unit",
+      "jenis": "upa",
+      "website": "https://tik.unsrat.ac.id",
+      "surel": "",
+      "bendera": null
+    },
+    {
+      "kode": "upa-labterpadu",
+      "nama": "UPA Laboratorium Terpadu",
+      "nama_en": "Integrated Laboratory",
+      "jenis": "upa",
+      "website": "https://labterpadu.unsrat.ac.id/",
+      "surel": "",
+      "bendera": null
+    },
+    {
+      "kode": "upa-biomol",
+      "nama": "UPA Laboratorium Biomolekuler",
+      "nama_en": "Biomolecular Laboratory",
+      "jenis": "upa",
+      "website": "https://www.unsrat.ac.id/labbiomolekuler/",
+      "surel": "",
+      "bendera": null
+    },
+    {
+      "kode": "upa-pkk",
+      "nama": "UPA Pengembangan Karier dan Kewirausahaan",
+      "nama_en": "Career and Entrepreneurship Development Unit",
+      "jenis": "upa",
+      "website": "https://upapkk.unsrat.ac.id",
+      "surel": "",
+      "bendera": null
+    },
+    {
+      "kode": "upa-bahasa",
+      "nama": "UPA Bahasa",
+      "nama_en": "Language Unit",
+      "jenis": "upa",
+      "website": "https://uptbahasa.unsrat.ac.id/",
+      "surel": "",
+      "bendera": null
+    },
+    {
+      "kode": "upa-cetak",
+      "nama": "UPA Percetakan dan Penerbitan",
+      "nama_en": "Printing and Publishing Unit",
+      "jenis": "upa",
+      "website": "https://unsratpress.unsrat.ac.id/",
+      "surel": "",
+      "bendera": null
+    },
+    {
+      "kode": "upa-bk",
+      "nama": "UPA Bimbingan dan Konseling",
+      "nama_en": "Guidance and Counselling Unit",
+      "jenis": "upa",
+      "website": "https://mentalsehat.unsrat.ac.id",
+      "surel": "",
+      "bendera": null
+    }
+  ]
+}

@@ -49,7 +49,11 @@ import tarik_www  # noqa: E402
 import warna  # noqa: E402
 from pemeriksa_halaman import periksa_situs  # noqa: E402
 
+# www's real data: the sibling checkout on a developer's machine, else the starting copy shipped with this repository
+# (platform/data-awal/www/, impor_www.py), so these checks run inside the Docker image too
 WWW_ASLI = os.path.join(os.path.dirname(AKAR), "website-unsrat-2026", "site", "mockup", "data")
+if not os.path.isfile(os.path.join(WWW_ASLI, "prodi.json")):
+    WWW_ASLI = os.path.join(AKAR, "platform", "data-awal", "www")
 gagal = []
 
 

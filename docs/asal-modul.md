@@ -29,6 +29,7 @@ bila asal di www berubah sesudahnya, supaya perbaikan keamanannya bisa diterapka
 | `platform/riwayat.py` | `site/admin/riwayat.py` | `b95f8fb1351c` | Langkah 2: dipindah dari `platform/admin/`; jalur dan nama berkas yang sah diambil dari `lokasi.py` |
 | `platform/admin/requirements.txt`, `constraints.txt` | `site/admin/` | — | `imageio-ffmpeg` dibuang (tidak ada video hero) |
 | `platform/media.py` | `site/admin/app.py` | `fe0f58774cc8` | Langkah 3b: `periksa_pdf` dan `konten_aktif_pdf` (PDF tanpa konten aktif) diambil; ditambah pemeriksaan teks judi di isi PDF, foto ke JPEG 1600/800/400, penyimpanan lokal/GCS tanpa menimpa |
+| `platform/impor_www.py` | `site/admin/impor.py` | `90513c17680b` | Langkah 7: `periksa_xlsx` (ukuran, struktur zip, bom zip, makro), `nilai`, `tabel`/`lembar`, `baca_tanggal`, dan label kolom `KOLOM_PRODI`/`KOLOM_CPL` untuk membaca berkas Excel ekspor program studi dari superadmin www; hasilnya ditulis dalam format `prodi.json` www lalu diperiksa `tarik_www.py` |
 | `platform/template/aset/img/lambang-128.png` | `site/mockup/assets/img/lambang-unsrat.png` | `ee6798d239da` | Langkah 3: diperkecil (juga `lambang-64.png` dan `lambang-192.png`) dan dikuantisasi ke 128 warna dengan Pillow (3–13 KB; SVG aslinya 147 KB) |
 
 Akan dipakai sebagai pola (ditulis ulang, bukan disalin) di langkah berikutnya:

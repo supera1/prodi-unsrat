@@ -5,7 +5,7 @@
     /super/prodi              registered programmes; programmes new in www, to register with a slug
     /super/prodi/<kode>       one programme: official data, slug and old slugs, active, lecturer link, rebuild
     /super/dosen              bulk import of lecturer links (CSV/Excel) with a preview
-    /super/tarik              the official data from www: preview, then apply
+    /super/tarik              the official data from www (K-P18): upload www's files, preview, then apply
     /super/riwayat            version history of the data files: compare with now, restore
     /super/bangun             rebuild status, rebuild everything
     /super/akun/<id>          an account's name, role and programmes
@@ -15,12 +15,14 @@ lecturer link or a restored file of its own, everything for a slug, an active sw
 """
 from __future__ import print_function
 
+import datetime
 import hashlib
 import io
 import json
 import os
 import re
 import secrets
+import shutil
 import sys
 import time
 
@@ -34,6 +36,7 @@ import akun as akun_mod  # noqa: E402
 import beda  # noqa: E402
 import data_prodi  # noqa: E402
 import impor_dosen  # noqa: E402
+import impor_www  # noqa: E402
 import lokasi  # noqa: E402
 import registri  # noqa: E402
 import riwayat  # noqa: E402
@@ -80,14 +83,21 @@ def pasang(app, alat):
             })
         return sorted(hasil, key=registri.kunci_urut)
 
+    def umur_hari(waktu):
+        try:
+            return max(0, (datetime.date.today() - datetime.date.fromisoformat((waktu or "")[:10])).days)
+        except ValueError:
+            return 0
+
     def ringkasan():
+        meta = lokasi.baca("warisan/meta") or {}
         baris = ikhtisar()
         aktif = [r for r in baris if r["aktif"]]
         return {"terdaftar": len(baris), "aktif": len(aktif), "belum": registri.belum_terdaftar(),
                 "tanpa_admin": [r for r in aktif if not r["admin"]], "hilang": [r for r in baris if r["hilang"]],
                 "kurang": [r for r in aktif if r["kekurangan"]], "tanpa_dosen": [r for r in aktif if not r["dosen_url"]],
                 "bentrok": [r for r in baris if r["bentrok"]], "timpaan": sum(1 for r in baris if r["timpaan"]),
-                "meta": lokasi.baca("warisan/meta") or {}, "bangun": alat.antrean.status}
+                "meta": meta, "umur_data": umur_hari(meta.get("ditarik")), "bangun": alat.antrean.status}
     alat.ringkasan = ringkasan
     alat.nama_berkas = lambda berkas: nama_berkas(berkas)
 
@@ -284,53 +294,136 @@ def pasang(app, alat):
         flash("Tautan dosen %d prodi disimpan; situsnya dibangun ulang." % len(ubah), "ok")
         return redirect(url_for("super_dosen"))
 
-    # -------------------------------------------------------------- official data from www
+    # -------------------------------------------------------------- official data from www (K-P18)
+
+    # An upload waits in <PRODI_RAHASIA>/kiriman/<token>/ (impor_www.siapkan_kiriman) until its uploader applies it,
+    # at most SEMENTARA_DETIK. On a developer's machine the WWW_DATA folder can be previewed and applied as well.
+
+    def folder_kiriman(token=""):
+        return os.path.join(lokasi.rahasia(), "kiriman", token)
+
+    def bersihkan_kiriman():
+        akar = folder_kiriman()
+        for n in (os.listdir(akar) if os.path.isdir(akar) else []):
+            path = os.path.join(akar, n)
+            if time.time() - os.path.getmtime(path) > SEMENTARA_DETIK:
+                shutil.rmtree(path, ignore_errors=True)
+
+    def ambil_kiriman(token):
+        """(folder, record) of an upload of this account that waits to be applied, or (None, None)."""
+        if not POLA_TOKEN.match(token or ""):
+            return None, None
+        folder = folder_kiriman(token)
+        try:
+            info = impor_www.baca_kiriman(folder)
+        except (IOError, OSError, ValueError):
+            return None, None
+        if info.get("pemilik") != g.akun["id"] or not 0 <= time.time() - info.get("waktu", 0) <= SEMENTARA_DETIK:
+            return None, None
+        return folder, info
 
     def sidik_sumber(hasil):
         return hashlib.sha256(json.dumps(hasil["sumber"]["meta"]["sidik"], sort_keys=True).encode("utf-8")).hexdigest()[:32]
 
-    def halaman_tarik(kode_status=200, masalah=None):
-        meta = lokasi.baca("warisan/meta") or {}
-        if masalah is None:
+    def halaman_tarik(kode_status=200, masalah=None, judul_masalah="Data www tidak dapat ditarik", token=None):
+        """The upload form, and the preview of an upload (token) or of the WWW_DATA folder when there is one."""
+        konteks = {"meta": lokasi.baca("warisan/meta") or {}, "laporan": None, "sidik": "", "token": "", "info": None,
+                   "basi": False, "folder_www": os.path.isdir(lokasi.www_data()), "maks_berkas": impor_www.MAKS_BERKAS,
+                   "batas_hilang": int(tarik_www.BATAS_HILANG * 100)}
+        folder, info = ambil_kiriman(token) if token else (None, None)
+        if folder:
+            konteks.update(token=token, info=info, basi=info.get("dasar") != impor_www.sidik_dasar())
+        if folder or konteks["folder_www"]:
             try:
-                hasil = tarik_www.pratinjau()
+                hasil = tarik_www.pratinjau(folder)
             except tarik_www.GagalTarik as e:
-                masalah = e.masalah
-        if masalah is not None:
-            return render_template("super_tarik.html", masalah=masalah, meta=meta, laporan=None, sidik=""), kode_status
-        nama = {p["kode_pddikti"]: registri.nama_tampil(p) for p in hasil["prodi"]["program"]}
-        return render_template("super_tarik.html", masalah=None, meta=meta, laporan=hasil["laporan"], nama=nama,
-                               ada=tarik_www.ada_perubahan(hasil["laporan"]), sidik=sidik_sumber(hasil),
-                               batas_hilang=int(tarik_www.BATAS_HILANG * 100)), kode_status
+                masalah = (masalah or []) + [m for m in e.masalah if m not in (masalah or [])]
+            else:
+                konteks.update(laporan=hasil["laporan"], ada=tarik_www.ada_perubahan(hasil["laporan"]),
+                               nama={p["kode_pddikti"]: registri.nama_tampil(p) for p in hasil["prodi"]["program"]},
+                               sidik=sidik_sumber(hasil))
+        return render_template("super_tarik.html", masalah=masalah, judul_masalah=judul_masalah, **konteks), kode_status
+
+    def siapkan_registri():
+        """A new VM without a registry yet: register the programmes of the approved slug list once the official data
+        is there (impor_www.isi_awal normally did it at start-up). Returns the number registered."""
+        if lokasi.baca("registri") is not None:
+            return 0
+        try:
+            n = registri.siapkan_dari_csv(oleh())
+        except registri.GagalRegistri as e:
+            flash("Registri awal dari daftar slug belum dibuat: %s. Daftarkan prodi di halaman Prodi." % e, "galat")
+            return 0
+        alat.catat("registri-awal", jumlah=n)
+        return n
 
     @app.route("/super/tarik")
     @akses("super")
     def super_tarik():
-        return halaman_tarik()
+        token = request.args.get("kiriman", "")
+        if token and ambil_kiriman(token)[0] is None:
+            flash("Unggahan itu sudah tidak berlaku (sudah diterapkan, lebih dari 30 menit, atau milik akun lain). "
+                  "Unggah ulang berkasnya.", "galat")
+            return redirect(url_for("super_tarik"))
+        return halaman_tarik(token=token or None)
+
+    @app.route("/super/tarik/unggah", methods=["POST"])
+    @akses("super")
+    def super_tarik_unggah():
+        berkas = [b for b in request.files.getlist("berkas") if b and b.filename][:impor_www.MAKS_BERKAS + 1]
+        nama = [os.path.basename(b.filename.replace("\\", "/"))[:120] for b in berkas]
+        bersihkan_kiriman()
+        token = secrets.token_urlsafe(24)
+        try:
+            isi = [(b.filename, b.read(impor_www.MAKS_UKURAN + 1)) for b in berkas]
+            info = impor_www.siapkan_kiriman(isi, folder_kiriman(token), pemilik=g.akun["id"], oleh=oleh(),
+                                             waktu=time.time())
+        except impor_www.GagalImpor as e:
+            alat.catat("data-www-unggahan-ditolak", berkas=nama, masalah=len(e.masalah))
+            return halaman_tarik(400, e.masalah, "Berkas unggahan tidak dapat dipakai")
+        alat.catat("data-www-diunggah", berkas=nama, dari_salinan=info["dari_salinan"])
+        return redirect(url_for("super_tarik", kiriman=token))
 
     @app.route("/super/tarik/terapkan", methods=["POST"])
     @akses("super")
     def super_tarik_terapkan():
+        token = request.form.get("kiriman", "")
+        folder, info = ambil_kiriman(token) if token else (None, None)
+        if token and folder is None:
+            flash("Unggahan itu sudah tidak berlaku (sudah diterapkan, lebih dari 30 menit, atau milik akun lain). "
+                  "Unggah ulang berkasnya.", "galat")
+            return redirect(url_for("super_tarik"))
+        if folder and info.get("dasar") != impor_www.sidik_dasar():
+            shutil.rmtree(folder, ignore_errors=True)
+            flash("Data resmi di platform berubah sejak berkas ini diunggah, mis. unggahan lain sudah diterapkan. "
+                  "Unggah ulang berkasnya, supaya perubahan itu tidak tertimpa.", "galat")
+            return redirect(url_for("super_tarik"))
+        kembali = url_for("super_tarik", kiriman=token) if folder else url_for("super_tarik")
         try:
-            hasil = tarik_www.pratinjau()
+            hasil = tarik_www.pratinjau(folder)
         except tarik_www.GagalTarik as e:
             alat.catat("tarik-data-www-ditolak", masalah=len(e.masalah))
-            return halaman_tarik(400, e.masalah)
+            return halaman_tarik(400, e.masalah, token=token or None)
         if request.form.get("sidik") != sidik_sumber(hasil):
             flash("Data www berubah sejak pratinjau dibuat. Periksa pratinjau terbaru di bawah, lalu terapkan lagi.", "galat")
-            return redirect(url_for("super_tarik"))
+            return redirect(kembali)
         try:
-            laporan = tarik_www.terapkan(oleh(), paksa=request.form.get("paksa") == "1")
+            laporan = tarik_www.terapkan(oleh(), folder=folder, paksa=request.form.get("paksa") == "1",
+                                         keterangan=info.get("label") if info else None)
         except tarik_www.GagalTarik as e:
             alat.catat("tarik-data-www-ditolak", masalah=len(e.masalah))
-            return halaman_tarik(400, e.masalah)
-        if not tarik_www.ada_perubahan(laporan):
+            return halaman_tarik(400, e.masalah, token=token or None)
+        if folder:
+            shutil.rmtree(folder, ignore_errors=True)            # an upload is applied once
+        registri_baru = siapkan_registri()
+        if not tarik_www.ada_perubahan(laporan) and not registri_baru:
             flash("Tidak ada perubahan dari data www.", "info")
             return redirect(url_for("super_tarik"))
-        alat.catat("tarik-data-www", baru=len(laporan["baru"]), hilang=len(laporan["hilang"]),
-                   berubah=len(laporan["berubah"]), kembali=len(laporan["kembali"]))
+        alat.catat("tarik-data-www", sumber=info.get("label") if info else "WWW_DATA", baru=len(laporan["baru"]),
+                   hilang=len(laporan["hilang"]), berubah=len(laporan["berubah"]), kembali=len(laporan["kembali"]))
         bangun()
-        flash("Data resmi dari www diterapkan; semua situs dibangun ulang.", "ok")
+        flash("Data resmi dari www diterapkan%s; semua situs dibangun ulang." % (
+            " dan %d prodi didaftarkan dari daftar slug" % registri_baru if registri_baru else ""), "ok")
         return redirect(url_for("super_tarik"))
 
     # -------------------------------------------------------------- version history

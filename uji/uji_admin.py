@@ -339,6 +339,7 @@ try:
         ("POST", "/super/dosen/impor", "super_dosen_impor", hanya("superuji", ya=400)),
         ("POST", "/super/dosen/terapkan", "super_dosen_terapkan", hanya("superuji", ya=302)),
         ("GET", "/super/tarik", "super_tarik", hanya("superuji")),
+        ("POST", "/super/tarik/unggah", "super_tarik_unggah", hanya("superuji", ya=400)),
         ("POST", "/super/tarik/terapkan", "super_tarik_terapkan", hanya("superuji", ya=400)),
         ("GET", "/super/riwayat", "super_riwayat", hanya("superuji")),
         ("GET", "/super/riwayat/lihat?berkas=registri&versi=20000101-000000-000000", "super_riwayat_lihat", hanya("superuji", ya=404)),

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """Copy the official programme data from www.unsrat.ac.id into the platform (K-P6: one way, www -> prodi).
 
-Reads prodi.json, unit.json, kalender.json and situs.json from WWW_DATA (lokasi.py; read only), checks them, compares them with
-the copy the platform has (warisan/*) and, when asked, writes the new copy. Nothing is written when any check fails:
-a broken or tampered source never reaches the programme sites.
+Reads prodi.json, unit.json, kalender.json and situs.json from a folder, checks them, compares them with the copy the
+platform has (warisan/*) and, when asked, writes the new copy. Nothing is written when any check fails: a broken or
+tampered source never reaches the programme sites. The folder is WWW_DATA (lokasi.py; read only) on a developer's
+machine; on the server it is an upload of the superadmin prepared by impor_www.py (K-P18), or the starting copy
+data-awal/www/ of a new VM.
 
     python3 platform/tarik_www.py              preview: what would change
     python3 platform/tarik_www.py --terapkan   apply (the previous copy goes to the version history)
@@ -43,7 +45,9 @@ FIELD_CPL = ("kode", "isi", "isi_en", "kurikulum")
 FIELD_UNIT = ("kode", "nama", "nama_en", "jenis", "website", "surel", "bendera")
 # From www's situs.json only what the programme sites show about the university (header, footer, contact page).
 FIELD_SITUS = ("identitas", "kontak", "media_sosial", "utilitas")
-WAJIB_PRODI = ("kode_pddikti", "nama", "jenjang", "unit_kode", "unit", "slug")
+# www's own page address of a programme ("slug") is kept when www gives it, but not required: www's Excel export,
+# which the superadmin may upload instead of prodi.json (impor_www.py), does not have it
+WAJIB_PRODI = ("kode_pddikti", "nama", "jenjang", "unit_kode", "unit")
 
 # Shown to the superadmin as gaps to fill in www (empty fields are never made up here).
 KEKURANGAN = (("cpl", "CPL"), ("akreditasi", "status akreditasi"), ("lembaga_akreditasi", "lembaga akreditasi"),
@@ -134,9 +138,10 @@ def _baca_json(folder, nama):
     return json.loads(mentah.decode("utf-8")), hashlib.sha256(mentah).hexdigest()
 
 
-def baca_sumber(folder=None):
+def baca_sumber(folder=None, keterangan=None):
     """Read and check www's data. Returns {"prodi": {...}, "unit": {...}, "kalender": {...}, "meta": {...}}
-    in the shape the platform stores; raises GagalTarik listing every problem."""
+    in the shape the platform stores; raises GagalTarik listing every problem. keterangan: where the data came from, as
+    recorded in warisan/meta.json (default: the folder)."""
     folder = folder or lokasi.www_data()
     masalah, mentah, sidik = [], {}, {}
     for nama in SUMBER:
@@ -205,7 +210,7 @@ def baca_sumber(folder=None):
                 masalah.append("teks judi %r di %s.json %s" % (istilah, nama, jalur))
     if masalah:
         raise GagalTarik(masalah)
-    hasil["meta"] = {"sumber": folder, "sidik": sidik, "jumlah_prodi": len(prodi)}
+    hasil["meta"] = {"sumber": keterangan or folder, "sidik": sidik, "jumlah_prodi": len(prodi)}
     return hasil
 
 
@@ -269,13 +274,13 @@ def gabungkan(lama, sumber, hari_ini=None):
     return baru, laporan
 
 
-def pratinjau(folder=None):
+def pratinjau(folder=None, keterangan=None):
     """Check the source and compare it with the platform's copy, without writing anything.
 
     Returns {"sumber": <baca_sumber result>, "prodi": <new warisan/prodi>, "laporan": {...}}, where laporan also has
     "unit_berubah", "kalender_berubah", "tampilan_berubah", "kekurangan" {kode: [labels]}, "belum_terdaftar" [kode],
     "hilang_terlalu_banyak" (bool) and "pertama" (bool: the platform has no copy yet)."""
-    sumber = baca_sumber(folder)
+    sumber = baca_sumber(folder, keterangan)
     lama = lokasi.baca("warisan/prodi")
     prodi, laporan = gabungkan(lama, sumber["prodi"])
     laporan["pertama"] = lama is None
@@ -302,10 +307,10 @@ def ada_perubahan(laporan):
                 or laporan["tampilan_berubah"])
 
 
-def terapkan(oleh, folder=None, paksa=False):
+def terapkan(oleh, folder=None, paksa=False, keterangan=None):
     """Pull and write the new copy. Returns the report; raises GagalTarik when the source fails a check or when too
     many programmes disappeared at once (unless paksa)."""
-    hasil = pratinjau(folder)
+    hasil = pratinjau(folder, keterangan)
     laporan = hasil["laporan"]
     if laporan["hilang_terlalu_banyak"] and not paksa:
         raise GagalTarik(["%d prodi hilang sekaligus dari data www (batas %d%%); periksa sumbernya, atau terapkan "

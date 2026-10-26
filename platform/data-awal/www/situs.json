@@ -1,0 +1,68 @@
+{
+  "identitas": {
+    "nama": {
+      "id": "Universitas Sam Ratulangi",
+      "en": "Sam Ratulangi University"
+    },
+    "tagline": {
+      "id": "Manado, Sulawesi Utara",
+      "en": "Manado, North Sulawesi"
+    },
+    "moto": "Si Tou Timou Tumou Tou",
+    "tahun_hak_cipta": "2026"
+  },
+  "kontak": {
+    "alamat": {
+      "id": [
+        "Jl. Kampus UNSRAT Bahu",
+        "Kelurahan Malalayang Satu Barat, Kecamatan Malalayang",
+        "Kota Manado, Sulawesi Utara 95115"
+      ],
+      "en": [
+        "Jl. Kampus UNSRAT Bahu",
+        "Malalayang Satu Barat, Malalayang",
+        "Manado, North Sulawesi 95115, Indonesia"
+      ]
+    },
+    "telepon": [
+      "(0431) 863886",
+      "(0431) 863786"
+    ],
+    "surel": "rektorat@unsrat.ac.id",
+    "hari": {
+      "id": "Senin–Jumat",
+      "en": "Monday–Friday"
+    },
+    "jam": "07.30–16.00"
+  },
+  "media_sosial": [
+    {
+      "nama": "Instagram",
+      "url": "https://www.instagram.com/unsrat1961"
+    },
+    {
+      "nama": "Facebook",
+      "url": "https://www.facebook.com/unsrat"
+    },
+    {
+      "nama": "YouTube",
+      "url": "https://www.youtube.com/@UNSRAT1961"
+    }
+  ],
+  "utilitas": {
+    "id": [
+      {
+        "label": "Portal akademik",
+        "href": "https://inspire.unsrat.ac.id"
+      },
+      {
+        "label": "PMB",
+        "href": "https://regmaba.unsrat.ac.id"
+      },
+      {
+        "label": "Direktori dosen",
+        "href": "https://dosen.unsrat.ac.id"
+      }
+    ]
+  }
+}

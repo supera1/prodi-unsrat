@@ -61,7 +61,7 @@
 		<dt>CPL</dt><dd>{{ p.cpl | length }} butir</dd>
 		<dt>Surel</dt><dd>{{ p.surel or '—' }}</dd>
 	</dl>
-	{% if b.kekurangan %}<p class="pesan pesan--info">Masih kosong: {{ b.kekurangan | join(', ') }}. Lengkapi di halaman Data prodi, atau di superadmin www lalu tarik data lagi.</p>{% endif %}
+	{% if b.kekurangan %}<p class="pesan pesan--info">Masih kosong: {{ b.kekurangan | join(', ') }}. Lengkapi di halaman Data prodi, atau di superadmin www lalu unggah data www lagi.</p>{% endif %}
 	<p><a class="tombol tombol--garis" href="{{ url_for('data_prodi_lihat', kode=b.kode) }}">Ubah data prodi</a></p>
 	{% else %}
 	<p>Tidak ada di data resmi.</p>
