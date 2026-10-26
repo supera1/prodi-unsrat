@@ -1,0 +1,60 @@
+{# Home page of a programme site: everything here comes from the official data (www) and the registry. #}
+{% extends "prodi.html" %}
+{% block isi %}
+<section class="pahlawan" aria-labelledby="judul-prodi">
+	<div class="wadah pahlawan__isi">
+		<p class="pahlawan__label">Program Studi {{ JENJANG_PANJANG.get(p.jenjang, p.jenjang) }} · {{ unit.nama }}</p>
+		<h1 id="judul-prodi">{{ nama }}</h1>
+		{% if p.nama_en %}<p class="pahlawan__en" lang="en">{{ p.nama_en }}</p>{% endif %}
+		<p class="pahlawan__pengantar">{% if tagline %}{{ tagline }}{% else %}Program studi {{ JENJANG_PANJANG.get(p.jenjang, p.jenjang) | lower }} di {{ unit.nama }}, Universitas Sam Ratulangi, Manado.{% endif %}</p>
+		<dl class="fakta">
+			{% if p.akreditasi %}
+			<div class="fakta__butir fakta__butir--aksen">
+				<dt>Akreditasi</dt>
+				<dd>{{ p.akreditasi }}{% if p.lembaga_akreditasi %} <span class="fakta__kecil">{{ p.lembaga_akreditasi }}</span>{% endif %}</dd>
+			</div>
+			{% endif %}
+			{% if p.gelar %}
+			<div class="fakta__butir"><dt>Gelar</dt><dd>{{ p.gelar }}</dd></div>
+			{% endif %}
+			{% if p.sks %}
+			<div class="fakta__butir"><dt>Beban studi</dt><dd>{{ p.sks }} SKS</dd></div>
+			{% endif %}
+			{% if p.internasional %}
+			<div class="fakta__butir"><dt>Akreditasi internasional</dt><dd>{{ p.internasional }}</dd></div>
+			{% endif %}
+		</dl>
+	</div>
+</section>
+
+<div class="wadah beranda">
+	<section class="beranda__bagian" aria-labelledby="judul-lulusan">
+		<h2 id="judul-lulusan">Profil lulusan</h2>
+		{% if p.bidang_kerja %}
+		<p>{{ p.bidang_kerja }}</p>
+		{% else %}
+		<p class="catatan catatan--menyusul">Profil lulusan sedang dilengkapi.</p>
+		{% endif %}
+		{% for e in menu if e.anak %}{% for a in e.anak if a.id == 'profil-lulusan' %}
+		<p><a class="tombol" href="{{ ke(slug ~ '/' ~ a.alamat) }}">{{ a.label }}{% if p.cpl %} ({{ p.cpl | length }} CPL){% endif %}</a></p>
+		{% endfor %}{% endfor %}
+	</section>
+
+	<section class="beranda__bagian" aria-labelledby="judul-jelajahi">
+		<h2 id="judul-jelajahi">Jelajahi program studi</h2>
+		<ul class="kartu-daftar kartu-daftar--tiga">
+			{% for e in menu if e.anak %}
+			<li class="kartu">
+				<h3 class="kartu__judul"><a href="{{ ke(slug ~ '/' ~ e.alamat) }}">{{ e.label }}</a></h3>
+				<p>{{ e.deskripsi }}</p>
+			</li>
+			{% endfor %}
+		</ul>
+	</section>
+
+	<section class="beranda__bagian" aria-labelledby="judul-kontak">
+		<h2 id="judul-kontak">Hubungi kami</h2>
+		<p>{% if p.surel %}Surel: <a href="mailto:{{ p.surel }}">{{ p.surel }}</a>. {% endif %}<a href="{{ ke(slug ~ '/kontak') }}">Kontak dan lokasi</a></p>
+	</section>
+</div>
+{% endblock %}

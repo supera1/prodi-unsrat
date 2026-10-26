@@ -3,7 +3,7 @@
 Situs ke-97 program studi Universitas Sam Ratulangi di `https://prodi.unsrat.ac.id/<slug>/`, dengan template seragam
 yang mengikuti kriteria akreditasi dan bisa disesuaikan oleh tiap prodi.
 
-> **Status 26 Oktober 2026:** Fase 1 langkah 2 (model data + tarik data www). Belum ada situs yang bisa dijalankan.
+> **Status 26 Oktober 2026:** Fase 1 langkah 3 (template induk + generator): 97 situs prodi bisa dibangun dan dilihat di komputer pengembang.
 > Rencana: [docs/rencana-fase-01.md](docs/rencana-fase-01.md) · Keputusan: [docs/keputusan.md](docs/keputusan.md)
 
 ## Cara kerja singkat
@@ -16,7 +16,9 @@ yang mengikuti kriteria akreditasi dan bisa disesuaikan oleh tiap prodi.
 ## Menjalankan uji
 
 ```bash
-python3 uji/jalankan-semua.py
+python3 -m venv .venv
+.venv/bin/pip install -r platform/admin/requirements.txt -c platform/admin/constraints.txt
+.venv/bin/python uji/jalankan-semua.py
 ```
 
 ## Menyiapkan data di komputer pengembang
@@ -26,17 +28,19 @@ Dengan repo www di folder sebelahnya (`../website-unsrat-2026`):
 ```bash
 python3 platform/tarik_www.py --terapkan
 python3 platform/registri.py --siapkan
+.venv/bin/python platform/bangun/bangun.py
+python3 -m http.server 8790 --bind 127.0.0.1 --directory publik
 ```
 
-Hasilnya di `data/` dan `riwayat/` (tidak masuk Git).
+Lalu buka http://127.0.0.1:8790/. Hasilnya di `data/`, `riwayat/`, `publik/`, dan `nginx-buatan/` (tidak masuk Git).
 
 ## Urutan Fase 1
 
 | Langkah | Isi | Status |
 |---|---|---|
 | 1 | Kerangka repo, dokumen, modul aman dari www, uji slug | selesai |
-| 2 | Model data + tarik data www | selesai, menunggu tinjauan |
-| 3 | Template induk + generator | — |
+| 2 | Model data + tarik data www | selesai |
+| 3 | Template induk + generator | selesai, menunggu tinjauan |
 | 4 | Akun & peran | — |
 | 5 | Superadmin | — |
 | 6 | Admin prodi | — |

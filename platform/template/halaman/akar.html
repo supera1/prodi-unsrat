@@ -1,0 +1,56 @@
+{# prodi.unsrat.ac.id/ — every programme site, by level. The search page comes in phase 3. #}
+{% extends "dasar.html" %}
+{% block judul %}Program Studi — Universitas Sam Ratulangi{% endblock %}
+{% block deskripsi %}Situs {{ jumlah }} program studi Universitas Sam Ratulangi, Manado: profil, kurikulum, capaian pembelajaran lulusan, dan akreditasi.{% endblock %}
+{% block kepala_situs %}
+<header class="kepala">
+	<div class="wadah kepala__isi">
+		<a class="merek" href="{{ ke('') }}">
+			<img class="merek__lambang" src="{{ aset('aset/img/lambang-128.png') }}" alt="" width="56" height="56">
+			<span class="merek__teks">
+				<span class="merek__nama">Program Studi</span>
+				<span class="merek__unit">Universitas Sam Ratulangi</span>
+			</span>
+		</a>
+	</div>
+	<div class="nav-utama nav-utama--kosong"></div>
+</header>
+{% endblock %}
+{% block isi %}
+<section class="pahlawan" aria-labelledby="judul-akar">
+	<div class="wadah pahlawan__isi">
+		<h1 id="judul-akar">Program Studi Universitas Sam Ratulangi</h1>
+		<p class="pahlawan__pengantar">{{ jumlah }} program studi, dari sarjana sampai subspesialis. Setiap program studi menyajikan profil, kurikulum, capaian pembelajaran lulusan, dan akreditasinya.</p>
+		<nav aria-label="Jenjang">
+			<ul class="loncat">
+				{% for k in kelompok %}
+				<li><a href="#{{ k.id }}">{{ k.judul }} <span class="loncat__jumlah">{{ k.prodi | length }}</span></a></li>
+				{% endfor %}
+			</ul>
+		</nav>
+	</div>
+</section>
+<div class="wadah akar">
+	{% for k in kelompok %}
+	<section class="akar__jenjang" id="{{ k.id }}" aria-labelledby="judul-{{ k.id }}">
+		<h2 id="judul-{{ k.id }}">{{ k.judul }}</h2>
+		<ul class="kartu-daftar kartu-daftar--tiga">
+			{% for x in k.prodi %}
+			<li class="kartu kartu--prodi">
+				<h3 class="kartu__judul"><a href="{{ ke(x.r.slug) }}">{{ nama_tampil(x.p) }}</a></h3>
+				<p class="kartu__unit">{{ x.unit }}</p>
+				{% if x.p.akreditasi %}<p><span class="lencana">Akreditasi {{ x.p.akreditasi }}</span></p>{% endif %}
+			</li>
+			{% endfor %}
+		</ul>
+	</section>
+	{% endfor %}
+</div>
+{% endblock %}
+{% block kaki %}
+<footer class="kaki">
+	<div class="wadah kaki__bawah">
+		<p>© {{ tahun }} Universitas Sam Ratulangi · <a href="{{ www }}/">www.unsrat.ac.id</a></p>
+	</div>
+</footer>
+{% endblock %}

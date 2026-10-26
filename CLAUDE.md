@@ -43,11 +43,16 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai
 ```
 
 ## Perintah
-- Semua uji: `python3 uji/jalankan-semua.py` (dari akar repo). Uji memakai folder sementara, tidak menyentuh `data/`.
+- Lingkungan Python sekali saja: `python3 -m venv .venv && .venv/bin/pip install -r platform/admin/requirements.txt -c platform/admin/constraints.txt`.
+- Semua uji: `.venv/bin/python uji/jalankan-semua.py` (dari akar repo). Uji memakai folder sementara, tidak menyentuh `data/`.
 - Lokasi data (`platform/lokasi.py`): `PRODI_DATA` (bawaan `data/`), `PRODI_RIWAYAT` (bawaan `riwayat/` di sampingnya),
   `WWW_DATA` (bawaan `../website-unsrat-2026/site/mockup/data`, hanya dibaca).
 - Tarik data resmi dari www: `python3 platform/tarik_www.py` (pratinjau), `--terapkan` (tulis; salinan lama ke riwayat).
 - Registri awal 97 prodi dari `slug.csv`: `python3 platform/registri.py --siapkan` (sesudah tarik data pertama).
+- Bangun situs ke `publik/`: `.venv/bin/python platform/bangun/bangun.py` (semua), `--prodi <kode>` (satu prodi),
+  `--produksi`. Ganti slug atau nonaktifkan prodi: bangun semua, supaya folder lama terhapus.
+- Template: `platform/template/menu.json` (menu induk), `platform/template/halaman/*.html` (Jinja2, autoescape),
+  `platform/template/aset/css/prodi.css`; palet pilihan `platform/data-awal/palet.json`, uji kontras di `platform/bangun/warna.py`.
 
 ## Cara kerja
 - Tugas yang menyentuh lebih dari satu file: ajukan rencana dulu dan tunggu persetujuan.

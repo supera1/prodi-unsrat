@@ -67,6 +67,11 @@ AWAL = {
                                       "jenis": "fakultas", "website": "", "surel": "", "bendera": {"dasar": "#0000ff"},
                                       "pimpinan": [{"peran": "Dekan", "nama": "Seseorang"}]}]},
     "kalender": {"judul": "Kalender akademik", "teks": "", "semester": []},
+    "situs": {"identitas": {"nama": {"id": "Universitas Sam Ratulangi"}}, "kontak": {"surel": "r@unsrat.ac.id"},
+              "media_sosial": [{"nama": "Instagram", "url": "https://instagram.com/x"}, {"nama": "Jahat", "url": "javascript:x"}],
+              "utilitas": {"id": [{"label": "PMB", "href": "https://regmaba.unsrat.ac.id"},
+                                  {"label": "Pengumuman", "href": "pengumuman.html"}]},
+              "menu": {"id": []}},
 }
 
 
@@ -105,6 +110,10 @@ try:
     cek(set(p) == set(tarik_www.FIELD_PRODI), "kolom prodi harus tepat FIELD_PRODI")
     cek("pimpinan" not in lokasi.baca("warisan/unit")["unit"][0], "data pimpinan fakultas tidak boleh disalin")
     cek(lokasi.baca("warisan/meta")["oleh"] == "penguji", "meta harus mencatat penarik")
+    uni = lokasi.baca("warisan/universitas")
+    cek(set(uni) == set(tarik_www.FIELD_SITUS), "dari situs.json hanya FIELD_SITUS yang disalin: %r" % sorted(uni))
+    cek([t["label"] for t in uni["utilitas"]] == ["PMB"], "tautan utilitas relatif www tidak boleh disalin")
+    cek([m["nama"] for m in uni["media_sosial"]] == ["Instagram"], "media sosial tanpa https tidak boleh disalin")
     lap = tarik_www.pratinjau()["laporan"]
     cek(not tarik_www.ada_perubahan(lap), "tarikan ulang tanpa perubahan harus kosong: %r" % lap)
     cek(lap["kekurangan"].get("21201") == ["CPL"], "prodi tanpa CPL harus dilaporkan kurang CPL")
@@ -198,6 +207,8 @@ try:
         ("unit tidak dikenal", lambda d: d["prodi"]["program"][0].update(unit_kode="fx")),
         ("daftar program kosong", lambda d: d["prodi"].update(program=[])),
         ("kalender rusak", lambda d: d.update(kalender=[])),
+        ("judi di kontak universitas", lambda d: d["situs"]["kontak"].update(surel="maxwin88@gacor.id slot")),
+        ("situs tanpa kontak", lambda d: d["situs"].pop("kontak")),
     ]
     for label, ubah in buruk:
         d = copy.deepcopy(berubah)

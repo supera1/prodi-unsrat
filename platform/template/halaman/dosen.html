@@ -1,0 +1,11 @@
+{# Permanent lecturers: kept in the university's lecturer directory; the registry holds this programme's link. #}
+{% extends "halaman.html" %}
+{% block isi_halaman %}
+<p class="pengantar">Profil dosen tetap Program Studi {{ nama }} — pendidikan, bidang keahlian, penelitian, dan publikasinya — dikelola di Direktori Dosen UNSRAT.</p>
+{% if dosen_url %}
+<p><a class="tombol" href="{{ dosen_url }}">Daftar dosen tetap {{ nama }}</a></p>
+{% else %}
+<p class="catatan catatan--menyusul">Tautan ke daftar dosen tetap program studi ini sedang disiapkan.</p>
+<p><a class="tombol tombol--garis" href="{{ dosen_umum }}">Buka Direktori Dosen UNSRAT</a></p>
+{% endif %}
+{% endblock %}

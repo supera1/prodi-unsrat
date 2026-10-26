@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Copy the official programme data from www.unsrat.ac.id into the platform (K-P6: one way, www -> prodi).
 
-Reads prodi.json, unit.json and kalender.json from WWW_DATA (lokasi.py; read only), checks them, compares them with
+Reads prodi.json, unit.json, kalender.json and situs.json from WWW_DATA (lokasi.py; read only), checks them, compares them with
 the copy the platform has (warisan/*) and, when asked, writes the new copy. Nothing is written when any check fails:
 a broken or tampered source never reaches the programme sites.
 
@@ -41,6 +41,8 @@ FIELD_PRODI = ("kode_pddikti", "nama", "nama_en", "jenjang", "gelar", "sks", "un
                "internasional", "slug", "slug_en")
 FIELD_CPL = ("kode", "isi", "isi_en", "kurikulum")
 FIELD_UNIT = ("kode", "nama", "nama_en", "jenis", "website", "surel", "bendera")
+# From www's situs.json only what the programme sites show about the university (header, footer, contact page).
+FIELD_SITUS = ("identitas", "kontak", "media_sosial", "utilitas")
 WAJIB_PRODI = ("kode_pddikti", "nama", "jenjang", "unit_kode", "unit", "slug")
 
 # Shown to the superadmin as gaps to fill in www (empty fields are never made up here).
@@ -52,7 +54,7 @@ POLA_KODE = re.compile(r"^[0-9A-Za-z]{3,12}$")
 POLA_TANGGAL = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 MAKS_TEKS = 10000
 BATAS_HILANG = 0.10
-SUMBER = ("prodi", "unit", "kalender")
+SUMBER = ("prodi", "unit", "kalender", "situs")
 
 
 class GagalTarik(Exception):
@@ -178,11 +180,23 @@ def baca_sumber(folder=None):
     if not isinstance(kalender, dict) or not isinstance(kalender.get("semester"), list):
         masalah.append("kalender.json tidak memuat daftar semester")
 
+    situs = mentah["situs"] if isinstance(mentah["situs"], dict) else {}
+    universitas = {f: situs.get(f) for f in FIELD_SITUS}
+    if not isinstance(universitas["identitas"], dict) or not isinstance(universitas["kontak"], dict):
+        masalah.append("situs.json tidak memuat identitas dan kontak")
+    # utility links: the Indonesian list, and only full addresses (www's relative ones point inside www)
+    utilitas = universitas["utilitas"] if isinstance(universitas["utilitas"], dict) else {}
+    universitas["utilitas"] = [t for t in (utilitas.get("id") or []) if isinstance(t, dict)
+                               and _teks(t.get("label"), False) and str(t.get("href", "")).startswith("https://")]
+    universitas["media_sosial"] = [m for m in (universitas["media_sosial"] or []) if isinstance(m, dict)
+                                   and _teks(m.get("nama"), False) and str(m.get("url", "")).startswith("https://")]
+
     hasil = {
         "prodi": {"tampilkan_berlaku_hingga": bool(mentah["prodi"].get("tampilkan_berlaku_hingga")),
                   "program": sorted(prodi, key=lambda p: p["kode_pddikti"])},
         "unit": {"unit": unit},
         "kalender": kalender,
+        "situs": universitas,
     }
     for nama in SUMBER:
         for jalur, teks in _semua_teks(hasil[nama]):
@@ -267,6 +281,7 @@ def pratinjau(folder=None):
     laporan["tampilan_berubah"] = bool(lama) and lama.get("tampilkan_berlaku_hingga") != prodi["tampilkan_berlaku_hingga"]
     laporan["unit_berubah"] = lokasi.baca("warisan/unit") != sumber["unit"]
     laporan["kalender_berubah"] = lokasi.baca("warisan/kalender") != sumber["kalender"]
+    laporan["universitas_berubah"] = lokasi.baca("warisan/universitas") != sumber["situs"]
     laporan["kekurangan"] = {p["kode_pddikti"]: kekurangan(p) for p in prodi["program"]
                              if kekurangan(p) and not p.get("hilang_dari_www")}
     terdaftar = {r["kode_pddikti"] for r in (lokasi.baca("registri") or {}).get("prodi", [])}
@@ -279,7 +294,8 @@ def pratinjau(folder=None):
 
 def ada_perubahan(laporan):
     return bool(laporan["pertama"] or laporan["baru"] or laporan["hilang"] or laporan["kembali"] or laporan["berubah"]
-                or laporan["unit_berubah"] or laporan["kalender_berubah"] or laporan["tampilan_berubah"])
+                or laporan["unit_berubah"] or laporan["kalender_berubah"] or laporan["universitas_berubah"]
+                or laporan["tampilan_berubah"])
 
 
 def terapkan(oleh, folder=None, paksa=False):
@@ -298,6 +314,8 @@ def terapkan(oleh, folder=None, paksa=False):
         lokasi.tulis("warisan/unit", hasil["sumber"]["unit"], oleh, bagian, "tarik data www")
     if laporan["kalender_berubah"]:
         lokasi.tulis("warisan/kalender", hasil["sumber"]["kalender"], oleh, bagian, "tarik data www")
+    if laporan["universitas_berubah"]:
+        lokasi.tulis("warisan/universitas", hasil["sumber"]["situs"], oleh, bagian, "tarik data www")
     meta = dict(hasil["sumber"]["meta"])
     meta.update({"ditarik": datetime.datetime.now().isoformat(timespec="seconds"), "oleh": oleh})
     lokasi.tulis("warisan/meta", meta, oleh, bagian, "tarik data www")
@@ -324,6 +342,7 @@ def cetak_laporan(laporan, nama):
             for b in beda:
                 print("      " + b)
     for kunci, judul in (("unit_berubah", "Data fakultas/unit berubah"), ("kalender_berubah", "Kalender akademik berubah"),
+                         ("universitas_berubah", "Identitas/kontak universitas berubah"),
                          ("tampilan_berubah", "Pengaturan tampil 'berlaku hingga' berubah")):
         if laporan[kunci]:
             print(judul + ".")

@@ -1,0 +1,76 @@
+{# Layout of every page of a programme site: header with the programme's name and menu, footer. #}
+{% extends "dasar.html" %}
+{% block judul %}{% if ini.alamat %}{{ ini.label }} — {{ nama }} — UNSRAT{% else %}{{ nama }} — Universitas Sam Ratulangi{% endif %}{% endblock %}
+{% block deskripsi %}{{ ini.deskripsi }} Program Studi {{ nama }}, {{ unit.nama }}, Universitas Sam Ratulangi.{% endblock %}
+{% block kepala_tambahan %}{% if json_ld is defined %}{{ json_ld | json_ld }}{% endif %}{% endblock %}
+{% block kepala_situs %}
+<header class="kepala">
+	<div class="wadah kepala__isi">
+		<a class="merek" href="{{ ke(slug) }}">
+			<img class="merek__lambang" src="{{ aset('aset/img/lambang-128.png') }}" alt="" width="56" height="56">
+			<span class="merek__teks">
+				<span class="merek__jenjang">Program Studi {{ JENJANG_PANJANG.get(p.jenjang, p.jenjang) }}</span>
+				<span class="merek__nama">{{ nama }}</span>
+				<span class="merek__unit">{{ unit.nama }} · Universitas Sam Ratulangi</span>
+			</span>
+		</a>
+	</div>
+	<nav class="nav-utama" aria-label="Menu utama">
+		<div class="wadah">
+			<ul class="nav-utama__daftar">
+				{% for e in menu if e.nav %}
+				<li><a href="{{ ke(slug ~ '/' ~ e.alamat) }}"{% if (kelompok and kelompok.id == e.id) or ini.id == e.id %} aria-current="{{ 'page' if ini.id == e.id else 'true' }}"{% endif %}>{{ e.label }}</a></li>
+				{% endfor %}
+			</ul>
+			<details class="nav-ponsel">
+				<summary>Menu</summary>
+				<ul class="nav-ponsel__daftar">
+					<li><a href="{{ ke(slug) }}">Beranda</a></li>
+					{% for e in menu if e.nav %}
+					<li>
+						<a href="{{ ke(slug ~ '/' ~ e.alamat) }}">{{ e.label }}</a>
+						{% if e.anak %}
+						<ul>
+							{% for a in e.anak %}
+							<li><a href="{{ ke(slug ~ '/' ~ a.alamat) }}"{% if ini.id == a.id %} aria-current="page"{% endif %}>{{ a.label }}</a></li>
+							{% endfor %}
+						</ul>
+						{% endif %}
+					</li>
+					{% endfor %}
+				</ul>
+			</details>
+		</div>
+	</nav>
+</header>
+{% endblock %}
+{% block kaki %}
+<footer class="kaki">
+	<div class="wadah kaki__isi">
+		<section class="kaki__kolom" aria-labelledby="kaki-prodi">
+			<h2 id="kaki-prodi" class="kaki__judul">{{ nama }}</h2>
+			<p>{{ unit.nama }}<br>Universitas Sam Ratulangi</p>
+			{% if p.surel %}<p><a href="mailto:{{ p.surel }}">{{ p.surel }}</a></p>{% endif %}
+		</section>
+		<nav class="kaki__kolom" aria-labelledby="kaki-menu">
+			<h2 id="kaki-menu" class="kaki__judul">Jelajahi</h2>
+			<ul>
+				{% for e in menu if e.nav %}
+				<li><a href="{{ ke(slug ~ '/' ~ e.alamat) }}">{{ e.label }}</a></li>
+				{% endfor %}
+			</ul>
+		</nav>
+		{% set kontak = univ.get('kontak', {}) %}
+		<section class="kaki__kolom" aria-labelledby="kaki-univ">
+			<h2 id="kaki-univ" class="kaki__judul">Universitas Sam Ratulangi</h2>
+			{% if kontak.get('alamat', {}).get('id') %}
+			<p>{% for baris in kontak.alamat.id %}{{ baris }}{% if not loop.last %}<br>{% endif %}{% endfor %}</p>
+			{% endif %}
+			<p><a href="{{ www }}/">www.unsrat.ac.id</a></p>
+		</section>
+	</div>
+	<div class="wadah kaki__bawah">
+		<p>© {{ tahun }} Universitas Sam Ratulangi{% if univ.get('identitas', {}).get('moto') %} · <span class="kaki__moto">{{ univ.identitas.moto }}</span>{% endif %}</p>
+	</div>
+</footer>
+{% endblock %}

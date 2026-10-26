@@ -184,6 +184,9 @@ Catatan:
 - Standar www tetap berlaku: tanpa JavaScript tetap berfungsi, satu `h1`, responsif dari 320 px, JSON-LD
   `CollegeOrUniversity`/`EducationalOccupationalProgram`, `canonical`, `sitemap.xml` per situs.
 - **Bangun bertahap**: menyimpan identitas satu prodi hanya membangun ulang situs prodi itu (±40 halaman), bukan 97 situs.
+- *Catatan pelaksanaan langkah 3:* karena semua prodi berada di satu domain, `sitemap.xml` dibuat satu di akar situs
+  (bukan per prodi). Identitas, alamat, dan tautan utilitas UNSRAT di kaki halaman ikut ditarik dari `situs.json` www
+  (`warisan/universitas.json`), bukan ditulis ulang. Slug lama dialihkan lewat `nginx-buatan/slug-lama.conf`.
 
 ## 8. Admin di Fase 1
 

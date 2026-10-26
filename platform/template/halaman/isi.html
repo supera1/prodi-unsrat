@@ -1,0 +1,6 @@
+{# A page the programme fills itself ("wajib" / "opsional"). Phase 1: the frame only; the editor comes in phase 2. #}
+{% extends "halaman.html" %}
+{% block isi_halaman %}
+<p class="pengantar">{{ ini.deskripsi }}</p>
+<p class="catatan catatan--menyusul">Informasi ini sedang dilengkapi oleh Program Studi {{ nama }}.</p>
+{% endblock %}
