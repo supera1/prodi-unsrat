@@ -1,0 +1,14 @@
+{% extends "dasar.html" %}
+{% block judul %}{{ judul }}{% endblock %}
+{% block isi %}
+<article class="panduan">
+	<h1>{{ judul }}</h1>
+	<nav class="kartu panduan__isi" aria-labelledby="isi-panduan">
+		<h2 id="isi-panduan">Isi panduan</h2>
+		<ol>
+			{% for id_, teks in daftar_isi %}<li><a href="#{{ id_ }}">{{ teks }}</a></li>{% endfor %}
+		</ol>
+	</nav>
+	{{ isi }}
+</article>
+{% endblock %}

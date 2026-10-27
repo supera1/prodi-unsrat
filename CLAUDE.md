@@ -19,6 +19,8 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
 - `docs/rencana-fase-02.md` — rencana Fase 2: penyunting halaman wajib, alur isi, kelengkapan, pilot 3 prodi.
 - `docs/keputusan.md` — log keputusan (K-P1, …). Tambahkan entri setiap ada keputusan baru.
 - `docs/asal-modul.md` — modul yang disalin dari repo www beserta versi asalnya.
+- `docs/panduan-admin-prodi.md` — panduan untuk admin prodi dan operator (juga menu Panduan di admin);
+  `docs/pilot-fase-02.md` — persiapan pilot; `docs/kriteria-akreditasi.md` — draf label kriteria untuk LPMPP.
 - `platform/data-awal/slug.csv` — slug 97 prodi yang disetujui. Kunci tetap prodi adalah `kode_pddikti`, bukan slug.
 - Log hasil setiap langkah/fase ditulis ke `docs/log/`; ringkasan Fase 1 (kriteria, verifikasi manual, sisa pekerjaan):
   `docs/log/fase-01.md`.
@@ -91,6 +93,10 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
 - Halaman admin prodi di `platform/admin/prodi_admin.py` (data, identitas, beranda, menu, riwayat, berkas),
   `platform/admin/pengumuman_admin.py` (operator menulis/mengajukan, admin menerbitkan/mengembalikan/menarik), dan
   `platform/admin/isi_admin.py` (isi halaman: daftar, penyunting, draf, pratinjau; operator juga).
+- Panduan admin prodi: `docs/panduan-admin-prodi.md`, juga tampil di admin (`/panduan`, `platform/admin/panduan.py`;
+  Markdown sederhana, semua di-escape). Bila tombol, menu, batas, atau pesan admin berubah, perbarui panduannya:
+  `uji/uji_pilot.py` memeriksanya. Masukan pengguna admin: `platform/admin/masukan_admin.py` (`masukan.json`).
+  Persiapan pilot: `docs/pilot-fase-02.md`.
 - Halaman superadmin di `platform/admin/superadmin.py`. Perubahan yang memengaruhi situs memanggil bangun ulang lewat
   `platform/admin/pembangun.py`; `PRODI_BANGUN=latar` (bawaan, utas latar), `sinkron` (uji), `mati` (uji akses).
 - Template: `platform/template/menu.json` (menu induk), `platform/template/kategori.json` (kategori pengumuman), `platform/template/halaman/*.html` (Jinja2, autoescape),

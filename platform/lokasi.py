@@ -18,6 +18,7 @@
 Layout of PRODI_DATA (docs/rencana-fase-01.md §4):
 
     registri.json                 programmes on the platform: PDDIKTI code, slug, old slugs, active, lecturer link
+    masukan.json                  feedback sent from the admin by its users, and the replies (admin/masukan_admin.py)
     warisan/prodi.json            official programme data copied from www (tarik_www.py), never edited here
     warisan/unit.json             faculties: names and flag colours
     warisan/kalender.json         academic calendar
@@ -39,7 +40,7 @@ AKAR = os.path.dirname(PLATFORM)
 
 # A data file is named by its path under PRODI_DATA without ".json": "registri", "warisan/prodi",
 # "prodi/55201/situs". Only these shapes are accepted, so a name can never point outside the data folder.
-NAMA_SAH = re.compile(r"^(registri|warisan/(prodi|unit|kalender|universitas|meta)|prodi/[0-9A-Za-z]{3,12}/[a-z][a-z0-9-]*)$")
+NAMA_SAH = re.compile(r"^(registri|masukan|warisan/(prodi|unit|kalender|universitas|meta)|prodi/[0-9A-Za-z]{3,12}/[a-z][a-z0-9-]*)$")
 
 
 def data():

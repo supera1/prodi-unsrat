@@ -69,6 +69,7 @@
 		<li>Draf hanya terlihat di admin, lewat pratinjau. {% if admin %}Situs berubah setelah Anda menekan Terbitkan.{% else %}Setelah diajukan, admin prodi menerbitkannya atau mengembalikannya dengan catatan.{% endif %}</li>
 		<li>Berkas besar sebaiknya diunggah satu per satu: satu kali simpan paling banyak 40 MB.</li>
 	</ul>
+	<p><a href="{{ url_for('panduan') }}#mengisi-halaman">Panduan lengkap: mengisi halaman</a></p>
 </details>
 <form method="post" action="{{ url_for('isi_simpan', kode=pr.kode, id_=ini.id) }}" enctype="multipart/form-data" class="formulir formulir--sunting">
 	<input type="hidden" name="csrf" value="{{ token_csrf() }}">

@@ -245,7 +245,7 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   dan label kriteria yang baru tampil setelah dikonfirmasi LPMPP (K-P25). Halaman **Akreditasi** (`profil/akreditasi`)
   sudah ada sejak Fase 1, menampilkan status dari data resmi, dan sudah menjanjikan "Sertifikat akreditasi sedang
   dilengkapi oleh Program Studi".
-- **Keputusan** (usulan pengembang, menunggu tinjauan):
+- **Keputusan** (usulan pengembang, disetujui pengguna 27 Oktober 2026):
   - **Dokumen Akreditasi** menjadi bagian dokumen di halaman Akreditasi itu, bukan halaman baru. Isinya daftar dokumen
     (sertifikat, SK, ringkasan hasil; judul, tahun, keterangan, PDF), keterangan, dan bagian tambahan, diisi lewat
     penyunting dengan alur K-P24.
@@ -265,3 +265,23 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
     - halaman Akreditasi memuat "Halaman menurut kriteria akreditasi", hanya halaman yang ada di situs prodi itu.
 - **Konsekuensi:** prodi dengan nilai lembaga yang tidak diklaim lembaga mana pun (kosong, `BAN-PT / LAM-PTIP`) tidak
   mendapat label sampai LPMPP memutuskan dan data www diperbaiki. Panduan untuk LPMPP: `docs/kriteria-akreditasi.md`.
+
+### K-P30 — Panduan di dalam admin dan menu Masukan untuk pilot (Fase 2 langkah 5)
+- **Konteks:** panduan admin prodi (`docs/panduan-admin-prodi.md`, rencana §6) ada di repo GitHub yang privat, padahal
+  pembacanya admin prodi dan operator. Rencana §6 dan §9 juga meminta setiap masukan pilot tercatat dan ditindaklanjuti
+  atau ditunda; tanpa surel (K-P12), masukan mudah tercecer di percakapan.
+- **Keputusan** (usulan pengembang, menunggu tinjauan):
+  - **Panduan di admin.** Panduan tampil di admin sebagai menu **Panduan** (`/panduan`), dari berkas yang sama.
+    - Berkasnya ikut di image admin. Penguraiannya Markdown sederhana dengan semua karakter di-escape; tanpa paket baru.
+    - Penyunting menautkan bagian "Mengisi halaman".
+    - Uji memastikan setiap tombol dan menu yang disebut panduan tampil di admin, dan batas serta pesan galat di
+      panduan sama dengan di kode.
+  - **Menu Masukan untuk setiap pengguna admin.** Isinya jenis (kendala, pertanyaan, usulan) dan teks; halaman asalnya
+    ikut tercatat.
+    - Pengirim melihat masukannya sendiri beserta tanggapannya.
+    - Superadmin melihat semua masukan di **Masukan pengguna**, menandainya ditindaklanjuti atau ditunda dengan
+      tanggapan, dan mengunduh CSV-nya untuk laporan pilot.
+    - Dasbor superadmin menyebut jumlah masukan baru.
+    - Disimpan di `masukan.json`; setiap kiriman dan tanggapan masuk log audit.
+- **Konsekuensi:** masukan juga bisa datang dari luar admin (sesi pengenalan, telepon). Superadmin mencatatnya lewat
+  menu yang sama supaya laporan pilot lengkap.

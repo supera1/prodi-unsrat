@@ -6,8 +6,8 @@ yang mengikuti kriteria akreditasi dan bisa disesuaikan oleh tiap prodi.
 > **Status 27 Oktober 2026:** Fase 1 selesai dan digabung ke `main` (PR #1): 97 situs prodi, data resmi dari www yang
 > diuji sama persis, admin tiga peran, stack Docker untuk VM sendiri ([log](docs/log/fase-01.md), panduan admin VM:
 > [docs/deploy.md](docs/deploy.md)). Fase 2 (penyunting halaman wajib dan pilot 3 prodi,
-> [rencana](docs/rencana-fase-02.md), disetujui): langkah 1–3 (templat isi, penyunting, alur dan kelengkapan)
-> selesai; langkah 4 (Dokumen Akreditasi dan label kriteria) menunggu tinjauan.
+> [rencana](docs/rencana-fase-02.md), disetujui): langkah 1–4 selesai; langkah 5 (panduan admin prodi, menu Masukan,
+> [persiapan pilot](docs/pilot-fase-02.md)) menunggu tinjauan. Pilot menunggu staging tayang dan dua prodi pilot.
 > Rencana: [docs/rencana-fase-01.md](docs/rencana-fase-01.md) · Keputusan: [docs/keputusan.md](docs/keputusan.md)
 
 ## Cara kerja singkat
@@ -78,7 +78,8 @@ Stack Docker lengkap di komputer sendiri: [docs/deploy.md §13](docs/deploy.md#1
 | 1 | Model data dan templat isi 22 halaman wajib + 2 opsional, tampilan di situs | selesai |
 | 2 | Penyunting di admin: formulir dari templat, unggah PDF/foto, draf, pratinjau | selesai |
 | 3 | Alur ajukan/terbitkan/kembalikan/tarik, riwayat per halaman, kelengkapan (dasbor, superadmin, CSV) | selesai |
-| 4 | Dokumen Akreditasi (di halaman Akreditasi) dan label kriteria (draf untuk LPMPP, [panduan](docs/kriteria-akreditasi.md)) | selesai, menunggu tinjauan |
-| 5–6 | Panduan dan pilot 3 prodi | menunggu staging |
+| 4 | Dokumen Akreditasi (di halaman Akreditasi) dan label kriteria (draf untuk LPMPP, [panduan](docs/kriteria-akreditasi.md)) | selesai |
+| 5 | [Panduan admin prodi](docs/panduan-admin-prodi.md) (juga di admin), menu Masukan, [persiapan pilot](docs/pilot-fase-02.md) | selesai, menunggu tinjauan |
+| 6 | Pilot 3 prodi | menunggu staging dan dua prodi pilot |
 | 7 | Pilihan tambahan (bila pilot memerlukan) | — |
 | 8 | Uji menyeluruh + log fase | — |

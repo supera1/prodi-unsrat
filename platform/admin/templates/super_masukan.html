@@ -1,0 +1,34 @@
+{% extends "dasar.html" %}
+{% block judul %}Masukan pengguna{% endblock %}
+{% macro waktu(w) %}{{ (w | replace('T', ' '))[:16] }}{% endmacro %}
+{% block isi %}
+<h1>Masukan pengguna</h1>
+<p>Masukan yang dikirim admin prodi dan operator lewat menu Masukan. Tandai setiap masukan ditindaklanjuti atau ditunda,
+	dengan tanggapan yang akan dibaca pengirimnya. <a href="{{ url_for('super_masukan_csv') }}">Unduh CSV</a> ·
+	<a href="{{ url_for('masukan') }}">Kirim masukan sendiri</a></p>
+<nav class="saring-status" aria-label="Saring status">
+	<a href="{{ url_for('super_masukan') }}"{% if not status %} aria-current="page"{% endif %}>Semua ({{ jumlah.values() | sum }})</a>
+	{% for s, label in STATUS.items() %}
+	<a href="{{ url_for('super_masukan', status=s) }}"{% if status == s %} aria-current="page"{% endif %}>{{ label }} ({{ jumlah[s] }})</a>
+	{% endfor %}
+</nav>
+{% for b in daftar %}
+<section class="kartu masukan-butir" id="m-{{ b.id }}" aria-labelledby="m-{{ b.id }}-judul">
+	<h2 id="m-{{ b.id }}-judul" class="masukan-butir__judul">{{ JENIS.get(b.jenis, b.jenis) }} dari {{ b.oleh }} <span class="keterangan">({{ b.peran }}{% for k in b.prodi %}, {{ nama_prodi(k) }}{% endfor %}) · {{ waktu(b.waktu) }}</span></h2>
+	<p><span class="status status--{{ b.status }}">{{ STATUS.get(b.status, b.status) }}</span>{% if b.halaman %} · dari halaman <a href="{{ b.halaman }}">{{ b.halaman }}</a>{% endif %}</p>
+	<p class="catatan-admin">{{ b.isi }}</p>
+	{% if b.tanggapan %}<p class="keterangan">Tanggapan {{ b.tanggapan.oleh }} ({{ waktu(b.tanggapan.waktu) }}): {{ b.tanggapan.isi }}</p>{% endif %}
+	<form method="post" action="{{ url_for('super_masukan_tanggapi', id_=b.id) }}" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<div class="isian isian--pilihan"><label for="m-{{ b.id }}-status">Status</label>
+			<select id="m-{{ b.id }}-status" name="status">{% for s, label in STATUS.items() %}<option value="{{ s }}"{% if b.status == s %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+		<div class="isian"><label for="m-{{ b.id }}-tanggapan">{{ 'Ganti tanggapan' if b.tanggapan else 'Tanggapan' }} (opsional)</label>
+			<textarea id="m-{{ b.id }}-tanggapan" name="tanggapan" rows="2" aria-describedby="m-{{ b.id }}-ket"></textarea>
+			<p class="keterangan" id="m-{{ b.id }}-ket">Paling banyak {{ maks }} karakter; dibaca pengirimnya di halaman Masukan.</p></div>
+		<button type="submit" class="tombol tombol--kecil">Simpan<span class="tersembunyi"> tanggapan untuk masukan {{ b.oleh }} {{ waktu(b.waktu) }}</span></button>
+	</form>
+</section>
+{% else %}
+<p>Tidak ada masukan{% if status %} berstatus {{ STATUS[status] | lower }}{% endif %}.</p>
+{% endfor %}
+{% endblock %}

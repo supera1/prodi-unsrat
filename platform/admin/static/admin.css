@@ -932,3 +932,55 @@ td.sel-angka {
 	font-variant-numeric: tabular-nums;
 	white-space: nowrap;
 }
+
+/* ---------------------------------------------------------------- the guide and the feedback (Fase 2 langkah 5) */
+
+.panduan {
+	max-width: 52rem;
+}
+
+.panduan h2 {
+	margin-top: 2rem;
+}
+
+.panduan__isi ol {
+	columns: 2 14rem;
+	margin: 0;
+}
+
+.panduan blockquote {
+	margin: 1rem 0;
+	padding: 0.5rem 1rem;
+	border-left: 4px solid var(--abu-200);
+}
+
+.panduan code,
+.formulir--sunting code {
+	padding: 0 0.25em;
+	background: var(--abu-200);
+	border-radius: 3px;
+	font-size: 0.9em;
+}
+
+.masukan-butir {
+	padding: 0.75rem 0;
+	border-bottom: 1px solid var(--abu-200);
+}
+
+.masukan-butir__judul {
+	font-size: 1.125rem;
+}
+
+.status--baru {
+	background: var(--kuning-pucat);
+	color: #8a4b00;
+}
+
+.status--ditindaklanjuti {
+	background: #e8f5ec;
+	color: var(--hijau);
+}
+
+.status--ditunda {
+	color: var(--abu-600);
+}

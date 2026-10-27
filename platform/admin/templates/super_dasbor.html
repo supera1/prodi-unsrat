@@ -13,6 +13,7 @@
 	<li><a href="#bentrok"><strong>{{ r.bentrok | length }}</strong> prodi dengan data yang bentrok dengan www</a></li>
 	<li><a href="{{ url_for('super_prodi') }}"><strong>{{ r.timpaan }}</strong> prodi mengubah data resminya sendiri</a></li>
 	<li><a href="{{ url_for('super_kelengkapan') }}">Kelengkapan halaman wajib setiap prodi (unduhan CSV untuk LPMPP)</a></li>
+	<li><a href="{{ url_for('super_masukan', status='baru') }}"><strong>{{ masukan_baru }}</strong> masukan baru dari pengguna admin</a></li>
 </ul>
 <section class="kartu">
 	<h2>Data resmi dari www</h2>

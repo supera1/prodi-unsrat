@@ -340,6 +340,13 @@ try:
          hanya("superuji", "admb", "opb", "opab", ya=404)),
         ("GET", "/super/kelengkapan", "super_kelengkapan", hanya("superuji")),
         ("GET", "/super/kelengkapan.csv", "super_kelengkapan_csv", hanya("superuji")),
+        # the guide and the feedback (Fase 2 langkah 5): everybody logged in sends; only the superadmin reads all
+        ("GET", "/panduan", "panduan", hanya(*semua_nama)),
+        ("GET", "/masukan?dari=/prodi/%s/halaman" % A, "masukan", hanya(*semua_nama)),
+        ("POST", "/masukan", "masukan_kirim", hanya(*semua_nama, ya=400)),
+        ("GET", "/super/masukan", "super_masukan", hanya("superuji")),
+        ("GET", "/super/masukan.csv", "super_masukan_csv", hanya("superuji")),
+        ("POST", "/super/masukan/20000101-000000-abcdef", "super_masukan_tanggapi", hanya("superuji", ya=404)),
         ("GET", "/aset-situs/prodi.css", "aset_situs", hanya(*semua_nama)),
         ("GET", "/aset-situs/admin.css", "aset_situs", hanya(*semua_nama, ya=404, tidak=404)),
         ("GET", "/prodi/%s/berkas/%s/202610-0123456789ab.pdf" % (A, A), "berkas_prodi",

@@ -39,6 +39,8 @@ import audit  # noqa: E402
 import lokasi  # noqa: E402
 import data_prodi  # noqa: E402
 import isi_admin  # noqa: E402
+import masukan_admin  # noqa: E402
+import panduan  # noqa: E402
 import pembangun  # noqa: E402
 import pengumuman_admin  # noqa: E402
 import prodi_admin  # noqa: E402
@@ -341,7 +343,7 @@ def buat_app(env=None):
     def dasbor():
         daftar = prodi_terlihat(g.akun)
         if g.akun["peran"] == "super":
-            return render_template("super_dasbor.html", r=alat.ringkasan())
+            return render_template("super_dasbor.html", r=alat.ringkasan(), masukan_baru=alat.jumlah_masukan_baru())
         if len(daftar) == 1:
             return redirect(url_for("dasbor_prodi", kode=daftar[0]["kode"]))
         return render_template("dasbor.html", daftar=daftar)
@@ -502,6 +504,8 @@ def buat_app(env=None):
     prodi_admin.pasang(app, alat)
     pengumuman_admin.pasang(app, alat)
     isi_admin.pasang(app, alat)
+    panduan.pasang(app, alat)
+    masukan_admin.pasang(app, alat)
     app.antrean, app.penjadwal = antrean, penjadwal
 
     # -------------------------------------------------------------- errors
