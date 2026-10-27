@@ -20,6 +20,9 @@ Tiga prodi dengan jenjang, fakultas, dan lembaga akreditasi berbeda, dan koordin
 
 Dikerjakan superadmin UPA TIK, bersama admin VM untuk butir 1.
 
+0. **Versi yang di-deploy memuat Fase 2.** `docs/deploy.md` §3 mengambil branch `main`, yang sampai sekarang baru berisi
+   Fase 1. Langkah 0–5 Fase 2 (`fase/02-0-rencana` … `fase/02-5-panduan`) perlu digabung ke `main` lebih dulu, atau
+   admin VM men-deploy branch lain yang disepakati. Tanpa itu, staging tidak punya menu Isi halaman.
 1. **Staging tayang.** Pemeriksaan di `docs/deploy.md` §5 sudah dijalankan: situs staging menampilkan pita "Pratinjau
    staging", admin terbuka dari jaringan UNSRAT (dari luar jaringan 403), kontainer *healthy*, dan pemantau mencatat
    0 temuan. Sudah ada minimal dua akun superadmin.

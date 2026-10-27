@@ -270,7 +270,7 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
 - **Konteks:** panduan admin prodi (`docs/panduan-admin-prodi.md`, rencana §6) ada di repo GitHub yang privat, padahal
   pembacanya admin prodi dan operator. Rencana §6 dan §9 juga meminta setiap masukan pilot tercatat dan ditindaklanjuti
   atau ditunda; tanpa surel (K-P12), masukan mudah tercecer di percakapan.
-- **Keputusan** (usulan pengembang, menunggu tinjauan):
+- **Keputusan** (usulan pengembang, disetujui pengguna 27 Oktober 2026):
   - **Panduan di admin.** Panduan tampil di admin sebagai menu **Panduan** (`/panduan`), dari berkas yang sama.
     - Berkasnya ikut di image admin. Penguraiannya Markdown sederhana dengan semua karakter di-escape; tanpa paket baru.
     - Penyunting menautkan bagian "Mengisi halaman".
