@@ -24,6 +24,10 @@ services:
     image: prodi-unsrat-admin:latest
     pull_policy: build                                    # rebuild on every (re)deploy, so new code from GitHub is used
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true                            # no program can give a process more rights than it started with
+    cap_drop:
+      - ALL                                               # runs as user 10001 (Dockerfile) and needs no Linux capability
     environment:
       PRODI_MODE: ${PRODI_MODE:-staging}                   # "produksi" once prodi.unsrat.ac.id points here
       PRODI_ALAMAT: ${PRODI_ALAMAT:-https://prodi.unsrat.ac.id}
@@ -46,6 +50,8 @@ services:
     image: prodi-unsrat-web:latest
     pull_policy: build
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       - admin
     environment:
@@ -75,6 +81,10 @@ services:
     image: prodi-unsrat-admin:latest
     pull_policy: build
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     depends_on:
       - admin
     entrypoint: ["/usr/local/bin/pemantau"]

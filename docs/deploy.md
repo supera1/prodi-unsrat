@@ -12,7 +12,7 @@ Stack Docker `prodi-unsrat` berisi tiga kontainer:
 |---|---|---|
 | `web` | Nginx: situs ke-97 prodi (port `PORT_SITUS`) dan admin (port `PORT_ADMIN`, hanya jaringan UNSRAT/VPN) | ya |
 | `admin` | Flask + generator situs. Membangun semua situs ke volume `prodi-publik` saat mulai, setelah setiap perubahan, dan setiap hari pukul 02.30 | tidak |
-| `pemantau` | Cek integritas situs publik setiap 10 menit (halaman diubah, berkas tanaman, teks judi) | tidak |
+| `pemantau` | Cek integritas situs publik setiap 10 menit (halaman diubah, berkas tanaman, teks judi atau pinjol) | tidak |
 
 Nama stack tetap `prodi-unsrat` (ditulis di `docker-compose.yml`), jadi kontainernya `prodi-unsrat-admin-1`,
 `prodi-unsrat-web-1`, `prodi-unsrat-pemantau-1`, dan volumenya diawali `prodi-unsrat_` (mis. `prodi-unsrat_prodi-data`):
@@ -85,11 +85,11 @@ Perubahan berlaku setelah `sudo docker compose up -d`.
 |---|---|---|
 | `PRODI_MODE` | `staging` | `staging`: pita "Pratinjau staging" dan `noindex` di setiap halaman. `produksi`: tanpa itu, dengan `sitemap.xml` dan alamat kanonik (§11) |
 | `PRODI_ALAMAT` | `https://prodi.unsrat.ac.id` | Alamat resmi situs: untuk alamat kanonik, sitemap, RSS, dan tautan "Lihat situs" di admin |
-| `ADMIN_IP_BOLEH` | `103.84.116.0/24` | Jaringan yang boleh membuka admin, dipisah koma (mis. jaringan kampus dan VPN) |
+| `ADMIN_IP_BOLEH` | `103.84.116.0/24` | Jaringan yang boleh membuka admin, dipisah koma (mis. jaringan kampus dan VPN). Paling luas `/8` (IPv4) atau `/32` (IPv6); yang lebih luas, mis. `0.0.0.0/0`, ditolak |
 | `PORT_SITUS` | `8080` | Port situs (HTTP) di VM |
 | `PORT_ADMIN` | `8081` | Port admin (HTTP) di VM |
-| `PROKSI_DEPAN` | kosong | Jaringan load balancer/reverse proxy di depan stack, dipisah koma; tanpanya admin melihat alamat proksi dan menolak semua orang (§7A) |
-| `ADMIN_HTTPS` | `0` | `1` bila admin dibuka lewat HTTPS (cookie aman + HSTS). Wajib `1` untuk §7B |
+| `PROKSI_DEPAN` | kosong | Jaringan load balancer/reverse proxy di depan stack, dipisah koma; tanpanya admin melihat alamat proksi dan menolak semua orang (§7A). Paling luas `/16` (IPv4) atau `/48` (IPv6): setiap alamat di dalamnya dipercaya menyebut alamat pengunjung (`X-Forwarded-For`) |
+| `ADMIN_HTTPS` | `0` | `1` bila admin dibuka lewat HTTPS (cookie aman + HSTS). Wajib `1` untuk §7B dan untuk `PRODI_MODE=produksi`: tanpa itu admin tidak mau berjalan (§11) |
 | `ADMIN_AWALAN` | kosong | Jalur admin bila admin dibuka di bawah alamat bersama, mis. `/admin` untuk `https://prodi.unsrat.ac.id/admin` (awalan dibuang di load balancer) |
 | `PRODI_BANGUN_HARIAN` | `02:30` | Jam bangun ulang harian (JJ:MM, WITA), supaya pengumuman yang lewat masa berlakunya turun dari situs |
 | `HTTPS_DI_VM` | `0` | `1`: TLS dipasang di VM ini sendiri (§7B) |
@@ -99,8 +99,9 @@ Perubahan berlaku setelah `sudo docker compose up -d`.
 | `PORT_ADMIN_HTTPS` | `8444` | Port admin HTTPS di VM (§7B) |
 | `UJI_SAAT_BUILD` | `1` | `0` melewati uji saat build. **Hanya** untuk perbaikan darurat; jalankan uji sesudahnya (§8) |
 
-Nilai yang salah (mis. `ADMIN_IP_BOLEH` bukan alamat jaringan) membuat kontainer `web` berhenti dengan pesan di log
-yang menyebut variabelnya.
+Nilai yang salah atau terlalu longgar (mis. `ADMIN_IP_BOLEH` bukan alamat jaringan atau `0.0.0.0/0`, produksi tanpa
+`ADMIN_HTTPS=1`) membuat kontainer `web` atau `admin` berhenti dengan pesan di log yang menyebut variabelnya. Admin
+memeriksa pengaturannya sebelum membangun situs; situs tetap menyajikan hasil bangun terakhir.
 
 ## 5. Nyalakan pertama kali
 
@@ -168,6 +169,8 @@ Stack melayani HTTP; sertifikat dipegang load balancer (seperti www).
 - **Admin:** nama sendiri ke `PORT_ADMIN`, atau jalur di alamat yang sama (mis. `/admin`, awalan dibuang load balancer,
   lalu `ADMIN_AWALAN=/admin`). Health check port admin pakai **TCP**, bukan HTTP: admin menjawab 403 kepada alamat
   load balancer, sehingga health check HTTP menganggap backend mati. Bila admin dibuka lewat HTTPS: `ADMIN_HTTPS=1`.
+  Di produksi admin wajib dibuka lewat HTTPS (sertifikat di load balancer, atau §7B), supaya kata sandi tidak pernah
+  lewat jaringan tanpa enkripsi: `PRODI_MODE=produksi` tanpa `ADMIN_HTTPS=1` membuat kontainer `admin` berhenti.
 - **`PROKSI_DEPAN`:** rentang alamat asal permintaan load balancer, ditambah alamat depan load balancer itu sendiri.
   Untuk load balancer Google: `130.211.0.0/22,35.191.0.0/16,<IP depan load balancer>`. Tanpanya admin melihat alamat
   load balancer dan menolak semua orang (403); log Nginx juga mencatat alamat yang salah.
@@ -262,7 +265,8 @@ admin → **Riwayat** (setiap berkas data punya versi sebelumnya).
 ### Bila pemantau menemukan sesuatu
 
 Baris di atas `PEMANTAU: ADA TEMUAN` menyebut jenisnya: `BERUBAH` (halaman berbeda dari hasil bangun), `ASING`
-(berkas yang tidak dibuat generator, mis. `.php`), `HILANG`, `SPAM` (teks judi), `SKRIP` (skrip/iframe dari luar).
+(berkas yang tidak dibuat generator, mis. `.php`), `HILANG`, `SPAM` (teks judi, pinjol, jual ijazah, atau obat
+terlarang), `SKRIP` (skrip/iframe dari luar).
 1. Catat baris temuannya. Jangan langsung menghapus apa pun di VM.
 2. Admin → Bangun ulang → **Bangun ulang semua situs**: hasil bangun menimpa halaman yang diubah dan menghapus berkas
    asing. Periksa log pemantau berikutnya (atau jalankan
@@ -279,12 +283,22 @@ Setelah staging disetujui: `PRODI_MODE=produksi` dan `PRODI_ALAMAT=https://prodi
 Pita "Pratinjau staging" dan `noindex` hilang, `sitemap.xml` dibuat, `robots.txt` mengizinkan mesin pencari. Pengalihan dari
 situs prodi lama (mis. `informatika.unsrat.ac.id`) diatur di luar stack ini (K-P4).
 
+- Admin harus sudah dibuka lewat HTTPS dengan `ADMIN_HTTPS=1` (§7). Tanpa itu kontainer `admin` berhenti dengan pesan
+  `PRODI_MODE=produksi memerlukan ADMIN_HTTPS=1`, dan situs tetap menyajikan hasil bangun terakhir (masih bentuk
+  staging) sampai admin berjalan.
+- Isi bertanda `[CONTOH]` (isi contoh untuk melihat tampilan, `isi_halaman.py contoh`) tidak pernah diterbitkan di
+  produksi. Log admin menyebutnya: `PERINGATAN … bertanda [CONTOH], tidak diterbitkan di produksi`. Ganti isinya di
+  admin, atau tarik halamannya.
+
 ## 12. Bila ada masalah
 
 | Gejala | Penyebab dan jalan keluar |
 |---|---|
 | Build gagal di langkah `uji/jalankan-semua.py` | Uji otomatis gagal di image ini. Versi lama tetap berjalan. Kirim log build ke pengembang |
 | `web` berhenti: `40-prodi-jaringan: … bukan alamat jaringan` | `ADMIN_IP_BOLEH` atau `PROKSI_DEPAN` berisi yang bukan alamat/jaringan |
+| `web` berhenti: `40-prodi-jaringan: … jaringan yang terlalu luas` | `ADMIN_IP_BOLEH` lebih luas dari `/8` (IPv6 `/32`), atau `PROKSI_DEPAN` lebih luas dari `/16` (IPv6 `/48`). Isi jaringan kampus/VPN atau subnet proksi yang sebenarnya |
+| `admin` berhenti: `ADMIN_IP_BOLEH berisi …` | Sama seperti baris di atas: admin juga memeriksa `ADMIN_IP_BOLEH` |
+| `admin` berhenti: `PRODI_MODE=produksi memerlukan ADMIN_HTTPS=1` | Buka admin lewat HTTPS (§7), lalu `ADMIN_HTTPS=1` di `.env` |
 | `web` berhenti: `… fullchain.pem tidak ada di TLS_FOLDER` | `HTTPS_DI_VM=1` tanpa sertifikat (§7B) |
 | Situs 404 semua, `web` *unhealthy* | Admin belum selesai membangun (lihat log admin) atau bangun gagal |
 | Admin 403 "tidak dapat dibuka dari jaringan ini" atau 403 Nginx | Alamat Anda di luar `ADMIN_IP_BOLEH`; di belakang load balancer isi `PROKSI_DEPAN` (§7A) |

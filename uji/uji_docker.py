@@ -5,13 +5,17 @@
 - the filter of the web container (50-prodi-pantau.sh) passes exactly the redirect lines the builder writes and no
   other directive (checked with Python's re, and with grep -E when the machine has it);
 - the stack: the admin is never published, secrets are mounted in the admin container only, the web and pemantau
-  containers mount everything read only, the image never gets a developer's data or secrets (.dockerignore);
+  containers mount everything read only, no container can gain rights (no-new-privileges) and those running as user
+  10001 have no Linux capability, the image never gets a developer's data or secrets (.dockerignore);
+- the start of the web container refuses networks that are not networks or are too wide (40-prodi-jaringan.sh), and
+  the start of the admin stops on a setting the admin refuses (production without HTTPS) before any site is built;
 - every variable of the stack is in .env.example and in docs/deploy.md; the shell scripts parse (sh -n).
 
 The stack itself is tried with Docker as described in docs/deploy.md (§ Mencoba di komputer sendiri).
 """
 from __future__ import print_function
 
+import fnmatch
 import io
 import os
 import re
@@ -120,6 +124,12 @@ for nama, isi in (("web", web), ("pemantau", pemantau)):
     volume = re.findall(r"^      - (\S+)$", isi.split("volumes:")[1], re.M) if "volumes:" in isi else []
     cek(volume and all(v.endswith(":ro") for v in volume), "semua volume %s harus hanya-baca: %r" % (nama, volume))
 cek('PROXY_TERPERCAYA: "1"' in admin, "admin hanya di belakang satu proksi (Nginx)")
+for nama, isi in (("admin", admin), ("web", web), ("pemantau", pemantau)):
+    cek(re.search(r"^    security_opt:\n      - no-new-privileges:true\s", isi, re.M),
+        "%s: tidak ada proses yang bisa menambah haknya sendiri (no-new-privileges)" % nama)
+for nama, isi in (("admin", admin), ("pemantau", pemantau)):
+    cek(re.search(r"^    cap_drop:\n      - ALL\s", isi, re.M), "%s: tanpa kapabilitas Linux (berjalan sebagai 10001)" % nama)
+cek(re.search(r"^USER prodi$", baca("Dockerfile"), re.M), "image admin berjalan sebagai pengguna prodi, bukan root")
 nama_stack = re.search(r"^name: (\S+)$", compose, re.M)
 cek(nama_stack and nama_stack.group(1) == "prodi-unsrat", "nama stack ditetapkan di docker-compose.yml: prodi-unsrat")
 for rel in ("docker/cadangan-prodi.sh", "docker/pulihkan-prodi.sh"):
@@ -128,6 +138,34 @@ cek("8791" in baca("docker/nginx/lokasi-admin.conf") and "PORT=8791" in baca("Do
 ignore = baca(".dockerignore").split()
 for x in (".git", ".venv", "data/", "rahasia/", "log/", "unggahan/", "publik/", ".env", ".kredensial*", "*.sqlite"):
     cek(x in ignore, ".dockerignore harus memuat %s" % x)
+
+
+def diabaikan(rel):
+    """Whether .dockerignore leaves a path of the repository out of the build context (the last matching pattern
+    wins, "!" takes a path back in; a pattern also matches the folders above the path)."""
+    hasil = False
+    for pola in [p for p in ignore if not p.startswith("#")]:
+        balik = pola.startswith("!")
+        pola = pola.lstrip("!").rstrip("/")
+        bagian = rel.split("/")
+        jalur = ["/".join(bagian[:i]) for i in range(1, len(bagian) + 1)]
+        if pola.startswith("**/"):
+            jalur += ["/".join(bagian[i:j]) for i in range(len(bagian)) for j in range(i + 1, len(bagian) + 1)]
+            pola = pola[3:]
+        if any(fnmatch.fnmatchcase(j, pola) for j in jalur):
+            hasil = not balik
+    return hasil
+
+
+# every file an image copies is in the build context: a COPY of a left-out file stops the build (and the deploy)
+cek(diabaikan("data/prodi/x.json") and diabaikan("platform/x/__pycache__/a.pyc") and not diabaikan("docs/asal-modul.md")
+    and diabaikan("docs/deploy.md"), "pembaca .dockerignore di uji ini")
+for berkas in ("Dockerfile", "docker/web.Dockerfile"):
+    for m in re.finditer(r"^COPY\s+(.+)$", baca(berkas).replace("\\\n", " "), re.M):
+        for sumber in [x for x in m.group(1).split()[:-1] if not x.startswith("--")]:
+            sumber = sumber.rstrip("/")
+            cek(os.path.exists(os.path.join(AKAR, *sumber.split("/"))), "%s: COPY %s tidak ada" % (berkas, sumber))
+            cek(not diabaikan(sumber), "%s: COPY %s dikecualikan .dockerignore, build akan gagal" % (berkas, sumber))
 variabel = sorted(set(re.findall(r"\$\{([A-Z_]+)", compose)))
 contoh = baca(".env.example")
 panduan = baca("docs/deploy.md") if os.path.isfile(os.path.join(AKAR, "docs", "deploy.md")) else ""
@@ -158,17 +196,24 @@ def jalankan(rel, env, kerja, shell):
 
 
 TAB = "\t"
+# wider than 40-prodi-jaringan.sh allows: ADMIN_IP_BOLEH at most /8 (IPv4) and /32 (IPv6), PROKSI_DEPAN /16 and /48
+TERLALU_LUAS = {"ADMIN_IP_BOLEH": ("0.0.0.0/0", "103.84.116.0/24,0.0.0.0/1", "10.0.0.0/7", "::/0", "2000::/3"),
+                "PROKSI_DEPAN": ("0.0.0.0/0", "10.0.0.0/8", "130.211.0.0/15", "2600:2d00::/32")}
 JARINGAN = [  # (env, exit status, expected admin-ip.conf, expected real-ip.conf, expected admin-awalan.conf)
     ({}, 0, "allow 103.84.116.0/24;\ndeny all;\n", "", 'proxy_set_header X-Forwarded-Prefix "";\n'),
     ({"ADMIN_IP_BOLEH": "103.84.116.0/24, 10.0.0.0/8"}, 0, "allow 103.84.116.0/24;\nallow 10.0.0.0/8;\ndeny all;\n", "", None),
     ({"ADMIN_IP_BOLEH": "103.84.116.0/24" + TAB + "10.0.0.0/8"}, 0, "allow 103.84.116.0/24;\nallow 10.0.0.0/8;\ndeny all;\n", "", None),
     ({"ADMIN_IP_BOLEH": "2001:db8::/32,,103.84.116.0/24"}, 0, "allow 2001:db8::/32;\nallow 103.84.116.0/24;\ndeny all;\n", "", None),
+    ({"ADMIN_IP_BOLEH": "103.84.116.5,10.8.0.0/16"}, 0, "allow 103.84.116.5;\nallow 10.8.0.0/16;\ndeny all;\n", "", None),
     ({"PROKSI_DEPAN": "130.211.0.0/22,35.191.0.0/16,103.157.55.250/32", "ADMIN_AWALAN": "/admin/"}, 0, None,
      "set_real_ip_from 130.211.0.0/22;\nset_real_ip_from 35.191.0.0/16;\nset_real_ip_from 103.157.55.250/32;\n"
      "real_ip_header X-Forwarded-For;\nreal_ip_recursive on;\n", 'proxy_set_header X-Forwarded-Prefix "/admin";\n'),
+    ({"PROKSI_DEPAN": "2600:2d00:1:b029::/64"}, 0, None,
+     "set_real_ip_from 2600:2d00:1:b029::/64;\nreal_ip_header X-Forwarded-For;\nreal_ip_recursive on;\n", None),
 ] + [({"ADMIN_IP_BOLEH": v}, 1, None, None, None) for v in (
-    "1.2.3.4;include /etc/passwd", "*", ",", TAB, "," + TAB + ",", " ", "103.84.116.0/24 x", "103.84.116.0/24\nallow all")] + [
-    ({"PROKSI_DEPAN": v}, 1, None, None, None) for v in ("10.0.0.0/8 x", "10.0.0.0/8,*")] + [
+    "1.2.3.4;include /etc/passwd", "*", ",", TAB, "," + TAB + ",", " ", "103.84.116.0/24 x", "103.84.116.0/24\nallow all",
+    "10.0.0.0/", "/8", "10.0.0.0/8/9", "10.0.0.0/33", "10.0.0.0/0008", "2001:db8::/129") + TERLALU_LUAS["ADMIN_IP_BOLEH"]] + [
+    ({"PROKSI_DEPAN": v}, 1, None, None, None) for v in ("10.0.0.0/8 x", "10.0.0.0/8,*") + TERLALU_LUAS["PROKSI_DEPAN"]] + [
     ({"ADMIN_AWALAN": v}, 1, None, None, None) for v in ('/admin";proxy_pass http://x', "admin", "/a//b")]
 shell_ada = [[x] for x in ("sh", "dash") if shutil.which(x)] + ([["busybox", "sh"]] if shutil.which("busybox") else [])
 for shell in shell_ada:
@@ -183,6 +228,8 @@ for shell in shell_ada:
             for nama, harap in (("admin-ip.conf", admin_ip), ("real-ip.conf", real_ip), ("admin-awalan.conf", awalan)):
                 if harap is not None:
                     cek(isi("prodi/" + nama) == harap, "%s: %s = %r" % (label, nama, isi("prodi/" + nama)))
+            if any(env.get(k) in v for k, v in TERLALU_LUAS.items()):
+                cek("terlalu luas" in galat, "%s: pesan harus menyebut jaringan terlalu luas: %s" % (label, galat.strip()))
         finally:
             shutil.rmtree(kerja, ignore_errors=True)
 
@@ -212,8 +259,36 @@ for shell in shell_ada:
         cek(https(env, sertifikat)[0] == 1, "%s 45-prodi-https %r harus berhenti" % (shell[0], env))
 cek(shell_ada, "tidak ada shell POSIX untuk menguji skrip awal web")
 
-# --- the shell scripts parse
 sh = shutil.which("sh")
+
+# --- the start of the admin checks its settings (app.buat_app) before building: the line of admin-mulai.sh, run as it
+# is from the root of the code (/app in the image), with the session key of a new VM
+mulai = baca("docker/admin-mulai.sh")
+baris = [b for b in mulai.splitlines() if "app.buat_app()" in b and not b.lstrip().startswith("#")]
+cek(len(baris) == 1 and mulai.index(baris[0]) < mulai.index("bangun.py") < mulai.index("waitress-serve"),
+    "admin-mulai.sh memeriksa pengaturan admin sekali, sebelum situs dibangun: %r" % baris)
+if baris and sh:
+    kerja = tempfile.mkdtemp(prefix="prodi-uji-mulai-")
+    try:
+        with io.open(os.path.join(kerja, ".env"), "w", encoding="utf-8") as f:
+            f.write("SECRET_KEY=%s\n" % ("k" * 64))
+        dasar = {"PATH": os.path.dirname(sys.executable) + os.pathsep + os.environ.get("PATH", "/usr/bin:/bin"),
+                 "PRODI_RAHASIA": kerja, "PRODI_DATA": os.path.join(kerja, "data"), "PRODI_LOG": os.path.join(kerja, "log"),
+                 "PRODI_RIWAYAT": os.path.join(kerja, "riwayat"), "WWW_DATA": os.path.join(kerja, "www")}
+        for env, kode, pesan in (({}, 0, ""), ({"PRODI_MODE": "produksi", "ADMIN_HTTPS": "1"}, 0, ""),
+                                 ({"PRODI_MODE": "produksi"}, 1, "ADMIN_HTTPS=1"),
+                                 ({"PRODI_MODE": "produksi", "ADMIN_HTTPS": "0"}, 1, "ADMIN_HTTPS=1"),
+                                 ({"ADMIN_IP_BOLEH": "0.0.0.0/0"}, 1, "terlalu luas"),
+                                 ({"ADMIN_IP_BOLEH": "103.84.116.0/24 bukan"}, 1, "tidak sah"),
+                                 ({"PRODI_BANGUN_HARIAN": "25:99"}, 1, "PRODI_BANGUN_HARIAN")):
+            r = subprocess.run([sh, "-c", "set -eu\n" + baris[0]], cwd=AKAR, env=dict(dasar, **env), capture_output=True,
+                               text=True, timeout=120)
+            cek(r.returncode == kode and pesan in r.stderr,
+                "admin-mulai.sh %r: kode %s (harus %s), pesan %r" % (env, r.returncode, kode, r.stderr.strip()[-300:]))
+    finally:
+        shutil.rmtree(kerja, ignore_errors=True)
+
+# --- the shell scripts parse
 for rel in ("docker/admin-mulai.sh", "docker/pemantau.sh", "docker/nginx/40-prodi-jaringan.sh",
             "docker/nginx/45-prodi-https.sh", "docker/nginx/50-prodi-pantau.sh"):
     path = os.path.join(AKAR, *rel.split("/"))

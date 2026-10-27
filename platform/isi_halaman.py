@@ -443,9 +443,9 @@ def _periksa(node, v, tempat, kode, masalah, jalur=""):
                 m = _teks_kaya_masalah(v)
                 if m:
                     salah(m)
-            judi = saringan_spam.cari(v)
-            if judi:
-                salah("memuat teks judi (%s)" % judi)
+            istilah = saringan_spam.cari(v)
+            if istilah:
+                salah("memuat teks %s (%s)" % (saringan_spam.jenis(istilah), istilah))
     elif j == "bilangan":
         if isinstance(v, bool) or not isinstance(v, int):
             salah("harus angka bulat")
@@ -474,7 +474,7 @@ def _periksa(node, v, tempat, kode, masalah, jalur=""):
                         and isinstance(x.get("tinggi"), int) for x in varian.values())):
             salah("foto tidak sah")
         elif not isinstance(v.get("alt"), str) or not v["alt"].strip() or len(v["alt"]) > 200 or saringan_spam.cari(v["alt"]):
-            salah("teks alternatif foto wajib diisi (maksimal 200 karakter, tanpa teks judi)")
+            salah("teks alternatif foto wajib diisi (maksimal 200 karakter, tanpa istilah terlarang)")
 
 
 def _semua_masalah(id_halaman, isi, kode):
@@ -959,8 +959,9 @@ def kembalikan(kode, id_halaman, catatan, oleh, versi=None, isi=None):
         raise GagalIsi("tulis catatan untuk penulis: apa yang perlu diperbaiki")
     if len(catatan) > MAKS_CATATAN or KONTROL.search(catatan):
         raise GagalIsi("catatan paling banyak %d karakter, tanpa karakter kendali" % MAKS_CATATAN)
-    if saringan_spam.cari(catatan):
-        raise GagalIsi("catatan memuat teks judi")
+    istilah = saringan_spam.cari(catatan)
+    if istilah:
+        raise GagalIsi("catatan memuat teks %s" % saringan_spam.jenis(istilah))
 
     def ubah(d):
         d["status"] = "dikembalikan"
@@ -1078,6 +1079,12 @@ def isi_contoh(id_halaman, n=3, berkas_contoh=None):
     """Content for every field of a page, marked [CONTOH]: n items per list. berkas_contoh(jenis) gives a stored file
     record ("dokumen" or "foto"); without it, list items that need a file are left out."""
     return _contoh(TEMPLAT[id_halaman], n, berkas_contoh)
+
+
+def bertanda_contoh(nilai):
+    """Whether content (a page, an announcement) holds the [CONTOH] mark of sample content. A production build never
+    publishes it (bangun.py), whoever put it there: a staging VM becomes the production one (docs/deploy.md §11)."""
+    return CONTOH in json.dumps(nilai, ensure_ascii=False)
 
 
 # ------------------------------------------------------------------ command line

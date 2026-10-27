@@ -16,27 +16,43 @@ jaringan() {  # the networks of a list (separated by commas, spaces or tabs), on
     printf '%s\n' "$1" | tr ', \t' '\n\n\n' | grep -v '^$' || true
 }
 
-# Anything that is not an address or network, or a wrong ADMIN_AWALAN, stops the start before any file is written.
-# Checked here, in the script itself: an "exit" inside $(...) would only leave that subshell (www's
-# 40-unsrat-jaringan.sh has that flaw: there a wrong value silently leaves the admin closed to everybody, or a list
-# of networks cut short).
-for pasangan in "ADMIN_IP_BOLEH=$ADMIN_IP" "PROKSI_DEPAN=$PROKSI"; do
-    for n in $(jaringan "${pasangan#*=}"); do
-        case "$n" in
-            *[!0-9a-fA-F:./]*) echo "40-prodi-jaringan: ${pasangan%%=*} berisi '$n', bukan alamat jaringan" >&2; exit 1 ;;
-        esac
-    done
-done
-if [ -z "$(jaringan "$ADMIN_IP")" ]; then
-    echo "40-prodi-jaringan: ADMIN_IP_BOLEH tidak berisi jaringan" >&2
+salah() {
+    echo "40-prodi-jaringan: $*" >&2
     exit 1
-fi
+}
+
+# Anything that is not an address or network, a network that is too wide, or a wrong ADMIN_AWALAN stops the start
+# before any file is written. Checked here, in the script itself: an "exit" inside $(...) would only leave that
+# subshell (www's 40-unsrat-jaringan.sh has that flaw: there a wrong value silently leaves the admin closed to
+# everybody, or a list of networks cut short).
+# periksa <name> <value> <shortest IPv4 prefix> <shortest IPv6 prefix>: ADMIN_IP_BOLEH=0.0.0.0/0 would open the admin
+# to the whole internet (the admin, app.py, refuses the same), and a wide PROKSI_DEPAN would let anybody in it name
+# their own address in X-Forwarded-For, e.g. one of ADMIN_IP_BOLEH.
+periksa() {
+    for n in $(jaringan "$2"); do
+        case "$n" in
+            *[!0-9a-fA-F:./]*|*/*/*|*/|/*) salah "$1 berisi '$n', bukan alamat jaringan" ;;
+            */*) pjg="${n##*/}" ;;
+            *) continue ;;                                  # one address
+        esac
+        case "$n" in
+            *:*) min=$4 maks=128 ;;
+            *) min=$3 maks=32 ;;
+        esac
+        case "$pjg" in *[!0-9]*|????*) salah "$1 berisi '$n', bukan alamat jaringan" ;; esac
+        [ "$pjg" -le "$maks" ] || salah "$1 berisi '$n', bukan alamat jaringan"
+        [ "$pjg" -ge "$min" ] || salah "$1 berisi '$n', jaringan yang terlalu luas (paling luas /$3 untuk IPv4, /$4 untuk IPv6)"
+    done
+}
+periksa ADMIN_IP_BOLEH "$ADMIN_IP" 8 32
+periksa PROKSI_DEPAN "$PROKSI" 16 48
+[ -n "$(jaringan "$ADMIN_IP")" ] || salah "ADMIN_IP_BOLEH tidak berisi jaringan"
 awalan="${ADMIN_AWALAN:-}"
 awalan="${awalan%/}"
 case "$awalan" in
     "") ;;
-    /*) case "$awalan" in *[!A-Za-z0-9/._-]*|*//*) echo "40-prodi-jaringan: ADMIN_AWALAN '$awalan' tidak sah" >&2; exit 1 ;; esac ;;
-    *) echo "40-prodi-jaringan: ADMIN_AWALAN harus diawali / (mis. /admin)" >&2; exit 1 ;;
+    /*) case "$awalan" in *[!A-Za-z0-9/._-]*|*//*) salah "ADMIN_AWALAN '$awalan' tidak sah" ;; esac ;;
+    *) salah "ADMIN_AWALAN harus diawali / (mis. /admin)" ;;
 esac
 
 {

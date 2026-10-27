@@ -207,7 +207,7 @@ def baca_sumber(folder=None, keterangan=None):
         for jalur, teks in _semua_teks(hasil[nama]):
             istilah = saringan_spam.cari(teks)
             if istilah:
-                masalah.append("teks judi %r di %s.json %s" % (istilah, nama, jalur))
+                masalah.append("teks %s %r di %s.json %s" % (saringan_spam.jenis(istilah), istilah, nama, jalur))
     if masalah:
         raise GagalTarik(masalah)
     hasil["meta"] = {"sumber": keterangan or folder, "sidik": sidik, "jumlah_prodi": len(prodi)}

@@ -25,5 +25,6 @@ platform/admin/riwayat/
 platform/admin/unggahan-sementara/
 docs/
 !docs/asal-modul.md
+!docs/panduan-admin-prodi.md
 README.md
 CLAUDE.md
