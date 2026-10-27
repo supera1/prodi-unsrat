@@ -199,3 +199,22 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   - butir "usulan perubahan data resmi" (rencana Fase 1 §2) diganti laporan perubahan data prodi untuk diteruskan ke
     pengelola www;
   - impor Excel untuk tabel besar hanya bila pilot memerlukannya.
+
+### K-P27 — Penyunting isi halaman: draf bersama, isian apa adanya, riwayat untuk simpanan sengaja (Fase 2 langkah 2)
+- **Konteks:** formulir isi halaman bisa panjang (tabel sampai 300–500 baris) dan diisi bergantian oleh operator dan
+  admin prodi. Tombol daftar (Tambah, Naik, Turun, Hapus) mengirim formulir tanpa JavaScript, jadi setiap klik adalah
+  satu simpanan.
+- **Keputusan** (usulan pengembang, menunggu tinjauan):
+  - satu draf bersama per halaman (bukan per orang); setiap simpanan memeriksa versi asal formulir, dan simpanan dari
+    versi lama ditolak dengan nama pengubah dan waktunya, tanpa menulis apa pun (juga berkas);
+  - isian yang belum sah (mis. tahun "20o5") disimpan apa adanya di draf lalu ditandai, supaya ketikan tidak hilang;
+    halaman baru bisa diterbitkan (langkah 3) bila semua isian lolos pemeriksaan;
+  - baris yang ditambah lalu dibiarkan kosong dibuang saat "Simpan draf"; butir yang baru dihapus bisa dikembalikan
+    sampai simpanan berikutnya;
+  - riwayat versi mencatat "Simpan draf", "Buang draf", penerbitan, dan penarikan; tombol daftar dan pratinjau
+    menyimpan draf tanpa riwayat. Ini lebih sempit dari bunyi rencana §3.4 ("setiap simpanan masuk riwayat"), supaya
+    riwayat berisi simpanan yang berarti, bukan setiap klik;
+  - batas bagian formulir admin dinaikkan dari 1.000 (bawaan Flask) ke 4.000; formulir terbesar (300 baris kerja sama)
+    2.725 bagian, diperiksa uji untuk setiap templat.
+- **Konsekuensi:** perubahan lewat tombol daftar yang belum disusul "Simpan draf" tidak bisa dipulihkan dari riwayat
+  (hanya dibuang bersama drafnya); pemulihan versi meneruskan hitungan versi (`riwayat.pulihkan`).

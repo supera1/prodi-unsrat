@@ -69,10 +69,12 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   `--produksi`. Ganti slug atau nonaktifkan prodi: bangun semua, supaya folder lama terhapus.
 - Pengumuman (sebelum admin ada): `.venv/bin/python platform/pengumuman.py tambah|daftar|status --prodi <kode> ...`;
   foto/PDF lewat `platform/media.py` (`PRODI_PENYIMPANAN=lokal` ke `unggahan/`, `gcs` ke bucket). Lalu bangun `--prodi`.
-- Isi halaman wajib/opsional (Fase 2, K-P23): templat, pemeriksaan, dan tampilannya di `platform/isi_halaman.py`;
-  disimpan di `data/prodi/<kode>/halaman-<id>.json`. Sebelum penyunting ada:
-  `.venv/bin/python platform/isi_halaman.py daftar|contoh|tarik --prodi <kode>` (`contoh` hanya untuk melihat tampilan,
-  bertanda `[CONTOH]`, ditolak di produksi). Templat situs: `platform/template/halaman/isi.html` + `_isi.html`.
+- Isi halaman wajib/opsional (Fase 2, K-P23): templat, pemeriksaan, draf, dan tampilannya di `platform/isi_halaman.py`;
+  disimpan di `data/prodi/<kode>/halaman-<id>.json` (`terbit`, `draf`, `versi`). Penyunting di admin (menu prodi
+  "Isi halaman", K-P27): rute `platform/admin/isi_admin.py`, formulir dari templat `platform/admin/penyunting.py`.
+  Untuk pengembang: `.venv/bin/python platform/isi_halaman.py daftar|contoh|tarik --prodi <kode>` (`contoh` hanya untuk
+  melihat tampilan, bertanda `[CONTOH]`, ditolak di produksi). Templat situs: `platform/template/halaman/isi.html` +
+  `_isi.html`; pratinjau admin memakai makro yang sama (`bangun.bagian_html`).
 - Bagian depan beranda (sebelum admin ada): `.venv/bin/python platform/tampilan_prodi.py lihat|atur|foto --prodi <kode>`.
   Nilai kartu resmi (akreditasi, gelar, SKS) tidak pernah boleh ditimpa (K-P15).
 - Admin (langkah 4): sekali `python3 platform/admin/siapkan.py` (kunci sesi di `rahasia/.env`), lalu
@@ -80,8 +82,9 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   `rahasia/.kredensial-<nama>.txt`); jalankan `.venv/bin/python platform/admin/app.py` → http://127.0.0.1:8791/.
 - Setiap rute admin wajib `@akses(...)` (`platform/admin/akses.py`) dan wajib masuk matriks di `uji/uji_admin.py`
   (uji gagal bila ada rute baru yang belum diuji untuk semua peran).
-- Halaman admin prodi di `platform/admin/prodi_admin.py` (data, identitas, beranda, menu, riwayat, berkas) dan
-  `platform/admin/pengumuman_admin.py` (operator menulis/mengajukan, admin menerbitkan/mengembalikan/menarik).
+- Halaman admin prodi di `platform/admin/prodi_admin.py` (data, identitas, beranda, menu, riwayat, berkas),
+  `platform/admin/pengumuman_admin.py` (operator menulis/mengajukan, admin menerbitkan/mengembalikan/menarik), dan
+  `platform/admin/isi_admin.py` (isi halaman: daftar, penyunting, draf, pratinjau; operator juga).
 - Halaman superadmin di `platform/admin/superadmin.py`. Perubahan yang memengaruhi situs memanggil bangun ulang lewat
   `platform/admin/pembangun.py`; `PRODI_BANGUN=latar` (bawaan, utas latar), `sinkron` (uji), `mati` (uji akses).
 - Template: `platform/template/menu.json` (menu induk), `platform/template/kategori.json` (kategori pengumuman), `platform/template/halaman/*.html` (Jinja2, autoescape),

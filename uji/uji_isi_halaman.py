@@ -207,7 +207,7 @@ try:
     cek(not masalah("kerja-sama", {"daftar": [dict(baris, bukti=dict(pdf_a))]}), "baris kerja sama yang benar lolos")
     ada_masalah("kerja-sama", {"daftar": [baris] * 301}, "paling banyak 300")
     ada_masalah("kerja-sama", {"daftar": "bukan daftar"}, "bukan daftar")
-    ada_masalah("kerja-sama", {"daftar": ["bukan objek"]}, "baris 1 bukan objek")
+    ada_masalah("kerja-sama", {"daftar": ["bukan objek"]}, "baris 1: bukan objek")
     ada_masalah("kerja-sama", "bukan objek", "bukan objek")
     for v, sah in ((87.5, True), (0, True), (100, True), (101, False), (50.555, False), ("50", False), (-1, False)):
         m = masalah("survei-kepuasan", {"hasil": [{"survei": "Alumni", "aspek": "Layanan", "baik": v}]})

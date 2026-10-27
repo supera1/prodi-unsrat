@@ -1,0 +1,58 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}{{ ini.label }} — {{ pr.nama }}{% endblock %}
+{% macro tombol_simpan() %}
+<div class="tombol-baris">
+	<button type="submit" class="tombol" name="aksi" value="simpan">Simpan draf</button>
+	<button type="submit" class="tombol tombol--garis" name="aksi" value="pratinjau">Simpan dan pratinjau</button>
+</div>
+{% endmacro %}
+{% block isi %}
+{{ nav_prodi(pr, 'isi_daftar') }}
+<p class="jejak-admin"><a href="{{ url_for('isi_daftar', kode=pr.kode) }}">Isi halaman</a> › {{ ini.label }}</p>
+<h1>{{ ini.label }}</h1>
+<p class="keterangan">{{ ini.deskripsi }}</p>
+<p>
+	{% if k.status == 'kosong' %}Belum ada isi; situs menampilkan “sedang dilengkapi”.
+	{% elif k.status == 'draf' %}<span class="status status--draf">Draf</span> belum terbit; situs masih menampilkan “sedang dilengkapi”.
+	{% else %}<span class="status status--terbit">Terbit</span> {{ (k.terbit.waktu | replace('T', ' '))[:16] }}{% if k.draf %}; perubahan di draf belum terbit{% endif %}.
+	{% endif %}
+	{% if k.draf %}Draf terakhir disimpan {{ (k.draf.waktu | replace('T', ' '))[:16] }} oleh {{ k.draf.oleh }}.{% endif %}
+	{% if not ini.sembunyi %}<a href="{{ pr.alamat }}{{ ini.alamat }}/">Lihat halaman ini di situs ↗</a>{% endif %}
+</p>
+<p class="pesan pesan--info">{{ privasi }}</p>
+{% if masalah %}
+<div class="pesan pesan--galat" id="ringkasan-galat">
+	<p>Draf ini belum dapat diterbitkan: {{ masalah | length }} isian perlu dilengkapi atau diperbaiki.</p>
+	<ul>
+		{% for jalur, tempat, pesan in masalah[:30] %}
+		<li>{% if jalur %}<a href="#{{ id_galat(jalur) }}">{{ tempat }}</a>: {% endif %}{{ pesan }}</li>
+		{% endfor %}
+	</ul>
+	{% if masalah | length > 30 %}<p>… dan {{ masalah | length - 30 }} lainnya.</p>{% endif %}
+</div>
+{% endif %}
+<details class="petunjuk">
+	<summary>Cara mengisi</summary>
+	<ul>
+		<li>Paragraf dipisah satu baris kosong; baris yang diawali “- ” menjadi daftar.</li>
+		<li>Tautan: <code>[teks tautan](https://alamat.lengkap)</code>; alamat yang diawali https:// juga menjadi tautan. Huruf tebal: <code>**teks**</code>. HTML tidak diterima.</li>
+		<li>Tombol Tambah, Naik, Turun, dan Hapus langsung menyimpan draf. Baris yang dibiarkan kosong dibuang saat draf disimpan.</li>
+		<li>Draf hanya terlihat di admin, lewat pratinjau. Situs tetap menampilkan isi yang sudah terbit.</li>
+		<li>Berkas besar sebaiknya diunggah satu per satu: satu kali simpan paling banyak 40 MB.</li>
+	</ul>
+</details>
+<form method="post" action="{{ url_for('isi_simpan', kode=pr.kode, id_=ini.id) }}" enctype="multipart/form-data" class="formulir formulir--sunting">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<input type="hidden" name="versi" value="{{ data.versi or 0 }}">
+	{{ tombol_simpan() }}
+	{{ formulir }}
+	{{ tombol_simpan() }}
+	{% if k.draf %}
+	<p class="tombol-baris">
+		<button type="submit" class="tombol tombol--garis tombol--bahaya" name="aksi" value="batal" formnovalidate>Buang draf</button>
+		<span class="keterangan">{{ 'Penyunting kembali ke isi yang sudah terbit.' if k.terbit else 'Halaman kembali kosong.' }} Draf yang dibuang tetap tersimpan di riwayat versi.</span>
+	</p>
+	{% endif %}
+</form>
+{% endblock %}

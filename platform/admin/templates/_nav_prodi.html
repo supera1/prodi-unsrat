@@ -3,7 +3,7 @@
 {% set a = akun_aktif() %}
 <p class="jejak-admin">{% if a.peran == 'super' or (a.prodi | length) > 1 %}<a href="{{ url_for('dasbor') }}">Dasbor</a> › {% endif %}<a href="{{ url_for('dasbor_prodi', kode=pr.kode) }}">{{ pr.nama }}</a></p>
 <nav class="sub-navigasi" aria-label="Menu {{ pr.nama }}">
-	{% for ep, label, admin_saja in [('dasbor_prodi', 'Ringkasan', false), ('pengumuman_daftar', 'Pengumuman', false),
+	{% for ep, label, admin_saja in [('dasbor_prodi', 'Ringkasan', false), ('isi_daftar', 'Isi halaman', false), ('pengumuman_daftar', 'Pengumuman', false),
 		('data_prodi_lihat', 'Data prodi', true), ('identitas_prodi', 'Identitas', true), ('beranda_prodi', 'Bagian depan beranda', true),
 		('menu_prodi', 'Menu', true), ('akun_prodi', 'Akun', true), ('riwayat_prodi', 'Riwayat', true), ('audit_prodi', 'Log audit', true)] %}
 	{% if not admin_saja or a.peran != 'operator' %}

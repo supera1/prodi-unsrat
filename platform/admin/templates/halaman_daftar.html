@@ -1,0 +1,36 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Isi halaman — {{ pr.nama }}{% endblock %}
+{% block isi %}
+{{ nav_prodi(pr, 'isi_daftar') }}
+<h1>Isi halaman</h1>
+<p>Halaman wajib akreditasi dan halaman opsional situs {{ pr.nama }}. Setiap halaman diisi lewat formulir dan disimpan
+	sebagai draf; situs tetap menampilkan isi yang sudah terbit. Penerbitan draf oleh admin prodi akan segera tersedia.</p>
+<p><strong>{{ jumlah.terbit }} dari {{ jumlah.wajib }}</strong> halaman wajib sudah berisi di situs.</p>
+{% for label, anak in kelompok %}
+<section class="kartu" aria-labelledby="kelompok-{{ loop.index }}">
+	<h2 id="kelompok-{{ loop.index }}">{{ label }}</h2>
+	<div class="tabel-gulir">
+		<table>
+			<thead><tr><th scope="col">Halaman</th><th scope="col">Jenis</th><th scope="col">Isi</th><th scope="col">Di situs</th></tr></thead>
+			<tbody>
+				{% for a in anak %}
+				<tr>
+					<td><a href="{{ url_for('isi_sunting', kode=pr.kode, id_=a.id) }}">{{ a.label }}</a>{% if a.sembunyi %} <span class="tanda">disembunyikan di menu</span>{% endif %}</td>
+					<td>{{ 'Wajib' if a.jenis == 'wajib' else 'Opsional' }}</td>
+					<td>
+						{% if a.k.status == 'kosong' %}Belum diisi
+						{% elif a.k.status == 'draf' %}<span class="status status--draf">Draf</span> belum terbit
+						{% else %}<span class="status status--terbit">Terbit</span> {{ (a.k.terbit.waktu | replace('T', ' '))[:16] }}
+						{% endif %}
+						{% if a.k.draf %}<br><span class="keterangan">{{ 'Draf' if a.k.status == 'draf' else 'Ada draf' }} disimpan {{ (a.k.draf.waktu | replace('T', ' '))[:16] }} oleh {{ a.k.draf.oleh }}</span>{% endif %}
+					</td>
+					<td>{% if not a.sembunyi %}<a href="{{ pr.alamat }}{{ a.alamat }}/">Lihat<span class="tersembunyi"> {{ a.label }} di situs</span> ↗</a>{% else %}—{% endif %}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</section>
+{% endfor %}
+{% endblock %}

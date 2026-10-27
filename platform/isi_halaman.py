@@ -12,10 +12,14 @@ the menu and what accreditation asks for, plus free extra sections at the end. T
 - the form of the admin (langkah 2: the form editor of www's superadmin, site/admin/editor.py, adapted). The nodes use
   the same vocabulary as that editor for this reason.
 
-Stored in prodi/<kode>/halaman-<id>.json (lokasi.py), every version kept in the history:
-    {"versi": n, "terbit": {"isi": {...}, "oleh", "waktu"} or null, "draf": {...} or null}
-The site shows "terbit" only; drafts and their approval come in langkah 3 (K-P24). Keys a template does not know are
-kept, so a template changed after the pilot never loses content.
+Stored in prodi/<kode>/halaman-<id>.json (lokasi.py):
+    {"versi": n, "terbit": {"isi": {...}, "oleh", "waktu"} or null,
+     "draf": {"isi": {...}, "status": "draf", "oleh", "waktu"} or null, "diubah": {"oleh", "waktu"}}
+The site shows "terbit" only. The admin's editor (admin/isi_admin.py, langkah 2) works on the draft; publishing it and
+its approval come in langkah 3 (K-P24). Every change counts up "versi", and a change made from an older version is
+refused, so two people editing a page never overwrite each other silently. Publishing, withdrawing, an explicit save of
+the draft and discarding it keep the previous content in the history. Keys a template does not know are kept, so a
+template changed after the pilot never loses content.
 
     python3 platform/isi_halaman.py daftar --prodi <kode>       which pages have published content
     python3 platform/isi_halaman.py contoh --prodi <kode>       fill every empty page with [CONTOH] content, to look at
@@ -26,9 +30,11 @@ from __future__ import print_function
 
 import argparse
 import datetime
+import json
 import os
 import re
 import sys
+import threading
 
 PLATFORM = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, PLATFORM)
@@ -370,100 +376,123 @@ def _media_sah(rekam, kode):
     return media.jalur_sah(jalur) and jalur.split("/")[0] == kode
 
 
-def _periksa(node, v, tempat, kode, masalah):
+def _periksa(node, v, tempat, kode, masalah, jalur=""):
+    """Append (path, where, problem) for every problem of a value. path: the dotted field name of the form
+    ("kerja_sama.0.mitra"); where: the same in words ("Daftar kerja sama baris 1, Mitra")."""
     j = node["jenis"]
-    di = "%s: " % tempat if tempat else ""
+
+    def salah(pesan):
+        masalah.append((jalur, tempat, pesan))
+
     if j == "objek":
         if v is None:
             v = {}
         if not isinstance(v, dict):
-            masalah.append("%sbukan objek" % di)
+            salah("bukan objek")
             return
         for kunci, n in node["bidang"]:
             label = n.get("label") or "Uraian"
-            _periksa(n, v.get(kunci), "%s, %s" % (tempat, label) if tempat else label, kode, masalah)
+            _periksa(n, v.get(kunci), "%s, %s" % (tempat, label) if tempat else label, kode, masalah,
+                     "%s.%s" % (jalur, kunci) if jalur else kunci)
         return
     if j == "daftar":
         if v is None:
             return
         if not isinstance(v, list):
-            masalah.append("%sbukan daftar" % di)
+            salah("bukan daftar")
             return
         if len(v) > node["maks"]:
-            masalah.append("%spaling banyak %d" % (di, node["maks"]))
+            salah("paling banyak %d" % node["maks"])
         isi = node["isi"]
         kata = "baris" if node["tampil"] == "tabel" else "butir"
-        for i, x in enumerate(v[:node["maks"]], 1):
+        for i, x in enumerate(v[:node["maks"]]):
+            sub, di = "%s.%d" % (jalur, i), "%s %s %d" % (tempat, kata, i + 1)
             if isi["jenis"] == "objek":
                 if not isinstance(x, dict):
-                    masalah.append("%s%s %d bukan objek" % (di, kata, i))
+                    masalah.append((sub, di, "bukan objek"))
                     continue
                 for kunci, n in isi["bidang"]:
-                    _periksa(n, x.get(kunci), "%s %s %d, %s" % (tempat, kata, i, n["label"]), kode, masalah)
+                    _periksa(n, x.get(kunci), "%s, %s" % (di, n["label"]), kode, masalah, "%s.%s" % (sub, kunci))
             else:
-                _periksa(isi, x, "%s %s %d" % (tempat, kata, i), kode, masalah)
+                _periksa(isi, x, di, kode, masalah, sub)
         return
-    kosong_ = v is None or (isinstance(v, str) and not v.strip())
-    if kosong_:
+    if v is None or (isinstance(v, str) and not v.strip()):
         if node.get("wajib"):
-            masalah.append("%swajib diisi" % di)
+            salah("wajib diisi")
         return
     if j == "teks":
         if not isinstance(v, str):
-            masalah.append("%sharus teks" % di)
+            salah("harus teks")
         elif len(v) > node["maks"]:
-            masalah.append("%sterlalu panjang (maksimal %d karakter)" % (di, node["maks"]))
+            salah("terlalu panjang (maksimal %d karakter)" % node["maks"])
         elif KONTROL.search(v) or (not node["panjang"] and "\n" in v):
-            masalah.append("%smemuat karakter yang tidak boleh" % di)
+            salah("memuat karakter yang tidak boleh")
         else:
             if node["kaya"]:
                 m = _teks_kaya_masalah(v)
                 if m:
-                    masalah.append(di + m)
+                    salah(m)
             judi = saringan_spam.cari(v)
             if judi:
-                masalah.append("%smemuat teks judi (%s)" % (di, judi))
+                salah("memuat teks judi (%s)" % judi)
     elif j == "bilangan":
         if isinstance(v, bool) or not isinstance(v, int):
-            masalah.append("%sharus angka bulat" % di)
+            salah("harus angka bulat")
         elif not node["minimum"] <= v <= node["maksimum"]:
-            masalah.append("%sharus antara %d dan %d" % (di, node["minimum"], node["maksimum"]))
+            salah("harus antara %d dan %d" % (node["minimum"], node["maksimum"]))
     elif j == "persen":
         if isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 <= v <= 100 or round(v, 2) != v:
-            masalah.append("%sharus angka 0 sampai 100, paling banyak dua angka di belakang koma" % di)
+            salah("harus angka 0 sampai 100, paling banyak dua angka di belakang koma")
     elif j == "url":
         if not isinstance(v, str) or len(v) > MAKS_URL or not POLA_URL.match(v):
-            masalah.append("%sharus alamat lengkap yang diawali https://" % di)
+            salah("harus alamat lengkap yang diawali https://")
     elif j == "pilihan":
         if v not in node["opsi"]:
-            masalah.append("%spilihan tidak dikenal" % di)
+            salah("pilihan tidak dikenal")
     elif j == "centang":
         if not isinstance(v, bool):
-            masalah.append("%sharus ya atau tidak" % di)
+            salah("harus ya atau tidak")
     elif j == "dokumen":
         if not (isinstance(v, dict) and v.get("jenis") == "pdf" and _media_sah(v, kode)
                 and isinstance(v.get("ukuran"), int) and isinstance(v.get("halaman"), int)):
-            masalah.append("%sberkas PDF tidak sah" % di)
+            salah("berkas PDF tidak sah")
     elif j == "foto":
         varian = v.get("varian") if isinstance(v, dict) else None
         if not (isinstance(v, dict) and v.get("jenis") == "gambar" and isinstance(varian, dict) and varian
                 and all(isinstance(x, dict) and _media_sah(x, kode) and isinstance(x.get("lebar"), int)
                         and isinstance(x.get("tinggi"), int) for x in varian.values())):
-            masalah.append("%sfoto tidak sah" % di)
+            salah("foto tidak sah")
         elif not isinstance(v.get("alt"), str) or not v["alt"].strip() or len(v["alt"]) > 200 or saringan_spam.cari(v["alt"]):
-            masalah.append("%steks alternatif foto wajib diisi (maksimal 200 karakter, tanpa teks judi)" % di)
+            salah("teks alternatif foto wajib diisi (maksimal 200 karakter, tanpa teks judi)")
 
 
-def periksa(id_halaman, isi, kode):
-    """Problems with a page's content (empty list when it may be stored)."""
+def _semua_masalah(id_halaman, isi, kode):
     templat = TEMPLAT.get(id_halaman)
     if templat is None:
-        return ["halaman %r tidak punya templat isi" % (id_halaman,)]
+        return [("", "", "halaman %r tidak punya templat isi" % (id_halaman,))]
     if not POLA_KODE.match(kode or ""):
-        return ["kode prodi tidak sah"]
+        return [("", "", "kode prodi tidak sah")]
     masalah = []
     _periksa(templat, isi, "", kode, masalah)
     return masalah
+
+
+def periksa(id_halaman, isi, kode):
+    """Problems with a page's content, each saying where it is (empty list when it may be stored)."""
+    return ["%s: %s" % (t, p) if t else p for _j, t, p in _semua_masalah(id_halaman, isi, kode)]
+
+
+def daftar_masalah(id_halaman, isi, kode):
+    """Every problem as (form field name, where in words, problem); the field name is "" for the page itself."""
+    return _semua_masalah(id_halaman, isi, kode)
+
+
+def periksa_jalur(id_halaman, isi, kode):
+    """{form field name: its first problem}, for marking the fields of the editor ("" = the page itself)."""
+    hasil = {}
+    for j, _t, p in _semua_masalah(id_halaman, isi, kode):
+        hasil.setdefault(j, p)
+    return hasil
 
 
 def kosong(node, v):
@@ -665,6 +694,12 @@ def tampilan(id_halaman, isi, media_ok=lambda rekam: True):
 
 # ------------------------------------------------------------------ stored content
 
+MAKS_DRAF = 2 * 1024 * 1024    # bytes of one page's draft as JSON; a full 300-row table with long texts stays under 1 MB
+# reading a page, checking its version and writing it happen under this lock, so two saves of the admin (one process,
+# several threads) can never both pass the check
+_KUNCI = threading.Lock()
+
+
 def nama_berkas(kode, id_halaman):
     if not POLA_KODE.match(kode or "") or id_halaman not in TEMPLAT:
         raise GagalIsi("prodi atau halaman tidak dikenal")
@@ -682,6 +717,18 @@ def terbit(kode, id_halaman):
     return t.get("isi") if isinstance(t, dict) else None
 
 
+def draf(data):
+    """The draft in a page's stored data (baca()): {"isi", "status", "oleh", "waktu"}, or None."""
+    d = data.get("draf")
+    return d if isinstance(d, dict) and isinstance(d.get("isi"), dict) else None
+
+
+def isi_kerja(data):
+    """What the editor starts from: the draft, else the published content, else nothing yet."""
+    t = data.get("terbit")
+    return (draf(data) or (t if isinstance(t, dict) and isinstance(t.get("isi"), dict) else {"isi": {}}))["isi"]
+
+
 def terisi(kode, id_halaman):
     """True when the page shows content of its own on the site (published, valid, not empty)."""
     isi = terbit(kode, id_halaman)
@@ -692,33 +739,150 @@ def _sekarang():
     return datetime.datetime.now().isoformat(timespec="seconds")
 
 
-def terbitkan(kode, id_halaman, isi, oleh, versi=None):
-    """Publish content (checked first; nothing is written when it fails). versi: the version the change was made
-    from; a different stored version means someone else saved in between, and the save is refused. Returns the new
-    version."""
+def cek_versi(data, versi):
+    """versi: the version a change was made from; any other stored version means someone saved in between."""
+    if versi is not None and versi != data.get("versi", 0):
+        d = data.get("diubah") if isinstance(data.get("diubah"), dict) else {}
+        oleh = " oleh %s (%s)" % (d["oleh"], str(d.get("waktu", "")).replace("T", " ")) if d.get("oleh") else " orang lain"
+        raise GagalIsi("halaman ini baru saja diubah%s; muat ulang lalu ulangi perubahan Anda" % oleh)
+
+
+def _tulis(kode, id_halaman, data, oleh, aksi, riwayat=True):
+    """Store a page's data under a new version; riwayat: keep the previous content in the history first."""
+    data["versi"] = data.get("versi", 0) + 1
+    data["diubah"] = {"oleh": oleh, "waktu": _sekarang()}
     berkas = nama_berkas(kode, id_halaman)
+    if riwayat:
+        lokasi.tulis(berkas, data, oleh, "Isi halaman", "%s %s" % (aksi, id_halaman))
+    else:
+        lokasi.tulis_json(lokasi.path_data(berkas), data)
+    return data["versi"]
+
+
+def terbitkan(kode, id_halaman, isi, oleh, versi=None):
+    """Publish content (checked first; nothing is written when it fails). versi: see cek_versi. Returns the new
+    version."""
+    nama_berkas(kode, id_halaman)
     masalah = periksa(id_halaman, isi, kode)
     if masalah:
         raise GagalIsi("; ".join(masalah[:20]))
-    data = baca(kode, id_halaman)
-    if versi is not None and versi != data.get("versi", 0):
-        raise GagalIsi("halaman ini baru saja diubah orang lain; muat ulang lalu ulangi perubahan Anda")
-    data["versi"] = data.get("versi", 0) + 1
-    data["terbit"] = {"isi": isi, "oleh": oleh, "waktu": _sekarang()}
-    lokasi.tulis(berkas, data, oleh, "Isi halaman", "terbitkan %s" % id_halaman)
-    return data["versi"]
+    with _KUNCI:
+        data = baca(kode, id_halaman)
+        cek_versi(data, versi)
+        data["terbit"] = {"isi": isi, "oleh": oleh, "waktu": _sekarang()}
+        return _tulis(kode, id_halaman, data, oleh, "terbitkan")
 
 
 def tarik(kode, id_halaman, oleh):
     """Take a page's content off the site (it is kept in the history). Returns the new version."""
-    berkas = nama_berkas(kode, id_halaman)
-    data = baca(kode, id_halaman)
-    if data.get("terbit") is None:
-        return data.get("versi", 0)
-    data["versi"] = data.get("versi", 0) + 1
-    data["terbit"] = None
-    lokasi.tulis(berkas, data, oleh, "Isi halaman", "tarik %s" % id_halaman)
-    return data["versi"]
+    with _KUNCI:
+        data = baca(kode, id_halaman)
+        if data.get("terbit") is None:
+            return data.get("versi", 0)
+        data["terbit"] = None
+        return _tulis(kode, id_halaman, data, oleh, "tarik")
+
+
+def node_jalur(templat, jalur):
+    """The template node of a form field name ("kerja_sama.0.bukti"), or None."""
+    node = templat
+    for p in jalur.split(".") if isinstance(jalur, str) and jalur else [None]:
+        if node["jenis"] == "objek":
+            node = dict(node["bidang"]).get(p)
+        elif node["jenis"] == "daftar" and isinstance(p, str) and p.isdigit():
+            node = node["isi"]
+        else:
+            return None
+        if node is None:
+            return None
+    return node
+
+
+def _berkas_sendiri(node, v, kode):
+    """True when every file a value refers to is a stored file of this programme."""
+    j = node["jenis"]
+    if v is None:
+        return True
+    if j == "objek":
+        return not isinstance(v, dict) or all(_berkas_sendiri(n, v.get(k), kode) for k, n in node["bidang"])
+    if j == "daftar":
+        return not isinstance(v, list) or all(_berkas_sendiri(node["isi"], x, kode) for x in v)
+    if j == "dokumen":
+        return _media_sah(v, kode)
+    if j == "foto":
+        varian = v.get("varian") if isinstance(v, dict) else None
+        return isinstance(varian, dict) and bool(varian) and all(_media_sah(x, kode) for x in varian.values())
+    return True
+
+
+def simpan_draf(kode, id_halaman, isi, oleh, versi=None, riwayat=True, dihapus=None):
+    """Store content as the page's draft; the site keeps showing the published content. A draft may be unfinished
+    (required fields empty, values not valid yet): the checks apply when it is published. Its files must be the
+    programme's own, and it may not be larger than MAKS_DRAF. versi: see cek_versi. riwayat: keep the previous content
+    in the history (an explicit save); the editor's list buttons and preview store without it, so the history holds
+    saves rather than every click. dihapus: the list item the editor just removed ({"jalur", "indeks", "nilai"}),
+    offered back until the next save. Returns the new version."""
+    nama_berkas(kode, id_halaman)
+    if not isinstance(isi, dict):
+        raise GagalIsi("isi halaman harus berupa objek")
+    templat = TEMPLAT[id_halaman]
+    if not _berkas_sendiri(templat, isi, kode):
+        raise GagalIsi("draf merujuk berkas yang bukan milik prodi ini")
+    if dihapus is not None:
+        node = node_jalur(templat, dihapus.get("jalur")) if isinstance(dihapus, dict) else None
+        if node is None or node["jenis"] != "daftar" or not isinstance(dihapus.get("indeks"), int) \
+                or not _berkas_sendiri(node["isi"], dihapus.get("nilai"), kode):
+            raise GagalIsi("butir yang dihapus tidak sah")
+    draf_ = {"isi": isi, "status": "draf", "oleh": oleh, "waktu": _sekarang()}
+    if dihapus:
+        draf_["dihapus"] = dihapus
+    if len(json.dumps(draf_, ensure_ascii=False).encode("utf-8")) > MAKS_DRAF:
+        raise GagalIsi("draf terlalu besar (maksimal %d MB)" % (MAKS_DRAF // 1024 // 1024))
+    with _KUNCI:
+        data = baca(kode, id_halaman)
+        cek_versi(data, versi)
+        data["draf"] = draf_
+        return _tulis(kode, id_halaman, data, oleh, "simpan draf", riwayat)
+
+
+def buang_draf(kode, id_halaman, oleh, versi=None):
+    """Drop the draft (it stays in the history); the editor starts again from the published content. Returns the
+    new version."""
+    with _KUNCI:
+        data = baca(kode, id_halaman)
+        if data.get("draf") is None:
+            return data.get("versi", 0)
+        cek_versi(data, versi)
+        data["draf"] = None
+        return _tulis(kode, id_halaman, data, oleh, "buang draf")
+
+
+def rapikan(node, v):
+    """The value without list items that hold nothing (a row added and left empty)."""
+    if node["jenis"] == "objek" and isinstance(v, dict):
+        return dict(v, **{k: rapikan(n, v[k]) for k, n in node["bidang"] if k in v})
+    if node["jenis"] == "daftar" and isinstance(v, list):
+        return [rapikan(node["isi"], x) for x in v if not kosong(node["isi"], x)]
+    return v
+
+
+def _saring(node, v, kode):
+    j = node["jenis"]
+    if j == "objek":
+        if not isinstance(v, dict):
+            return {}
+        return dict(v, **{k: _saring(n, v.get(k), kode) for k, n in node["bidang"]})
+    if j == "daftar":
+        return [_saring(node["isi"], x, kode) for x in v[:node["maks"]]] if isinstance(v, list) else []
+    masalah = []
+    _periksa(node, v, "", kode, masalah)
+    return None if masalah else v
+
+
+def isi_sah(id_halaman, isi, kode):
+    """A copy of content with every value that fails the checks left out: what the admin's preview of an unfinished
+    draft shows (the site only ever shows content that passes them all)."""
+    return _saring(TEMPLAT[id_halaman], isi, kode)
 
 
 # ------------------------------------------------------------------ sample content (looking at the pages; tests)

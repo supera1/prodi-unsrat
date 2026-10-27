@@ -1,0 +1,33 @@
+{# The preview of a programme's own page: the site's styles and macros (bangun.bagian_html), in the admin. #}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Pratinjau: {{ ini.label }} — {{ pr.nama }}</title>
+<link rel="stylesheet" href="{{ url_for('aset_situs', nama='tokens.css') }}">
+<link rel="stylesheet" href="{{ url_for('aset_situs', nama='prodi.css') }}">
+<link rel="stylesheet" href="{{ url_for('isi_warna_css', kode=pr.kode) }}">
+</head>
+<body>
+<a class="lewati" href="#konten">Langsung ke konten utama</a>
+<p class="pita-staging">Pratinjau {{ 'draf' if k.draf else 'isi yang sudah terbit' }}: tampilan ini belum tayang di situs.
+	{% if n_masalah %}{{ n_masalah }} isian yang belum sah tidak ditampilkan.{% endif %}
+	{% if hilang %}{{ hilang }} berkas tidak ditemukan.{% endif %}
+	<a href="{{ url_for('isi_sunting', kode=pr.kode, id_=ini.id) }}">Kembali ke penyunting</a></p>
+<main id="konten" tabindex="-1">
+<div class="wadah halaman">
+	<article class="halaman__isi">
+		<h1>{{ ini.label }}</h1>
+		{% if isi_html %}
+		{{ isi_html }}
+		{% else %}
+		<p class="pengantar">{{ ini.deskripsi }}</p>
+		<p class="catatan catatan--menyusul">Informasi ini sedang dilengkapi oleh Program Studi {{ pr.nama }}.</p>
+		{% endif %}
+	</article>
+</div>
+</main>
+</body>
+</html>

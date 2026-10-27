@@ -177,6 +177,25 @@ def sha(isi):
     return hashlib.sha256(isi).hexdigest()
 
 
+def lingkungan():
+    """The Jinja2 environment of the site's page templates, with the site's filters."""
+    env = Environment(loader=FileSystemLoader(os.path.join(TEMPLATE, "halaman")), autoescape=True,
+                      undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True, keep_trailing_newline=True)
+    env.filters.update(tanggal=tanggal, tautan_md=tautan_md, json_ld=json_ld, teks_isi=teks_isi, ukuran=ukuran,
+                       foto_varian=foto_varian, akreditasi=registri.label_akreditasi)
+    env.globals.update(nama_tampil=nama_tampil, JENJANG_PANJANG=JENJANG_PANJANG,
+                       NAMA_MEDIA_SOSIAL={k: v[0] for k, v in tampilan_prodi.MEDIA_SOSIAL.items()})
+    return env
+
+
+def bagian_html(bagian, media_url):
+    """The sections of a programme's own page (isi_halaman.tampilan) as the site shows them, with the macros of
+    _isi.html: the admin's preview."""
+    return Markup(lingkungan().from_string('{% from "_isi.html" import bagian_isi with context %}'
+                                           '{% for b in bagian %}{{ bagian_isi(b) }}{% endfor %}')
+                  .render(bagian=bagian, media_url=media_url))
+
+
 # ------------------------------------------------------------------ the builder
 
 class Pembangun(object):
@@ -198,12 +217,7 @@ class Pembangun(object):
         self.palet = warna_mod.baca_palet()
         self.kategori = pengumuman_mod.baca_kategori()
         self.label_kategori = {k["id"]: k["label"] for k in self.kategori}
-        self.env = Environment(loader=FileSystemLoader(os.path.join(TEMPLATE, "halaman")), autoescape=True,
-                               undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True, keep_trailing_newline=True)
-        self.env.filters.update(tanggal=tanggal, tautan_md=tautan_md, json_ld=json_ld, teks_isi=teks_isi, ukuran=ukuran,
-                                foto_varian=foto_varian, akreditasi=registri.label_akreditasi)
-        self.env.globals.update(nama_tampil=nama_tampil, JENJANG_PANJANG=JENJANG_PANJANG,
-                                NAMA_MEDIA_SOSIAL={k: v[0] for k, v in tampilan_prodi.MEDIA_SOSIAL.items()})
+        self.env = lingkungan()
         self.berkas = {}      # published path -> bytes
         self.versi = {}       # published asset path -> short hash, for ?v=
         self.peringatan = []

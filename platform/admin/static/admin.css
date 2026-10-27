@@ -278,7 +278,9 @@ h2 {
 	user-select: all;
 }
 
+/* the box text hidden for screen readers (.tersembunyi, absolute) is placed in, so it never widens the page */
 .tabel-gulir {
+	position: relative;
 	overflow-x: auto;
 	background: #fff;
 	border: 1px solid var(--abu-200);
@@ -696,4 +698,193 @@ dl.data dd {
 .daftar-periksa li.belum::before {
 	content: "○";
 	color: #8a4b00;
+}
+
+/* ---------------------------------------------------------------- the page editor (Fase 2, penyunting.py) */
+
+.status--draf {
+	background: var(--biru-50);
+	color: var(--biru-gelap);
+}
+
+.tombol--bahaya {
+	border-color: var(--merah);
+	color: var(--merah);
+}
+
+.tombol--bahaya:hover {
+	background: #fdecec;
+	border-color: var(--merah);
+	color: var(--merah);
+}
+
+.formulir--sunting > .tombol-baris {
+	margin: 1rem 0;
+}
+
+.formulir--sunting fieldset {
+	min-width: 0;
+}
+
+.kartu--sunting > .isian:last-child {
+	margin-bottom: 0;
+}
+
+.petunjuk summary {
+	cursor: pointer;
+	font-weight: 700;
+}
+
+.lencana {
+	padding: 0.1rem 0.4rem;
+	border-radius: 4px;
+	background: var(--biru-50);
+	color: var(--biru-gelap);
+	font-size: 0.75rem;
+	white-space: nowrap;
+}
+
+.wajib {
+	color: var(--abu-600);
+	font-size: 0.875rem;
+	font-weight: 400;
+}
+
+.galat-isian {
+	margin: 0.25rem 0 0;
+	color: var(--merah);
+	font-size: 0.875rem;
+	font-weight: 700;
+}
+
+/* as specific as the rule that gives fields their border */
+.formulir input[aria-invalid="true"]:not([type="hidden"]):not([type="radio"]):not([type="checkbox"]):not([type="color"]),
+.formulir textarea[aria-invalid="true"],
+.formulir select[aria-invalid="true"] {
+	border: 2px solid var(--merah);
+}
+
+/* numbers and choices: a short field (the box holds label, field and help, so the field's own width rule stays) */
+.isian--pendek {
+	max-width: 16rem;
+}
+
+.isian--pilihan {
+	max-width: 24rem;
+}
+
+.isian--centang {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.formulir .isian--centang label {
+	display: inline;
+	margin: 0;
+	font-weight: 400;
+}
+
+.daftar-sunting {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.daftar-sunting > legend {
+	padding: 0;
+	font-size: 1.125rem;
+	font-weight: 700;
+}
+
+.jumlah {
+	color: var(--abu-600);
+	font-size: 0.875rem;
+	font-weight: 400;
+}
+
+.daftar-sunting__isi {
+	display: grid;
+	gap: 0.5rem;
+	margin: 0.75rem 0;
+}
+
+.butir-sunting {
+	padding: 0.5rem 0.75rem;
+	background: var(--abu-50);
+	border: 1px solid var(--abu-200);
+	border-radius: 8px;
+}
+
+.butir-sunting[open] {
+	padding-bottom: 0.75rem;
+	background: #fff;
+}
+
+.butir-sunting summary {
+	cursor: pointer;
+	font-weight: 700;
+	overflow-wrap: anywhere;
+}
+
+.butir-sunting--galat,
+.butir-baris--galat {
+	border-left: 4px solid var(--merah);
+}
+
+.butir-baris--galat {
+	padding-left: 0.5rem;
+}
+
+.butir-sunting__kendali {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	margin: 0.5rem 0 0.75rem;
+}
+
+.butir-baris {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 0 0.75rem;
+}
+
+.butir-baris .isian {
+	flex: 1 1 24rem;
+	margin-bottom: 0.25rem;
+}
+
+.butir-baris .butir-sunting__kendali {
+	margin: 0 0 0.5rem;
+}
+
+.isian-berkas {
+	margin: 0 0 1rem;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--abu-200);
+	border-radius: 8px;
+}
+
+.isian-berkas legend {
+	padding: 0 0.25rem;
+	font-weight: 700;
+}
+
+.isian-berkas .isian {
+	margin-bottom: 0.5rem;
+}
+
+.pratinjau-kecil {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin-bottom: 0.25rem;
+	border: 1px solid var(--abu-200);
+	border-radius: 4px;
+}
+
+.berkas-kini {
+	margin: 0 0 0.25rem;
+	overflow-wrap: anywhere;
 }

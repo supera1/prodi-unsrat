@@ -1,0 +1,13 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Belum disimpan — {{ ini.label }}{% endblock %}
+{% block isi %}
+{{ nav_prodi(pr, 'isi_daftar') }}
+<section class="kartu kartu--sempit">
+	<h1>Perubahan Anda belum disimpan</h1>
+	<p class="pesan pesan--galat" role="alert">Tidak disimpan: {{ pesan }}.</p>
+	<p>Isian yang tadi Anda ketik masih ada di halaman sebelumnya. Gunakan tombol Kembali di browser untuk menyalin bagian
+		yang perlu, lalu buka penyunting lagi dan masukkan perubahan Anda ke isi terbaru.</p>
+	<p><a class="tombol" href="{{ url_for('isi_sunting', kode=pr.kode, id_=ini.id) }}">Buka penyunting dengan isi terbaru</a></p>
+</section>
+{% endblock %}

@@ -38,6 +38,7 @@ import akun as akun_mod  # noqa: E402
 import audit  # noqa: E402
 import lokasi  # noqa: E402
 import data_prodi  # noqa: E402
+import isi_admin  # noqa: E402
 import pembangun  # noqa: E402
 import pengumuman_admin  # noqa: E402
 import prodi_admin  # noqa: E402
@@ -110,6 +111,9 @@ def buat_app(env=None):
     app.config.update(
         SECRET_KEY=env["SECRET_KEY"],
         MAX_CONTENT_LENGTH=40 * 1024 * 1024,       # the largest upload (a hero photo, 15 MB) with room for the form
+        # the form of a page with every list full (a 300-row table of partnerships: about 2,700 fields; uji_penyunting
+        # checks every template against this); Flask's default is 1,000
+        MAX_FORM_PARTS=4000,
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Strict",
         SESSION_COOKIE_SECURE=https,
@@ -357,8 +361,10 @@ def buat_app(env=None):
             r = registri_per_kode().get(kode, {})
             p = data_prodi.efektif(kode)
             kurang = tarik_www.kekurangan(p) if p else []
+            import isi_halaman
             import menu as menu_mod
-            wajib = sum(1 for b in menu_mod.halaman(menu_mod.susun(menu_mod.baca_templat())) if b.get("jenis") == "wajib")
+            wajib = [b["id"] for b in menu_mod.halaman(menu_mod.susun(menu_mod.baca_templat())) if b.get("jenis") == "wajib"]
+            terbit = sum(1 for id_ in wajib if id_ in isi_halaman.TEMPLAT and isi_halaman.terisi(kode, id_))
             operator_n = sum(1 for a in akun_mod.terlihat_oleh(g.akun, kode) if a["peran"] == "operator" and a["aktif"])
             siap = [
                 (not kurang, "Data prodi lengkap" if not kurang else "Data prodi masih kosong: %s" % ", ".join(kurang),
@@ -371,7 +377,8 @@ def buat_app(env=None):
                     "sudah disesuaikan" if situs.get("beranda") or situs.get("tagline") else "masih bawaan (opsional)"),
                  url_for("beranda_prodi", kode=kode)),
                 (operator_n > 0, "%d akun operator aktif" % operator_n, url_for("akun_prodi", kode=kode)),
-                (False, "%d halaman wajib akreditasi menunggu isi (penyunting halaman di Fase 2)" % wajib, None),
+                (terbit == len(wajib), "%d dari %d halaman wajib akreditasi sudah berisi di situs" % (terbit, len(wajib)),
+                 url_for("isi_daftar", kode=kode)),
             ]
         return render_template("prodi.html", p=g.prodi, jumlah=jumlah, terbaru=terbaru, siap=siap, operator=operator,
                                NAMA_STATUS=pengumuman_admin.NAMA_STATUS)
@@ -497,6 +504,7 @@ def buat_app(env=None):
     superadmin.pasang(app, alat)
     prodi_admin.pasang(app, alat)
     pengumuman_admin.pasang(app, alat)
+    isi_admin.pasang(app, alat)
     app.antrean, app.penjadwal = antrean, penjadwal
 
     # -------------------------------------------------------------- errors
