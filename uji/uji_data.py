@@ -204,6 +204,8 @@ try:
         ("judi di CPL", lambda d: d["prodi"]["program"][0]["cpl"][0].update(isi="Daftar slot gacor di sini")),
         ("judi dengan huruf samaran", lambda d: d["prodi"]["program"][1].update(bidang_kerja="situs s1ot g4cor")),
         ("judi di kalender", lambda d: d["kalender"].update(teks="togel online")),
+        ("pinjol di kalender", lambda d: d["kalender"].update(teks="Pinjol cepat cair tanpa BI checking")),
+        ("pinjol dengan huruf samaran", lambda d: d["prodi"]["program"][0].update(bidang_kerja="d4na cepat c4ir")),
         ("kode PDDIKTI ganda", lambda d: d["prodi"]["program"][1].update(kode_pddikti="55201")),
         ("kode PDDIKTI berbahaya", lambda d: d["prodi"]["program"][1].update(kode_pddikti="../../x")),
         ("nama kosong", lambda d: d["prodi"]["program"][0].update(nama="")),
@@ -222,8 +224,9 @@ try:
         ubah(d)
         tulis_www(d)
         e = harus_gagal(tarik_www.terapkan, "sumber dengan %s harus ditolak" % label, "penguji")
-        if e is not None and label.startswith("judi"):
-            cek(any("teks judi" in m for m in e.masalah), "%s harus ditolak karena teks judi: %r" % (label, e.masalah))
+        jenis = label.split()[0]
+        if e is not None and jenis in ("judi", "pinjol"):
+            cek(any("teks %s" % jenis in m for m in e.masalah), "%s harus ditolak karena teks %s: %r" % (label, jenis, e.masalah))
         cek(lokasi.baca("warisan/prodi") == sebelum, "sumber dengan %s tidak boleh menulis apa pun" % label)
     with io.open(os.path.join(WWW, "prodi.json"), "w", encoding="utf-8") as f:
         f.write("{bukan json")

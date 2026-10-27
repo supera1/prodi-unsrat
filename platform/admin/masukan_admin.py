@@ -61,8 +61,9 @@ def _teks(teks, maks, nama):
         raise GagalMasukan("%s paling banyak %d karakter" % (nama, maks))
     if KONTROL.search(teks):
         raise GagalMasukan("%s memuat karakter yang tidak boleh" % nama)
-    if saringan_spam.cari(teks):
-        raise GagalMasukan("%s memuat teks judi" % nama)
+    istilah = saringan_spam.cari(teks)
+    if istilah:
+        raise GagalMasukan("%s memuat teks %s" % (nama, saringan_spam.jenis(istilah)))
     return teks
 
 

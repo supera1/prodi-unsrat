@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Online-gambling spam filter, shared by the admin (refuses such text when it is saved) and the integrity
-check (finds it on the published pages).
+"""Spam filter, shared by the admin (refuses such text when it is saved) and the integrity check (finds it on the
+published pages).
 
-Defacements of .ac.id sites almost always plant gambling text and links ("slot gacor", "togel", ...),
-often spelled to slip past filters. Text is normalised before matching:
+Defacements of .ac.id sites almost always plant gambling text and links ("slot gacor", "togel", ...); the other
+spam planted there sells illegal online loans ("pinjol"), diplomas and drugs. Gambling terms are refused outright (as
+in www); for the others only the selling language is listed, never the words a university writes about the topic
+itself ("pinjaman online ilegal" in a research title, "ijazah palsu" in a warning, "sildenafil" in a pharmacy study).
+Text is often spelled to slip past filters, and is normalised before matching:
 - Unicode compatibility forms (fullwidth or mathematical letters) become plain letters;
 - invisible characters (zero-width space, soft hyphen, ...) are removed;
 - accents are dropped;
@@ -34,6 +37,21 @@ ISTILAH = [
     "sabung ayam online",
 ]
 
+# selling language of illegal online loans (prodi.unsrat.ac.id, pre-production audit 27 October 2026)
+ISTILAH_PINJOL = [
+    "dana cepat cair", "pinjaman cepat cair", "pinjaman online cepat cair", "pinjaman online langsung cair",
+    "pinjol cepat cair", "pinjol langsung cair", "pinjol mudah cair", "pinjol tanpa jaminan", "pinjol tanpa ktp",
+    "pinjaman tanpa ktp", "pinjol terpercaya", "pinjol terbaik", "pinjol bunga rendah", "tanpa bi checking",
+    "tanpa bi check", "bebas bi checking", "cair dalam 5 menit", "cair 5 menit",
+]
+# diplomas and drugs for sale, the other spam planted on .ac.id sites
+ISTILAH_LAIN = [
+    "jual ijazah asli", "beli ijazah asli", "jasa ijazah asli", "jasa pembuatan ijazah asli", "ijazah asli tanpa kuliah",
+    "jual obat aborsi", "obat aborsi ampuh", "jual obat penggugur", "obat penggugur kandungan ampuh", "jual cytotec",
+    "cytotec asli", "jual viagra", "viagra asli", "jual cialis", "cialis asli", "jual obat kuat", "obat kuat asli",
+]
+JENIS = [("judi", ISTILAH), ("pinjol", ISTILAH_PINJOL), ("terlarang", ISTILAH_LAIN)]
+
 
 def _pola_kata(kata):
     """Regex for one word: each letter may be written with a look-alike, and in words of five or more
@@ -51,7 +69,9 @@ def _pola_istilah(istilah):
     return r"[\s._\-]*".join(_pola_kata(k) for k in istilah.split())
 
 
-POLA = re.compile(r"(?<![a-z0-9])(%s)(?![a-z0-9])" % "|".join(_pola_istilah(i) for i in sorted(ISTILAH, key=len, reverse=True)))
+POLA = re.compile(r"(?<![a-z0-9])(%s)(?![a-z0-9])" % "|".join(
+    _pola_istilah(i) for i in sorted(ISTILAH + ISTILAH_PINJOL + ISTILAH_LAIN, key=len, reverse=True)))
+POLA_JENIS = [(nama, re.compile(r"^(%s)$" % "|".join(_pola_istilah(i) for i in daftar))) for nama, daftar in JENIS]
 
 
 def normal(teks):
@@ -64,12 +84,20 @@ def normal(teks):
 
 
 def cari(teks):
-    """The first gambling term found in the text (as written there), or None."""
+    """The first spam term found in the text (as written there), or None."""
     m = POLA.search(normal(teks))
     return m.group(1) if m else None
+
+
+def jenis(istilah):
+    """What a term found by cari() is: "judi", "pinjol" or "terlarang" (diplomas for sale, illegal drugs)."""
+    for nama, pola in POLA_JENIS:
+        if pola.match(normal(istilah or "")):
+            return nama
+    return "terlarang"
 
 
 if __name__ == "__main__":
     import sys
     for baris in sys.argv[1:]:
-        print("%r -> %r" % (baris, cari(baris)))
+        print("%r -> %r (%s)" % (baris, cari(baris), jenis(cari(baris)) if cari(baris) else "-"))

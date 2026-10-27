@@ -58,7 +58,9 @@ diperbaiki.
 - Huruf tebal: `**teks**`.
 - Tautan: `[teks tautan](https://alamat.lengkap)`. Alamat harus lengkap dan diawali `https://`. Alamat yang ditulis
   begitu saja juga menjadi tautan.
-- HTML tidak diterima. Teks yang memuat istilah judi online ditolak.
+- HTML tidak diterima. Teks yang memuat istilah judi online ditolak, begitu juga promosi pinjaman online ilegal
+  (pinjol), jual-beli ijazah, dan obat terlarang. Menulis tentang pinjaman online, misalnya judul penelitian, tetap
+  boleh.
 
 ### Daftar dan tabel
 
@@ -157,7 +159,8 @@ bisa diterbitkan lagi.
 - Jangan mengunggah NIK, nomor HP, alamat rumah, nilai atau IPK perorangan, data kesehatan, atau dokumen internal yang
   memuat data pribadi. Daftar tenaga kependidikan dan prestasi cukup memuat nama dan peran; jangan cantumkan NIM.
 - Foto orang sebaiknya atas izin yang bersangkutan.
-- Bila Anda melihat isi aneh di situs (misalnya iklan judi), laporkan segera ke UPA TIK lewat menu **Masukan**.
+- Bila Anda melihat isi aneh di situs (misalnya iklan judi atau pinjol), laporkan segera ke UPA TIK lewat menu
+  **Masukan**.
 
 ## Pesan yang sering muncul
 
