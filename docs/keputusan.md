@@ -331,6 +331,12 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
     karena VM staging menjadi VM produksi (deploy §11).
   - **Kontainer:** `no-new-privileges` untuk ketiganya; admin dan pemantau (pengguna 10001) tanpa kapabilitas Linux.
     Kontainer web (Nginx mulai sebagai root) belum dibatasi kapabilitasnya sampai dicoba dengan Docker.
+    - **Lanjutan setelah dicoba dengan Docker** (27 Oktober 2026,
+      [log](log/praproduksi-keamanan.md#lanjutan-build-dan-stack-docker-sungguhan)): kontainer web hanya memegang
+      CHOWN, SETUID, SETGID, dan NET_BIND_SERVICE, antara lain tanpa NET_RAW (menyadap lalu lintas web ↔ admin di
+      jaringan Docker) dan tanpa DAC_OVERRIDE. Akibatnya berkas sertifikat di `TLS_FOLDER` harus milik root. Kunci yang
+      tidak terbaca menghentikan start dengan pesan; saat perpanjangan, sertifikat itu tidak dipasang, juga dengan
+      pesan, dan yang lama tetap dipakai.
   - **Tautan ke www** memakai alamat www yang tayang sekarang (`bangun.WWW_SEKARANG`: `kalender-akademik/`,
     `category/pengumuman/`), karena www baru belum tayang. Tabel itu dikosongkan saat www baru tayang.
 - **Konsekuensi:**

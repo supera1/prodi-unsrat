@@ -45,7 +45,8 @@ akses keluar adalah permintaan GET biasa ke situs publik yang ditautkan, untuk m
   di produksi. Log admin menulis `PERINGATAN prodi …: … bertanda [CONTOH], tidak diterbitkan di produksi`.
 - **Kontainer** (`docker-compose.yml`): `docker compose config -q` lulus. Kontainer web belum diberi `cap_drop`:
   Nginx mulai sebagai root dan butuh beberapa kapabilitas (CHOWN, SETUID, SETGID, NET_BIND_SERVICE). Ini perlu dicoba
-  dengan Docker lebih dulu, karena kalau salah, situs tidak mau start.
+  dengan Docker lebih dulu, karena kalau salah, situs tidak mau start. (Sudah dicoba dan dipasang: lihat
+  [Lanjutan](#lanjutan-build-dan-stack-docker-sungguhan).)
 - **Tautan www** (`bangun.WWW_SEKARANG`, `bangun.alamat_www`): dipakai sumber halaman Kalender dan tautan relatif dalam
   teks dari data www. Saat www baru (website-unsrat-2026) tayang, tabel itu dikosongkan. www baru belum mengalihkan
   alamat WordPress lama, jadi disarankan ke tim www untuk menambah pengalihannya.
@@ -137,7 +138,7 @@ akses keluar adalah permintaan GET biasa ke situs publik yang ditautkan, untuk m
 ## Perlu diketahui
 - **Build image Docker sungguhan belum dijalankan** untuk Fase 2 maupun audit ini, karena Docker lokal mati. Bug #1
   menunjukkan risikonya. Saat admin VM membangun staging, seluruh uji berjalan lagi di image (K-P20). Pantau log build
-  pertama.
+  pertama. (Sudah dijalankan: lihat [Lanjutan](#lanjutan-build-dan-stack-docker-sungguhan).)
 - **Staging juga sebaiknya HTTPS** (`ADMIN_HTTPS=1`), karena akun pilot adalah akun orang sungguhan. Yang diwajibkan
   hanya produksi.
 - **Admin VM perlu menyiapkan HTTPS untuk admin sebelum §11.** `PROKSI_DEPAN` harus berisi subnet proksi yang
@@ -154,3 +155,89 @@ akses keluar adalah permintaan GET biasa ke situs publik yang ditautkan, untuk m
     berkala, mis. setiap pembaruan `constraints.txt`.
 - **Isi contoh di komputer pengembang** (4 pengumuman `[CONTOH]` S1 Teknik Informatika) hanya ada di data lokal dan
   tidak ikut repositori maupun VM.
+
+## Lanjutan: build dan stack Docker sungguhan
+
+27 Oktober 2026, branch `fase/praproduksi-docker` (dari `main` `02ff44d`), setelah K-P32 disetujui pengguna.
+
+Docker lokal: Colima, Docker 29.5.2, 2 CPU. Konteks Docker global tidak diganti (`colima start --activate=false`,
+perintah dengan `--context colima`). Stack uji `prodi-uji` dibongkar beserta volumenya, lalu Colima dimatikan lagi.
+
+### Build dan start pertama
+- **Kedua image dibangun** dari `main` (dengan perbaikan #1). Di dalam image (Python 3.12.16, pengguna 10001), seluruh
+  uji berjalan saat build: 19 rangkaian, 0 gagal.
+- **Start pertama VM baru** (`docs/deploy.md` §13):
+  - data awal 97 prodi diterapkan, dan registri dibuat dengan 94 tautan dosen;
+  - 3.688 halaman dibangun;
+  - pemeriksaan pengaturan admin yang baru lolos tanpa pesan;
+  - admin dan web *healthy*.
+- **Pengerasan**, seperti terbaca di `/proc/1/status` setiap kontainer:
+  - admin dan pemantau: `CapBnd` 0 (tanpa kapabilitas) dan `NoNewPrivs` 1;
+  - web: `NoNewPrivs` 1.
+- **Situs:**
+  - 200, POST ditolak 403, header keamanan lengkap, dan `Server: nginx` tanpa versi;
+  - halaman Kalender menautkan `/kalender-akademik/` dan `/category/pengumuman/`, dengan pita staging;
+  - admin `/masuk` 200;
+  - pemantau: 3.889 berkas, 0 temuan;
+  - saringan di image mengenali pinjol dan meloloskan judul penelitian.
+
+### Pengaturan yang salah (uji negatif)
+
+| Pengaturan | Hasil |
+|---|---|
+| `ADMIN_IP_BOLEH=0.0.0.0/0` | `web` dan `admin` berhenti dengan pesan "jaringan yang terlalu luas"; admin berhenti sebelum membangun situs |
+| `PROKSI_DEPAN=10.0.0.0/8` | `web` berhenti dengan pesan (paling luas /16); admin tetap berjalan |
+| `PRODI_MODE=produksi` tanpa `ADMIN_HTTPS=1` | `admin` berhenti sebelum membangun, dengan pesan HTTPS; situs tetap 200 dari hasil bangun terakhir (berpita staging) |
+| `PRODI_MODE=produksi` dengan `ADMIN_HTTPS=1` | Dibangun bentuk produksi: `robots.txt` mengizinkan, `sitemap.xml` ada, tanpa pita dan `noindex`. Kuki admin `__Host-` dengan `Secure`, `HttpOnly`, `SameSite=Strict`, ditambah HSTS |
+
+### Kapabilitas kontainer web
+`cap_drop: ALL`, lalu hanya CHOWN, SETUID, SETGID, dan NET_BIND_SERVICE yang dikembalikan; kini di `docker-compose.yml`.
+Yang dicoba:
+- **Proses:** master Nginx root, 2 worker sebagai pengguna `nginx`; situs dan admin lewat Nginx 200.
+- **Muat ulang:** `nginx -t` dan muat ulang berhasil. Pengalihan slug lama yang baru ditulis generator dimuat ulang
+  sendiri (301).
+- **Unggahan besar:** 400 KB ke admin ditampung berkas sementara Nginx, lalu dijawab admin 413 (batas sebelum masuk).
+- **HTTPS di VM** (sertifikat uji milik root, kunci `chmod 600`):
+  - HTTP/2 200, `http://` dialihkan ke `https://`, admin HTTPS 200;
+  - sertifikat pengganti dipakai dalam 30 detik.
+
+**Ditemukan:** kunci privat milik pengguna lain (izin 600) tidak terbaca tanpa DAC_OVERRIDE, sehingga web berhenti
+dengan galat OpenSSL yang sulit dipahami. Dengan kapabilitas bawaan Docker, kunci yang sama terbaca. Di bawah
+pembatasan ini `test -r` juga keliru menyatakan berkas terbaca. Kapabilitas tetap minimal, karena NET_RAW dan kawannya
+lebih berbahaya daripada syarat "milik root". Perbaikannya:
+- `docker/nginx/45-prodi-https.sh` benar-benar membaca kedua berkas sertifikat dan berhenti dengan pesan
+  `privkey.pem di TLS_FOLDER tidak bisa dibaca; berkas sertifikat harus milik root`;
+- `docker/nginx/50-prodi-pantau.sh` menulis `sertifikat TLS baru ditolak nginx -t` bila sertifikat perpanjangan tidak
+  bisa dipakai. Sebelumnya kegagalan ini tidak tercatat sama sekali. Situs tetap memakai sertifikat lama; sertifikat
+  baru tetap dicoba setiap 30 detik, dan pesannya hanya ditulis sekali;
+- `docs/deploy.md` §7B dan §12.
+
+Dicoba ulang di Docker dengan `docker-compose.yml` repo apa adanya:
+- kunci milik 10001 → pesan di atas;
+- setelah `chown root` → HTTPS 200;
+- perpanjangan dengan kunci milik 10001 → ditolak dengan pesan, sertifikat lama tetap dipakai;
+- setelah `chown root` → sertifikat baru dipakai (nomor seri sesuai);
+- perpanjangan saat `nginx -t` gagal karena sebab lain (berkas konfigurasi rusak sengaja di dalam kontainer) → satu
+  pesan selama dua putaran, sertifikat lama tetap dipakai. Setelah sebabnya dihapus, sertifikat baru dipakai pada
+  putaran berikutnya tanpa ada berkas sertifikat yang berubah.
+
+Jalur bawaan (HTTP di belakang load balancer) dengan compose ini: admin dan web *healthy*, pemantau 0 temuan.
+
+### Rahasia di riwayat git
+Seluruh 35 commit (37.387 baris tambahan) diperiksa dengan `git log` dan `grep`. Tidak pernah ada berkas `.env`,
+kredensial, basis data, atau kunci yang ter-commit. Tidak ada pola kunci privat, token GitHub/Google/AWS/Slack,
+`SECRET_KEY` berisi nilai, hash argon2, atau sandi tertulis. Hanya jumlahnya yang dicetak.
+
+Gitleaks dan Trivy, yang sudah ada di Colima, tidak dijalankan: pengaman izin otomatis menolak menjalankan kode dari luar
+repo ini. Keduanya bisa dijalankan pengguna atau admin VM, mis. Trivy untuk kerentanan paket OS dan pustaka Python di
+image.
+
+### Verifikasi
+- `uji/uji_docker.py` kini memeriksa:
+  - kapabilitas web tepat empat itu;
+  - kunci yang tidak terbaca menghentikan `45-prodi-https.sh` dengan pesan (dilewati bila uji berjalan sebagai root).
+- Uji mutasi: web tanpa `cap_drop`, web dengan DAC_OVERRIDE, tanpa pemeriksaan baca kunci, dan pemeriksaan yang hanya
+  melihat ukuran berkas. Semuanya ditangkap.
+- `.venv/bin/python uji/jalankan-semua.py`: 19 rangkaian, 0 gagal. Sesudahnya hanya `50-prodi-pantau.sh` yang
+  berubah (percobaan ulang dan pesan); `uji_docker.py` dijalankan lagi dan lulus, dan perilakunya dicoba di Docker
+  (di atas).
