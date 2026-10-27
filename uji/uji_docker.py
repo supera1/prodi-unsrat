@@ -129,6 +129,12 @@ for nama, isi in (("admin", admin), ("web", web), ("pemantau", pemantau)):
         "%s: tidak ada proses yang bisa menambah haknya sendiri (no-new-privileges)" % nama)
 for nama, isi in (("admin", admin), ("pemantau", pemantau)):
     cek(re.search(r"^    cap_drop:\n      - ALL\s", isi, re.M), "%s: tanpa kapabilitas Linux (berjalan sebagai 10001)" % nama)
+# Nginx starts as root: of all capabilities it keeps only those it needs then (tried with Docker, docs/log), so e.g. no
+# NET_RAW, no DAC_OVERRIDE
+tambah = re.search(r"^    cap_add:[^\n]*\n((?:      - [A-Z_]+[^\n]*\n)+)", web, re.M)
+cek(re.search(r"^    cap_drop:\n      - ALL\s", web, re.M) and tambah
+    and sorted(re.findall(r"^      - ([A-Z_]+)", tambah.group(1), re.M)) == ["CHOWN", "NET_BIND_SERVICE", "SETGID", "SETUID"],
+    "web: semua kapabilitas Linux dibuang kecuali CHOWN, SETUID, SETGID, NET_BIND_SERVICE")
 cek(re.search(r"^USER prodi$", baca("Dockerfile"), re.M), "image admin berjalan sebagai pengguna prodi, bukan root")
 nama_stack = re.search(r"^name: (\S+)$", compose, re.M)
 cek(nama_stack and nama_stack.group(1) == "prodi-unsrat", "nama stack ditetapkan di docker-compose.yml: prodi-unsrat")
@@ -233,7 +239,8 @@ for shell in shell_ada:
         finally:
             shutil.rmtree(kerja, ignore_errors=True)
 
-    def https(env, sertifikat=False):
+    def https(env, sertifikat=False, terkunci=False):
+        """45-prodi-https.sh in a temporary folder; terkunci: a key that cannot be read (owned by another user)."""
         kerja = tempfile.mkdtemp(prefix="prodi-uji-https-")
         os.makedirs(os.path.join(kerja, "conf.d"))
         if sertifikat:
@@ -241,9 +248,13 @@ for shell in shell_ada:
             for n in ("fullchain.pem", "privkey.pem"):
                 with io.open(os.path.join(kerja, "tls", n), "w") as f:
                     f.write("uji\n")
+            if terkunci:
+                os.chmod(os.path.join(kerja, "tls", "privkey.pem"), 0)
         try:
-            k, isi, _g = jalankan("docker/nginx/45-prodi-https.sh", env, kerja, shell)
-            return k, {n: isi(n) for n in ("prodi/port-80.conf", "prodi/port-8081.conf", "conf.d/https.conf")}
+            k, isi, galat = jalankan("docker/nginx/45-prodi-https.sh", env, kerja, shell)
+            hasil = {n: isi(n) for n in ("prodi/port-80.conf", "prodi/port-8081.conf", "conf.d/https.conf")}
+            hasil["galat"] = galat
+            return k, hasil
         finally:
             shutil.rmtree(kerja, ignore_errors=True)
     k, isi = https({})
@@ -257,6 +268,10 @@ for shell in shell_ada:
     for env, sertifikat in (({"HTTPS_DI_VM": "1"}, False), ({"HTTPS_DI_VM": "ya"}, True),
                             ({"HTTPS_DI_VM": "1", "PORT_ADMIN_HTTPS": "84a"}, True)):
         cek(https(env, sertifikat)[0] == 1, "%s 45-prodi-https %r harus berhenti" % (shell[0], env))
+    if os.geteuid() != 0:                 # root reads any file here; in the web container it does not (cap_drop)
+        k, isi = https({"HTTPS_DI_VM": "1"}, sertifikat=True, terkunci=True)
+        cek(k == 1 and "privkey.pem di TLS_FOLDER tidak bisa dibaca" in isi["galat"] and isi["conf.d/https.conf"] is None,
+            "%s 45-prodi-https: kunci yang tidak terbaca menghentikan start dengan pesan: %r" % (shell[0], isi["galat"]))
 cek(shell_ada, "tidak ada shell POSIX untuk menguji skrip awal web")
 
 sh = shutil.which("sh")

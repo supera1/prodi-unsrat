@@ -183,7 +183,8 @@ port 80/8081 hanya mengalihkan ke HTTPS (kecuali `/sehat` dan tantangan Let's En
 1. Siapkan folder di VM: `sudo mkdir -p /srv/prodi-tls /srv/prodi-acme`.
 2. Sertifikat, salah satu:
    - **sertifikat UNSRAT sendiri:** salin ke `/srv/prodi-tls/fullchain.pem` (sertifikat + rantai perantara) dan
-     `/srv/prodi-tls/privkey.pem` (`chmod 600`);
+     `/srv/prodi-tls/privkey.pem` (`chmod 600`), keduanya milik root (`sudo chown root:root /srv/prodi-tls/*.pem`).
+     Kontainer `web` berjalan dengan hak terbatas, jadi tidak bisa membaca kunci milik pengguna lain;
    - **Let's Encrypt:** DNS `prodi.unsrat.ac.id` sudah menunjuk ke VM, port 80 terbuka. Deploy dulu dengan
      `PORT_SITUS=80` dan `ACME_FOLDER=/srv/prodi-acme` (masih `HTTPS_DI_VM=0`), lalu di VM:
 
@@ -200,8 +201,10 @@ port 80/8081 hanya mengalihkan ke HTTPS (kecuali `/sehat` dan tantangan Let's En
    `PORT_SITUS_HTTPS=443`, `PORT_ADMIN_HTTPS` (mis. `8444`), `ADMIN_HTTPS=1`, lalu `sudo docker compose up -d`.
 
 Sertifikat yang diganti di `TLS_FOLDER` dipakai Nginx dalam 30 detik tanpa restart (log `web`:
-`sertifikat TLS diperbarui`). Bila `HTTPS_DI_VM=1` tetapi sertifikat tidak ada, kontainer `web` berhenti dengan pesan
-`… fullchain.pem tidak ada di TLS_FOLDER`.
+`sertifikat TLS diperbarui`). Pengganti yang tidak bisa dipakai (mis. kunci bukan milik root) tidak dipasang; log `web`
+menulis `sertifikat TLS baru ditolak nginx -t`, dan sertifikat lama tetap dipakai. Bila `HTTPS_DI_VM=1` tetapi
+sertifikat tidak ada atau tidak bisa dibaca, kontainer `web` berhenti dengan pesan `… fullchain.pem tidak ada di
+TLS_FOLDER` atau `… privkey.pem di TLS_FOLDER tidak bisa dibaca`.
 
 ## 8. Memperbarui ke versi baru
 
@@ -300,6 +303,8 @@ situs prodi lama (mis. `informatika.unsrat.ac.id`) diatur di luar stack ini (K-P
 | `admin` berhenti: `ADMIN_IP_BOLEH berisi …` | Sama seperti baris di atas: admin juga memeriksa `ADMIN_IP_BOLEH` |
 | `admin` berhenti: `PRODI_MODE=produksi memerlukan ADMIN_HTTPS=1` | Buka admin lewat HTTPS (§7), lalu `ADMIN_HTTPS=1` di `.env` |
 | `web` berhenti: `… fullchain.pem tidak ada di TLS_FOLDER` | `HTTPS_DI_VM=1` tanpa sertifikat (§7B) |
+| `web` berhenti: `45-prodi-https: privkey.pem di TLS_FOLDER tidak bisa dibaca` | Berkas sertifikat harus milik root: `sudo chown root:root /srv/prodi-tls/*.pem` dan `sudo chmod 600 /srv/prodi-tls/privkey.pem` (§7B) |
+| Log `web`: `sertifikat TLS baru ditolak nginx -t` | Sertifikat pengganti tidak terbaca (bukan milik root) atau tidak cocok dengan kuncinya; situs tetap memakai yang lama. Perbaiki berkasnya; dalam 30 detik dicoba lagi |
 | Situs 404 semua, `web` *unhealthy* | Admin belum selesai membangun (lihat log admin) atau bangun gagal |
 | Admin 403 "tidak dapat dibuka dari jaringan ini" atau 403 Nginx | Alamat Anda di luar `ADMIN_IP_BOLEH`; di belakang load balancer isi `PROKSI_DEPAN` (§7A) |
 | Masuk admin selalu kembali ke halaman masuk | `ADMIN_HTTPS=1` tetapi admin dibuka lewat `http://` (cookie aman tidak dikirim browser) |
