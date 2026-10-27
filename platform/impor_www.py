@@ -454,7 +454,8 @@ def isi_awal(oleh="data-awal", folder=DATA_AWAL):
         laporan = tarik_www.terapkan(oleh, folder=folder, keterangan=label)
         pesan.append("%s diterapkan: %d prodi" % (label, len(laporan["baru"])))
     if lokasi.baca("registri") is None:
-        pesan.append("registri awal dari slug.csv: %d prodi" % registri.siapkan_dari_csv(oleh))
+        n = registri.siapkan_dari_csv(oleh, dosen=registri.DOSEN_AWAL)
+        pesan.append("registri awal dari slug.csv: %d prodi, %d dengan tautan dosen" % (n, registri.jumlah_tautan_dosen()))
     return pesan
 
 

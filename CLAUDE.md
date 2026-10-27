@@ -61,7 +61,9 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
 - Lokasi data (`platform/lokasi.py`): `PRODI_DATA` (bawaan `data/`), `PRODI_RIWAYAT` (bawaan `riwayat/` di sampingnya),
   `WWW_DATA` (bawaan `../website-unsrat-2026/site/mockup/data`, hanya dibaca).
 - Tarik data resmi dari www: `python3 platform/tarik_www.py` (pratinjau), `--terapkan` (tulis; salinan lama ke riwayat).
-- Registri awal 97 prodi dari `slug.csv`: `python3 platform/registri.py --siapkan` (sesudah tarik data pertama).
+- Registri awal 97 prodi dari `slug.csv`: `python3 platform/registri.py --siapkan` (sesudah tarik data pertama). Tautan
+  dosen awal ikut dari `platform/data-awal/dosen.csv` (K-P31; format templat impor Tautan dosen), di setiap jalur
+  pembuatan registri (VM baru, `--siapkan`, unggahan data www pertama).
 - Unggahan data www (Excel/JSON) dibaca `platform/impor_www.py` lalu dipratinjau/diterapkan `tarik_www.py`.
   Data awal VM baru: `python3 platform/impor_www.py --isi-awal` (platform kosong saja); perbarui salinannya setelah
   menarik data www terbaru: `python3 platform/impor_www.py --tulis-data-awal --dari "..."`.
