@@ -369,3 +369,23 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   - Kelengkapan superadmin (layar dan CSV) menampilkan jumlah kriteria tiap prodi, supaya LPMPP bisa memeriksanya.
 - **Konsekuensi:** isi label menjadi tanggung jawab prodi, seperti isi halaman lain. LPMPP tetap bisa memeriksa lewat
   kelengkapan dan situs, dan meminta perbaikan kepada admin prodi.
+
+### K-P34 — Impor Excel untuk tabel besar, ke draf halaman (Fase 2 langkah 7)
+- **Konteks:** beberapa halaman wajib memuat tabel ratusan baris (mata kuliah 250, publikasi 500, penelitian dan PkM
+  300). Mengisinya baris demi baris lewat formulir melelahkan, padahal datanya biasanya sudah ada di Excel prodi.
+  Pengguna meminta impor Excel dikerjakan di langkah 7 tanpa menunggu pilot (pembaruan K-P26).
+- **Keputusan** (usulan pengembang dalam rencana yang disetujui pengguna 27 Oktober 2026):
+  - **Tabel yang bisa diimpor:** tabel halaman yang tampil sebagai tabel, bisa memuat minimal 50 baris, dan tidak punya
+    kolom berkas wajib; sekarang 16 tabel di 14 halaman (`platform/admin/impor_tabel.py`). Kolom berkas (RPS, bukti
+    kerja sama) tidak ada di Excel dan diunggah lewat formulir.
+  - **Templat .xlsx per tabel**: nama kolom, baris yang ada di halaman, daftar pilihan, dan lembar Petunjuk. Teks yang
+    diawali `=` ditulis sebagai teks, bukan rumus. Berkas CSV juga diterima.
+  - **Pratinjau dulu:** setiap sel dibaca seperti isian formulir, dan setiap baris diperiksa aturan halaman yang sama
+    (wajib, batas, https, saringan spam). Baris bermasalah ditampilkan dengan nomor barisnya di Excel dan tidak ikut.
+    Pratinjau berlaku 30 menit, sekali pakai, untuk akun pengunggahnya saja.
+  - **Tambahkan** di bawah baris yang ada (baris yang sama persis tidak dua kali) atau **ganti semua** (baris yang
+    tidak berubah tetap membawa berkasnya). Batas baris tabel tetap berlaku.
+  - **Hasilnya masuk ke draf**, jadi tetap melewati alur K-P24: operator mengajukan, admin prodi menerbitkan. Versi
+    sebelumnya ada di riwayat halaman, dan impor tercatat di log audit.
+  - Operator dan admin prodi boleh mengimpor, seperti menyimpan draf. Berkas paling besar 2 MB, paling banyak 2.000
+    baris dan 40 kolom yang dibaca.

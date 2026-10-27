@@ -746,6 +746,11 @@ dl.data dd {
 	font-weight: 700;
 }
 
+/* the columns of a table on the spreadsheet import page, above its upload form */
+.impor-kolom {
+	margin-bottom: 1rem;
+}
+
 .lencana {
 	padding: 0.1rem 0.4rem;
 	border-radius: 4px;

@@ -1,0 +1,49 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Impor dari Excel — {{ ini.label }} — {{ pr.nama }}{% endblock %}
+{% block isi %}
+{{ nav_prodi(pr, 'isi_daftar') }}
+<p class="jejak-admin"><a href="{{ url_for('isi_daftar', kode=pr.kode) }}">Isi halaman</a> › <a href="{{ url_for('isi_sunting', kode=pr.kode, id_=ini.id) }}">{{ ini.label }}</a> › Impor dari Excel</p>
+<h1>Impor dari Excel: {{ ini.label }}</h1>
+<p>Tabel besar di halaman ini bisa diisi dari berkas Excel (.xlsx) atau CSV. Hasilnya masuk ke <strong>draf</strong> halaman; situs
+	belum berubah sampai halaman diterbitkan seperti biasa.</p>
+<ol>
+	<li><strong>Unduh templat</strong>: berkas Excel dengan nama kolom yang benar, berisi baris yang sudah ada di halaman ini, dan
+		daftar pilihan untuk kolom pilihan.</li>
+	<li>Isi atau ubah barisnya di lembar <strong>Data</strong>. Isi setiap kolom dijelaskan di lembar <strong>Petunjuk</strong>.</li>
+	<li>Unggah berkasnya, lalu tekan <strong>Baca berkas</strong>. Pratinjau menunjukkan baris yang siap dan baris yang bermasalah;
+		belum ada yang disimpan sampai Anda menekan <strong>Masukkan ke draf</strong>.</li>
+</ol>
+{% for t in daftar %}
+<section class="kartu" aria-labelledby="judul-{{ t.kunci }}">
+	<h2 id="judul-{{ t.kunci }}">{{ t.node.label }}</h2>
+	<p>Sekarang {{ t.jumlah }} baris; paling banyak {{ t.node.maks }} baris.{% if t.berkas %} Kolom {{ t.berkas | join(', ') }} tidak ada di
+		Excel: unggah berkasnya lewat formulir halaman sesudah impor.{% endif %}</p>
+	<p><a class="tombol tombol--garis" href="{{ url_for('isi_impor_templat', kode=pr.kode, id_=ini.id, tabel=t.kunci) }}">Unduh templat (.xlsx)<span class="tersembunyi"> {{ t.node.label }}</span></a></p>
+	<details class="petunjuk impor-kolom">
+		<summary>Kolom dan isinya</summary>
+		<div class="tabel-gulir">
+			<table>
+				<thead><tr><th scope="col">Kolom</th><th scope="col">Wajib</th><th scope="col">Isi</th></tr></thead>
+				<tbody>
+					{% for _k, n in t.kolom %}
+					<tr><td>{{ n.label }}</td><td>{{ 'ya' if n.wajib else '' }}</td><td>{{ petunjuk(n) }}</td></tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</details>
+	<form method="post" action="{{ url_for('isi_impor_baca', kode=pr.kode, id_=ini.id) }}" enctype="multipart/form-data" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<input type="hidden" name="tabel" value="{{ t.kunci }}">
+		<div class="isian">
+			<label for="berkas-{{ t.kunci }}">Berkas Excel atau CSV untuk {{ t.node.label }}</label>
+			<input id="berkas-{{ t.kunci }}" name="berkas" type="file" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+			<p class="keterangan">Paling besar 2 MB. Yang dibaca lembar pertama; baris pertamanya berisi nama kolom.</p>
+		</div>
+		<button type="submit" class="tombol">Baca berkas</button>
+	</form>
+</section>
+{% endfor %}
+<p><a href="{{ url_for('isi_sunting', kode=pr.kode, id_=ini.id) }}">Kembali ke penyunting</a></p>
+{% endblock %}

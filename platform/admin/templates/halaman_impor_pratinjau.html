@@ -1,0 +1,55 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Pratinjau impor — {{ ini.label }} — {{ pr.nama }}{% endblock %}
+{% block isi %}
+{{ nav_prodi(pr, 'isi_daftar') }}
+<p class="jejak-admin"><a href="{{ url_for('isi_daftar', kode=pr.kode) }}">Isi halaman</a> › <a href="{{ url_for('isi_sunting', kode=pr.kode, id_=ini.id) }}">{{ ini.label }}</a> › <a href="{{ url_for('isi_impor', kode=pr.kode, id_=ini.id) }}">Impor dari Excel</a> › Pratinjau</p>
+<h1>Pratinjau impor: {{ node.label }}</h1>
+<p>Berkas <code>{{ nama_berkas }}</code>: {{ hasil.dibaca }} baris dibaca, <strong>{{ hasil.baris | length }}</strong> siap diimpor{% if hasil.bermasalah %},
+	<strong>{{ hasil.bermasalah }}</strong> bermasalah dan tidak ikut{% endif %}. Belum ada yang disimpan.</p>
+{% if hasil.abaikan %}<p class="keterangan">Kolom yang bukan bagian tabel ini diabaikan: {{ hasil.abaikan | join(', ') }}.</p>{% endif %}
+{% if hasil.galat %}
+<section class="kartu" aria-labelledby="judul-galat">
+	<h2 id="judul-galat">Baris bermasalah (tidak ikut diimpor)</h2>
+	<p>Perbaiki di berkas lalu unggah lagi, atau isi baris itu lewat formulir halaman sesudah impor.</p>
+	<ul>{% for p in hasil.galat[:maks_galat] %}<li>{{ p }}</li>{% endfor %}</ul>
+	{% if hasil.galat | length > maks_galat %}<p class="keterangan">… dan {{ hasil.galat | length - maks_galat }} masalah lain.</p>{% endif %}
+</section>
+{% endif %}
+{% if token %}
+{% set bisa_tambah = r.tambah <= r.maks %}
+<form method="post" action="{{ url_for('isi_impor_terapkan', kode=pr.kode, id_=ini.id) }}" class="formulir kartu">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<input type="hidden" name="token" value="{{ token }}">
+	<fieldset>
+		<legend>Masukkan ke draf</legend>
+		<div class="isian">
+			<label><input type="radio" name="mode" value="tambah"{% if bisa_tambah %} checked{% else %} disabled{% endif %}> Tambahkan di bawah baris yang ada</label>
+			<p class="keterangan">Tabel menjadi {{ r.tambah }} baris.{% if r.sama %} {{ r.sama }} baris di berkas sama persis dengan baris yang sudah ada dan tidak ditambahkan lagi.{% endif %}{% if not bisa_tambah %} Itu melebihi batas {{ r.maks }} baris, jadi hanya bisa mengganti semua baris.{% endif %}</p>
+		</div>
+		<div class="isian">
+			<label><input type="radio" name="mode" value="ganti"{% if not bisa_tambah %} checked{% endif %}> Ganti semua baris</label>
+			<p class="keterangan">Tabel menjadi {{ r.ganti }} baris; {{ r.lama }} baris yang ada sekarang diganti.{% if berkas_kolom %} Baris yang sama persis dengan baris lama tetap membawa berkasnya ({{ berkas_kolom | join(', ') }}).{% endif %}{% if r.lepas %} <strong>{{ r.lepas }} berkas</strong> di baris lama yang tidak ada di berkas Excel akan terlepas dari draf; versi sebelumnya tetap ada di riwayat halaman.{% endif %}</p>
+		</div>
+	</fieldset>
+	<button type="submit" class="tombol">Masukkan ke draf</button>
+	<a href="{{ url_for('isi_impor', kode=pr.kode, id_=ini.id) }}">Batal</a>
+	<p class="keterangan">Pratinjau ini berlaku 30 menit dan hanya sekali pakai. Situs belum berubah sampai halaman diterbitkan.</p>
+</form>
+<section class="kartu" aria-labelledby="judul-contoh">
+	<h2 id="judul-contoh">{{ contoh | length }} baris pertama yang siap diimpor</h2>
+	<div class="tabel-gulir">
+		<table>
+			<thead><tr><th scope="col">No</th>{% for _k, n in kolom %}<th scope="col">{{ n.label }}</th>{% endfor %}</tr></thead>
+			<tbody>
+				{% for b in contoh %}
+				<tr><td>{{ loop.index }}</td>{% for k, _n in kolom %}{% set v = b.get(k) %}<td>{{ 'ya' if v is sameas true else ('' if v is none else v) }}</td>{% endfor %}</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</section>
+{% else %}
+<p>Tidak ada baris yang bisa diimpor. Perbaiki berkasnya, lalu <a href="{{ url_for('isi_impor', kode=pr.kode, id_=ini.id) }}">unggah lagi</a>.</p>
+{% endif %}
+{% endblock %}

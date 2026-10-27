@@ -38,6 +38,7 @@ import akun as akun_mod  # noqa: E402
 import audit  # noqa: E402
 import lokasi  # noqa: E402
 import data_prodi  # noqa: E402
+import impor_tabel  # noqa: E402
 import isi_admin  # noqa: E402
 import kriteria_admin  # noqa: E402
 import masukan_admin  # noqa: E402
@@ -519,6 +520,7 @@ def buat_app(env=None):
     prodi_admin.pasang(app, alat)
     pengumuman_admin.pasang(app, alat)
     isi_admin.pasang(app, alat)
+    impor_tabel.pasang(app, alat)
     kriteria_admin.pasang(app, alat)
     panduan.pasang(app, alat)
     masukan_admin.pasang(app, alat)

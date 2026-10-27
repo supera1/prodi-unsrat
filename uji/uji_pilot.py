@@ -50,6 +50,7 @@ os.environ.pop("PRODI_MODE", None)
 import akun  # noqa: E402
 import app as app_mod  # noqa: E402
 import audit  # noqa: E402
+import impor_tabel  # noqa: E402
 import isi_admin  # noqa: E402
 import isi_halaman as ih  # noqa: E402
 import masukan_admin as mk  # noqa: E402
@@ -108,7 +109,8 @@ try:
     for pesan in ("Formulir kedaluwarsa", "Sesi berakhir. Silakan masuk lagi.", "halaman ini baru saja diubah",
                   "Berkas atau formulir terlalu besar", "Teks alternatif foto wajib diisi",
                   "PDF berisi skrip, formulir aktif, atau berkas sisipan", "isian perlu diperbaiki",
-                  "Draf yang menunggu persetujuan tidak dapat dibuang", "Tidak ada perubahan untuk disimpan"):
+                  "Draf yang menunggu persetujuan tidak dapat dibuang", "Tidak ada perubahan untuk disimpan",
+                  "Pratinjau impor sudah tidak berlaku"):
         cek(pesan in teks and pesan in kode, "pesan %r di panduan sama dengan di admin" % pesan)
     app_uji = app_mod.buat_app({"SECRET_KEY": "k" * 64, "ADMIN_IP_BOLEH": "103.84.116.0/24", "PRODI_BANGUN": "mati"})
     for angka, nilai in (("paling besar 20 MB", media.MAKS_PDF), ("paling besar 10 MB", media.MAKS_FOTO),
@@ -176,11 +178,17 @@ try:
     tampak["admin, terbit"] = halaman(ka, URL + "sejarah")
     tampak["riwayat halaman"] = halaman(ka, URL + "sejarah/riwayat")
     tampak["dasbor admin"] = halaman(ka, "/prodi/%s/" % A)
+    tampak["impor"] = halaman(ko, URL + "kurikulum/impor")
+    tampak["pratinjau impor"] = kirim(ko, URL + "kurikulum/impor", tabel="mata_kuliah", berkas=(io.BytesIO(
+        impor_tabel.templat_xlsx(dict(impor_tabel.tabel_halaman("kurikulum"))["mata_kuliah"],
+                                 [{"semester": 1, "nama": "Algoritma", "sks": 3}], "Uji")), "mk.xlsx")).get_data(as_text=True)
     tampak["daftar, tabel, berkas"] = py.formulir(ih.TEMPLAT["kerja-sama"], {"daftar": [{"mitra": "Mitra", "bukti": {
         "jenis": "pdf", "jalur": "%s/202610-0123456789ab.pdf" % A, "judul": "Bukti", "halaman": 1, "ukuran": 1000}},
         {"mitra": "Mitra kedua"}]}, py.Tampil(dihapus={"jalur": "daftar", "indeks": 1, "nilai": {"mitra": "Lain"}}))
     for di, labels in (("operator, draf", ("Simpan draf", "Simpan dan pratinjau", "Ajukan untuk diterbitkan", "Buang draf",
-                                           "Riwayat halaman ini", "(wajib)")),
+                                           "Riwayat halaman ini", "(wajib)", "Impor dari Excel")),
+                       ("impor", ("Unduh templat (.xlsx)", "Baca berkas", "Petunjuk", "Data")),
+                       ("pratinjau impor", ("Masukkan ke draf", "Tambahkan di bawah baris yang ada", "Ganti semua baris")),
                        ("operator, menunggu", ("Batalkan pengajuan",)),
                        ("admin, menunggu", ("Terbitkan", "Kembalikan dengan catatan", "Catatan untuk penulis")),
                        ("admin, terbit", ("Terbitkan perubahan", "Tarik dari situs")),
