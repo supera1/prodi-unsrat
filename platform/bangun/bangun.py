@@ -55,6 +55,7 @@ from markupsafe import Markup, escape  # noqa: E402
 
 import data_prodi  # noqa: E402
 import isi_halaman  # noqa: E402
+import kriteria as kriteria_mod  # noqa: E402
 import lokasi  # noqa: E402
 import menu as menu_mod  # noqa: E402
 import media  # noqa: E402
@@ -221,6 +222,15 @@ class Pembangun(object):
         self.berkas = {}      # published path -> bytes
         self.versi = {}       # published asset path -> short hash, for ?v=
         self.peringatan = []
+        # accreditation criteria labels: only bodies LPMPP confirmed are shown (K-P29); a broken file shows none
+        try:
+            self.kriteria = kriteria_mod.baca()
+            masalah = kriteria_mod.periksa(self.kriteria, set(isi_halaman.TEMPLAT))
+        except (OSError, ValueError) as e:
+            masalah = [str(e)]
+        if masalah:
+            self.peringatan.append("label kriteria akreditasi diabaikan: %s" % "; ".join(masalah[:3]))
+            self.kriteria = None
 
     # -------------------------------------------------------------- which programmes
 
@@ -342,12 +352,17 @@ class Pembangun(object):
             for halaman_id in k["halaman"]:
                 if isi:
                     terkait.setdefault(halaman_id, []).append({"kategori": k, "butir": isi[:TERKAIT], "jumlah": len(isi)})
+        lembaga = kriteria_mod.lembaga_untuk(self.kriteria, p.get("lembaga_akreditasi"))
+        urut = [b["id"] for b in menu_mod.halaman(menu)]             # the pages this site has, in menu order
+        ada = {b["id"]: b for b in menu_mod.halaman(menu)}
+        peta_kriteria = [{"nomor": n, "nama": nama, "halaman": [ada[x] for x in sorted(ids, key=urut.index)]}
+                         for n, nama, ids in kriteria_mod.peta(lembaga, set(ada))]
         umum = dict(p=p, r=r, slug=slug, situs=situs, tagline=tagline, unit=unit, menu=menu,
                     nama=nama_tampil(p), warna_css=warna_css, tampil_berlaku=self.tampil_berlaku,
                     dosen_url=r.get("dosen_url") or "", dosen_umum=DOSEN_UMUM, kalender=self.kalender,
                     kurikulum=sorted({c["kurikulum"] for c in p.get("cpl", []) if c.get("kurikulum")}),
                     kabar_beranda=di_beranda, terkait=terkait, label_kategori=self.label_kategori, hero=hero,
-                    logo=logo, media_sosial=media_sosial,
+                    logo=logo, media_sosial=media_sosial, lembaga_kriteria=lembaga, peta_kriteria=peta_kriteria,
                     hari_ini=self.hari_ini)
         for e in menu:
             for ini in [e] + e.get("anak", []):
@@ -363,7 +378,8 @@ class Pembangun(object):
                     templat = "isi.html"
                 folder = posixpath.join(slug, ini["alamat"]) if ini["alamat"] else slug
                 konteks = dict(umum, ini=ini, kelompok=kelompok, kanonik=self.kanonik(folder))
-                if templat == "isi.html":
+                konteks["label_kriteria"] = kriteria_mod.label(lembaga, ini["id"])
+                if templat == "isi.html" or ini["id"] in isi_halaman.TEMPLAT:
                     konteks["isi_bagian"] = self.isi_halaman_prodi(kode, ini["id"])
                 if ini["alamat"] == "":
                     konteks["json_ld"] = self.json_ld_prodi(p, unit, folder)

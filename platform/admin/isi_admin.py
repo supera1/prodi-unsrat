@@ -45,6 +45,7 @@ import bangun as bangun_mod  # noqa: E402
 import data_prodi  # noqa: E402
 import impor_dosen  # noqa: E402
 import isi_halaman as ih  # noqa: E402
+import kriteria as kriteria_mod  # noqa: E402
 import lokasi  # noqa: E402
 import media  # noqa: E402
 import menu as menu_mod  # noqa: E402
@@ -216,7 +217,19 @@ def pasang(app, alat):
         return render_template("halaman_sunting.html", pr=g.prodi, ini=ini, data=data, k=ih.keadaan(kode, ini["id"], data),
                                formulir=Markup(penyunting.formulir(templat, isi, t)), masalah=masalah,
                                id_galat=penyunting._id, privasi=PRIVASI, admin=adalah_admin(g.akun),
-                               maks_catatan=ih.MAKS_CATATAN)
+                               maks_catatan=ih.MAKS_CATATAN, kriteria=label_kriteria(kode, ini["id"]),
+                               resmi=data_prodi.efektif(kode) if ini["id"] == "akreditasi" else None)
+
+    def label_kriteria(kode, id_):
+        """(body, [(number, name)]) of the criteria a page serves, once LPMPP confirmed the programme's body (K-P29)."""
+        try:
+            data = kriteria_mod.baca()
+        except (OSError, ValueError):
+            return None, []
+        if kriteria_mod.periksa(data, set(ih.TEMPLAT)):
+            return None, []
+        lembaga = kriteria_mod.lembaga_untuk(data, (data_prodi.efektif(kode) or {}).get("lembaga_akreditasi"))
+        return lembaga, kriteria_mod.label(lembaga, id_)
 
     def bentrok(kode, ini, pesan):
         """A form made from an older version: nothing was stored (409)."""
@@ -502,13 +515,15 @@ def pasang(app, alat):
     @akses("super")
     def super_kelengkapan_csv():
         baris, wajib = kelengkapan()
-        label = {k: b["label"] for k, b in menu_mod.semua_butir(menu_mod.baca_templat()).items()}
+        butir = menu_mod.semua_butir(menu_mod.baca_templat())
+        label = {k: b["label"] + {"wajib": "", "opsional": " (opsional)"}.get(b.get("jenis"), " (pelengkap)")
+                 for k, b in butir.items()}
         halaman = wajib + [id_ for id_ in ih.TEMPLAT if id_ not in wajib]
         buf = io.StringIO()
         tulis = csv.writer(buf)
         tulis.writerow(["kode_pddikti", "jenjang", "nama", "fakultas", "slug", "aktif", "wajib_terbit", "wajib_total",
                         "menunggu", "dikembalikan", "draf", "terakhir_diubah"] +
-                       ["%s%s" % (label.get(id_, id_), "" if id_ in wajib else " (opsional)") for id_ in halaman])
+                       [label.get(id_, id_) for id_ in halaman])
         for b in baris:
             x = b["isi"]
             tulis.writerow([impor_dosen.aman_csv(v) for v in [

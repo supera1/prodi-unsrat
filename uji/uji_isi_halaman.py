@@ -134,8 +134,10 @@ try:
     # ============================================================== the templates
     menu = menu_mod.baca_templat()
     diisi_prodi = {b["id"]: b for b in menu_mod.semua_butir(menu).values() if b.get("jenis") in ("wajib", "opsional")}
-    cek(set(ih.TEMPLAT) == set(diisi_prodi), "satu templat untuk setiap halaman wajib/opsional: kurang %r, lebih %r" % (
-        sorted(set(diisi_prodi) - set(ih.TEMPLAT)), sorted(set(ih.TEMPLAT) - set(diisi_prodi))))
+    # every required and optional page, and the documents of the accreditation page (langkah 4, K-P29)
+    cek(set(ih.TEMPLAT) == set(diisi_prodi) | {"akreditasi"}, "satu templat untuk setiap halaman wajib/opsional dan "
+        "akreditasi: kurang %r, lebih %r" % (sorted((set(diisi_prodi) | {"akreditasi"}) - set(ih.TEMPLAT)),
+                                             sorted(set(ih.TEMPLAT) - set(diisi_prodi) - {"akreditasi"})))
     cek(sum(1 for b in diisi_prodi.values() if b["jenis"] == "wajib") == 22, "22 halaman wajib")
 
     def periksa_node(node, tempat):

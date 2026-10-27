@@ -222,7 +222,7 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
 ### K-P28 — Alur isi halaman: aturan rinci di dalam K-P24 (Fase 2 langkah 3)
 - **Konteks:** K-P24 menetapkan alur operator → admin prodi seperti pengumuman. Beberapa hal rinci perlu ditentukan
   agar alurnya sulit dirusak oleh pengelola yang bukan developer.
-- **Keputusan** (usulan pengembang, menunggu tinjauan):
+- **Keputusan** (usulan pengembang, disetujui pengguna 27 Oktober 2026):
   - setiap tombol penyunting (termasuk Ajukan, Terbitkan, Kembalikan, Tarik) menyimpan dulu apa yang ada di formulir,
     jadi ketikan tidak pernah hilang karena tombol yang dipilih;
   - draf baru bisa diajukan atau diterbitkan bila lolos semua pemeriksaan dan tidak kosong. Admin tidak pernah menerima
@@ -239,3 +239,29 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   - kelengkapan menghitung halaman wajib yang **terbit dan tampil** (lolos pemeriksaan), bukan sekadar pernah terbit.
 - **Konsekuensi:** tanpa SMTP (K-P12), pemberitahuan hanya lewat dasbor: admin melihat jumlah halaman yang menunggu,
   operator melihat halaman yang dikembalikan.
+
+### K-P29 — Dokumen akreditasi di halaman Akreditasi; label kriteria dari berkas yang dikonfirmasi LPMPP (Fase 2 langkah 4)
+- **Konteks:** rencana §3.7 meminta satu halaman Dokumen Akreditasi per prodi ("misalnya `profil/dokumen-akreditasi`")
+  dan label kriteria yang baru tampil setelah dikonfirmasi LPMPP (K-P25). Halaman **Akreditasi** (`profil/akreditasi`)
+  sudah ada sejak Fase 1, menampilkan status dari data resmi, dan sudah menjanjikan "Sertifikat akreditasi sedang
+  dilengkapi oleh Program Studi".
+- **Keputusan** (usulan pengembang, menunggu tinjauan):
+  - **Dokumen Akreditasi** menjadi bagian dokumen di halaman Akreditasi itu, bukan halaman baru. Isinya daftar dokumen
+    (sertifikat, SK, ringkasan hasil; judul, tahun, keterangan, PDF), keterangan, dan bagian tambahan, diisi lewat
+    penyunting dengan alur K-P24.
+    - Status akreditasi tetap otomatis dari data resmi dan tidak bisa diubah di sini (K-P15, K-P16).
+    - Halaman ini tidak menambah hitungan halaman wajib (tetap 22) dan tercatat di kelengkapan sebagai "pelengkap".
+  - **Label kriteria** ada di `platform/template/kriteria.json`, per lembaga akreditasi:
+    - isinya nama instrumen, daftar kriteria, pemetaan halaman → kriteria, dan nilai `lembaga_akreditasi` data resmi yang
+      berarti lembaga itu (mis. `LAM-Teknik` dan `LAM-Tek`);
+    - lembaga baru tampil bila berstatus `dikonfirmasi` dengan nama pengonfirmasi dan tanggalnya;
+    - draf tidak pernah tampil di situs maupun di penyunting.
+    - Berkas disunting pengembang atas dasar daftar dari LPMPP (perubahannya jarang); berkas yang rusak tidak
+      memunculkan label apa pun.
+  - **Draf awal:** BAN-PT (IAPS 4.0, 9 kriteria) dengan usulan pemetaan. LAM hanya terdaftar namanya, tanpa kriteria;
+    daftarnya menunggu LPMPP supaya tidak ada yang dikarang.
+  - **Tampilan setelah dikonfirmasi:**
+    - halaman yang dipetakan menyebut kriterianya di bawah judul;
+    - halaman Akreditasi memuat "Halaman menurut kriteria akreditasi", hanya halaman yang ada di situs prodi itu.
+- **Konsekuensi:** prodi dengan nilai lembaga yang tidak diklaim lembaga mana pun (kosong, `BAN-PT / LAM-PTIP`) tidak
+  mendapat label sampai LPMPP memutuskan dan data www diperbaiki. Panduan untuk LPMPP: `docs/kriteria-akreditasi.md`.

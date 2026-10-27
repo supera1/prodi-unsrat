@@ -363,7 +363,7 @@ try:
         cek("<script" not in html and " style=" not in html, "%s: penyunting tanpa skrip/gaya sebaris" % id_)
         tombol = re.findall(r'<button type="submit"[^>]* value="([^"]+)"', html[html.index("formulir--sunting"):])
         cek(tombol and tombol[0] == "simpan", "%s: Enter di isian menekan Simpan draf, bukan tombol daftar: %r" % (id_, tombol[:1]))
-    cek(ka.get(URL + "tidak-ada").status_code == 404 and ka.get(URL + "akreditasi").status_code == 404,
+    cek(ka.get(URL + "tidak-ada").status_code == 404 and ka.get(URL + "kalender").status_code == 404,
         "halaman tanpa templat isi tidak punya penyunting")
 
     # adding a row, filling it, a value not valid yet, a PDF

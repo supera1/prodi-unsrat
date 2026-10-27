@@ -69,7 +69,8 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   `--produksi`. Ganti slug atau nonaktifkan prodi: bangun semua, supaya folder lama terhapus.
 - Pengumuman (sebelum admin ada): `.venv/bin/python platform/pengumuman.py tambah|daftar|status --prodi <kode> ...`;
   foto/PDF lewat `platform/media.py` (`PRODI_PENYIMPANAN=lokal` ke `unggahan/`, `gcs` ke bucket). Lalu bangun `--prodi`.
-- Isi halaman wajib/opsional (Fase 2, K-P23): templat, pemeriksaan, draf, dan tampilannya di `platform/isi_halaman.py`;
+- Isi halaman wajib/opsional dan dokumen halaman Akreditasi (Fase 2, K-P23, K-P29): templat, pemeriksaan, draf, dan
+  tampilannya di `platform/isi_halaman.py`;
   disimpan di `data/prodi/<kode>/halaman-<id>.json` (`terbit`, `draf` berstatus draf/menunggu/dikembalikan, `versi`).
   Penyunting di admin (menu prodi "Isi halaman", K-P24, K-P27, K-P28): rute `platform/admin/isi_admin.py` (operator
   menulis/mengajukan; admin menerbitkan/mengembalikan/menarik; riwayat per halaman; kelengkapan superadmin
@@ -77,6 +78,9 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   Untuk pengembang: `.venv/bin/python platform/isi_halaman.py daftar|contoh|tarik --prodi <kode>` (`contoh` hanya untuk
   melihat tampilan, bertanda `[CONTOH]`, ditolak di produksi). Templat situs: `platform/template/halaman/isi.html` +
   `_isi.html`; pratinjau admin memakai makro yang sama (`bangun.bagian_html`).
+- Label kriteria akreditasi (K-P25, K-P29): `platform/template/kriteria.json` + `platform/kriteria.py`; hanya lembaga
+  berstatus `dikonfirmasi` (oleh LPMPP) yang tampil. `python3 platform/kriteria.py periksa|tabel`; tabelnya disalin ke
+  `docs/kriteria-akreditasi.md` (uji memastikan sama). Jangan mengisi kriteria LAM tanpa daftar dari LPMPP.
 - Bagian depan beranda (sebelum admin ada): `.venv/bin/python platform/tampilan_prodi.py lihat|atur|foto --prodi <kode>`.
   Nilai kartu resmi (akreditasi, gelar, SKS) tidak pernah boleh ditimpa (K-P15).
 - Admin (langkah 4): sekali `python3 platform/admin/siapkan.py` (kunci sesi di `rahasia/.env`), lalu

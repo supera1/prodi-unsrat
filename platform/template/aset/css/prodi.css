@@ -1252,3 +1252,47 @@ ul.saring {
 .isi-bagian .galeri {
 	padding-left: 0;
 }
+
+/* ---------------------------------------------------------------- accreditation criteria (Fase 2, kriteria.py) */
+
+/* the criteria a page serves, under the page title; text colour on the pale primary meets the contrast rules */
+.label-kriteria {
+	margin: 0 0 var(--unsrat-spasi-40);
+	padding: var(--unsrat-spasi-20) var(--unsrat-spasi-30);
+	border-left: 4px solid var(--prodi-utama);
+	background: var(--prodi-utama-pucat);
+	color: var(--prodi-utama);
+	font-size: var(--unsrat-size-kecil);
+	font-weight: 600;
+}
+
+.peta-kriteria__daftar {
+	margin: 0;
+	border-top: 1px solid var(--garis);
+}
+
+.peta-kriteria__daftar > div {
+	display: grid;
+	gap: var(--unsrat-spasi-10) var(--unsrat-spasi-40);
+	padding: var(--unsrat-spasi-30) 0;
+	border-bottom: 1px solid var(--garis);
+}
+
+@media (min-width: 640px) {
+	.peta-kriteria__daftar > div {
+		grid-template-columns: 18rem minmax(0, 1fr);
+	}
+}
+
+.peta-kriteria__daftar dt {
+	font-weight: 600;
+}
+
+.peta-kriteria__daftar dd {
+	margin: 0;
+}
+
+.peta-kriteria__daftar ul {
+	margin: 0;
+	padding-left: 1.25rem;
+}

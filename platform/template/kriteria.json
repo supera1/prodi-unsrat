@@ -1,0 +1,210 @@
+{
+  "keterangan": "Label kriteria akreditasi per lembaga (platform/kriteria.py, K-P25, K-P29). Disiapkan pengembang sebagai DRAF untuk diperiksa LPMPP UNSRAT; lembaga berstatus draf tidak pernah ditampilkan di situs. Setelah LPMPP mengonfirmasi, ubah status menjadi dikonfirmasi dan isi dikonfirmasi.oleh dan .tanggal. Panduan: docs/kriteria-akreditasi.md.",
+  "lembaga": [
+    {
+      "id": "ban-pt",
+      "nama": "BAN-PT",
+      "instrumen": "Instrumen Akreditasi Program Studi (IAPS) 4.0",
+      "alias": [
+        "BAN-PT"
+      ],
+      "status": "draf",
+      "dikonfirmasi": null,
+      "kriteria": [
+        {
+          "nomor": "1",
+          "nama": "Visi, Misi, Tujuan, dan Strategi"
+        },
+        {
+          "nomor": "2",
+          "nama": "Tata Pamong, Tata Kelola, dan Kerja Sama"
+        },
+        {
+          "nomor": "3",
+          "nama": "Mahasiswa"
+        },
+        {
+          "nomor": "4",
+          "nama": "Sumber Daya Manusia"
+        },
+        {
+          "nomor": "5",
+          "nama": "Keuangan, Sarana, dan Prasarana"
+        },
+        {
+          "nomor": "6",
+          "nama": "Pendidikan"
+        },
+        {
+          "nomor": "7",
+          "nama": "Penelitian"
+        },
+        {
+          "nomor": "8",
+          "nama": "Pengabdian kepada Masyarakat"
+        },
+        {
+          "nomor": "9",
+          "nama": "Luaran dan Capaian Tridharma"
+        }
+      ],
+      "halaman": {
+        "visi-misi": [
+          "1"
+        ],
+        "struktur-organisasi": [
+          "2"
+        ],
+        "penjaminan-mutu": [
+          "2"
+        ],
+        "kerja-sama": [
+          "2"
+        ],
+        "penerimaan": [
+          "3"
+        ],
+        "layanan": [
+          "3"
+        ],
+        "organisasi-prestasi": [
+          "3",
+          "9"
+        ],
+        "kelompok-keahlian": [
+          "4"
+        ],
+        "tendik": [
+          "4"
+        ],
+        "pengembangan-sdm": [
+          "4"
+        ],
+        "laboratorium": [
+          "5"
+        ],
+        "ruang": [
+          "5"
+        ],
+        "perpustakaan": [
+          "5"
+        ],
+        "sistem-informasi": [
+          "5"
+        ],
+        "kurikulum": [
+          "6"
+        ],
+        "peraturan": [
+          "6"
+        ],
+        "jadwal": [
+          "6"
+        ],
+        "penelitian": [
+          "7"
+        ],
+        "pkm": [
+          "8"
+        ],
+        "publikasi": [
+          "9"
+        ],
+        "luaran": [
+          "9"
+        ],
+        "alumni": [
+          "9"
+        ],
+        "survei-kepuasan": [
+          "9"
+        ]
+      }
+    },
+    {
+      "id": "lam-ptkes",
+      "nama": "LAM-PTKes",
+      "instrumen": "Instrumen akreditasi LAM-PTKes",
+      "alias": [
+        "LAM-PTKes"
+      ],
+      "status": "draf",
+      "dikonfirmasi": null,
+      "kriteria": [],
+      "halaman": {}
+    },
+    {
+      "id": "lam-spak",
+      "nama": "LAM-SPAK",
+      "instrumen": "Instrumen akreditasi LAM-SPAK",
+      "alias": [
+        "LAM-SPAK"
+      ],
+      "status": "draf",
+      "dikonfirmasi": null,
+      "kriteria": [],
+      "halaman": {}
+    },
+    {
+      "id": "lamemba",
+      "nama": "LAMEMBA",
+      "instrumen": "Instrumen akreditasi LAMEMBA",
+      "alias": [
+        "LAMEMBA"
+      ],
+      "status": "draf",
+      "dikonfirmasi": null,
+      "kriteria": [],
+      "halaman": {}
+    },
+    {
+      "id": "lam-teknik",
+      "nama": "LAM Teknik",
+      "instrumen": "Instrumen akreditasi LAM Teknik",
+      "alias": [
+        "LAM-Teknik",
+        "LAM-Tek"
+      ],
+      "status": "draf",
+      "dikonfirmasi": null,
+      "kriteria": [],
+      "halaman": {}
+    },
+    {
+      "id": "lamsama",
+      "nama": "LAMSAMA",
+      "instrumen": "Instrumen akreditasi LAMSAMA",
+      "alias": [
+        "LAMSAMA"
+      ],
+      "status": "draf",
+      "dikonfirmasi": null,
+      "kriteria": [],
+      "halaman": {}
+    },
+    {
+      "id": "lam-infokom",
+      "nama": "LAM-Infokom",
+      "instrumen": "Instrumen akreditasi LAM-Infokom",
+      "alias": [
+        "LAM-Infokom"
+      ],
+      "status": "draf",
+      "dikonfirmasi": null,
+      "kriteria": [],
+      "halaman": {}
+    },
+    {
+      "id": "lam-ptip",
+      "nama": "LAM-PTIP",
+      "instrumen": "Instrumen akreditasi LAM-PTIP",
+      "alias": [
+        "LAM-PTIP"
+      ],
+      "status": "draf",
+      "dikonfirmasi": null,
+      "kriteria": [],
+      "halaman": {}
+    }
+  ]
+}

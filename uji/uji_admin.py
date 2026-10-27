@@ -326,7 +326,7 @@ try:
         ("GET", "/prodi/%s/halaman" % A, "isi_daftar", hanya("superuji", "adma", "opa", "opab")),
         ("GET", "/prodi/%s/halaman" % B, "isi_daftar", hanya("superuji", "admb", "opb", "opab")),
         ("GET", "/prodi/%s/halaman/sejarah" % A, "isi_sunting", hanya("superuji", "adma", "opa", "opab")),
-        ("GET", "/prodi/%s/halaman/akreditasi" % A, "isi_sunting", hanya("superuji", "adma", "opa", "opab", ya=404)),
+        ("GET", "/prodi/%s/halaman/kalender" % A, "isi_sunting", hanya("superuji", "adma", "opa", "opab", ya=404)),
         ("POST", "/prodi/%s/halaman/sejarah" % A, "isi_simpan", hanya("superuji", "adma", "opa", "opab", ya=400)),
         ("POST", "/prodi/%s/halaman/sejarah" % B, "isi_simpan", hanya("superuji", "admb", "opb", "opab", ya=400)),
         ("GET", "/prodi/%s/halaman/sejarah/pratinjau" % A, "isi_pratinjau", hanya("superuji", "adma", "opa", "opab")),

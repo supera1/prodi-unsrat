@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """The content of a programme's own pages (Fase 2, K-P23): the 22 required accreditation pages ("wajib") and the 2
-optional ones of the master menu (platform/template/menu.json).
+optional ones of the master menu (platform/template/menu.json), and the documents of the accreditation page (langkah 4,
+K-P29: its status comes from the official data, the programme adds the certificate, the decree and other public
+documents).
 
 Every page has a content template (TEMPLAT): sections of fields, lists and tables that follow the page's description in
 the menu and what accreditation asks for, plus free extra sections at the end. The template drives:
@@ -199,6 +201,12 @@ TEMPLAT = {
     "penjaminan-mutu": halaman(
         ("uraian", uraian()),
         ("dokumen", dokumen_daftar("Dokumen mutu", "Standar mutu, SOP, laporan audit mutu internal, tindak lanjut."))),
+    # the accreditation page ("otomatis"): its status from the official data, these documents from the programme
+    "akreditasi": halaman(
+        ("dokumen", dokumen_daftar("Dokumen akreditasi", "Sertifikat akreditasi, SK akreditasi, dan ringkasan hasil akreditasi "
+                                                         "yang boleh dipublikasikan. Jangan unggah LED, LKPS, atau dokumen "
+                                                         "lain yang memuat data pribadi.", 20)),
+        ("uraian", paragraf("Keterangan", maks=3000))),
     "kerja-sama": halaman(
         ("uraian", uraian()),
         ("daftar", tabel("Daftar kerja sama", [
