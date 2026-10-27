@@ -150,6 +150,42 @@ try:
         cek(klien(ip).get("/masuk").status_code == 403 and klien(ip).get("/static/admin.css").status_code == 403,
             "alamat %s di luar jaringan harus ditolak" % ip)
     cek(klien("::ffff:103.84.116.20").get("/masuk").status_code == 200, "IPv4 di dalam IPv6 dikenali")
+
+    # settings that would open the admin too wide stop the start: a network of (nearly) the whole internet, production
+    # without HTTPS. Networks are separated by commas, spaces or tabs, as for Nginx (40-prodi-jaringan.sh).
+    def start_ditolak(label, **atur):
+        try:
+            app_mod.buat_app(dict(env, **atur))
+        except SystemExit as e:
+            return str(e)
+        gagal.append("%s: admin harus menolak start" % label)
+        return ""
+    for nilai in ("0.0.0.0/0", "103.84.116.0/24,0.0.0.0/1", "10.0.0.0/7", "::/0", "2000::/3"):
+        cek("terlalu luas" in start_ditolak("ADMIN_IP_BOLEH=" + nilai, ADMIN_IP_BOLEH=nilai), "pesan ADMIN_IP_BOLEH=%s" % nilai)
+    cek("tidak sah" in start_ditolak("ADMIN_IP_BOLEH bukan jaringan", ADMIN_IP_BOLEH="103.84.116.0/24;allow"),
+        "pesan ADMIN_IP_BOLEH bukan jaringan")
+    for atur in ({"PRODI_MODE": "produksi"}, {"PRODI_MODE": "produksi", "ADMIN_HTTPS": "0"}):
+        cek("ADMIN_HTTPS=1" in start_ditolak("produksi tanpa HTTPS %r" % atur, **atur), "pesan produksi tanpa HTTPS")
+    app_mod.buat_app(dict(env, PRODI_MODE="produksi", ADMIN_HTTPS="1"))
+    app_luas = app_mod.buat_app(dict(env, ADMIN_IP_BOLEH="103.84.116.0/24 10.8.0.0/16,\t2001:db8::/32"))
+    for ip, kode in (("10.8.3.4", 200), ("2001:db8::5", 200), ("103.84.116.9", 200), ("10.9.0.1", 403), ("8.8.8.8", 403)):
+        c_ = app_luas.test_client()
+        c_.environ_base["REMOTE_ADDR"] = ip
+        cek(c_.get("/masuk").status_code == kode, "ADMIN_IP_BOLEH dipisah spasi dan tab: %s harus %s" % (ip, kode))
+    # PRODI_MODE comes from the environment of the stack, not from the secrets folder's .env
+    os.makedirs(lokasi.rahasia(), exist_ok=True)
+    path_env = os.path.join(lokasi.rahasia(), ".env")
+    with io.open(path_env, "w", encoding="utf-8") as f:
+        f.write("SECRET_KEY=%s\n" % ("k" * 64))
+    os.environ["PRODI_MODE"] = "produksi"
+    try:
+        app_mod.buat_app()
+        gagal.append("PRODI_MODE=produksi dari lingkungan stack harus dibaca admin")
+    except SystemExit as e:
+        cek("ADMIN_HTTPS=1" in str(e), "PRODI_MODE dari lingkungan: %s" % e)
+    finally:
+        os.environ.pop("PRODI_MODE")
+        os.remove(path_env)
     r = klien().get("/masuk")
     for h, isi in (("Content-Security-Policy", "frame-ancestors 'none'"), ("X-Frame-Options", "DENY"),
                    ("Cache-Control", "no-store"), ("X-Content-Type-Options", "nosniff")):

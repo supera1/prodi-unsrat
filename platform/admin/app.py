@@ -6,9 +6,9 @@
     .venv/bin/python platform/admin/app.py                               local admin at http://127.0.0.1:8791/
 
 Never exposed to the internet: only addresses in ADMIN_IP_BOLEH (UNSRAT's network, or its VPN) get anything at all,
-and in production only over HTTPS (ADMIN_HTTPS=1) behind the web container. Patterns taken from the www admin
-(site/admin/app.py): network allow-list, lockout per address and per user name, sessions bound to the password,
-CSRF on every form, strict security headers, no debugger.
+and in production only over HTTPS (PRODI_MODE=produksi does not start without ADMIN_HTTPS=1) behind the web container.
+Patterns taken from the www admin (site/admin/app.py): network allow-list, lockout per address and per user name,
+sessions bound to the password, CSRF on every form, strict security headers, no debugger.
 
 Access is declared on every route with @akses(...) (akses.py) and checked in one place (periksa_akses) before any
 view runs. A route without a declaration is refused (fail closed); uji/uji_admin.py tries every route with every role.
@@ -55,8 +55,11 @@ GAGAL_MAKS_AKUN = 10          # failed logins for one user name, from any addres
 KUNCI_MENIT = 15
 MAKS_TANPA_LOGIN = 64 * 1024  # largest request accepted before logging in (the login form)
 IP_BOLEH_BAWAAN = "103.84.116.0/24"
+# the shortest prefix of a network in ADMIN_IP_BOLEH, per IP version: a wider one opens the admin to a large part of the
+# internet (0.0.0.0/0 to everybody); docker/nginx/40-prodi-jaringan.sh refuses the same
+AWALAN_MIN = {4: 8, 6: 32}
 PENGATURAN_LINGKUNGAN = ("ADMIN_IP_BOLEH", "ADMIN_HTTPS", "PROXY_TERPERCAYA", "ADMIN_AWALAN", "PORT", "PRODI_ALAMAT_PUBLIK",
-                         "PRODI_BANGUN", "PRODI_BANGUN_HARIAN")
+                         "PRODI_BANGUN", "PRODI_BANGUN_HARIAN", "PRODI_MODE")
 POLA_NAMA_AKUN = re.compile(r"^([a-z][a-z0-9._-]{2,31}|-|baris-perintah)$")
 POLA_AKSI = re.compile(r"^[a-z][a-z-]{1,40}$")
 POLA_KODE = re.compile(r"^[0-9A-Za-z]{3,12}$")
@@ -84,13 +87,18 @@ def baca_env(path):
 
 
 def baca_jaringan(teks):
+    """The networks of ADMIN_IP_BOLEH, separated by commas, spaces or tabs (as for Nginx, 40-prodi-jaringan.sh)."""
     hasil = []
-    for bagian in (teks or "").split(","):
-        if bagian.strip():
+    for bagian in re.split(r"[,\s]+", teks or ""):
+        if bagian:
             try:
-                hasil.append(ipaddress.ip_network(bagian.strip(), strict=False))
+                n = ipaddress.ip_network(bagian, strict=False)
             except ValueError:
-                raise ValueError("ADMIN_IP_BOLEH berisi alamat yang tidak sah: %s" % bagian.strip())
+                raise ValueError("ADMIN_IP_BOLEH berisi alamat yang tidak sah: %s" % bagian)
+            if n.prefixlen < AWALAN_MIN[n.version]:
+                raise ValueError("ADMIN_IP_BOLEH berisi jaringan yang terlalu luas: %s (paling luas /%d untuk IPv4, /%d "
+                                 "untuk IPv6)" % (bagian, AWALAN_MIN[4], AWALAN_MIN[6]))
+            hasil.append(n)
     return hasil
 
 
@@ -102,11 +110,17 @@ def buat_app(env=None):
     if not env.get("SECRET_KEY") or len(env["SECRET_KEY"]) < 32:
         raise SystemExit("SECRET_KEY belum diisi: jalankan dulu python3 platform/admin/siapkan.py")
     https = env.get("ADMIN_HTTPS") == "1"
+    if env.get("PRODI_MODE") == "produksi" and not https:
+        raise SystemExit("PRODI_MODE=produksi memerlukan ADMIN_HTTPS=1: di produksi admin hanya dibuka lewat HTTPS, "
+                         "supaya kata sandi dan sesi tidak pernah lewat jaringan tanpa enkripsi (docs/deploy.md §7)")
     proksi = int(env.get("PROXY_TERPERCAYA") or 0)
     awalan = (env.get("ADMIN_AWALAN") or "").rstrip("/")
     if awalan and not re.match(r"^(/[A-Za-z0-9._-]+)+$", awalan):
         raise SystemExit("ADMIN_AWALAN tidak sah: %s" % awalan)
-    ip_boleh = baca_jaringan(env.get("ADMIN_IP_BOLEH") or IP_BOLEH_BAWAAN)
+    try:
+        ip_boleh = baca_jaringan(env.get("ADMIN_IP_BOLEH") or IP_BOLEH_BAWAAN)
+    except ValueError as e:
+        raise SystemExit(str(e))
     alamat_publik = (env.get("PRODI_ALAMAT_PUBLIK") or "https://prodi.unsrat.ac.id").rstrip("/")
 
     app = Flask(__name__, template_folder=os.path.join(ADMIN, "templates"), static_folder=os.path.join(ADMIN, "static"))
