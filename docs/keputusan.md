@@ -313,7 +313,7 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
 - **Konteks:** sebelum staging dan produksi, pengguna meminta pemeriksaan menyeluruh: bug, tautan rusak, dan terutama
   keamanan (diserang, deface, pencurian data, disusupi pinjol, diambil alih). Temuan dan buktinya:
   [log audit pra-produksi](log/praproduksi-keamanan.md).
-- **Keputusan** (usulan pengembang, menunggu tinjauan):
+- **Keputusan** (usulan pengembang, disetujui pengguna 27 Oktober 2026):
   - **Saringan spam** (`platform/pemantau/saringan_spam.py`) juga menolak bahasa jualan pinjol ilegal, jual-beli ijazah,
     dan obat terlarang (mis. "dana cepat cair", "pinjol tanpa KTP", "jual ijazah asli", "jual obat aborsi").
     - Kata topiknya sendiri tidak ditolak ("pinjaman online ilegal" di judul penelitian, "ijazah palsu" di peringatan,
