@@ -48,7 +48,7 @@ platform/admin/      Flask: akun, peran, superadmin, admin prodi
 platform/bangun/     generator + perakit folder publik
 platform/template/   template induk: menu.json, halaman Jinja2, aset
 platform/data-awal/  slug.csv, palet warna, www/ (salinan data www untuk VM baru)
-platform/pemantau/   cek integritas & saringan spam judi
+platform/pemantau/   cek integritas & saringan spam (judi, pinjol, ijazah, obat)
 uji/                 skrip uji; python uji/jalankan-semua.py
 docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pulihkan (Dockerfile admin di akar)
 ```
@@ -126,6 +126,9 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
 - Admin hanya dari jaringan UNSRAT atau VPN (`ADMIN_IP_BOLEH`).
 - Escape semua keluaran (Jinja2 autoescape), CSRF di setiap formulir, CSP tanpa skrip *inline*.
 - Unggahan: hanya JPEG/PNG/SVG tersanitasi (`gambar_aman.py`, `svg_aman.py`); semua teks lewat `saringan_spam.py`.
+- Produksi: admin hanya lewat HTTPS (`PRODI_MODE=produksi` tanpa `ADMIN_HTTPS=1` ditolak saat start); jaringan
+  `ADMIN_IP_BOLEH`/`PROKSI_DEPAN` yang terlalu luas ditolak (`app.py`, `40-prodi-jaringan.sh`); isi bertanda `[CONTOH]`
+  tidak pernah terbit di produksi (K-P32).
 - Konteks ancaman nyata: domain `.ac.id` sering disusupi konten judi online lewat CMS lemah, unggahan berbahaya,
   dan akun admin curian.
 

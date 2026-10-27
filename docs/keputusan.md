@@ -308,3 +308,34 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
 - **Konsekuensi:** VM yang registrinya sudah ada tidak berubah sendiri. Superadmin mengunggah berkas yang sama di menu
   Tautan dosen. Tautan yang berubah di dosen.unsrat.ac.id diperbarui lewat menu itu, dan data awal diperbarui pengembang
   sesekali.
+
+### K-P32 — Pengerasan keamanan pra-produksi (audit 27 Oktober 2026)
+- **Konteks:** sebelum staging dan produksi, pengguna meminta pemeriksaan menyeluruh: bug, tautan rusak, dan terutama
+  keamanan (diserang, deface, pencurian data, disusupi pinjol, diambil alih). Temuan dan buktinya:
+  [log audit pra-produksi](log/praproduksi-keamanan.md).
+- **Keputusan** (usulan pengembang, menunggu tinjauan):
+  - **Saringan spam** (`platform/pemantau/saringan_spam.py`) juga menolak bahasa jualan pinjol ilegal, jual-beli ijazah,
+    dan obat terlarang (mis. "dana cepat cair", "pinjol tanpa KTP", "jual ijazah asli", "jual obat aborsi").
+    - Kata topiknya sendiri tidak ditolak ("pinjaman online ilegal" di judul penelitian, "ijazah palsu" di peringatan,
+      nama obat di penelitian farmasi), supaya prodi tetap bisa menulis tentang topik itu.
+    - Istilah judi tetap seperti di www: ditolak seluruhnya.
+    - Pesan penolakan menyebut jenisnya: teks judi, teks pinjol, atau teks terlarang.
+  - **Jaringan yang terlalu luas ditolak** saat start, di admin (`app.py`) maupun Nginx (`40-prodi-jaringan.sh`):
+    - `ADMIN_IP_BOLEH` paling luas `/8` (IPv4) atau `/32` (IPv6), sehingga `0.0.0.0/0` tidak bisa membuka admin ke
+      seluruh internet;
+    - `PROKSI_DEPAN` paling luas `/16` atau `/48`, karena setiap alamat di dalamnya dipercaya menyebut alamat
+      pengunjung (`X-Forwarded-For`) dan dengan itu bisa lolos `ADMIN_IP_BOLEH`.
+  - **Admin di produksi hanya lewat HTTPS:** `PRODI_MODE=produksi` tanpa `ADMIN_HTTPS=1` membuat admin berhenti dengan
+    pesan. Pengaturan admin diperiksa sebelum situs dibangun (`docker/admin-mulai.sh`).
+  - **Isi bertanda `[CONTOH]` tidak pernah terbit di produksi** (halaman dan pengumuman), siapa pun yang menaruhnya,
+    karena VM staging menjadi VM produksi (deploy §11).
+  - **Kontainer:** `no-new-privileges` untuk ketiganya; admin dan pemantau (pengguna 10001) tanpa kapabilitas Linux.
+    Kontainer web (Nginx mulai sebagai root) belum dibatasi kapabilitasnya sampai dicoba dengan Docker.
+  - **Tautan ke www** memakai alamat www yang tayang sekarang (`bangun.WWW_SEKARANG`: `kalender-akademik/`,
+    `category/pengumuman/`), karena www baru belum tayang. Tabel itu dikosongkan saat www baru tayang.
+- **Konsekuensi:**
+  - Admin VM menyiapkan HTTPS untuk admin sebelum produksi.
+  - `PROKSI_DEPAN` diisi subnet proksi yang sebenarnya; nilai seperti `10.0.0.0/8` ditolak.
+  - Judul yang memuat istilah judi (mis. pengabdian tentang bahaya judi online) tetap ditolak; bila pilot
+    memerlukannya, diputuskan terpisah.
+  - Perubahan saringan dan pemeriksaan jaringan diusulkan juga untuk www (`docs/asal-modul.md`).
