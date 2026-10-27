@@ -70,8 +70,10 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
 - Pengumuman (sebelum admin ada): `.venv/bin/python platform/pengumuman.py tambah|daftar|status --prodi <kode> ...`;
   foto/PDF lewat `platform/media.py` (`PRODI_PENYIMPANAN=lokal` ke `unggahan/`, `gcs` ke bucket). Lalu bangun `--prodi`.
 - Isi halaman wajib/opsional (Fase 2, K-P23): templat, pemeriksaan, draf, dan tampilannya di `platform/isi_halaman.py`;
-  disimpan di `data/prodi/<kode>/halaman-<id>.json` (`terbit`, `draf`, `versi`). Penyunting di admin (menu prodi
-  "Isi halaman", K-P27): rute `platform/admin/isi_admin.py`, formulir dari templat `platform/admin/penyunting.py`.
+  disimpan di `data/prodi/<kode>/halaman-<id>.json` (`terbit`, `draf` berstatus draf/menunggu/dikembalikan, `versi`).
+  Penyunting di admin (menu prodi "Isi halaman", K-P24, K-P27, K-P28): rute `platform/admin/isi_admin.py` (operator
+  menulis/mengajukan; admin menerbitkan/mengembalikan/menarik; riwayat per halaman; kelengkapan superadmin
+  `/super/kelengkapan` + CSV), formulir dari templat `platform/admin/penyunting.py`.
   Untuk pengembang: `.venv/bin/python platform/isi_halaman.py daftar|contoh|tarik --prodi <kode>` (`contoh` hanya untuk
   melihat tampilan, bertanda `[CONTOH]`, ditolak di produksi). Templat situs: `platform/template/halaman/isi.html` +
   `_isi.html`; pratinjau admin memakai makro yang sama (`bangun.bagian_html`).

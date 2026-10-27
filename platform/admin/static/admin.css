@@ -25,6 +25,7 @@ body {
 	background: var(--abu-50);
 	color: var(--abu-900);
 	font: 1rem/1.6 var(--font);
+	overflow-wrap: break-word;         /* long file names and paths wrap instead of widening the page */
 }
 
 a {
@@ -641,6 +642,11 @@ dl.data dd {
 	color: var(--abu-600);
 }
 
+.status--dikembalikan {
+	background: #fdecec;
+	color: var(--merah);
+}
+
 .media-daftar {
 	padding: 0;
 	list-style: none;
@@ -724,6 +730,11 @@ dl.data dd {
 
 .formulir--sunting fieldset {
 	min-width: 0;
+}
+
+/* a text area starts on its own line, also after the badge of a paragraph field */
+.formulir--sunting textarea {
+	display: block;
 }
 
 .kartu--sunting > .isian:last-child {
@@ -887,4 +898,37 @@ dl.data dd {
 .berkas-kini {
 	margin: 0 0 0.25rem;
 	overflow-wrap: anywhere;
+}
+
+.kembalikan {
+	margin: 0 0 1rem;
+}
+
+.catatan-admin {
+	white-space: pre-line;
+	overflow-wrap: anywhere;
+}
+
+.zona-bahaya {
+	margin-top: 1.5rem;
+	padding-top: 0.5rem;
+	border-top: 1px solid var(--abu-200);
+}
+
+.versi-bagian {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.25rem 0.75rem;
+	margin: 0.25rem 0;
+}
+
+.versi-bagian .sebaris {
+	margin: 0;
+}
+
+td.sel-angka {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
 }

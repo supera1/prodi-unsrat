@@ -1,29 +1,53 @@
 {% extends "dasar.html" %}
 {% from "_nav_prodi.html" import nav_prodi %}
 {% block judul %}{{ ini.label }} — {{ pr.nama }}{% endblock %}
+{# every button saves what the form holds first; "Simpan draf" comes first, so Enter in a field saves the draft #}
 {% macro tombol_simpan() %}
+{% set menunggu = k.draf and k.draf.status == 'menunggu' %}
 <div class="tombol-baris">
 	<button type="submit" class="tombol" name="aksi" value="simpan">Simpan draf</button>
 	<button type="submit" class="tombol tombol--garis" name="aksi" value="pratinjau">Simpan dan pratinjau</button>
+	{% if admin %}
+	<button type="submit" class="tombol tombol--garis" name="aksi" value="terbitkan">{{ 'Terbitkan perubahan' if k.terbit else 'Terbitkan' }}</button>
+	{% elif menunggu %}
+	<button type="submit" class="tombol tombol--garis" name="aksi" value="batal-ajukan">Batalkan pengajuan</button>
+	{% else %}
+	<button type="submit" class="tombol tombol--garis" name="aksi" value="ajukan">Ajukan untuk diterbitkan</button>
+	{% endif %}
 </div>
 {% endmacro %}
 {% block isi %}
+{% set d = k.draf %}
+{% set menunggu = d and d.status == 'menunggu' %}
 {{ nav_prodi(pr, 'isi_daftar') }}
 <p class="jejak-admin"><a href="{{ url_for('isi_daftar', kode=pr.kode) }}">Isi halaman</a> › {{ ini.label }}</p>
 <h1>{{ ini.label }}</h1>
 <p class="keterangan">{{ ini.deskripsi }}</p>
-<p>
-	{% if k.status == 'kosong' %}Belum ada isi; situs menampilkan “sedang dilengkapi”.
-	{% elif k.status == 'draf' %}<span class="status status--draf">Draf</span> belum terbit; situs masih menampilkan “sedang dilengkapi”.
-	{% else %}<span class="status status--terbit">Terbit</span> {{ (k.terbit.waktu | replace('T', ' '))[:16] }}{% if k.draf %}; perubahan di draf belum terbit{% endif %}.
+<section class="kartu tindakan-status" aria-label="Keadaan halaman">
+	<p>
+		{% if k.terbit %}<span class="status status--terbit">Terbit</span> {{ (k.terbit.waktu | replace('T', ' '))[:16] }} oleh {{ k.terbit.oleh }}{% if not k.tayang %}, tetapi <strong>tidak tampil</strong>: isinya tidak lolos pemeriksaan sekarang{% endif %}.
+		{% elif not d %}Belum ada isi; situs menampilkan “sedang dilengkapi”.
+		{% else %}Belum terbit; situs menampilkan “sedang dilengkapi”.
+		{% endif %}
+		{% if not ini.sembunyi %}<a href="{{ pr.alamat }}{{ ini.alamat }}/">Lihat halaman ini di situs ↗</a>{% endif %}
+	</p>
+	{% if d %}
+	<p><span class="status status--{{ d.status }}">{{ {'draf': 'Draf', 'menunggu': 'Menunggu persetujuan', 'dikembalikan': 'Dikembalikan'}[d.status] }}</span>
+		{% if menunggu %}diajukan {{ (d.diajukan.waktu | replace('T', ' '))[:16] }} oleh {{ d.diajukan.oleh }}{% if admin %}: periksa lewat pratinjau, lalu terbitkan atau kembalikan dengan catatan{% else %}; admin prodi akan memeriksanya{% endif %}.
+		{% endif %}
+		Terakhir disimpan {{ (d.waktu | replace('T', ' '))[:16] }} oleh {{ d.oleh }}.</p>
+	{% if d.status == 'dikembalikan' and d.catatan %}
+	<div class="pesan pesan--info"><p><strong>Catatan dari {{ d.catatan.oleh }}</strong> ({{ (d.catatan.waktu | replace('T', ' '))[:16] }}):</p>
+		<p class="catatan-admin">{{ d.catatan.isi }}</p>
+		<p>Perbaiki drafnya, lalu ajukan lagi.</p></div>
 	{% endif %}
-	{% if k.draf %}Draf terakhir disimpan {{ (k.draf.waktu | replace('T', ' '))[:16] }} oleh {{ k.draf.oleh }}.{% endif %}
-	{% if not ini.sembunyi %}<a href="{{ pr.alamat }}{{ ini.alamat }}/">Lihat halaman ini di situs ↗</a>{% endif %}
-</p>
+	{% endif %}
+	<p><a href="{{ url_for('isi_riwayat', kode=pr.kode, id_=ini.id) }}">Riwayat halaman ini</a></p>
+</section>
 <p class="pesan pesan--info">{{ privasi }}</p>
 {% if masalah %}
 <div class="pesan pesan--galat" id="ringkasan-galat">
-	<p>Draf ini belum dapat diterbitkan: {{ masalah | length }} isian perlu dilengkapi atau diperbaiki.</p>
+	<p>Draf ini belum dapat {{ 'diterbitkan' if admin else 'diajukan' }}: {{ masalah | length }} isian perlu dilengkapi atau diperbaiki.</p>
 	<ul>
 		{% for jalur, tempat, pesan in masalah[:30] %}
 		<li>{% if jalur %}<a href="#{{ id_galat(jalur) }}">{{ tempat }}</a>: {% endif %}{{ pesan }}</li>
@@ -38,7 +62,7 @@
 		<li>Paragraf dipisah satu baris kosong; baris yang diawali “- ” menjadi daftar.</li>
 		<li>Tautan: <code>[teks tautan](https://alamat.lengkap)</code>; alamat yang diawali https:// juga menjadi tautan. Huruf tebal: <code>**teks**</code>. HTML tidak diterima.</li>
 		<li>Tombol Tambah, Naik, Turun, dan Hapus langsung menyimpan draf. Baris yang dibiarkan kosong dibuang saat draf disimpan.</li>
-		<li>Draf hanya terlihat di admin, lewat pratinjau. Situs tetap menampilkan isi yang sudah terbit.</li>
+		<li>Draf hanya terlihat di admin, lewat pratinjau. {% if admin %}Situs berubah setelah Anda menekan Terbitkan.{% else %}Setelah diajukan, admin prodi menerbitkannya atau mengembalikannya dengan catatan.{% endif %}</li>
 		<li>Berkas besar sebaiknya diunggah satu per satu: satu kali simpan paling banyak 40 MB.</li>
 	</ul>
 </details>
@@ -46,13 +70,31 @@
 	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
 	<input type="hidden" name="versi" value="{{ data.versi or 0 }}">
 	{{ tombol_simpan() }}
+	{% if admin and menunggu %}
+	<div class="kartu kembalikan">
+		<div class="isian"><label for="catatan">Catatan untuk penulis, bila dikembalikan</label>
+			<textarea id="catatan" name="catatan" rows="3" aria-describedby="catatan-ket"></textarea>
+			<p class="keterangan" id="catatan-ket">Apa yang perlu diperbaiki sebelum diajukan lagi; paling banyak {{ maks_catatan }} karakter.</p></div>
+		<button type="submit" class="tombol tombol--garis" name="aksi" value="kembalikan">Kembalikan dengan catatan</button>
+	</div>
+	{% endif %}
 	{{ formulir }}
 	{{ tombol_simpan() }}
-	{% if k.draf %}
-	<p class="tombol-baris">
-		<button type="submit" class="tombol tombol--garis tombol--bahaya" name="aksi" value="batal" formnovalidate>Buang draf</button>
-		<span class="keterangan">{{ 'Penyunting kembali ke isi yang sudah terbit.' if k.terbit else 'Halaman kembali kosong.' }} Draf yang dibuang tetap tersimpan di riwayat versi.</span>
-	</p>
+	{% if (d and (admin or not menunggu)) or (admin and k.terbit) %}
+	<div class="zona-bahaya">
+		{% if d and (admin or not menunggu) %}
+		<p class="tombol-baris">
+			<button type="submit" class="tombol tombol--garis tombol--bahaya" name="aksi" value="buang" formnovalidate>Buang draf</button>
+			<span class="keterangan">{{ 'Penyunting kembali ke isi yang sudah terbit.' if k.terbit else 'Halaman kembali kosong.' }} Draf yang dibuang tetap tersimpan di riwayat.</span>
+		</p>
+		{% endif %}
+		{% if admin and k.terbit %}
+		<p class="tombol-baris">
+			<button type="submit" class="tombol tombol--garis tombol--bahaya" name="aksi" value="tarik" formnovalidate>Tarik dari situs</button>
+			<span class="keterangan">Halaman kembali “sedang dilengkapi”; isinya tetap ada di draf dan di riwayat.</span>
+		</p>
+		{% endif %}
+	</div>
 	{% endif %}
 </form>
 {% endblock %}

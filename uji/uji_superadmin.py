@@ -173,7 +173,7 @@ try:
     cek('href="https://dosen.unsrat.ac.id/prodi/ti"' in baca("s1ti/dosen/dosen-tetap/index.html"), "tautan dosen tampil di situs")
 
     # --- lecturer links in bulk
-    cek(impor_dosen._aman("=HYPERLINK(\"x\")").startswith("'") and impor_dosen._aman("biasa") == "biasa", "rumus di CSV dinetralkan")
+    cek(impor_dosen.aman_csv("=HYPERLINK(\"x\")").startswith("'") and impor_dosen.aman_csv("biasa") == "biasa", "rumus di CSV dinetralkan")
     r = su.get("/super/dosen/templat.csv")
     templat = r.get_data(as_text=True)
     cek(r.headers["Content-Type"].startswith("text/csv") and "attachment" in r.headers["Content-Disposition"], "templat diunduh")

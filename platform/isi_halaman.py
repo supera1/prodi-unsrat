@@ -14,12 +14,15 @@ the menu and what accreditation asks for, plus free extra sections at the end. T
 
 Stored in prodi/<kode>/halaman-<id>.json (lokasi.py):
     {"versi": n, "terbit": {"isi": {...}, "oleh", "waktu"} or null,
-     "draf": {"isi": {...}, "status": "draf", "oleh", "waktu"} or null, "diubah": {"oleh", "waktu"}}
-The site shows "terbit" only. The admin's editor (admin/isi_admin.py, langkah 2) works on the draft; publishing it and
-its approval come in langkah 3 (K-P24). Every change counts up "versi", and a change made from an older version is
-refused, so two people editing a page never overwrite each other silently. Publishing, withdrawing, an explicit save of
-the draft and discarding it keep the previous content in the history. Keys a template does not know are kept, so a
-template changed after the pilot never loses content.
+     "draf": {"isi": {...}, "status": "draf" | "menunggu" | "dikembalikan", "oleh", "waktu", "diajukan": {"oleh",
+              "waktu"}, "catatan": {"isi", "oleh", "waktu"}} or null,
+     "diubah": {"oleh", "waktu"}}
+The site shows "terbit" only. The admin's editor (admin/isi_admin.py) works on the draft (K-P24, K-P27): an operator
+submits it (ajukan), a programme admin publishes it (terbitkan) or sends it back with a note (kembalikan), and can take
+published content off the site (tarik). Every change counts up "versi", and a change made from an older version is
+refused, so two people editing a page never overwrite each other silently. Every deliberate action (save, submit,
+publish, send back, withdraw, discard, an old version made the draft) keeps the previous content in the history. Keys
+a template does not know are kept, so a template changed after the pilot never loses content.
 
     python3 platform/isi_halaman.py daftar --prodi <kode>       which pages have published content
     python3 platform/isi_halaman.py contoh --prodi <kode>       fill every empty page with [CONTOH] content, to look at
@@ -695,6 +698,9 @@ def tampilan(id_halaman, isi, media_ok=lambda rekam: True):
 # ------------------------------------------------------------------ stored content
 
 MAKS_DRAF = 2 * 1024 * 1024    # bytes of one page's draft as JSON; a full 300-row table with long texts stays under 1 MB
+MAKS_CATATAN = 500             # an admin's note when sending a draft back (as for announcements)
+STATUS_DRAF = ("draf", "menunggu", "dikembalikan")
+NAMA_STATUS_DRAF = {"draf": "masih draf", "menunggu": "menunggu persetujuan", "dikembalikan": "dikembalikan"}
 # reading a page, checking its version and writing it happen under this lock, so two saves of the admin (one process,
 # several threads) can never both pass the check
 _KUNCI = threading.Lock()
@@ -759,26 +765,43 @@ def _tulis(kode, id_halaman, data, oleh, aksi, riwayat=True):
     return data["versi"]
 
 
-def terbitkan(kode, id_halaman, isi, oleh, versi=None):
-    """Publish content (checked first; nothing is written when it fails). versi: see cek_versi. Returns the new
-    version."""
+def terbitkan(kode, id_halaman, isi, oleh, versi=None, dari_draf=False):
+    """Publish content (checked first; nothing is written when it fails). versi: see cek_versi. dari_draf: the content
+    is the page's draft as the editor holds it (a programme admin publishing, K-P24): the draft is done with, and who
+    submitted it is kept with the published content. Returns the new version."""
     nama_berkas(kode, id_halaman)
     masalah = periksa(id_halaman, isi, kode)
     if masalah:
-        raise GagalIsi("; ".join(masalah[:20]))
+        raise GagalIsi("%d isian perlu diperbaiki: %s" % (len(masalah), "; ".join(masalah[:5])))
+    if dari_draf and kosong(TEMPLAT[id_halaman], isi):
+        raise GagalIsi("halaman ini belum berisi apa pun untuk diterbitkan")
     with _KUNCI:
         data = baca(kode, id_halaman)
         cek_versi(data, versi)
         data["terbit"] = {"isi": isi, "oleh": oleh, "waktu": _sekarang()}
+        if dari_draf:
+            d = draf(data)
+            if d and d.get("diajukan"):
+                data["terbit"]["diajukan"] = d["diajukan"]
+            data["draf"] = None
         return _tulis(kode, id_halaman, data, oleh, "terbitkan")
 
 
-def tarik(kode, id_halaman, oleh):
-    """Take a page's content off the site (it is kept in the history). Returns the new version."""
+def tarik(kode, id_halaman, oleh, versi=None, isi=None):
+    """Take a page's content off the site; the page says again that the programme is filling it. The content stays in
+    the history, and becomes the draft when there is none, so the editor still holds it. isi: what the editor holds
+    (it becomes the draft). Returns the new version."""
+    if isi is not None:
+        _boleh_disimpan(kode, id_halaman, isi)
     with _KUNCI:
         data = baca(kode, id_halaman)
         if data.get("terbit") is None:
             return data.get("versi", 0)
+        cek_versi(data, versi)
+        if isi is not None:
+            data["draf"] = _draf_dari(isi, oleh, draf(data))
+        elif draf(data) is None and isinstance(data["terbit"], dict) and isinstance(data["terbit"].get("isi"), dict):
+            data["draf"] = {"isi": data["terbit"]["isi"], "status": "draf", "oleh": oleh, "waktu": _sekarang()}
         data["terbit"] = None
         return _tulis(kode, id_halaman, data, oleh, "tarik")
 
@@ -822,26 +845,13 @@ def simpan_draf(kode, id_halaman, isi, oleh, versi=None, riwayat=True, dihapus=N
     in the history (an explicit save); the editor's list buttons and preview store without it, so the history holds
     saves rather than every click. dihapus: the list item the editor just removed ({"jalur", "indeks", "nilai"}),
     offered back until the next save. Returns the new version."""
-    nama_berkas(kode, id_halaman)
-    if not isinstance(isi, dict):
-        raise GagalIsi("isi halaman harus berupa objek")
-    templat = TEMPLAT[id_halaman]
-    if not _berkas_sendiri(templat, isi, kode):
-        raise GagalIsi("draf merujuk berkas yang bukan milik prodi ini")
-    if dihapus is not None:
-        node = node_jalur(templat, dihapus.get("jalur")) if isinstance(dihapus, dict) else None
-        if node is None or node["jenis"] != "daftar" or not isinstance(dihapus.get("indeks"), int) \
-                or not _berkas_sendiri(node["isi"], dihapus.get("nilai"), kode):
-            raise GagalIsi("butir yang dihapus tidak sah")
-    draf_ = {"isi": isi, "status": "draf", "oleh": oleh, "waktu": _sekarang()}
-    if dihapus:
-        draf_["dihapus"] = dihapus
-    if len(json.dumps(draf_, ensure_ascii=False).encode("utf-8")) > MAKS_DRAF:
-        raise GagalIsi("draf terlalu besar (maksimal %d MB)" % (MAKS_DRAF // 1024 // 1024))
+    _boleh_disimpan(kode, id_halaman, isi, dihapus)
     with _KUNCI:
         data = baca(kode, id_halaman)
         cek_versi(data, versi)
-        data["draf"] = draf_
+        data["draf"] = _draf_dari(isi, oleh, draf(data))
+        if dihapus:
+            data["draf"]["dihapus"] = dihapus
         return _tulis(kode, id_halaman, data, oleh, "simpan draf", riwayat)
 
 
@@ -855,6 +865,137 @@ def buang_draf(kode, id_halaman, oleh, versi=None):
         cek_versi(data, versi)
         data["draf"] = None
         return _tulis(kode, id_halaman, data, oleh, "buang draf")
+
+
+def _boleh_disimpan(kode, id_halaman, isi, dihapus=None):
+    """What a draft must be, whatever its status: an object, files of this programme only, at most MAKS_DRAF."""
+    nama_berkas(kode, id_halaman)
+    if not isinstance(isi, dict):
+        raise GagalIsi("isi halaman harus berupa objek")
+    templat = TEMPLAT[id_halaman]
+    if not _berkas_sendiri(templat, isi, kode):
+        raise GagalIsi("draf merujuk berkas yang bukan milik prodi ini")
+    if dihapus is not None:
+        node = node_jalur(templat, dihapus.get("jalur")) if isinstance(dihapus, dict) else None
+        if node is None or node["jenis"] != "daftar" or not isinstance(dihapus.get("indeks"), int) \
+                or not _berkas_sendiri(node["isi"], dihapus.get("nilai"), kode):
+            raise GagalIsi("butir yang dihapus tidak sah")
+    if len(json.dumps([isi, dihapus], ensure_ascii=False).encode("utf-8")) > MAKS_DRAF:
+        raise GagalIsi("draf terlalu besar (maksimal %d MB)" % (MAKS_DRAF // 1024 // 1024))
+
+
+def _draf_dari(isi, oleh, lama=None):
+    """The draft record for new content: its status (with who submitted it, the admin's note) stays what it was, so
+    editing a submitted or returned draft keeps it so until it is submitted again or cancelled."""
+    d = {"isi": isi, "status": "draf", "oleh": oleh, "waktu": _sekarang()}
+    if lama:
+        d["status"] = lama.get("status") if lama.get("status") in STATUS_DRAF else "draf"
+        for k in ("diajukan", "catatan"):
+            if k in lama:
+                d[k] = lama[k]
+    return d
+
+
+def _siap_diterbitkan(id_halaman, isi, kode):
+    masalah = periksa(id_halaman, isi, kode)
+    if masalah:
+        raise GagalIsi("%d isian perlu diperbaiki: %s" % (len(masalah), "; ".join(masalah[:5])))
+    if kosong(TEMPLAT[id_halaman], isi):
+        raise GagalIsi("halaman ini belum berisi apa pun")
+
+
+def ajukan(kode, id_halaman, isi, oleh, versi=None):
+    """Submit content for publishing (K-P24): it becomes the draft, waiting for a programme admin. It must pass every
+    check already, so an admin never gets a draft that cannot be published. Returns the new version."""
+    _boleh_disimpan(kode, id_halaman, isi)
+    _siap_diterbitkan(id_halaman, isi, kode)
+    with _KUNCI:
+        data = baca(kode, id_halaman)
+        cek_versi(data, versi)
+        waktu = _sekarang()
+        data["draf"] = {"isi": isi, "status": "menunggu", "oleh": oleh, "waktu": waktu,
+                        "diajukan": {"oleh": oleh, "waktu": waktu}}
+        return _tulis(kode, id_halaman, data, oleh, "ajukan")
+
+
+def _ubah_status(kode, id_halaman, oleh, versi, isi, dari, aksi, ubah):
+    """Change the status of the draft (it must be in one of `dari`); isi: what the editor holds, stored with it."""
+    if isi is not None:
+        _boleh_disimpan(kode, id_halaman, isi)
+    with _KUNCI:
+        data = baca(kode, id_halaman)
+        cek_versi(data, versi)
+        d = draf(data)
+        if d is None or d.get("status") not in dari:
+            raise GagalIsi("tindakan ini hanya untuk draf yang %s" % " atau ".join(NAMA_STATUS_DRAF[x] for x in dari))
+        d = dict(d, isi=isi if isi is not None else d["isi"], oleh=oleh, waktu=_sekarang())
+        d.pop("dihapus", None)
+        ubah(d)
+        data["draf"] = d
+        return _tulis(kode, id_halaman, data, oleh, aksi)
+
+
+def batal_ajukan(kode, id_halaman, oleh, versi=None, isi=None):
+    """Take a submission back: the draft is an ordinary draft again. Returns the new version."""
+    def ubah(d):
+        d["status"] = "draf"
+        d.pop("diajukan", None)
+    return _ubah_status(kode, id_halaman, oleh, versi, isi, ("menunggu",), "batal ajukan", ubah)
+
+
+def kembalikan(kode, id_halaman, catatan, oleh, versi=None, isi=None):
+    """Send a submitted draft back to its writers with a note (required): what to fix before submitting it again.
+    Returns the new version."""
+    catatan = re.sub(r"[ \t]+", " ", (catatan or "").replace("\r\n", "\n")).strip()
+    if not catatan:
+        raise GagalIsi("tulis catatan untuk penulis: apa yang perlu diperbaiki")
+    if len(catatan) > MAKS_CATATAN or KONTROL.search(catatan):
+        raise GagalIsi("catatan paling banyak %d karakter, tanpa karakter kendali" % MAKS_CATATAN)
+    if saringan_spam.cari(catatan):
+        raise GagalIsi("catatan memuat teks judi")
+
+    def ubah(d):
+        d["status"] = "dikembalikan"
+        d["catatan"] = {"isi": catatan, "oleh": oleh, "waktu": _sekarang()}
+    return _ubah_status(kode, id_halaman, oleh, versi, isi, ("menunggu",), "kembalikan", ubah)
+
+
+def pakai_versi(kode, id_halaman, versi_lama, bagian, oleh, versi=None):
+    """Make the published content or the draft of an old version (riwayat.py) the page's draft: an old version comes
+    back through the same review as any change, never straight onto the site. Returns the new version."""
+    import riwayat as riwayat_mod
+    if bagian not in ("terbit", "draf"):
+        raise GagalIsi("bagian versi tidak dikenal")
+    try:
+        path = riwayat_mod.baca_versi(nama_berkas(kode, id_halaman), versi_lama)
+    except ValueError as e:
+        raise GagalIsi(str(e))
+    with open(path, encoding="utf-8") as f:
+        lama = json.load(f)
+    rekam = lama.get(bagian) if isinstance(lama, dict) else None
+    if not isinstance(rekam, dict) or not isinstance(rekam.get("isi"), dict):
+        raise GagalIsi("versi itu tidak memuat %s" % ("isi terbit" if bagian == "terbit" else "draf"))
+    _boleh_disimpan(kode, id_halaman, rekam["isi"])
+    with _KUNCI:
+        data = baca(kode, id_halaman)
+        cek_versi(data, versi)
+        data["draf"] = {"isi": rekam["isi"], "status": "draf", "oleh": oleh, "waktu": _sekarang()}
+        return _tulis(kode, id_halaman, data, oleh, "pakai versi %s" % versi_lama)
+
+
+def keadaan(kode, id_halaman, data=None):
+    """What a page holds, for the lists and the completeness tables (K-P24, rencana §3.6):
+    {"status": "terbit" (published; "tayang": the site shows it) | "menunggu" | "dikembalikan" | "draf" | "kosong",
+     "draf": the draft or None, "terbit": the published record or None, "waktu": the last change}."""
+    data = baca(kode, id_halaman) if data is None else data
+    d, t = draf(data), data.get("terbit") if isinstance(data.get("terbit"), dict) else None
+    tayang = bool(t) and isinstance(t.get("isi"), dict) and not periksa(id_halaman, t["isi"], kode) \
+        and not kosong(TEMPLAT[id_halaman], t["isi"])
+    diubah = data.get("diubah") if isinstance(data.get("diubah"), dict) else {}
+    return {"status": "terbit" if t else (d.get("status") if d and d.get("status") in STATUS_DRAF else
+                                          ("draf" if d else "kosong")),
+            "tayang": tayang, "draf": d, "terbit": t,
+            "waktu": diubah.get("waktu") or (d or {}).get("waktu") or (t or {}).get("waktu") or ""}
 
 
 def rapikan(node, v):

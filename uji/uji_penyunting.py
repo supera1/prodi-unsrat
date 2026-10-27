@@ -30,7 +30,6 @@ import shutil
 import sys
 import tempfile
 import threading
-from html.parser import HTMLParser
 
 AKAR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 for sub in ("platform", "platform/admin", "platform/bangun", "platform/pemantau"):
@@ -38,7 +37,6 @@ for sub in ("platform", "platform/admin", "platform/bangun", "platform/pemantau"
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
-    from PIL import Image
     import flask  # noqa: F401
     from werkzeug.datastructures import MultiDict
 except ImportError:
@@ -64,6 +62,7 @@ import penyunting as py  # noqa: E402
 import registri  # noqa: E402
 import riwayat  # noqa: E402
 import tarik_www  # noqa: E402
+from formulir_uji import Formulir, gambar, pdf, prodi  # noqa: E402
 
 A, B = "55201", "20201"
 IP = "103.84.116.30"
@@ -74,107 +73,6 @@ gagal = []
 def cek(kondisi, pesan):
     if not kondisi:
         gagal.append(pesan)
-
-
-def gambar(lebar, tinggi):
-    buf = io.BytesIO()
-    Image.new("RGB", (lebar, tinggi), (20, 60, 160)).save(buf, "JPEG")
-    return buf.getvalue()
-
-
-def pdf():
-    isi = b"BT /F1 24 Tf 72 720 Td (Dokumen) Tj ET"
-    objek = [b"<< /Type /Catalog /Pages 2 0 R >>", b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-             b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
-             b"<< /Length %d >>\nstream\n" % len(isi) + isi + b"\nendstream", b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"]
-    keluar, letak = bytearray(b"%PDF-1.4\n"), []
-    for i, o in enumerate(objek, 1):
-        letak.append(len(keluar))
-        keluar += b"%d 0 obj\n" % i + o + b"\nendobj\n"
-    xref = len(keluar)
-    keluar += b"xref\n0 %d\n0000000000 65535 f \n" % (len(objek) + 1) + b"".join(b"%010d 00000 n \n" % x for x in letak)
-    keluar += b"trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n" % (len(objek) + 1, xref)
-    return bytes(keluar)
-
-
-def prodi(kode, nama):
-    return {"kode_pddikti": kode, "nama": nama, "nama_en": "", "jenjang": "S1", "gelar": "S.Kom.", "sks": 144, "unit_kode": "ft",
-            "unit": "Fakultas Teknik", "website": "", "surel": "p@unsrat.ac.id", "bidang_kerja": "B.", "bidang_kerja_en": "",
-            "akreditasi": "Unggul", "lembaga_akreditasi": "LAM-Infokom", "berlaku_hingga": "", "internasional": "", "slug": "x",
-            "slug_en": "", "cpl": [{"kode": "CPL 1", "isi": "Capaian.", "isi_en": "", "kurikulum": "2025/2026"}]}
-
-
-class Formulir(HTMLParser):
-    """What a browser sends for a form (no button pressed), and what the page holds for checks: ids, labels, the
-    controls that need a label. semua: every field of the document (a form's fields without their <form>)."""
-
-    def __init__(self, html, semua=False):
-        HTMLParser.__init__(self, convert_charrefs=True)
-        self.isian, self.berkas, self.id, self.label_for, self.kontrol = [], [], [], set(), []
-        self.dalam, self._area, self._pilih = semua, None, None
-        self.feed(html)
-
-    def handle_starttag(self, tag, attrs):
-        a = dict(attrs)
-        if a.get("id"):
-            self.id.append(a["id"])
-        if tag == "form" and "formulir--sunting" in (a.get("class") or ""):
-            self.dalam = True
-        if not self.dalam:
-            return
-        if tag == "label" and a.get("for"):
-            self.label_for.add(a["for"])
-        if tag == "input":
-            jenis = a.get("type", "text")
-            if jenis in ("text", "hidden"):
-                self.isian.append((a["name"], a.get("value", "")))
-            elif jenis == "checkbox" and "checked" in a:
-                self.isian.append((a["name"], a.get("value", "on")))
-            elif jenis == "file":
-                self.berkas.append(a["name"])
-            if jenis != "hidden" and a.get("id"):
-                self.kontrol.append(a["id"])
-            elif jenis not in ("hidden", "checkbox"):
-                self.kontrol.append(None)
-        elif tag == "textarea":
-            self._area = [a["name"], ""]
-            self.kontrol.append(a.get("id"))
-        elif tag == "select":
-            self._pilih = [a["name"], None, None]
-            self.kontrol.append(a.get("id"))
-        elif tag == "option" and self._pilih is not None:
-            if self._pilih[1] is None:
-                self._pilih[1] = a.get("value", "")
-            if "selected" in a:
-                self._pilih[2] = a.get("value", "")
-
-    def handle_data(self, data):
-        if self._area is not None:
-            self._area[1] += data
-
-    def handle_endtag(self, tag):
-        if tag == "form":
-            self.dalam = False
-        elif tag == "textarea" and self._area is not None:
-            nama, isi = self._area
-            # a browser's parser drops the first new line of a text area, and sends line ends as CRLF
-            self.isian.append((nama, (isi[1:] if isi.startswith("\n") else isi).replace("\n", "\r\n")))
-            self._area = None
-        elif tag == "select" and self._pilih is not None:
-            nama, pertama, pilih = self._pilih
-            self.isian.append((nama, pilih if pilih is not None else pertama))
-            self._pilih = None
-
-    def data(self, ubah=None, aksi=None):
-        isian = MultiDict(self.isian)
-        for k, v in (ubah or {}).items():
-            if v is None:
-                isian.poplist(k)
-            else:
-                isian[k] = v
-        if aksi:
-            isian["aksi"] = aksi
-        return isian
 
 
 def tanpa_judul_pdf(x):
@@ -517,21 +415,21 @@ try:
     r = kirim(ka, "kerja-sama", buka(ka, "kerja-sama"), "hapus:daftar.0")
     cek(r.headers["Location"].endswith("#f-daftar") and len(ih.draf(ih.baca(A, "kerja-sama"))["isi"]["daftar"]) == 1, "hapus baris")
     html = buka(ka, "kerja-sama")
-    cek("Baris 1 (Pemda Y · Pengabdian kepada masyarakat · Lokal) baru saja dihapus." in html and 'value="kembalikan"' in html,
+    cek("Baris 1 (Pemda Y · Pengabdian kepada masyarakat · Lokal) baru saja dihapus." in html and 'value="pulihkan-butir"' in html,
         "baris yang baru dihapus ditawarkan kembali")
-    r = kirim(ka, "kerja-sama", html, "kembalikan")
+    r = kirim(ka, "kerja-sama", html, "pulihkan-butir")
     cek(r.headers["Location"].endswith("?buka=daftar.0#f-daftar-0") and
         [x["mitra"] for x in ih.draf(ih.baca(A, "kerja-sama"))["isi"]["daftar"]] == ["Pemda Y", "Universitas X"], "baris dikembalikan")
-    cek('value="kembalikan"' not in buka(ka, "kerja-sama"), "tawaran kembalikan hilang setelah dipakai")
+    cek('value="pulihkan-butir"' not in buka(ka, "kerja-sama"), "tawaran kembalikan hilang setelah dipakai")
     kirim(ka, "kerja-sama", buka(ka, "kerja-sama"), "hapus:daftar.0")
     kirim(ka, "kerja-sama", buka(ka, "kerja-sama"), "tambah:daftar")
-    cek('value="kembalikan"' not in buka(ka, "kerja-sama"), "tawaran kembalikan hanya sampai simpanan berikutnya")
+    cek('value="pulihkan-butir"' not in buka(ka, "kerja-sama"), "tawaran kembalikan hanya sampai simpanan berikutnya")
     r = kirim(ka, "kerja-sama", buka(ka, "kerja-sama"))
     cek([x.get("mitra") for x in ih.draf(ih.baca(A, "kerja-sama"))["isi"]["daftar"]] == ["Universitas X"], "baris kosong dibuang saat simpan")
 
     # buttons and forms the page never shows
     html = buka(ka, "kerja-sama")
-    for aksi in ("tambah:../x", "tambah:uraian", "hapus:daftar.9", "hapus", "geser:daftar.0", "terbitkan"):
+    for aksi in ("tambah:../x", "tambah:uraian", "hapus:daftar.9", "hapus", "geser:daftar.0", "publikasikan", "batal"):
         cek(kirim(ka, "kerja-sama", html, aksi).status_code == 400, "tombol %r ditolak" % aksi)
     cek(kirim(ka, "kerja-sama", html, ubah={"versi": None}).status_code == 400, "formulir tanpa versi ditolak")
     cek(kirim(ka, "kerja-sama", html, ubah={"versi": "x"}).status_code == 400, "versi bukan angka ditolak")
@@ -638,7 +536,7 @@ try:
 
     # discarding a draft
     v = ih.baca(A, "kerja-sama")["versi"]
-    r = kirim(ka, "kerja-sama", buka(ka, "kerja-sama"), "batal")
+    r = kirim(ka, "kerja-sama", buka(ka, "kerja-sama"), "buang")
     cek(r.status_code == 302 and ih.draf(ih.baca(A, "kerja-sama")) is None and "Halaman ini kembali kosong" in
         ka.get(r.headers["Location"]).get_data(as_text=True), "buang draf")
     cek(any(x["aksi"] == "buang draf kerja-sama" for x in riwayat.daftar(1000)), "draf yang dibuang ada di riwayat")
@@ -671,7 +569,9 @@ try:
 
     # the list, other programmes, the audit log
     teks = ka.get("/prodi/%s/halaman" % A).get_data(as_text=True)
-    cek("1 dari 22" in teks and "Ada draf disimpan" in teks and "Draf</span> belum terbit" in teks, "daftar halaman: keadaan setiap halaman")
+    cek("1 dari 22" in teks and '<span class="status status--draf">Draf</span>' in teks and
+        re.search(r'status--terbit">Terbit</span>[^<]*<br><span class="status status--draf">Draf</span>', teks),
+        "daftar halaman: keadaan setiap halaman, juga halaman terbit yang punya draf")
     with klien["admb"].session_transaction() as s_:
         token_b = s_["csrf"]
     cek(klien["admb"].get(URL + "sejarah").status_code == 403 and

@@ -271,7 +271,7 @@ def _daftar(node, v, path, t):
         dihapus = ('<p class="pesan pesan--info">%s %d%s baru saja dihapus. %s</p>' % (
             _e(kata.capitalize()), t.dihapus["indeks"] + 1,
             " (%s)" % _e(_ringkas(isi_node, t.dihapus["nilai"])) if _ringkas(isi_node, t.dihapus["nilai"]) else "",
-            _tombol("kembalikan", "Kembalikan %s itu" % kata)))
+            _tombol("pulihkan-butir", "Kembalikan %s itu" % kata)))
     if n < node["maks"]:
         tambah = _tombol("tambah:" + path, "Tambah %s" % (kata if kata == "baris" or not objek else isi_node["label"].lower()),
                          " ke %s" % node["label"], "")

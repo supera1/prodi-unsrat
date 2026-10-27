@@ -204,7 +204,7 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
 - **Konteks:** formulir isi halaman bisa panjang (tabel sampai 300–500 baris) dan diisi bergantian oleh operator dan
   admin prodi. Tombol daftar (Tambah, Naik, Turun, Hapus) mengirim formulir tanpa JavaScript, jadi setiap klik adalah
   satu simpanan.
-- **Keputusan** (usulan pengembang, menunggu tinjauan):
+- **Keputusan** (usulan pengembang, disetujui pengguna 27 Oktober 2026):
   - satu draf bersama per halaman (bukan per orang); setiap simpanan memeriksa versi asal formulir, dan simpanan dari
     versi lama ditolak dengan nama pengubah dan waktunya, tanpa menulis apa pun (juga berkas);
   - isian yang belum sah (mis. tahun "20o5") disimpan apa adanya di draf lalu ditandai, supaya ketikan tidak hilang;
@@ -218,3 +218,24 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
     2.725 bagian, diperiksa uji untuk setiap templat.
 - **Konsekuensi:** perubahan lewat tombol daftar yang belum disusul "Simpan draf" tidak bisa dipulihkan dari riwayat
   (hanya dibuang bersama drafnya); pemulihan versi meneruskan hitungan versi (`riwayat.pulihkan`).
+
+### K-P28 — Alur isi halaman: aturan rinci di dalam K-P24 (Fase 2 langkah 3)
+- **Konteks:** K-P24 menetapkan alur operator → admin prodi seperti pengumuman. Beberapa hal rinci perlu ditentukan
+  agar alurnya sulit dirusak oleh pengelola yang bukan developer.
+- **Keputusan** (usulan pengembang, menunggu tinjauan):
+  - setiap tombol penyunting (termasuk Ajukan, Terbitkan, Kembalikan, Tarik) menyimpan dulu apa yang ada di formulir,
+    jadi ketikan tidak pernah hilang karena tombol yang dipilih;
+  - draf baru bisa diajukan atau diterbitkan bila lolos semua pemeriksaan dan tidak kosong. Admin tidak pernah menerima
+    draf yang tidak bisa diterbitkan;
+  - draf yang menunggu tetap bisa disunting operator (tetap menunggu; admin yang menerbitkan selalu melihat versi
+    terbaru karena simpanan dari versi lama ditolak), tetapi tidak bisa dibuang operator sebelum pengajuannya dibatalkan;
+  - Kembalikan wajib dengan catatan (paling banyak 500 karakter). Catatan tampil sampai draf diajukan lagi dan tetap ada
+    di riwayat;
+  - Tarik menurunkan isi dari situs dan menjadikannya draf (bila belum ada draf), supaya bisa diperbaiki dan diterbitkan
+    lagi;
+  - versi lama di riwayat halaman hanya bisa **dijadikan draf**, tidak langsung ke situs, sehingga melewati pemeriksaan
+    dan persetujuan yang sama. Operator juga boleh, karena hanya mengubah draf. Pemulihan langsung tetap ada di menu
+    Riwayat untuk admin prodi;
+  - kelengkapan menghitung halaman wajib yang **terbit dan tampil** (lolos pemeriksaan), bukan sekadar pernah terbit.
+- **Konsekuensi:** tanpa SMTP (K-P12), pemberitahuan hanya lewat dasbor: admin melihat jumlah halaman yang menunggu,
+  operator melihat halaman yang dikembalikan.

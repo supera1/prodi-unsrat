@@ -355,16 +355,13 @@ def buat_app(env=None):
         butir = [b for b in pengumuman.baca(kode)["butir"] if not operator or b.get("oleh") == g.akun["nama"]]
         jumlah = {s: sum(1 for b in butir if b.get("status") == s) for s in pengumuman.STATUS}
         terbaru = sorted(butir, key=lambda b: b.get("diubah", ""), reverse=True)[:5]
+        isi = alat.ringkasan_isi(kode)
         siap = []
         if not operator:
             situs = lokasi.baca("prodi/%s/situs" % kode) or {}
             r = registri_per_kode().get(kode, {})
             p = data_prodi.efektif(kode)
             kurang = tarik_www.kekurangan(p) if p else []
-            import isi_halaman
-            import menu as menu_mod
-            wajib = [b["id"] for b in menu_mod.halaman(menu_mod.susun(menu_mod.baca_templat())) if b.get("jenis") == "wajib"]
-            terbit = sum(1 for id_ in wajib if id_ in isi_halaman.TEMPLAT and isi_halaman.terisi(kode, id_))
             operator_n = sum(1 for a in akun_mod.terlihat_oleh(g.akun, kode) if a["peran"] == "operator" and a["aktif"])
             siap = [
                 (not kurang, "Data prodi lengkap" if not kurang else "Data prodi masih kosong: %s" % ", ".join(kurang),
@@ -377,11 +374,11 @@ def buat_app(env=None):
                     "sudah disesuaikan" if situs.get("beranda") or situs.get("tagline") else "masih bawaan (opsional)"),
                  url_for("beranda_prodi", kode=kode)),
                 (operator_n > 0, "%d akun operator aktif" % operator_n, url_for("akun_prodi", kode=kode)),
-                (terbit == len(wajib), "%d dari %d halaman wajib akreditasi sudah berisi di situs" % (terbit, len(wajib)),
+                (isi["terbit"] == isi["wajib"], "%d dari %d halaman wajib akreditasi terbit" % (isi["terbit"], isi["wajib"]),
                  url_for("isi_daftar", kode=kode)),
             ]
         return render_template("prodi.html", p=g.prodi, jumlah=jumlah, terbaru=terbaru, siap=siap, operator=operator,
-                               NAMA_STATUS=pengumuman_admin.NAMA_STATUS)
+                               NAMA_STATUS=pengumuman_admin.NAMA_STATUS, isi=isi)
 
     # -------------------------------------------------------------- accounts
 

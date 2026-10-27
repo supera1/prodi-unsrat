@@ -140,9 +140,9 @@ def rencana(baris, daftar_registri, nama_prodi):
     return hasil
 
 
-def _aman(teks):
-    """A CSV cell that a spreadsheet will not run as a formula."""
-    teks = str(teks or "")
+def aman_csv(teks):
+    """A CSV cell that a spreadsheet will not run as a formula (a number stays a number, 0 included)."""
+    teks = "" if teks is None else str(teks)
     return "'" + teks if teks[:1] in ("=", "+", "-", "@", "\t", "\r") else teks
 
 
@@ -154,6 +154,6 @@ def templat_csv(daftar_registri, info):
     tulis.writerow(["kode_pddikti", "jenjang", "nama", "fakultas", "slug", "dosen_url"])
     for r in sorted(daftar_registri, key=lambda r: r["slug"]):
         x = info.get(r["kode_pddikti"], {})
-        tulis.writerow([_aman(v) for v in (r["kode_pddikti"], x.get("jenjang", ""), x.get("nama", ""), x.get("unit", ""),
+        tulis.writerow([aman_csv(v) for v in (r["kode_pddikti"], x.get("jenjang", ""), x.get("nama", ""), x.get("unit", ""),
                                            r["slug"], r.get("dosen_url") or "")])
     return "\ufeff" + buf.getvalue()                    # the BOM makes Excel read it as UTF-8
