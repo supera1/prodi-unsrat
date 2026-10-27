@@ -67,6 +67,10 @@ from slug import POLA_SLUG  # noqa: E402
 
 ALAMAT_BAWAAN = "https://prodi.unsrat.ac.id"
 WWW = "https://www.unsrat.ac.id"
+# Pages of www the sites link to, by their path in www's data (website-unsrat-2026), and where the www that is live
+# today has them: the new www is not live yet, and the current one answers 404 at kalender-akademik.html and
+# pengumuman.html (pre-production audit, 27 October 2026). Empty this table when the new www goes live.
+WWW_SEKARANG = {"kalender-akademik.html": "kalender-akademik/", "pengumuman.html": "category/pengumuman/"}
 DOSEN_UMUM = "https://dosen.unsrat.ac.id"
 
 CSP = ("default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; "
@@ -109,6 +113,12 @@ def tanggal(iso):
     return "%d %s %s" % (int(m.group(3)), BULAN[int(m.group(2)) - 1], m.group(1))
 
 
+def alamat_www(jalur):
+    """The address of a page of www from its path in www's data (see WWW_SEKARANG)."""
+    jalur = jalur.lstrip("/")
+    return "%s/%s" % (WWW, WWW_SEKARANG.get(jalur, jalur))
+
+
 def tautan_md(teks):
     """Escape text from www and turn its [label](address) links into links; a relative address points into www."""
     hasil, awal = [], 0
@@ -116,7 +126,7 @@ def tautan_md(teks):
         hasil.append(escape(teks[awal:m.start()]))
         href = m.group(2)
         if not href.startswith("https://"):
-            href = None if (":" in href.split("/")[0] or href.startswith("//")) else "%s/%s" % (WWW, href.lstrip("/"))
+            href = None if (":" in href.split("/")[0] or href.startswith("//")) else alamat_www(href)
         hasil.append(Markup('<a href="%s">%s</a>') % (href, m.group(1)) if href else escape(m.group(1)))
         awal = m.end()
     hasil.append(escape((teks or "")[awal:]))
@@ -184,7 +194,7 @@ def lingkungan():
                       undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True, keep_trailing_newline=True)
     env.filters.update(tanggal=tanggal, tautan_md=tautan_md, json_ld=json_ld, teks_isi=teks_isi, ukuran=ukuran,
                        foto_varian=foto_varian, akreditasi=registri.label_akreditasi)
-    env.globals.update(nama_tampil=nama_tampil, JENJANG_PANJANG=JENJANG_PANJANG,
+    env.globals.update(nama_tampil=nama_tampil, JENJANG_PANJANG=JENJANG_PANJANG, alamat_www=alamat_www,
                        NAMA_MEDIA_SOSIAL={k: v[0] for k, v in tampilan_prodi.MEDIA_SOSIAL.items()})
     return env
 

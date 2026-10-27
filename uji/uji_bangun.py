@@ -244,7 +244,12 @@ try:
     cek("15 Agustus 2030" in baca_halaman("s1informatika/profil/akreditasi/index.html"), "berlaku hingga tampil bila diizinkan")
     kal = baca_halaman("s1informatika/akademik/kalender/index.html")
     cek("Semester Gasal 2026/2027" in kal and "Genap" not in kal, "hanya semester yang tampil")
-    cek('href="https://www.unsrat.ac.id/pengumuman.html"' in kal and "javascript:" not in kal, "tautan kalender aman")
+    cek('href="https://www.unsrat.ac.id/category/pengumuman/"' in kal and "javascript:" not in kal, "tautan kalender aman")
+    # www's own paths point where the www that is live today has them (bangun.WWW_SEKARANG): no 404 for visitors
+    cek('href="https://www.unsrat.ac.id/kalender-akademik/"' in kal and "kalender-akademik.html" not in kal,
+        "sumber kalender di www yang tayang sekarang")
+    cek(bangun.alamat_www("/pengumuman.html") == "https://www.unsrat.ac.id/category/pengumuman/"
+        and bangun.alamat_www("berita.html") == "https://www.unsrat.ac.id/berita.html", "alamat www lewat WWW_SEKARANG")
     cek("Direktori Dosen UNSRAT" in baca_halaman("s1informatika/dosen/dosen-tetap/index.html"), "halaman dosen tanpa tautan khusus")
     akar = baca_halaman("index.html")
     cek(akar.count('class="kartu kartu--prodi"') == 3, "halaman akar harus memuat 3 prodi")
