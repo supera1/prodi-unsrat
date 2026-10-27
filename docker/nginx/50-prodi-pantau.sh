@@ -43,9 +43,14 @@ echo "50-prodi-pantau: $(grep -c '^rewrite' "$HASIL" || true) pengalihan slug la
         fi
         if [ "${HTTPS_DI_VM:-0}" = "1" ]; then
             tls_baru="$(sidik_tls)"
-            if [ "$tls_baru" != "$tls_lama" ] && nginx -t -q; then
-                nginx -s reload && echo "50-prodi-pantau: sertifikat TLS diperbarui; Nginx dimuat ulang"
-                tls_lama="$tls_baru"
+            if [ "$tls_baru" != "$tls_lama" ]; then
+                if nginx -t -q; then
+                    nginx -s reload && echo "50-prodi-pantau: sertifikat TLS diperbarui; Nginx dimuat ulang"
+                    tls_lama="$tls_baru"
+                elif [ "$tls_baru" != "${tls_ditolak:-}" ]; then   # tried again every 30 seconds, said once
+                    echo "50-prodi-pantau: sertifikat TLS baru ditolak nginx -t (mis. kunci bukan milik root atau tidak cocok dengan sertifikatnya, docs/deploy.md §7B); yang lama tetap dipakai" >&2
+                    tls_ditolak="$tls_baru"
+                fi
             fi
         fi
     done

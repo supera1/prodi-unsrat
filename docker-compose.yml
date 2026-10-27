@@ -52,6 +52,13 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
+    cap_drop:
+      - ALL                                               # e.g. no NET_RAW: no listening in on web <-> admin traffic
+    cap_add:                                              # what Nginx needs as root at start: its temp folders, its
+      - CHOWN                                             # workers' user, ports 80 and 443. The TLS files must then
+      - SETUID                                            # be owned by root (docs/deploy.md §7B)
+      - SETGID
+      - NET_BIND_SERVICE
     depends_on:
       - admin
     environment:

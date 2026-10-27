@@ -30,6 +30,12 @@ case "${HTTPS_DI_VM:-0}" in
                 echo "45-prodi-https: HTTPS_DI_VM=1 tetapi $f tidak ada di TLS_FOLDER (lihat docs/deploy.md)" >&2
                 exit 1
             fi
+            # read for real: with its capabilities limited (docker-compose.yml) root here reads only what its owner
+            # may, while "test -r" still says yes
+            if ! head -c 1 "/etc/nginx/tls/$f" > /dev/null 2>&1; then
+                echo "45-prodi-https: $f di TLS_FOLDER tidak bisa dibaca; berkas sertifikat harus milik root (docs/deploy.md §7B)" >&2
+                exit 1
+            fi
         done
         situs="$(akhiran_port "${PORT_SITUS_HTTPS:-443}")"
         admin="$(akhiran_port "${PORT_ADMIN_HTTPS:-8444}")"
