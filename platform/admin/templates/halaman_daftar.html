@@ -1,0 +1,49 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Isi halaman — {{ pr.nama }}{% endblock %}
+{% macro waktu(w) %}{{ (w | replace('T', ' '))[:16] }}{% endmacro %}
+{% block isi %}
+{{ nav_prodi(pr, 'isi_daftar') }}
+<h1>Isi halaman</h1>
+<p>Halaman wajib akreditasi dan halaman opsional situs {{ pr.nama }}. Isi ditulis sebagai draf;
+	{% if admin %}Anda menerbitkannya, atau mengembalikan draf yang diajukan operator dengan catatan.{% else %}setelah diajukan, admin prodi menerbitkannya atau mengembalikannya dengan catatan.{% endif %}
+	Situs selalu menampilkan isi yang sudah terbit.</p>
+<p><strong>{{ r.terbit }} dari {{ r.wajib }}</strong> halaman wajib terbit.</p>
+{% if admin and r.menunggu %}<p class="pesan pesan--info"><a href="{{ url_for('isi_daftar', kode=pr.kode, status='menunggu') }}">{{ r.menunggu }} halaman menunggu persetujuan Anda.</a></p>{% endif %}
+{% if not admin and r.dikembalikan %}<p class="pesan pesan--info"><a href="{{ url_for('isi_daftar', kode=pr.kode, status='dikembalikan') }}">{{ r.dikembalikan }} halaman dikembalikan dengan catatan dari admin prodi.</a></p>{% endif %}
+<nav class="saring-status" aria-label="Saring keadaan">
+	<a href="{{ url_for('isi_daftar', kode=pr.kode) }}"{% if not status %} aria-current="page"{% endif %}>Semua ({{ r.halaman | length }})</a>
+	{% for s in ['menunggu', 'dikembalikan', 'draf', 'terbit', 'kosong'] %}
+	<a href="{{ url_for('isi_daftar', kode=pr.kode, status=s) }}"{% if status == s %} aria-current="page"{% endif %}>{{ NAMA_STATUS[s] }} ({{ jumlah[s] }})</a>
+	{% endfor %}
+</nav>
+{% for label, anak in kelompok %}
+<section class="kartu" aria-labelledby="kelompok-{{ loop.index }}">
+	<h2 id="kelompok-{{ loop.index }}">{{ label }}</h2>
+	<div class="tabel-gulir">
+		<table>
+			<thead><tr><th scope="col">Halaman</th><th scope="col">Jenis</th><th scope="col">Isi</th><th scope="col">Di situs</th></tr></thead>
+			<tbody>
+				{% for a in anak %}
+				{% set k = a.k %}
+				<tr>
+					<td><a href="{{ url_for('isi_sunting', kode=pr.kode, id_=a.id) }}">{{ a.label }}</a>{% if a.sembunyi %} <span class="tanda">disembunyikan di menu</span>{% endif %}</td>
+					<td>{{ {'wajib': 'Wajib', 'opsional': 'Opsional'}.get(a.jenis, 'Pelengkap') }}</td>
+					<td>
+						{% if k.terbit %}<span class="status status--terbit">Terbit</span> {{ waktu(k.terbit.waktu) }}{% if not k.tayang %} <span class="keterangan">(tidak tampil: isi tidak lolos pemeriksaan)</span>{% endif %}
+						{% elif not k.draf %}Belum diisi
+						{% endif %}
+						{% if k.draf %}{% if k.terbit %}<br>{% endif %}<span class="status status--{{ k.draf.status }}">{{ NAMA_STATUS[k.draf.status] }}</span>
+						<span class="keterangan">{% if k.draf.status == 'menunggu' and k.draf.diajukan %}diajukan {{ waktu(k.draf.diajukan.waktu) }} oleh {{ k.draf.diajukan.oleh }}{% else %}disimpan {{ waktu(k.draf.waktu) }} oleh {{ k.draf.oleh }}{% endif %}</span>{% endif %}
+					</td>
+					<td>{% if not a.sembunyi %}<a href="{{ pr.alamat }}{{ a.alamat }}/">Lihat<span class="tersembunyi"> {{ a.label }} di situs</span> ↗</a>{% else %}—{% endif %}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</section>
+{% else %}
+<p>Tidak ada halaman berstatus {{ NAMA_STATUS[status] | lower }}.</p>
+{% endfor %}
+{% endblock %}

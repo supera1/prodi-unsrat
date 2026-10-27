@@ -1,0 +1,30 @@
+{% extends "dasar.html" %}
+{% block judul %}Masukan{% endblock %}
+{% macro waktu(w) %}{{ (w | replace('T', ' '))[:16] }}{% endmacro %}
+{% block isi %}
+<h1>Masukan</h1>
+<p>Kirim kendala, pertanyaan, atau usulan tentang admin dan situs prodi. Masukan langsung terlihat oleh superadmin UPA TIK,
+	dan tanggapannya tampil di bawah. Untuk hal yang mendesak (misalnya isi aneh di situs), sebutkan alamat halamannya.</p>
+<form method="post" action="{{ url_for('masukan_kirim') }}" class="formulir kartu">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<input type="hidden" name="dari" value="{{ dari }}">
+	<div class="isian isian--pilihan"><label for="jenis">Jenis</label>
+		<select id="jenis" name="jenis">{% for k, label in JENIS.items() %}<option value="{{ k }}"{% if isian.get('jenis') == k %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+	<div class="isian"><label for="isi">Isi masukan</label>
+		<textarea id="isi" name="isi" rows="6" aria-describedby="isi-ket">{{ isian.get('isi', '') }}</textarea>
+		<p class="keterangan" id="isi-ket">Ceritakan apa yang Anda lakukan dan apa yang terjadi; paling banyak {{ maks }} karakter. Jangan tulis kata sandi.{% if dari %} Dikirim dari halaman {{ dari }}.{% endif %}</p></div>
+	<button type="submit" class="tombol">Kirim masukan</button>
+</form>
+<section class="kartu" aria-labelledby="masukan-anda">
+	<h2 id="masukan-anda">Masukan Anda</h2>
+	{% for b in milik %}
+	<div class="masukan-butir">
+		<p><span class="status status--{{ b.status }}">{{ STATUS.get(b.status, b.status) }}</span> {{ JENIS.get(b.jenis, b.jenis) }} · {{ waktu(b.waktu) }}{% if b.halaman %} · <span class="keterangan">{{ b.halaman }}</span>{% endif %}</p>
+		<p class="catatan-admin">{{ b.isi }}</p>
+		{% if b.tanggapan %}<div class="pesan pesan--info"><p><strong>Tanggapan {{ b.tanggapan.oleh }}</strong> ({{ waktu(b.tanggapan.waktu) }}):</p><p class="catatan-admin">{{ b.tanggapan.isi }}</p></div>{% endif %}
+	</div>
+	{% else %}
+	<p>Belum ada masukan dari Anda.</p>
+	{% endfor %}
+</section>
+{% endblock %}

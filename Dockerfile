@@ -33,6 +33,8 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt -c /tmp/constraints.txt 
 COPY platform/ /app/platform/
 COPY uji/ /app/uji/
 COPY docs/asal-modul.md /app/docs/asal-modul.md
+# the guide is a page of the admin too (/panduan, platform/admin/panduan.py)
+COPY docs/panduan-admin-prodi.md /app/docs/panduan-admin-prodi.md
 COPY docker/admin-mulai.sh /usr/local/bin/admin-mulai
 COPY docker/pemantau.sh /usr/local/bin/pemantau
 

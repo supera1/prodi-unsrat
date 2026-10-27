@@ -15,9 +15,12 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
 - Bahasa: Indonesia; bahasa Inggris di `/<slug>/en/` menyusul (Fase 5, alamatnya sudah dicadangkan).
 
 ## Dokumen (baca bagian yang relevan sebelum mengerjakan fitur)
-- `docs/rencana-fase-01.md` — rencana Fase 1 yang disetujui: arsitektur, model data, peran, template, urutan kerja.
+- `docs/rencana-fase-01.md` — rencana Fase 1 (selesai): arsitektur, model data, peran, template, urutan kerja.
+- `docs/rencana-fase-02.md` — rencana Fase 2: penyunting halaman wajib, alur isi, kelengkapan, pilot 3 prodi.
 - `docs/keputusan.md` — log keputusan (K-P1, …). Tambahkan entri setiap ada keputusan baru.
 - `docs/asal-modul.md` — modul yang disalin dari repo www beserta versi asalnya.
+- `docs/panduan-admin-prodi.md` — panduan untuk admin prodi dan operator (juga menu Panduan di admin);
+  `docs/pilot-fase-02.md` — persiapan pilot; `docs/kriteria-akreditasi.md` — draf label kriteria untuk LPMPP.
 - `platform/data-awal/slug.csv` — slug 97 prodi yang disetujui. Kunci tetap prodi adalah `kode_pddikti`, bukan slug.
 - Log hasil setiap langkah/fase ditulis ke `docs/log/`; ringkasan Fase 1 (kriteria, verifikasi manual, sisa pekerjaan):
   `docs/log/fase-01.md`.
@@ -68,6 +71,18 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   `--produksi`. Ganti slug atau nonaktifkan prodi: bangun semua, supaya folder lama terhapus.
 - Pengumuman (sebelum admin ada): `.venv/bin/python platform/pengumuman.py tambah|daftar|status --prodi <kode> ...`;
   foto/PDF lewat `platform/media.py` (`PRODI_PENYIMPANAN=lokal` ke `unggahan/`, `gcs` ke bucket). Lalu bangun `--prodi`.
+- Isi halaman wajib/opsional dan dokumen halaman Akreditasi (Fase 2, K-P23, K-P29): templat, pemeriksaan, draf, dan
+  tampilannya di `platform/isi_halaman.py`;
+  disimpan di `data/prodi/<kode>/halaman-<id>.json` (`terbit`, `draf` berstatus draf/menunggu/dikembalikan, `versi`).
+  Penyunting di admin (menu prodi "Isi halaman", K-P24, K-P27, K-P28): rute `platform/admin/isi_admin.py` (operator
+  menulis/mengajukan; admin menerbitkan/mengembalikan/menarik; riwayat per halaman; kelengkapan superadmin
+  `/super/kelengkapan` + CSV), formulir dari templat `platform/admin/penyunting.py`.
+  Untuk pengembang: `.venv/bin/python platform/isi_halaman.py daftar|contoh|tarik --prodi <kode>` (`contoh` hanya untuk
+  melihat tampilan, bertanda `[CONTOH]`, ditolak di produksi). Templat situs: `platform/template/halaman/isi.html` +
+  `_isi.html`; pratinjau admin memakai makro yang sama (`bangun.bagian_html`).
+- Label kriteria akreditasi (K-P25, K-P29): `platform/template/kriteria.json` + `platform/kriteria.py`; hanya lembaga
+  berstatus `dikonfirmasi` (oleh LPMPP) yang tampil. `python3 platform/kriteria.py periksa|tabel`; tabelnya disalin ke
+  `docs/kriteria-akreditasi.md` (uji memastikan sama). Jangan mengisi kriteria LAM tanpa daftar dari LPMPP.
 - Bagian depan beranda (sebelum admin ada): `.venv/bin/python platform/tampilan_prodi.py lihat|atur|foto --prodi <kode>`.
   Nilai kartu resmi (akreditasi, gelar, SKS) tidak pernah boleh ditimpa (K-P15).
 - Admin (langkah 4): sekali `python3 platform/admin/siapkan.py` (kunci sesi di `rahasia/.env`), lalu
@@ -75,8 +90,13 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   `rahasia/.kredensial-<nama>.txt`); jalankan `.venv/bin/python platform/admin/app.py` → http://127.0.0.1:8791/.
 - Setiap rute admin wajib `@akses(...)` (`platform/admin/akses.py`) dan wajib masuk matriks di `uji/uji_admin.py`
   (uji gagal bila ada rute baru yang belum diuji untuk semua peran).
-- Halaman admin prodi di `platform/admin/prodi_admin.py` (data, identitas, beranda, menu, riwayat, berkas) dan
-  `platform/admin/pengumuman_admin.py` (operator menulis/mengajukan, admin menerbitkan/mengembalikan/menarik).
+- Halaman admin prodi di `platform/admin/prodi_admin.py` (data, identitas, beranda, menu, riwayat, berkas),
+  `platform/admin/pengumuman_admin.py` (operator menulis/mengajukan, admin menerbitkan/mengembalikan/menarik), dan
+  `platform/admin/isi_admin.py` (isi halaman: daftar, penyunting, draf, pratinjau; operator juga).
+- Panduan admin prodi: `docs/panduan-admin-prodi.md`, juga tampil di admin (`/panduan`, `platform/admin/panduan.py`;
+  Markdown sederhana, semua di-escape). Bila tombol, menu, batas, atau pesan admin berubah, perbarui panduannya:
+  `uji/uji_pilot.py` memeriksanya. Masukan pengguna admin: `platform/admin/masukan_admin.py` (`masukan.json`).
+  Persiapan pilot: `docs/pilot-fase-02.md`.
 - Halaman superadmin di `platform/admin/superadmin.py`. Perubahan yang memengaruhi situs memanggil bangun ulang lewat
   `platform/admin/pembangun.py`; `PRODI_BANGUN=latar` (bawaan, utas latar), `sinkron` (uji), `mati` (uji akses).
 - Template: `platform/template/menu.json` (menu induk), `platform/template/kategori.json` (kategori pengumuman), `platform/template/halaman/*.html` (Jinja2, autoescape),

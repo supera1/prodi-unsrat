@@ -173,7 +173,7 @@ try:
     cek('href="https://dosen.unsrat.ac.id/prodi/ti"' in baca("s1ti/dosen/dosen-tetap/index.html"), "tautan dosen tampil di situs")
 
     # --- lecturer links in bulk
-    cek(impor_dosen._aman("=HYPERLINK(\"x\")").startswith("'") and impor_dosen._aman("biasa") == "biasa", "rumus di CSV dinetralkan")
+    cek(impor_dosen.aman_csv("=HYPERLINK(\"x\")").startswith("'") and impor_dosen.aman_csv("biasa") == "biasa", "rumus di CSV dinetralkan")
     r = su.get("/super/dosen/templat.csv")
     templat = r.get_data(as_text=True)
     cek(r.headers["Content-Type"].startswith("text/csv") and "attachment" in r.headers["Content-Disposition"], "templat diunduh")
@@ -296,6 +296,12 @@ try:
         cek(su.get(url).status_code == 404, "jalur aneh di riwayat ditolak: %s" % url)
     cek(kirim(su, "/super/riwayat/pulihkan", berkas="prodi/../registri", versi=v).status_code == 404, "pulihkan jalur aneh ditolak")
     cek(su.get("/super/riwayat?berkas=prodi/%s" % A).status_code == 200, "saringan riwayat per prodi")
+    # a page's own content (Fase 2) is named after the page in the history
+    import isi_halaman
+    isi_halaman.terbitkan(A, "sejarah", {"uraian": "Versi pertama."}, "superuji")
+    isi_halaman.terbitkan(A, "sejarah", {"uraian": "Versi kedua."}, "superuji")
+    cek("Teknik Informatika — halaman Sejarah" in su.get("/super/riwayat?berkas=prodi/%s" % A).get_data(as_text=True),
+        "riwayat menamai isi halaman dengan nama halamannya")
 
     # --- accounts: role and programmes; the change applies to running sessions
     r = ad.get("/prodi/%s/" % C)

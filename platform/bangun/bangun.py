@@ -18,7 +18,7 @@ Output (PRODI_PUBLIK, the only folder the web server serves):
     <slug>/warna.css                 the programme's colours (custom properties only)
     <slug>/pengumuman/               announcements and news (pengumuman.py): list pages (/halaman/<n>/), one page per
                                      item (/<id>/), per category (/kategori/<id>/), per year (/arsip/<yyyy>/), rss.xml
-    unggahan/<kode>/...              uploaded photos and PDFs of published items (PRODI_PENYIMPANAN=lokal only)
+    unggahan/<kode>/...              uploaded photos and PDFs of published items and pages (PRODI_PENYIMPANAN=lokal only)
 
 plus PRODI_MANIFES (SHA-256 of every published file, for pemantau/cek_integritas.py) and
 PRODI_NGINX/slug-lama.conf (301 redirects of old slugs, included by Nginx).
@@ -54,6 +54,8 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined  # noqa: E402
 from markupsafe import Markup, escape  # noqa: E402
 
 import data_prodi  # noqa: E402
+import isi_halaman  # noqa: E402
+import kriteria as kriteria_mod  # noqa: E402
 import lokasi  # noqa: E402
 import menu as menu_mod  # noqa: E402
 import media  # noqa: E402
@@ -176,6 +178,25 @@ def sha(isi):
     return hashlib.sha256(isi).hexdigest()
 
 
+def lingkungan():
+    """The Jinja2 environment of the site's page templates, with the site's filters."""
+    env = Environment(loader=FileSystemLoader(os.path.join(TEMPLATE, "halaman")), autoescape=True,
+                      undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True, keep_trailing_newline=True)
+    env.filters.update(tanggal=tanggal, tautan_md=tautan_md, json_ld=json_ld, teks_isi=teks_isi, ukuran=ukuran,
+                       foto_varian=foto_varian, akreditasi=registri.label_akreditasi)
+    env.globals.update(nama_tampil=nama_tampil, JENJANG_PANJANG=JENJANG_PANJANG,
+                       NAMA_MEDIA_SOSIAL={k: v[0] for k, v in tampilan_prodi.MEDIA_SOSIAL.items()})
+    return env
+
+
+def bagian_html(bagian, media_url):
+    """The sections of a programme's own page (isi_halaman.tampilan) as the site shows them, with the macros of
+    _isi.html: the admin's preview."""
+    return Markup(lingkungan().from_string('{% from "_isi.html" import bagian_isi with context %}'
+                                           '{% for b in bagian %}{{ bagian_isi(b) }}{% endfor %}')
+                  .render(bagian=bagian, media_url=media_url))
+
+
 # ------------------------------------------------------------------ the builder
 
 class Pembangun(object):
@@ -197,15 +218,19 @@ class Pembangun(object):
         self.palet = warna_mod.baca_palet()
         self.kategori = pengumuman_mod.baca_kategori()
         self.label_kategori = {k["id"]: k["label"] for k in self.kategori}
-        self.env = Environment(loader=FileSystemLoader(os.path.join(TEMPLATE, "halaman")), autoescape=True,
-                               undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True, keep_trailing_newline=True)
-        self.env.filters.update(tanggal=tanggal, tautan_md=tautan_md, json_ld=json_ld, teks_isi=teks_isi, ukuran=ukuran,
-                                foto_varian=foto_varian, akreditasi=registri.label_akreditasi)
-        self.env.globals.update(nama_tampil=nama_tampil, JENJANG_PANJANG=JENJANG_PANJANG,
-                                NAMA_MEDIA_SOSIAL={k: v[0] for k, v in tampilan_prodi.MEDIA_SOSIAL.items()})
+        self.env = lingkungan()
         self.berkas = {}      # published path -> bytes
         self.versi = {}       # published asset path -> short hash, for ?v=
         self.peringatan = []
+        # accreditation criteria labels: only bodies LPMPP confirmed are shown (K-P29); a broken file shows none
+        try:
+            self.kriteria = kriteria_mod.baca()
+            masalah = kriteria_mod.periksa(self.kriteria, set(isi_halaman.TEMPLAT))
+        except (OSError, ValueError) as e:
+            masalah = [str(e)]
+        if masalah:
+            self.peringatan.append("label kriteria akreditasi diabaikan: %s" % "; ".join(masalah[:3]))
+            self.kriteria = None
 
     # -------------------------------------------------------------- which programmes
 
@@ -327,12 +352,17 @@ class Pembangun(object):
             for halaman_id in k["halaman"]:
                 if isi:
                     terkait.setdefault(halaman_id, []).append({"kategori": k, "butir": isi[:TERKAIT], "jumlah": len(isi)})
+        lembaga = kriteria_mod.lembaga_untuk(self.kriteria, p.get("lembaga_akreditasi"))
+        urut = [b["id"] for b in menu_mod.halaman(menu)]             # the pages this site has, in menu order
+        ada = {b["id"]: b for b in menu_mod.halaman(menu)}
+        peta_kriteria = [{"nomor": n, "nama": nama, "halaman": [ada[x] for x in sorted(ids, key=urut.index)]}
+                         for n, nama, ids in kriteria_mod.peta(lembaga, set(ada))]
         umum = dict(p=p, r=r, slug=slug, situs=situs, tagline=tagline, unit=unit, menu=menu,
                     nama=nama_tampil(p), warna_css=warna_css, tampil_berlaku=self.tampil_berlaku,
                     dosen_url=r.get("dosen_url") or "", dosen_umum=DOSEN_UMUM, kalender=self.kalender,
                     kurikulum=sorted({c["kurikulum"] for c in p.get("cpl", []) if c.get("kurikulum")}),
                     kabar_beranda=di_beranda, terkait=terkait, label_kategori=self.label_kategori, hero=hero,
-                    logo=logo, media_sosial=media_sosial,
+                    logo=logo, media_sosial=media_sosial, lembaga_kriteria=lembaga, peta_kriteria=peta_kriteria,
                     hari_ini=self.hari_ini)
         for e in menu:
             for ini in [e] + e.get("anak", []):
@@ -348,11 +378,31 @@ class Pembangun(object):
                     templat = "isi.html"
                 folder = posixpath.join(slug, ini["alamat"]) if ini["alamat"] else slug
                 konteks = dict(umum, ini=ini, kelompok=kelompok, kanonik=self.kanonik(folder))
+                konteks["label_kriteria"] = kriteria_mod.label(lembaga, ini["id"])
+                if templat == "isi.html" or ini["id"] in isi_halaman.TEMPLAT:
+                    konteks["isi_bagian"] = self.isi_halaman_prodi(kode, ini["id"])
                 if ini["alamat"] == "":
                     konteks["json_ld"] = self.json_ld_prodi(p, unit, folder)
                     if hero["latar"]["jenis"] == "foto":
                         konteks["og_gambar"] = self.media_mutlak(hero["latar"]["foto"]["varian"]["1600"])
                 self.render(templat, self.jalur_halaman(slug, ini["alamat"]), **konteks)
+
+    def isi_halaman_prodi(self, kode, id_halaman):
+        """The sections of a programme's own page (isi_halaman.py, Fase 2), or None while it has no content to show:
+        the page then says the programme is still filling it. Content that fails the checks is not shown at all."""
+        if id_halaman not in isi_halaman.TEMPLAT:
+            return None
+        isi = isi_halaman.terbit(kode, id_halaman)
+        if isi is None:
+            return None
+        masalah = isi_halaman.periksa(id_halaman, isi, kode)
+        if masalah:
+            self.peringatan.append("prodi %s: isi halaman %s diabaikan (%s)" % (kode, id_halaman, "; ".join(masalah[:3])))
+            return None
+        bagian, hilang = isi_halaman.tampilan(id_halaman, isi, self.terbitkan_media)
+        if hilang:
+            self.peringatan.append("prodi %s: halaman %s: %d berkas tidak ditemukan, dilewati" % (kode, id_halaman, hilang))
+        return bagian or None
 
     def identitas_prodi(self, kode, situs):
         """(logo, social media) of a programme, each only when its settings pass the checks."""

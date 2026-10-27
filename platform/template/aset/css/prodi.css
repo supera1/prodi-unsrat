@@ -764,6 +764,7 @@ a:hover {
 }
 
 .tabel-gulir {
+	position: relative;     /* text hidden for screen readers inside a cell (.tersembunyi) stays within the scroll box */
 	overflow-x: auto;
 	margin-bottom: var(--unsrat-spasi-40);
 }
@@ -1143,4 +1144,155 @@ ul.saring {
 
 .terkait {
 	margin-top: var(--unsrat-spasi-50);
+}
+
+/* ---------------------------------------------------------------- a programme's own pages (Fase 2, isi_halaman.py) */
+
+.isi-bagian {
+	margin-bottom: var(--unsrat-spasi-50);
+}
+
+.isi-bagian ul,
+.isi-bagian ol {
+	padding-left: 1.25em;
+}
+
+.isi-bagian li + li {
+	margin-top: var(--unsrat-spasi-10);
+}
+
+.isi-info {
+	color: var(--unsrat-abu-600);
+	font-size: var(--unsrat-size-kecil);
+}
+
+/* long text in the first column wraps here (the calendar's first column keeps its dates on one line) */
+.tabel-isi td:first-child {
+	white-space: normal;
+}
+
+.tabel-isi td {
+	min-width: 6rem;
+}
+
+.isi-kartu {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+	gap: var(--unsrat-spasi-30);
+	padding: 0;
+	list-style: none;
+}
+
+.isi-bagian .isi-kartu {
+	padding-left: 0;
+}
+
+.isi-kartu__butir {
+	padding: var(--unsrat-spasi-40);
+	background: var(--unsrat-putih);
+	border: 1px solid var(--garis);
+	border-top: 4px solid var(--prodi-utama);
+	border-radius: var(--unsrat-radius-kartu);
+}
+
+.isi-bagian .isi-kartu__butir + .isi-kartu__butir {
+	margin-top: 0;
+}
+
+.isi-kartu__judul {
+	margin: 0 0 var(--unsrat-spasi-20);
+	font-size: var(--unsrat-size-sedang);
+}
+
+.isi-kartu__butir img {
+	display: block;
+	width: 100%;
+	height: auto;
+	margin-bottom: var(--unsrat-spasi-30);
+	border-radius: var(--unsrat-radius-kontrol);
+}
+
+.isi-kartu__butir h4 {
+	margin: var(--unsrat-spasi-30) 0 var(--unsrat-spasi-10);
+	font-size: var(--unsrat-size-isi);
+}
+
+.isi-rincian {
+	margin: 0;
+}
+
+.isi-rincian div + div {
+	margin-top: var(--unsrat-spasi-10);
+}
+
+.isi-rincian dt {
+	display: inline;
+	font-weight: 600;
+}
+
+.isi-rincian dt::after {
+	content: ": ";
+}
+
+.isi-rincian dd {
+	display: inline;
+	margin: 0;
+}
+
+.isi-galeri figure {
+	margin: 0;
+}
+
+.isi-galeri figcaption {
+	margin-top: var(--unsrat-spasi-10);
+	color: var(--unsrat-abu-600);
+	font-size: var(--unsrat-size-kecil);
+}
+
+.isi-bagian .galeri {
+	padding-left: 0;
+}
+
+/* ---------------------------------------------------------------- accreditation criteria (Fase 2, kriteria.py) */
+
+/* the criteria a page serves, under the page title; text colour on the pale primary meets the contrast rules */
+.label-kriteria {
+	margin: 0 0 var(--unsrat-spasi-40);
+	padding: var(--unsrat-spasi-20) var(--unsrat-spasi-30);
+	border-left: 4px solid var(--prodi-utama);
+	background: var(--prodi-utama-pucat);
+	color: var(--prodi-utama);
+	font-size: var(--unsrat-size-kecil);
+	font-weight: 600;
+}
+
+.peta-kriteria__daftar {
+	margin: 0;
+	border-top: 1px solid var(--garis);
+}
+
+.peta-kriteria__daftar > div {
+	display: grid;
+	gap: var(--unsrat-spasi-10) var(--unsrat-spasi-40);
+	padding: var(--unsrat-spasi-30) 0;
+	border-bottom: 1px solid var(--garis);
+}
+
+@media (min-width: 640px) {
+	.peta-kriteria__daftar > div {
+		grid-template-columns: 18rem minmax(0, 1fr);
+	}
+}
+
+.peta-kriteria__daftar dt {
+	font-weight: 600;
+}
+
+.peta-kriteria__daftar dd {
+	margin: 0;
+}
+
+.peta-kriteria__daftar ul {
+	margin: 0;
+	padding-left: 1.25rem;
 }

@@ -5,9 +5,26 @@
 {{ nav_prodi(p, 'dasbor_prodi') }}
 <h1>{{ p.nama }}</h1>
 <p>{{ p.unit }} · <a href="{{ p.alamat }}">{{ p.alamat }}</a>{% if not p.aktif %} · <strong>situs nonaktif</strong>{% endif %}</p>
+{% if not operator and isi.menunggu %}
+<p class="pesan pesan--info"><a href="{{ url_for('isi_daftar', kode=p.kode, status='menunggu') }}">{{ isi.menunggu }} halaman menunggu persetujuan Anda.</a></p>
+{% endif %}
+{% if operator and isi.dikembalikan %}
+<p class="pesan pesan--info"><a href="{{ url_for('isi_daftar', kode=p.kode, status='dikembalikan') }}">{{ isi.dikembalikan }} halaman dikembalikan dengan catatan dari admin prodi.</a></p>
+{% endif %}
 {% if not operator and jumlah.menunggu %}
 <p class="pesan pesan--info"><a href="{{ url_for('pengumuman_daftar', kode=p.kode, status='menunggu') }}">{{ jumlah.menunggu }} pengumuman menunggu persetujuan Anda.</a></p>
 {% endif %}
+<section class="kartu">
+	<h2>Isi halaman</h2>
+	<p><strong>{{ isi.terbit }} dari {{ isi.wajib }}</strong> halaman wajib akreditasi terbit.</p>
+	<ul class="angka">
+		{% for s, label in [('menunggu', 'menunggu persetujuan'), ('dikembalikan', 'dikembalikan'), ('draf', 'draf')] %}
+		<li><a href="{{ url_for('isi_daftar', kode=p.kode, status=s) }}"><strong>{{ isi[s] }}</strong> {{ label }}</a></li>
+		{% endfor %}
+		<li><a href="{{ url_for('isi_daftar', kode=p.kode, status='kosong') }}"><strong>{{ isi.kosong }}</strong> halaman wajib belum diisi</a></li>
+	</ul>
+	<p><a class="tombol" href="{{ url_for('isi_daftar', kode=p.kode) }}">Buka isi halaman</a></p>
+</section>
 <section class="kartu">
 	<h2>{{ 'Pengumuman Anda' if operator else 'Pengumuman dan berita' }}</h2>
 	<ul class="angka">

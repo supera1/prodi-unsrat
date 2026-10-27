@@ -1,9 +1,18 @@
-{# A page the programme fills itself ("wajib" / "opsional"). Phase 1: the frame only; the editor comes in phase 2. #}
+{# A page the programme fills itself ("wajib" / "opsional"): its content (platform/isi_halaman.py, Fase 2), or, until
+   it has some, the page's description and a note that the programme is still filling it. #}
 {% extends "halaman.html" %}
 {% from "_kabar.html" import kartu_kabar with context %}
+{% from "_isi.html" import bagian_isi with context %}
 {% block isi_halaman %}
+{% if label_kriteria %}
+<p class="label-kriteria">Kriteria akreditasi {{ lembaga_kriteria.nama }}: {% for n, nama_k in label_kriteria %}Kriteria {{ n }}, {{ nama_k }}{{ "; " if not loop.last }}{% endfor %}</p>
+{% endif %}
+{% if isi_bagian %}
+{% for b in isi_bagian %}{{ bagian_isi(b) }}{% endfor %}
+{% else %}
 <p class="pengantar">{{ ini.deskripsi }}</p>
 <p class="catatan catatan--menyusul">Informasi ini sedang dilengkapi oleh Program Studi {{ nama }}.</p>
+{% endif %}
 {% for t in terkait.get(ini.id, []) %}
 <section class="terkait" aria-labelledby="terkait-{{ t.kategori.id }}">
 	<h2 id="terkait-{{ t.kategori.id }}">Kabar terkait: {{ t.kategori.label }}</h2>

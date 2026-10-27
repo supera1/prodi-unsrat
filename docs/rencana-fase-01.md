@@ -1,6 +1,7 @@
 # Rencana Fase 1 — Fondasi Platform `prodi.unsrat.ac.id`
 
-Status: **disetujui** (26 Oktober 2026), pertanyaan §12 sudah dijawab. Dikerjakan per langkah (§10).
+Status: **selesai** — disetujui 26 Oktober 2026, dikerjakan per langkah (§10), digabung ke `main` lewat PR #1
+(27 Oktober 2026). Hasil: [log Fase 1](log/fase-01.md). Lanjutan: [rencana Fase 2](rencana-fase-02.md).
 Lampiran: [`platform/data-awal/slug.csv`](../platform/data-awal/slug.csv) — alamat singkat 97 prodi (disetujui).
 
 ---

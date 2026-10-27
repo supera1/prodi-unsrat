@@ -173,3 +173,115 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   terbangun; superadmin lalu mengunggah data www terbaru (K-P18). Data ini memang tayang publik di www.
 - **Konsekuensi:** salinan diperbarui pengembang sesekali (`impor_www.py --tulis-data-awal`); `uji_impor_www.py` memberi
   tahu bila salinan sudah berbeda dari data www di komputer pengembang.
+
+### K-P23 — Isi halaman wajib terstruktur per halaman (Fase 2)
+- **Konteks:** 22 halaman wajib akreditasi per prodi diisi prodi sendiri; asesor perlu menemukan informasi yang sama di
+  tempat yang sama di 97 situs.
+- **Keputusan** (pengguna, 27 Oktober 2026, rencana Fase 2 §3): setiap halaman wajib dan opsional punya **templat isi**
+  (bagian, isian, tabel) ditambah bagian tambahan bebas. Formulirnya dibentuk dari templat dengan pola penyunting
+  superadmin www (`editor.py`), tanpa HTML; teks hanya dengan markah tautan `https://` dan huruf tebal.
+- **Konsekuensi:** templat bisa direvisi setelah pilot tanpa menghapus isi (kunci yang tidak dikenal disimpan).
+
+### K-P24 — Alur isi halaman operator → admin prodi, dan kelengkapan per prodi (Fase 2)
+- **Keputusan** (pengguna, 27 Oktober 2026): operator dan admin prodi mengisi; admin prodi menerbitkan atau
+  mengembalikan dengan catatan, seperti pengumuman (K-P14). Satu isi terbit dan satu draf per halaman; simpanan yang
+  saling menimpa ditolak. Kelengkapan halaman wajib tampil di dasbor prodi dan superadmin.
+
+### K-P25 — Dokumen akreditasi hanya yang boleh publik; label kriteria dari LPMPP (Fase 2)
+- **Keputusan** (pengguna, 27 Oktober 2026): halaman Dokumen Akreditasi memuat dokumen yang boleh publik saja
+  (sertifikat, SK, ringkasan); dokumen berisi data pribadi tidak diunggah ke situs. Label kriteria akreditasi per
+  lembaga disiapkan atau dikonfirmasi LPMPP UNSRAT; sebelum itu tidak ditampilkan.
+
+### K-P26 — Pilot 3 prodi dan pilihan tambahan (Fase 2)
+- **Keputusan** (pengguna, 27 Oktober 2026):
+  - pilot di staging: S1 Teknik Informatika dan dua prodi lain yang disebutkan pengguna; ukuran keberhasilan minimal 15
+    dari 22 halaman wajib terbit per prodi pilot tanpa bantuan pengembang;
+  - butir "usulan perubahan data resmi" (rencana Fase 1 §2) diganti laporan perubahan data prodi untuk diteruskan ke
+    pengelola www;
+  - impor Excel untuk tabel besar hanya bila pilot memerlukannya.
+
+### K-P27 — Penyunting isi halaman: draf bersama, isian apa adanya, riwayat untuk simpanan sengaja (Fase 2 langkah 2)
+- **Konteks:** formulir isi halaman bisa panjang (tabel sampai 300–500 baris) dan diisi bergantian oleh operator dan
+  admin prodi. Tombol daftar (Tambah, Naik, Turun, Hapus) mengirim formulir tanpa JavaScript, jadi setiap klik adalah
+  satu simpanan.
+- **Keputusan** (usulan pengembang, disetujui pengguna 27 Oktober 2026):
+  - satu draf bersama per halaman (bukan per orang); setiap simpanan memeriksa versi asal formulir, dan simpanan dari
+    versi lama ditolak dengan nama pengubah dan waktunya, tanpa menulis apa pun (juga berkas);
+  - isian yang belum sah (mis. tahun "20o5") disimpan apa adanya di draf lalu ditandai, supaya ketikan tidak hilang;
+    halaman baru bisa diterbitkan (langkah 3) bila semua isian lolos pemeriksaan;
+  - baris yang ditambah lalu dibiarkan kosong dibuang saat "Simpan draf"; butir yang baru dihapus bisa dikembalikan
+    sampai simpanan berikutnya;
+  - riwayat versi mencatat "Simpan draf", "Buang draf", penerbitan, dan penarikan; tombol daftar dan pratinjau
+    menyimpan draf tanpa riwayat. Ini lebih sempit dari bunyi rencana §3.4 ("setiap simpanan masuk riwayat"), supaya
+    riwayat berisi simpanan yang berarti, bukan setiap klik;
+  - batas bagian formulir admin dinaikkan dari 1.000 (bawaan Flask) ke 4.000; formulir terbesar (300 baris kerja sama)
+    2.725 bagian, diperiksa uji untuk setiap templat.
+- **Konsekuensi:** perubahan lewat tombol daftar yang belum disusul "Simpan draf" tidak bisa dipulihkan dari riwayat
+  (hanya dibuang bersama drafnya); pemulihan versi meneruskan hitungan versi (`riwayat.pulihkan`).
+
+### K-P28 — Alur isi halaman: aturan rinci di dalam K-P24 (Fase 2 langkah 3)
+- **Konteks:** K-P24 menetapkan alur operator → admin prodi seperti pengumuman. Beberapa hal rinci perlu ditentukan
+  agar alurnya sulit dirusak oleh pengelola yang bukan developer.
+- **Keputusan** (usulan pengembang, disetujui pengguna 27 Oktober 2026):
+  - setiap tombol penyunting (termasuk Ajukan, Terbitkan, Kembalikan, Tarik) menyimpan dulu apa yang ada di formulir,
+    jadi ketikan tidak pernah hilang karena tombol yang dipilih;
+  - draf baru bisa diajukan atau diterbitkan bila lolos semua pemeriksaan dan tidak kosong. Admin tidak pernah menerima
+    draf yang tidak bisa diterbitkan;
+  - draf yang menunggu tetap bisa disunting operator (tetap menunggu; admin yang menerbitkan selalu melihat versi
+    terbaru karena simpanan dari versi lama ditolak), tetapi tidak bisa dibuang operator sebelum pengajuannya dibatalkan;
+  - Kembalikan wajib dengan catatan (paling banyak 500 karakter). Catatan tampil sampai draf diajukan lagi dan tetap ada
+    di riwayat;
+  - Tarik menurunkan isi dari situs dan menjadikannya draf (bila belum ada draf), supaya bisa diperbaiki dan diterbitkan
+    lagi;
+  - versi lama di riwayat halaman hanya bisa **dijadikan draf**, tidak langsung ke situs, sehingga melewati pemeriksaan
+    dan persetujuan yang sama. Operator juga boleh, karena hanya mengubah draf. Pemulihan langsung tetap ada di menu
+    Riwayat untuk admin prodi;
+  - kelengkapan menghitung halaman wajib yang **terbit dan tampil** (lolos pemeriksaan), bukan sekadar pernah terbit.
+- **Konsekuensi:** tanpa SMTP (K-P12), pemberitahuan hanya lewat dasbor: admin melihat jumlah halaman yang menunggu,
+  operator melihat halaman yang dikembalikan.
+
+### K-P29 — Dokumen akreditasi di halaman Akreditasi; label kriteria dari berkas yang dikonfirmasi LPMPP (Fase 2 langkah 4)
+- **Konteks:** rencana §3.7 meminta satu halaman Dokumen Akreditasi per prodi ("misalnya `profil/dokumen-akreditasi`")
+  dan label kriteria yang baru tampil setelah dikonfirmasi LPMPP (K-P25). Halaman **Akreditasi** (`profil/akreditasi`)
+  sudah ada sejak Fase 1, menampilkan status dari data resmi, dan sudah menjanjikan "Sertifikat akreditasi sedang
+  dilengkapi oleh Program Studi".
+- **Keputusan** (usulan pengembang, disetujui pengguna 27 Oktober 2026):
+  - **Dokumen Akreditasi** menjadi bagian dokumen di halaman Akreditasi itu, bukan halaman baru. Isinya daftar dokumen
+    (sertifikat, SK, ringkasan hasil; judul, tahun, keterangan, PDF), keterangan, dan bagian tambahan, diisi lewat
+    penyunting dengan alur K-P24.
+    - Status akreditasi tetap otomatis dari data resmi dan tidak bisa diubah di sini (K-P15, K-P16).
+    - Halaman ini tidak menambah hitungan halaman wajib (tetap 22) dan tercatat di kelengkapan sebagai "pelengkap".
+  - **Label kriteria** ada di `platform/template/kriteria.json`, per lembaga akreditasi:
+    - isinya nama instrumen, daftar kriteria, pemetaan halaman → kriteria, dan nilai `lembaga_akreditasi` data resmi yang
+      berarti lembaga itu (mis. `LAM-Teknik` dan `LAM-Tek`);
+    - lembaga baru tampil bila berstatus `dikonfirmasi` dengan nama pengonfirmasi dan tanggalnya;
+    - draf tidak pernah tampil di situs maupun di penyunting.
+    - Berkas disunting pengembang atas dasar daftar dari LPMPP (perubahannya jarang); berkas yang rusak tidak
+      memunculkan label apa pun.
+  - **Draf awal:** BAN-PT (IAPS 4.0, 9 kriteria) dengan usulan pemetaan. LAM hanya terdaftar namanya, tanpa kriteria;
+    daftarnya menunggu LPMPP supaya tidak ada yang dikarang.
+  - **Tampilan setelah dikonfirmasi:**
+    - halaman yang dipetakan menyebut kriterianya di bawah judul;
+    - halaman Akreditasi memuat "Halaman menurut kriteria akreditasi", hanya halaman yang ada di situs prodi itu.
+- **Konsekuensi:** prodi dengan nilai lembaga yang tidak diklaim lembaga mana pun (kosong, `BAN-PT / LAM-PTIP`) tidak
+  mendapat label sampai LPMPP memutuskan dan data www diperbaiki. Panduan untuk LPMPP: `docs/kriteria-akreditasi.md`.
+
+### K-P30 — Panduan di dalam admin dan menu Masukan untuk pilot (Fase 2 langkah 5)
+- **Konteks:** panduan admin prodi (`docs/panduan-admin-prodi.md`, rencana §6) ada di repo GitHub yang privat, padahal
+  pembacanya admin prodi dan operator. Rencana §6 dan §9 juga meminta setiap masukan pilot tercatat dan ditindaklanjuti
+  atau ditunda; tanpa surel (K-P12), masukan mudah tercecer di percakapan.
+- **Keputusan** (usulan pengembang, disetujui pengguna 27 Oktober 2026):
+  - **Panduan di admin.** Panduan tampil di admin sebagai menu **Panduan** (`/panduan`), dari berkas yang sama.
+    - Berkasnya ikut di image admin. Penguraiannya Markdown sederhana dengan semua karakter di-escape; tanpa paket baru.
+    - Penyunting menautkan bagian "Mengisi halaman".
+    - Uji memastikan setiap tombol dan menu yang disebut panduan tampil di admin, dan batas serta pesan galat di
+      panduan sama dengan di kode.
+  - **Menu Masukan untuk setiap pengguna admin.** Isinya jenis (kendala, pertanyaan, usulan) dan teks; halaman asalnya
+    ikut tercatat.
+    - Pengirim melihat masukannya sendiri beserta tanggapannya.
+    - Superadmin melihat semua masukan di **Masukan pengguna**, menandainya ditindaklanjuti atau ditunda dengan
+      tanggapan, dan mengunduh CSV-nya untuk laporan pilot.
+    - Dasbor superadmin menyebut jumlah masukan baru.
+    - Disimpan di `masukan.json`; setiap kiriman dan tanggapan masuk log audit.
+- **Konsekuensi:** masukan juga bisa datang dari luar admin (sesi pengenalan, telepon). Superadmin mencatatnya lewat
+  menu yang sama supaya laporan pilot lengkap.

@@ -1,0 +1,84 @@
+{# The sections of a programme's own page (platform/isi_halaman.py tampilan()): paragraphs, lists, tables, cards,
+   documents, photos and links. Text arrives escaped; only the limited markup (links, bold, lists) is HTML.
+   Headings: the page's h1, then h2 per section, h3 per card, h4 inside a card. #}
+
+{% macro sel_isi(c) -%}
+{%- if c.jenis == "teks" %}{{ c.html }}
+{%- elif c.jenis == "tautan" %}<a href="{{ c.alamat }}">{{ c.label }}</a>
+{%- elif c.jenis == "dokumen" %}<a href="{{ media_url(c.rekam) }}">PDF<span class="tersembunyi">: {{ c.rekam.judul }}</span></a> <span class="isi-info">{{ c.rekam.ukuran | ukuran }}</span>
+{%- elif c.jenis == "ya" %}Ya
+{%- endif %}
+{%- endmacro %}
+
+{% macro bagian_isi(b) %}
+<section class="isi-bagian isi-bagian--{{ b.jenis }}"{% if b.judul %} aria-labelledby="{{ b.id }}"{% endif %}>
+	{% if b.judul %}<h2 id="{{ b.id }}">{{ b.judul }}</h2>{% endif %}
+	{% if b.jenis == "paragraf" %}
+	{{ b.html }}
+	{% elif b.jenis == "daftar" %}
+	{% if b.bernomor %}<ol class="isi-daftar">{% else %}<ul class="isi-daftar">{% endif %}
+		{% for x in b.butir %}<li>{{ x }}</li>{% endfor %}
+	{% if b.bernomor %}</ol>{% else %}</ul>{% endif %}
+	{% elif b.jenis == "tabel" %}
+	<div class="tabel-gulir" role="region" aria-labelledby="{{ b.id }}" tabindex="0">
+		<table class="tabel-isi">
+			<caption class="tersembunyi">{{ b.judul }}</caption>
+			<thead><tr>{% for k in b.kolom %}<th scope="col">{{ k }}</th>{% endfor %}</tr></thead>
+			<tbody>
+				{% for r in b.baris %}
+				<tr>{% for c in r %}<td>{{ sel_isi(c) }}</td>{% endfor %}</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% elif b.jenis == "kartu" %}
+	<ul class="isi-kartu">
+		{% for k in b.kartu %}
+		<li class="isi-kartu__butir">
+			<h3 class="isi-kartu__judul">{{ k.judul }}</h3>
+			{% if k.foto %}{% set f = k.foto | foto_varian(800) %}
+			<img src="{{ media_url(f) }}" alt="{{ k.foto.alt }}" width="{{ f.lebar }}" height="{{ f.tinggi }}" loading="lazy">
+			{% endif %}
+			{% if k.rincian %}
+			<dl class="isi-rincian">
+				{% for label, c in k.rincian %}<div><dt>{{ label }}</dt><dd>{{ sel_isi(c) }}</dd></div>{% endfor %}
+			</dl>
+			{% endif %}
+			{% for label, html in k.uraian %}
+			<h4>{{ label }}</h4>
+			{{ html }}
+			{% endfor %}
+			{% for label, rekam in k.dokumen %}
+			<p><a href="{{ media_url(rekam) }}">{{ label }}</a> <span class="isi-info">PDF, {{ rekam.ukuran | ukuran }}</span></p>
+			{% endfor %}
+		</li>
+		{% endfor %}
+	</ul>
+	{% elif b.jenis == "dokumen" %}
+	<ul class="isi-dokumen">
+		{% for d in b.dokumen %}
+		<li>
+			<a href="{{ media_url(d.rekam) }}">{{ d.judul }}</a>
+			<span class="isi-info">PDF, {{ d.rekam.halaman }} halaman, {{ d.rekam.ukuran | ukuran }}{% if d.tahun %}, {{ d.tahun }}{% endif %}</span>
+			{% if d.keterangan %}<br>{{ d.keterangan }}{% endif %}
+		</li>
+		{% endfor %}
+	</ul>
+	{% elif b.jenis == "galeri" %}
+	<ul class="galeri isi-galeri">
+		{% for f in b.foto %}{% set v = f.rekam | foto_varian(800) %}
+		<li>
+			<figure>
+				<a href="{{ media_url(f.rekam | foto_varian) }}"><img src="{{ media_url(v) }}" alt="{{ f.rekam.alt }}" width="{{ v.lebar }}" height="{{ v.tinggi }}" loading="lazy"></a>
+				{% if f.keterangan %}<figcaption>{{ f.keterangan }}</figcaption>{% endif %}
+			</figure>
+		</li>
+		{% endfor %}
+	</ul>
+	{% elif b.jenis == "tautan" %}
+	<ul class="isi-tautan">
+		{% for t in b.tautan %}<li><a href="{{ t.alamat }}">{{ t.label }}</a></li>{% endfor %}
+	</ul>
+	{% endif %}
+</section>
+{% endmacro %}

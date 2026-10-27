@@ -67,10 +67,21 @@ def baca_versi(berkas, versi):
 
 
 def pulihkan(berkas, versi, oleh, bagian):
-    """Put an old version back (the current one is kept as a new history entry first)."""
+    """Put an old version back (the current one is kept as a new history entry first).
+
+    A file that counts its own changes ("versi", the pages of isi_halaman.py) goes on counting from the current
+    number: a form opened before the restore is then refused instead of silently overwriting the restored content."""
     asal = baca_versi(berkas, versi)
     simpan_versi(berkas, oleh, bagian, "sebelum pemulihan versi %s" % versi)
     tujuan = path_data(berkas)
+    with io.open(asal, encoding="utf-8") as f:
+        lama = json.load(f)
+    kini = lokasi.baca(berkas)
+    if isinstance(lama, dict) and isinstance(kini, dict) and isinstance(lama.get("versi"), int) \
+            and isinstance(kini.get("versi"), int):
+        lama["versi"] = kini["versi"] + 1
+        lokasi.tulis_json(tujuan, lama)
+        return
     tmp = tujuan + ".tmp"
     shutil.copy2(asal, tmp)
     os.replace(tmp, tujuan)

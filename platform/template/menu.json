@@ -15,7 +15,7 @@
        {"id": "penjaminan-mutu", "label": "Penjaminan Mutu", "jenis": "wajib", "alamat": "profil/penjaminan-mutu",
         "deskripsi": "Pelaksanaan sistem penjaminan mutu internal: dokumen dan standar mutu, SOP, hasil audit mutu internal, dan tindak lanjutnya."},
        {"id": "akreditasi", "label": "Akreditasi", "jenis": "otomatis", "templat": "akreditasi", "alamat": "profil/akreditasi",
-        "deskripsi": "Status akreditasi nasional dan internasional program studi."},
+        "deskripsi": "Status akreditasi nasional dan internasional program studi, beserta sertifikat dan SK akreditasinya."},
        {"id": "kerja-sama", "label": "Kerja Sama", "jenis": "wajib", "alamat": "profil/kerja-sama",
         "deskripsi": "Kerja sama dengan mitra dalam dan luar negeri beserta manfaatnya bagi program studi."}
      ]},

@@ -18,13 +18,17 @@
 			<a href="{{ url_for('dasbor') }}">Dasbor</a>
 			{% if a.peran == 'super' %}
 			<a href="{{ url_for('super_prodi') }}">Prodi</a>
+			<a href="{{ url_for('super_kelengkapan') }}">Kelengkapan</a>
 			<a href="{{ url_for('super_tarik') }}">Data www</a>
 			<a href="{{ url_for('super_dosen') }}">Tautan dosen</a>
 			<a href="{{ url_for('akun_semua') }}">Akun</a>
 			<a href="{{ url_for('super_riwayat') }}">Riwayat</a>
 			<a href="{{ url_for('audit_semua') }}">Log audit</a>
 			<a href="{{ url_for('super_bangun') }}">Bangun ulang</a>
+			<a href="{{ url_for('super_masukan') }}">Masukan pengguna</a>
 			{% endif %}
+			<a href="{{ url_for('panduan') }}">Panduan</a>
+			<a href="{{ url_for('masukan', dari=request.path) }}">Masukan</a>
 			<a href="{{ url_for('sandi') }}">Kata sandi</a>
 		</nav>
 		<form method="post" action="{{ url_for('keluar') }}" class="keluar">
