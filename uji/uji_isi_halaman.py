@@ -364,6 +364,13 @@ try:
     b = bangun.Pembangun(produksi=False)
     b.bangun(A)
     cek("[CONTOH] Mitra" in halaman_html("s1informatika", "profil/kerja-sama"), "bangun satu prodi dengan isi halaman")
+    # sample content is never published in production, whoever put it there (a staging VM becomes the production one)
+    b = bangun.Pembangun(produksi=True)
+    b.bangun(A)
+    kerja = halaman_html("s1informatika", "profil/kerja-sama")
+    cek("[CONTOH]" not in kerja and MENYUSUL in kerja
+        and "prodi %s: isi halaman kerja-sama bertanda [CONTOH], tidak diterbitkan di produksi" % A in b.peringatan,
+        "isi contoh tidak terbit di produksi: %r" % b.peringatan[:4])
 
     # the command line
     cek(ih.main(["daftar", "--prodi", A]) == 0, "baris perintah: daftar")

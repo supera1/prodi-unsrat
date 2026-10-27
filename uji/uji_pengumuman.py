@@ -384,10 +384,16 @@ try:
     cek(ada("unggahan/" + elektro["varian"]["800"]["jalur"]), "bangun satu prodi tidak menghapus berkas prodi lain")
     cek(ada(p + utama + "/index.html"), "pengumuman yang diterbitkan lagi kembali tampil")
 
-    # --- production: sitemap holds every page, also the announcements; link previews carry the address
-    bangun.Pembangun(produksi=True, hari_ini=HARI_INI, alamat="https://prodi.unsrat.ac.id").bangun()
+    # --- production: sitemap holds every page, also the announcements; link previews carry the address. Sample content
+    # ([CONTOH], isi_halaman.py) is never published there, whoever put it in.
+    contoh = t("[CONTOH] Kuliah umum", "2026-10-20", "kegiatan")
+    b_produksi = bangun.Pembangun(produksi=True, hari_ini=HARI_INI, alamat="https://prodi.unsrat.ac.id")
+    b_produksi.bangun()
     with io.open(os.path.join(pub, "sitemap.xml"), encoding="utf-8") as f:
         peta = f.read()
+    cek(not ada(p + contoh + "/index.html") and "[CONTOH]" not in peta and "[CONTOH]" not in baca("s1informatika/index.html")
+        and any(contoh in x and "tidak diterbitkan di produksi" in x for x in b_produksi.peringatan),
+        "pengumuman contoh tidak terbit di produksi: %r" % b_produksi.peringatan[:4])
     halaman = sum(1 for _f, _d, n in os.walk(pub) for x in n if x == "index.html")
     cek(peta.count("<loc>") == halaman, "sitemap = semua halaman (%d), ada %d" % (halaman, peta.count("<loc>")))
     cek("<loc>https://prodi.unsrat.ac.id/s1informatika/pengumuman/%s/</loc>" % utama in peta, "sitemap memuat pengumuman")

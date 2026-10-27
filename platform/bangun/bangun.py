@@ -395,6 +395,10 @@ class Pembangun(object):
         isi = isi_halaman.terbit(kode, id_halaman)
         if isi is None:
             return None
+        if self.produksi and isi_halaman.bertanda_contoh(isi):
+            self.peringatan.append("prodi %s: isi halaman %s bertanda %s, tidak diterbitkan di produksi"
+                                   % (kode, id_halaman, isi_halaman.CONTOH))
+            return None
         masalah = isi_halaman.periksa(id_halaman, isi, kode)
         if masalah:
             self.peringatan.append("prodi %s: isi halaman %s diabaikan (%s)" % (kode, id_halaman, "; ".join(masalah[:3])))
@@ -437,6 +441,10 @@ class Pembangun(object):
         """Published announcements of a programme whose files are all there (local files are published here)."""
         hasil = []
         for b in pengumuman_mod.terbit(pengumuman_mod.baca(kode)):
+            if self.produksi and isi_halaman.bertanda_contoh(b):
+                self.peringatan.append("prodi %s: pengumuman %s bertanda %s, tidak diterbitkan di produksi"
+                                       % (kode, b["id"], isi_halaman.CONTOH))
+                continue
             rekam = [v for f in b.get("foto", []) for v in f["varian"].values()] + list(b.get("pdf", []))
             if all(self.terbitkan_media(r) for r in rekam):
                 hasil.append(b)

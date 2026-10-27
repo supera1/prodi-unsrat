@@ -1081,6 +1081,12 @@ def isi_contoh(id_halaman, n=3, berkas_contoh=None):
     return _contoh(TEMPLAT[id_halaman], n, berkas_contoh)
 
 
+def bertanda_contoh(nilai):
+    """Whether content (a page, an announcement) holds the [CONTOH] mark of sample content. A production build never
+    publishes it (bangun.py), whoever put it there: a staging VM becomes the production one (docs/deploy.md §11)."""
+    return CONTOH in json.dumps(nilai, ensure_ascii=False)
+
+
 # ------------------------------------------------------------------ command line
 
 def main(argv=None):
