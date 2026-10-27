@@ -1,7 +1,13 @@
-# Label kriteria akreditasi — draf untuk diperiksa LPMPP UNSRAT
+# Label kriteria akreditasi — usulan bersama dan pemeriksaan LPMPP UNSRAT
 
-**Status: draf (27 Oktober 2026).** Belum ada lembaga yang dikonfirmasi, jadi label ini belum tampil di situs prodi
-mana pun (K-P25, K-P29). Berkasnya: `platform/template/kriteria.json`; kodenya: `platform/kriteria.py`.
+**Status (27 Oktober 2026):** label kriteria **diisi admin prodi sendiri** di menu prodi **Kriteria akreditasi**
+(K-P33), tanpa menunggu LPMPP. Kriteria setiap prodi disimpan di `data/prodi/<kode>/kriteria.json` dan jumlahnya
+terlihat di menu **Kelengkapan** superadmin (layar dan CSV).
+
+Berkas bersama `platform/template/kriteria.json` (kode: `platform/kriteria.py`) sekarang berfungsi sebagai **usulan**:
+lembaga yang punya daftar kriteria (saat ini draf BAN-PT IAPS 4.0) bisa mengisi formulir admin prodi. Lembaga yang
+dikonfirmasi di berkas itu (K-P29) hanya dipakai untuk prodi yang belum mengisi kriterianya sendiri; saat ini belum ada.
+Bagian di bawah tetap berlaku untuk LPMPP yang ingin memeriksa atau melengkapi usulan.
 
 ## Untuk apa
 Situs prodi dipakai untuk akreditasi. Bila pemetaan ini sudah dikonfirmasi, setiap halaman wajib menyebut kriteria
@@ -15,8 +21,9 @@ membuka halaman yang relevan per kriteria. Label dipilih menurut `lembaga_akredi
 ## Yang diminta dari LPMPP
 1. **BAN-PT (IAPS 4.0):** periksa nama ke-9 kriteria dan pemetaan halaman di bawah. Halaman boleh punya lebih dari satu
    kriteria, dan boleh juga tanpa kriteria.
-2. **Setiap LAM** (LAM-PTKes, LAM-SPAK, LAMEMBA, LAM Teknik, LAMSAMA, LAM-Infokom, LAM-PTIP): kirim daftar kriteria
-   instrumennya dan pemetaan halamannya. Pengembang tidak mengisi kriteria LAM sendiri supaya tidak ada yang dikarang.
+2. **Setiap LAM** (LAM-PTKes, LAM-SPAK, LAMEMBA, LAM Teknik, LAMSAMA, LAM-Infokom, LAM-PTIP): bila ada, kirim daftar
+   kriteria instrumennya dan pemetaan halamannya sebagai usulan bersama. Pengembang tidak mengisi kriteria LAM sendiri
+   supaya tidak ada yang dikarang; sampai itu, admin prodi mengetiknya dari instrumen lembaganya.
 3. **Nilai lembaga di data resmi** yang perlu diputuskan:
    - 3 prodi bertanda `BAN-PT / LAM-PTIP` dan 7 prodi tanpa lembaga belum mendapat label apa pun;
    - `LAM-Teknik` dan `LAM-Tek` dianggap lembaga yang sama (LAM Teknik).

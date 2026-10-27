@@ -384,8 +384,9 @@ try:
     baris = list(csv.reader(io.StringIO(teks.lstrip("﻿"))))
     kepala, data_a = baris[0], [b for b in baris[1:] if b[0] == A][0]
     kolom = dict(zip(kepala, data_a))
-    cek(kepala[:12] == ["kode_pddikti", "jenjang", "nama", "fakultas", "slug", "aktif", "wajib_terbit", "wajib_total", "menunggu",
-                        "dikembalikan", "draf", "terakhir_diubah"] and len(kepala) == 12 + len(ih.TEMPLAT), "kolom CSV: %r" % kepala[:12])
+    cek(kepala[:13] == ["kode_pddikti", "jenjang", "nama", "fakultas", "slug", "aktif", "wajib_terbit", "wajib_total", "menunggu",
+                        "dikembalikan", "draf", "terakhir_diubah", "kriteria_akreditasi"]
+        and len(kepala) == 13 + len(ih.TEMPLAT), "kolom CSV: %r" % kepala[:13])
     cek(kolom["wajib_terbit"] == "1" and kolom["wajib_total"] == "22" and kolom["menunggu"] == "1" and kolom["draf"] == "2",
         "CSV: jumlah prodi A: %r" % [kolom[x] for x in ("wajib_terbit", "menunggu", "draf")])
     cek(kolom["Perpustakaan dan Referensi"].startswith("terbit 20") and kolom["Ruang Kuliah dan Ruang Pendukung"] == "menunggu persetujuan"

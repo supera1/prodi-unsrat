@@ -1,0 +1,111 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Kriteria akreditasi — {{ pr.nama }}{% endblock %}
+{% block isi %}
+{{ nav_prodi(pr, 'kriteria_prodi') }}
+<h1>Kriteria akreditasi</h1>
+<p>Label kriteria membantu asesor menemukan halaman menurut kriteria instrumen akreditasi prodi Anda. Setiap halaman yang dicentang
+	menampilkan labelnya ("Kriteria 2, Tata Pamong, …"), dan halaman <strong>Akreditasi</strong> menampilkan daftar halaman per kriteria.
+	Daftar kriteria diisi admin prodi sesuai instrumen lembaga akreditasinya{% if lembaga_resmi %} (data resmi: {{ lembaga_resmi }}){% endif %}.
+	Selama daftar kriteria kosong, situs tidak menampilkan label kriteria.</p>
+{% if not admin %}
+<p class="keterangan">Hanya admin prodi yang bisa mengubah kriteria akreditasi.</p>
+{% endif %}
+
+{% if admin and usulan %}
+<section class="kartu" aria-labelledby="judul-usulan">
+	<h2 id="judul-usulan">Mulai dari usulan</h2>
+	<p>Mengisi formulir di bawah dengan usulan daftar kriteria dan pemetaan halamannya. Usulan bisa diubah sebelum disimpan; situs
+		belum berubah sampai Anda menekan <strong>Simpan kriteria</strong>.</p>
+	<form method="post" action="{{ url_for('kriteria_usulan', kode=pr.kode) }}" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<div class="isian"><label for="usulan">Usulan</label>
+			<select id="usulan" name="usulan">{% for lb in usulan %}<option value="{{ lb.id }}">{{ lb.nama }} — {{ lb.instrumen }}</option>{% endfor %}</select></div>
+		<button type="submit" class="tombol tombol--garis">Isi formulir dari usulan</button>
+	</form>
+</section>
+{% endif %}
+
+{% if admin %}
+<form method="post" action="{{ url_for('kriteria_simpan', kode=pr.kode) }}" class="formulir">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+{% endif %}
+	<section class="kartu" aria-labelledby="judul-lembaga">
+		<h2 id="judul-lembaga">Lembaga dan instrumen</h2>
+		{% if admin %}
+		<div class="isian"><label for="nama">Nama lembaga akreditasi</label>
+			<input id="nama" name="nama" type="text" value="{{ isian.nama or '' }}" maxlength="{{ maks_lembaga }}" required></div>
+		<div class="isian"><label for="instrumen">Nama instrumen (opsional)</label>
+			<input id="instrumen" name="instrumen" type="text" value="{{ isian.instrumen or '' }}" maxlength="{{ maks_nama }}">
+			<p class="keterangan">Mis. "Instrumen Akreditasi Program Studi (IAPS) 4.0". Tampil di halaman Akreditasi.</p></div>
+		{% else %}
+		<p>{{ isian.nama or '—' }}{% if isian.instrumen %} — {{ isian.instrumen }}{% endif %}</p>
+		{% endif %}
+	</section>
+
+	<section class="kartu" aria-labelledby="judul-daftar">
+		<h2 id="judul-daftar">Daftar kriteria</h2>
+		{% if admin %}
+		<p class="keterangan">Paling banyak {{ maks }} kriteria. Nomor boleh angka atau huruf (mis. 1, 2.1, C). Kosongkan nomor dan nama
+			sebuah baris untuk menghapusnya. Baris baru mendapat kolom centang di tabel halaman setelah disimpan.</p>
+		{% set baris = (isian.kriteria or []) + [{}] * kosong %}
+		<input type="hidden" name="kriteria_jumlah" value="{{ baris | length }}">
+		<div class="tabel-gulir">
+			<table>
+				<thead><tr><th scope="col">Nomor</th><th scope="col">Nama kriteria</th></tr></thead>
+				<tbody>
+					{% for k in baris %}
+					<tr>
+						<td><label class="tersembunyi" for="k-{{ loop.index0 }}-nomor">Nomor baris {{ loop.index }}</label>
+							<input id="k-{{ loop.index0 }}-nomor" name="k-{{ loop.index0 }}-nomor" type="text" value="{{ k.nomor or '' }}" maxlength="8" class="angka-kecil"></td>
+						<td><label class="tersembunyi" for="k-{{ loop.index0 }}-nama">Nama kriteria baris {{ loop.index }}</label>
+							<input id="k-{{ loop.index0 }}-nama" name="k-{{ loop.index0 }}-nama" type="text" value="{{ k.nama or '' }}" maxlength="{{ maks_nama }}"></td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		{% elif isian.kriteria %}
+		<ul>{% for k in isian.kriteria %}<li>Kriteria {{ k.nomor }}: {{ k.nama }}</li>{% endfor %}</ul>
+		{% else %}
+		<p>Belum ada daftar kriteria.</p>
+		{% endif %}
+	</section>
+
+	{% if kolom %}
+	<section class="kartu" aria-labelledby="judul-halaman">
+		<h2 id="judul-halaman">Halaman per kriteria</h2>
+		<p class="keterangan">{% if admin %}Centang kriteria yang dilayani setiap halaman. {% else %}Kriteria yang dilayani setiap halaman. {% endif %}Satu halaman boleh melayani lebih dari satu kriteria, atau tidak sama sekali.</p>
+		<div class="tabel-gulir">
+			<table>
+				<thead><tr><th scope="col">Halaman</th>{% for k in kolom %}<th scope="col"><abbr title="{{ k.nama }}">{{ k.nomor }}</abbr></th>{% endfor %}</tr></thead>
+				<tbody>
+					{% for label_kelompok, anak in kelompok %}
+					<tr><th scope="rowgroup" colspan="{{ (kolom | length) + 1 }}">{{ label_kelompok }}</th></tr>
+					{% for a in anak %}
+					{% set pilih = (isian.halaman or {}).get(a.id, []) %}
+					<tr>
+						<th scope="row">{{ a.label }}{% if a.sembunyi %} <span class="tanda">disembunyikan</span>{% endif %}</th>
+						{% for k in kolom %}
+						<td>{% if admin %}<label><input type="checkbox" name="h-{{ a.id }}" value="{{ k.nomor }}"{% if k.nomor in pilih %} checked{% endif %}><span class="tersembunyi"> {{ a.label }}: kriteria {{ k.nomor }}</span></label>{% elif k.nomor in pilih %}<span aria-hidden="true">✓</span><span class="tersembunyi">ya</span>{% endif %}</td>
+						{% endfor %}
+					</tr>
+					{% endfor %}
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</section>
+	{% endif %}
+{% if admin %}
+	<button type="submit" class="tombol">Simpan kriteria</button>
+</form>
+{% if tersimpan %}
+<form method="post" action="{{ url_for('kriteria_kosongkan', kode=pr.kode) }}" class="formulir">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<p class="keterangan">Mengosongkan menghapus daftar kriteria prodi ini dari situs. Versi sebelumnya tetap ada di menu Riwayat.</p>
+	<button type="submit" class="tombol tombol--garis tombol--bahaya">Kosongkan kriteria</button>
+</form>
+{% endif %}
+{% endif %}
+{% endblock %}

@@ -1,5 +1,5 @@
 {
-  "keterangan": "Label kriteria akreditasi per lembaga (platform/kriteria.py, K-P25, K-P29). Disiapkan pengembang sebagai DRAF untuk diperiksa LPMPP UNSRAT; lembaga berstatus draf tidak pernah ditampilkan di situs. Setelah LPMPP mengonfirmasi, ubah status menjadi dikonfirmasi dan isi dikonfirmasi.oleh dan .tanggal. Panduan: docs/kriteria-akreditasi.md.",
+  "keterangan": "Usulan bersama label kriteria akreditasi per lembaga (platform/kriteria.py, K-P25, K-P29, K-P33). Admin prodi mengisi kriteria prodinya sendiri di menu Kriteria akreditasi; lembaga di sini yang punya daftar kriteria bisa mengisi formulir itu. Disiapkan pengembang sebagai DRAF untuk diperiksa LPMPP UNSRAT; lembaga berstatus draf tidak pernah ditampilkan langsung di situs. Setelah LPMPP mengonfirmasi, ubah status menjadi dikonfirmasi dan isi dikonfirmasi.oleh dan .tanggal. Panduan: docs/kriteria-akreditasi.md.",
   "lembaga": [
     {
       "id": "ban-pt",

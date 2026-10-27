@@ -3,7 +3,8 @@
 {% block isi %}
 <h1>Kelengkapan halaman wajib</h1>
 <p>Halaman wajib akreditasi yang sudah terbit di setiap situs prodi, beserta draf yang sedang dikerjakan. Unduhan CSV memuat
-	keadaan setiap halaman per prodi, untuk dipantau LPMPP.</p>
+	keadaan setiap halaman per prodi, untuk dipantau LPMPP. Kolom Kriteria akreditasi: jumlah kriteria yang diisi admin prodi
+	di menu Kriteria akreditasi.</p>
 <ul class="ringkasan">
 	<li><strong>{{ jumlah.lengkap }}</strong> dari {{ aktif | length }} situs aktif sudah menerbitkan ke-{{ wajib }} halaman wajib</li>
 	<li>rata-rata <strong>{{ '%.1f' | format(jumlah.rata) | replace('.', ',') }}</strong> dari {{ wajib }} halaman wajib terbit per situs aktif</li>
@@ -13,7 +14,7 @@
 <div class="tabel-gulir">
 	<table>
 		<thead><tr><th scope="col">Prodi</th><th scope="col">Fakultas</th><th scope="col">Wajib terbit</th><th scope="col">Menunggu</th>
-			<th scope="col">Dikembalikan</th><th scope="col">Draf</th><th scope="col">Terakhir diubah</th></tr></thead>
+			<th scope="col">Dikembalikan</th><th scope="col">Draf</th><th scope="col">Terakhir diubah</th><th scope="col">Kriteria akreditasi</th></tr></thead>
 		<tbody>
 			{% for b in baris %}
 			<tr>
@@ -24,6 +25,7 @@
 				<td class="sel-angka">{{ b.isi.dikembalikan or '' }}</td>
 				<td class="sel-angka">{{ b.isi.draf or '' }}</td>
 				<td>{{ (b.isi.terakhir | replace('T', ' '))[:16] or '—' }}</td>
+				<td class="sel-angka">{{ b.kriteria or '—' }}</td>
 			</tr>
 			{% endfor %}
 		</tbody>

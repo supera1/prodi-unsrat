@@ -28,7 +28,7 @@
 {% if peta %}
 <section class="peta-kriteria" aria-labelledby="peta-kriteria">
 	<h2 id="peta-kriteria">Halaman menurut kriteria akreditasi {{ lembaga_kriteria.nama }}</h2>
-	<p class="isi-info">{{ lembaga_kriteria.instrumen }}</p>
+	{% if lembaga_kriteria.instrumen %}<p class="isi-info">{{ lembaga_kriteria.instrumen }}</p>{% endif %}
 	<dl class="peta-kriteria__daftar">
 		{% for k in peta %}
 		<div>

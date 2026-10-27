@@ -10,8 +10,11 @@
   and the pages per criterion on the accreditation page (a hidden optional page left out), escaped; a broken file
   shows nothing and warns; the documents of the accreditation page under its official status, the note while there
   are none; the shared page checks;
+- a programme's own criteria (K-P33): the checks of its file (numbers, names, spam, pages), its labels shown while the
+  shared file is a draft and before a confirmed body, a broken one ignored with a warning;
 - the admin: the accreditation page in the list and its editor (the official status said, not editable there), the
-  label in the editor only once confirmed, the completeness CSV.
+  label in the editor only once confirmed or set by the programme, the criteria page (filled from a proposal without
+  storing, stored, refused with the reason, read-only for operators, cleared), the completeness CSV.
 
 Needs the packages of platform/admin/requirements.txt: run with .venv/bin/python.
 """
@@ -242,6 +245,56 @@ try:
     cek(getattr(b, "kriteria", "tidak ada") is None and any("label kriteria" in p for p in b.peringatan),
         "berkas yang bukan JSON diabaikan")
 
+    # ============================================================== a programme's own criteria (K-P33)
+    butir = menu_mod.semua_butir(menu)
+    sah = {"nama": "LAM Teknik", "instrumen": "", "kriteria": [{"nomor": "1", "nama": "Visi & Misi"},
+                                                              {"nomor": "2.1", "nama": "Tata Kelola"}],
+           "halaman": {"visi-misi": ["1"], "struktur-organisasi": ["1", "2.1"]}}
+    cek(kr.periksa_prodi(sah, halaman_ada) == [], "kriteria prodi sah: %r" % kr.periksa_prodi(sah, halaman_ada))
+    for pesan, ubah in (
+            ("tanpa nama lembaga", lambda d: d.update(nama="")),
+            ("nama lembaga dengan markah", lambda d: d.update(nama="<b>LAM</b>")),
+            ("nomor tidak sah", lambda d: d["kriteria"][0].update(nomor="1 2")),
+            ("nomor ganda", lambda d: d["kriteria"][1].update(nomor="1")),
+            ("nama kriteria kosong", lambda d: d["kriteria"][0].update(nama="")),
+            ("teks judi", lambda d: d["kriteria"][0].update(nama="Info slot gacor")),
+            ("halaman tidak dikenal", lambda d: d["halaman"].update({"keuangan": ["1"]})),
+            ("nomor halaman tidak ada", lambda d: d["halaman"].update({"visi-misi": ["3"]})),
+            ("terlalu banyak kriteria", lambda d: d.update(kriteria=[{"nomor": str(i), "nama": "K%d" % i}
+                                                                     for i in range(1, kr.MAKS_KRITERIA + 2)],
+                                                           halaman={}))):
+        d = copy.deepcopy(sah)
+        ubah(d)
+        cek(kr.periksa_prodi(d, halaman_ada), "kriteria prodi %s harus ditolak" % pesan)
+    cek(kr.periksa_prodi(dict(sah, kriteria=[{"nomor": str(i), "nama": "K%d" % i} for i in range(1, kr.MAKS_KRITERIA + 1)],
+                              halaman={}), halaman_ada) == [], "tepat %d kriteria diterima" % kr.MAKS_KRITERIA)
+    try:
+        kr.simpan_prodi(B, dict(sah, nama="Info togel"), halaman_ada, "penguji", "uji")
+        cek(False, "simpan kriteria dengan teks judi harus ditolak")
+    except kr.GagalKriteria as e:
+        cek("judi" in str(e) and kr.baca_prodi(B) == {}, "penolakan menyebut alasannya, tidak ada yang tersimpan: %s" % e)
+    kr.simpan_prodi(B, sah, halaman_ada, "penguji", "uji")
+    cek(kr.baca_prodi(B) == sah, "kriteria prodi tersimpan apa adanya")
+    b = pakai_kriteria(asli)                                  # every shared body a draft
+    teks = halaman_situs(B, butir["visi-misi"]["alamat"])
+    cek('<p class="label-kriteria">Kriteria akreditasi LAM Teknik: Kriteria 1, Visi &amp; Misi</p>' in teks,
+        "kriteria prodi tampil walau berkas bersama masih draf, di-escape")
+    cek("Kriteria 1, Visi &amp; Misi; Kriteria 2.1, Tata Kelola" in halaman_situs(B, butir["struktur-organisasi"]["alamat"]),
+        "dua kriteria prodi pada satu halaman")
+    teks = halaman_situs(B, "profil/akreditasi")
+    cek('<h2 id="peta-kriteria">Halaman menurut kriteria akreditasi LAM Teknik</h2>' in teks and 'class="isi-info"></p>' not in teks,
+        "peta kriteria prodi, tanpa baris instrumen yang kosong")
+    cek("label-kriteria" not in halaman_situs(A, butir["visi-misi"]["alamat"]), "prodi lain tidak terpengaruh")
+    b = pakai_kriteria(lt)                                    # LAM Teknik confirmed in the shared file
+    cek("Kriteria A" not in halaman_situs(B, "akademik/kurikulum") and "Visi &amp; Misi" in
+        halaman_situs(B, butir["visi-misi"]["alamat"]), "kriteria prodi didahulukan dari lembaga yang dikonfirmasi")
+    lokasi.tulis_json(lokasi.path_data(kr.berkas_prodi(B)), dict(sah, nama="Promo slot gacor"))
+    b = pakai_kriteria(asli)
+    cek(any(p.startswith("prodi %s: label kriteria diabaikan" % B) for p in b.peringatan) and
+        "label-kriteria" not in halaman_situs(B, butir["visi-misi"]["alamat"]), "kriteria prodi rusak: tanpa label, ada peringatan")
+    kr.hapus_prodi(B, "penguji")
+    cek(kr.baca_prodi(B) == {}, "kriteria prodi dikosongkan")
+
     # ============================================================== the admin
     kr.KRITERIA_JSON = ASLI
     SANDI = {}
@@ -253,9 +306,10 @@ try:
         return akun.ambil(id_a)
     super_ = akun_baru("superuji", "super", [])
     akun_baru("adma", "admin", [A], super_)
+    akun_baru("opa", "operator", [A], super_)
     app = app_mod.buat_app({"SECRET_KEY": "k" * 64, "ADMIN_IP_BOLEH": "103.84.116.0/24", "PRODI_BANGUN": "mati"})
     klien = {}
-    for i, nama in enumerate(("superuji", "adma")):
+    for i, nama in enumerate(("superuji", "adma", "opa")):
         c = app.test_client()
         c.environ_base["REMOTE_ADDR"] = "103.84.116.%d" % (80 + i)
         c.get("/masuk")
@@ -263,7 +317,12 @@ try:
             token = s["csrf"]
         cek(c.post("/masuk", data={"csrf": token, "pengguna": nama, "sandi": SANDI[nama]}).status_code == 302, "%s masuk" % nama)
         klien[nama] = c
-    ka, ks = klien["adma"], klien["superuji"]
+    ka, ks, ko = klien["adma"], klien["superuji"], klien["opa"]
+
+    def kirim(c, url, data):
+        with c.session_transaction() as s:
+            data = dict(data, csrf=s["csrf"])
+        return c.post(url, data=data)
     teks = ka.get("/prodi/%s/halaman" % A).get_data(as_text=True)
     cek('href="/prodi/%s/halaman/akreditasi">Akreditasi</a>' % A in teks and "Pelengkap" in teks,
         "daftar halaman: akreditasi sebagai pelengkap")
@@ -278,6 +337,41 @@ try:
     cek("Kriteria akreditasi BAN-PT: Kriteria 2, Tata Pamong, Tata Kelola, dan Kerja Sama" in
         ka.get("/prodi/%s/halaman/kerja-sama" % A).get_data(as_text=True), "penyunting: label kriteria setelah dikonfirmasi")
     kr.KRITERIA_JSON = ASLI
+
+    # the criteria page of a programme (K-P33)
+    url_k = "/prodi/%s/kriteria" % A
+    teks = ka.get(url_k).get_data(as_text=True)
+    cek('id="nama" name="nama" type="text" value="BAN-PT"' in teks and '<option value="ban-pt">' in teks and
+        "Halaman per kriteria" not in teks, "halaman kriteria: lembaga dari data resmi, usulan BAN-PT, belum ada tabel")
+    r = kirim(ka, url_k + "/usulan", {"usulan": "ban-pt"})
+    teks = r.get_data(as_text=True)
+    cek(r.status_code == 200 and 'value="Tata Pamong, Tata Kelola, dan Kerja Sama"' in teks and
+        'name="h-kerja-sama" value="2" checked' in teks and kr.baca_prodi(A) == {},
+        "usulan mengisi formulir dan centang halaman tanpa menyimpan")
+    cek(kirim(ka, url_k + "/usulan", {"usulan": "lam-teknik"}).status_code == 400, "usulan tanpa daftar kriteria ditolak")
+    isian = {"nama": "BAN-PT", "instrumen": "IAPS 4.0", "kriteria_jumlah": "3", "k-0-nomor": "1", "k-0-nama": "Visi",
+             "k-1-nomor": "2", "k-1-nama": "Tata Pamong", "k-2-nomor": "", "k-2-nama": "",
+             "h-kerja-sama": "2", "h-visi-misi": ["1", "9"]}
+    r = kirim(ka, url_k, dict(isian, **{"k-1-nomor": "1"}))
+    cek(r.status_code == 400 and "nomor 1 sudah dipakai" in r.get_data(as_text=True) and kr.baca_prodi(A) == {},
+        "nomor ganda ditolak dengan pesan, formulir tetap terisi")
+    r = kirim(ka, url_k, dict(isian, **{"k-0-nama": "Judi online terpercaya"}))
+    cek(r.status_code == 400 and "memuat teks judi" in r.get_data(as_text=True) and kr.baca_prodi(A) == {},
+        "teks judi ditolak")
+    cek(kirim(ka, url_k, isian).status_code == 302 and kr.baca_prodi(A)["halaman"] == {"kerja-sama": ["2"], "visi-misi": ["1"]},
+        "kriteria tersimpan; centang nomor yang tidak ada dibuang")
+    cek("Kriteria akreditasi BAN-PT: Kriteria 2, Tata Pamong" in ka.get("/prodi/%s/halaman/kerja-sama" % A).get_data(as_text=True),
+        "penyunting: label kriteria yang diisi admin prodi")
+    teks = ko.get(url_k).get_data(as_text=True)
+    cek('action="%s"' % url_k not in teks and "Kriteria 2: Tata Pamong" in teks and "Hanya admin prodi" in teks
+        and "Kriteria akreditasi</a>" in teks, "operator melihat kriteria tanpa formulir")
+    cek(kirim(ko, url_k, isian).status_code == 403, "operator tidak bisa menyimpan kriteria")
+    kol = dict(zip(*[b_ for b_ in csv.reader(io.StringIO(ks.get("/super/kelengkapan.csv").get_data(as_text=True).lstrip("﻿")))
+                     if b_[0] in ("kode_pddikti", A)]))
+    cek(kol.get("kriteria_akreditasi") == "2", "CSV kelengkapan: jumlah kriteria prodi")
+    cek(kirim(ka, url_k + "/kosongkan", {}).status_code == 302 and kr.baca_prodi(A) == {}, "kriteria dikosongkan")
+    cek("kriteria akreditasi" in ka.get("/prodi/%s/riwayat" % A).get_data(as_text=True),
+        "riwayat prodi: versi kriteria akreditasi sebelum dikosongkan")
     baris = list(csv.reader(io.StringIO(ks.get("/super/kelengkapan.csv").get_data(as_text=True).lstrip("﻿"))))
     kolom = dict(zip(baris[0], [b_ for b_ in baris[1:] if b_[0] == A][0]))
     cek(kolom.get("Akreditasi (pelengkap)", "").startswith("terbit 20") and kolom["wajib_total"] == "22",
