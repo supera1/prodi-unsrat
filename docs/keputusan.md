@@ -199,6 +199,10 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   - butir "usulan perubahan data resmi" (rencana Fase 1 §2) diganti laporan perubahan data prodi untuk diteruskan ke
     pengelola www;
   - impor Excel untuk tabel besar hanya bila pilot memerlukannya.
+- **Pembaruan** (pengguna, 27 Oktober 2026):
+  - dua prodi pilot lainnya: S1 Pendidikan Dokter Gigi (12201, LAM-PTKes) dan S1 Teknik Elektro (20201, LAM-Teknik);
+  - impor Excel untuk tabel besar dikerjakan di langkah 7 tanpa menunggu pilot;
+  - staging untuk pilot cukup dibuka lewat alamat IP VM; nama DNS dan HTTPS menyusul untuk produksi.
 
 ### K-P27 — Penyunting isi halaman: draf bersama, isian apa adanya, riwayat untuk simpanan sengaja (Fase 2 langkah 2)
 - **Konteks:** formulir isi halaman bisa panjang (tabel sampai 300–500 baris) dan diisi bergantian oleh operator dan
