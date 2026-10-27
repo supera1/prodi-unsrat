@@ -350,11 +350,11 @@ def pasang(app, alat):
         if lokasi.baca("registri") is not None:
             return 0
         try:
-            n = registri.siapkan_dari_csv(oleh())
+            n = registri.siapkan_dari_csv(oleh(), dosen=registri.DOSEN_AWAL)
         except registri.GagalRegistri as e:
             flash("Registri awal dari daftar slug belum dibuat: %s. Daftarkan prodi di halaman Prodi." % e, "galat")
             return 0
-        alat.catat("registri-awal", jumlah=n)
+        alat.catat("registri-awal", jumlah=n, tautan_dosen=registri.jumlah_tautan_dosen())
         return n
 
     @app.route("/super/tarik")
@@ -423,7 +423,8 @@ def pasang(app, alat):
                    hilang=len(laporan["hilang"]), berubah=len(laporan["berubah"]), kembali=len(laporan["kembali"]))
         bangun()
         flash("Data resmi dari www diterapkan%s; semua situs dibangun ulang." % (
-            " dan %d prodi didaftarkan dari daftar slug" % registri_baru if registri_baru else ""), "ok")
+            " dan %d prodi didaftarkan dari daftar slug (%d dengan tautan dosen)" % (registri_baru, registri.jumlah_tautan_dosen())
+            if registri_baru else ""), "ok")
         return redirect(url_for("super_tarik"))
 
     # -------------------------------------------------------------- version history

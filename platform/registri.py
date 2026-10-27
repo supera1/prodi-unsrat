@@ -5,12 +5,15 @@ A programme is identified by its PDDIKTI code (K-P1). Its official data lives in
 the registry adds what the platform decides: the slug, old slugs (redirected with 301), whether the site is active,
 and the link to its lecturers on dosen.unsrat.ac.id.
 
-    python3 platform/registri.py --siapkan    first start: registry from data-awal/slug.csv + empty settings files
+    python3 platform/registri.py --siapkan    first start: registry from data-awal/slug.csv + empty settings files,
+                                              with the starting lecturer links of data-awal/dosen.csv (K-P31)
 """
 from __future__ import print_function
 
 import argparse
+import csv
 import datetime
+import io
 import os
 import sys
 
@@ -21,6 +24,9 @@ import lokasi  # noqa: E402
 import slug as slug_mod  # noqa: E402
 
 POLA_URL_DOSEN = ("https://dosen.unsrat.ac.id/", "https://www.dosen.unsrat.ac.id/")
+# the lecturer links a new VM starts with (K-P31): the template of the admin's bulk import (/super/dosen), so the same
+# file can be uploaded on a platform whose registry exists already
+DOSEN_AWAL = os.path.join(PLATFORM, "data-awal", "dosen.csv")
 
 
 class GagalRegistri(ValueError):
@@ -135,10 +141,20 @@ def siapkan_situs(kode, oleh):
     return True
 
 
-def siapkan_dari_csv(oleh, path=None):
+def baca_dosen_awal(path=DOSEN_AWAL):
+    """{code: link} of a lecturer links file in the import template (kode_pddikti, ..., dosen_url). Rows without a
+    link, or with a link that is not on dosen.unsrat.ac.id, are left out."""
+    with io.open(path, encoding="utf-8-sig", newline="") as f:
+        return {b["kode_pddikti"].strip(): b["dosen_url"].strip() for b in csv.DictReader(f)
+                if (b.get("kode_pddikti") or "").strip() and (b.get("dosen_url") or "").strip()
+                and periksa_dosen_url(b["dosen_url"]) is None}
+
+
+def siapkan_dari_csv(oleh, path=None, dosen=None):
     """First start: build the registry from the approved slug list. Needs warisan/prodi.json (tarik_www.py) so
-    every code is checked against the official data. Does nothing when a registry exists. Returns the number of
-    programmes registered."""
+    every code is checked against the official data. Does nothing when a registry exists. dosen: a lecturer links file
+    (DOSEN_AWAL on a real first start) whose links the new entries get, in the same first version. Returns the number
+    of programmes registered."""
     if lokasi.baca("registri") is not None:
         return 0
     warisan = warisan_per_kode()
@@ -155,10 +171,19 @@ def siapkan_dari_csv(oleh, path=None):
     if masalah:
         raise GagalRegistri("; ".join(masalah))
     registri = {"prodi": [_entri(b["kode_pddikti"], b["slug_usulan"]) for b in baris]}
-    lokasi.tulis("registri", registri, oleh, "Registri", "registri awal dari slug.csv")
+    tautan = baca_dosen_awal(dosen) if dosen else {}
+    for r in registri["prodi"]:
+        if r["kode_pddikti"] in tautan:
+            r["dosen_url"] = tautan[r["kode_pddikti"]]
+    lokasi.tulis("registri", registri, oleh, "Registri", "registri awal dari slug.csv" + (
+        " dengan %d tautan dosen" % sum(1 for r in registri["prodi"] if r["dosen_url"]) if tautan else ""))
     for b in baris:
         siapkan_situs(b["kode_pddikti"], oleh)
     return len(baris)
+
+
+def jumlah_tautan_dosen():
+    return sum(1 for r in baca()["prodi"] if r.get("dosen_url"))
 
 
 def daftarkan(kode, slug, oleh):
@@ -240,11 +265,12 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if a.siapkan:
         try:
-            n = siapkan_dari_csv(a.oleh)
+            n = siapkan_dari_csv(a.oleh, dosen=DOSEN_AWAL)
         except GagalRegistri as e:
             print("Registri TIDAK dibuat: %s" % e)
             return 1
-        print("%d prodi didaftarkan." % n if n else "Registri sudah ada; tidak diubah.")
+        print("%d prodi didaftarkan, %d dengan tautan dosen." % (n, jumlah_tautan_dosen()) if n
+              else "Registri sudah ada; tidak diubah.")
     reg = baca()
     print("Terdaftar: %d prodi, aktif %d." % (len(reg["prodi"]), sum(1 for r in reg["prodi"] if r["aktif"])))
     return 0

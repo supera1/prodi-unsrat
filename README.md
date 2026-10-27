@@ -80,6 +80,7 @@ Stack Docker lengkap di komputer sendiri: [docs/deploy.md §13](docs/deploy.md#1
 | 3 | Alur ajukan/terbitkan/kembalikan/tarik, riwayat per halaman, kelengkapan (dasbor, superadmin, CSV) | selesai |
 | 4 | Dokumen Akreditasi (di halaman Akreditasi) dan label kriteria (draf untuk LPMPP, [panduan](docs/kriteria-akreditasi.md)) | selesai |
 | 5 | [Panduan admin prodi](docs/panduan-admin-prodi.md) (juga di admin), menu Masukan, [persiapan pilot](docs/pilot-fase-02.md) | selesai |
+| 5b | Tautan dosen 94 prodi (dosen.unsrat.ac.id) di data awal VM baru (K-P31) | selesai, menunggu tinjauan |
 | 6 | Pilot 3 prodi | menunggu staging dan dua prodi pilot |
 | 7 | Pilihan tambahan (bila pilot memerlukan) | — |
 | 8 | Uji menyeluruh + log fase | — |

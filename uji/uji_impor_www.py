@@ -50,9 +50,11 @@ for nama in ("PRODI_MODE", "PRODI_PENYIMPANAN"):
 import akun  # noqa: E402
 import app as app_mod  # noqa: E402
 import audit  # noqa: E402
+import impor_dosen  # noqa: E402
 import impor_www  # noqa: E402
 import lokasi  # noqa: E402
 import registri  # noqa: E402
+import slug as slug_mod  # noqa: E402
 import tarik_www  # noqa: E402
 
 WWW_SEBELAH = os.path.join(os.path.dirname(AKAR), "website-unsrat-2026", "site")
@@ -373,6 +375,20 @@ try:
     cek(len(registri.baca()["prodi"]) == 97 and len(os.listdir(os.path.join(lokasi.data(), "prodi"))) == 97,
         "registri dan pengaturan 97 prodi dibuat")
     cek(lokasi.baca("warisan/meta")["sumber"] == "data awal repo (salinan www %s)" % asal["diambil"], "sumber data awal")
+    # the starting lecturer links (data-awal/dosen.csv, K-P31): a valid file for every programme of the slug list, applied
+    tautan = registri.baca_dosen_awal()
+    kode_slug = [b["kode_pddikti"] for b in slug_mod.baca_csv()]
+    with io.open(registri.DOSEN_AWAL, "rb") as f:
+        baris_dosen = impor_dosen.baca_tabel("dosen.csv", f.read())
+    cek(sorted(b["kode_pddikti"] for b in baris_dosen) == sorted(kode_slug), "dosen.csv: tepat satu baris untuk setiap prodi slug.csv")
+    cek(all(registri.periksa_dosen_url(b["dosen_url"]) is None for b in baris_dosen) and len(set(tautan.values())) == len(tautan)
+        and len(tautan) >= 90, "dosen.csv: tautan sah, unik (%d)" % len(tautan))
+    rencana_dosen = impor_dosen.rencana(baris_dosen, [dict(r, dosen_url="") for r in registri.baca()["prodi"]], {})
+    cek(not rencana_dosen["galat"] and len(rencana_dosen["ubah"]) == len(tautan), "dosen.csv bisa diunggah di Tautan dosen")
+    reg_dosen = {r["kode_pddikti"]: r["dosen_url"] for r in registri.baca()["prodi"]}
+    cek(all(reg_dosen[k] == u for k, u in tautan.items()) and sum(1 for u in reg_dosen.values() if u) == len(tautan)
+        and "%d dengan tautan dosen" % len(tautan) in pesan[1], "VM baru: tautan dosen dari data awal: %r" % pesan[1])
+    cek(reg_dosen["55201"] == "https://dosen.unsrat.ac.id/faculty/teknik/?program=s1-teknik-informatika", "tautan dosen Informatika")
     cek(impor_www.isi_awal() == [], "isi awal kedua kali tidak melakukan apa pun")
     cek(impor_www.main(["--isi-awal"]) == 0, "baris perintah --isi-awal")
     # the starting copy, applied and written again, is the same (never written into the repository here)
@@ -533,8 +549,10 @@ try:
     cek("Salinan pertama: 97 prodi" in teks, "pratinjau salinan pertama")
     r = kirim(su, "/super/tarik/terapkan", sidik=isi_formulir(teks), kiriman=token)
     cek(r.status_code == 302 and len(registri.baca()["prodi"]) == 97, "unggahan pertama membuat registri 97 prodi")
+    cek(registri.jumlah_tautan_dosen() == len(registri.baca_dosen_awal()), "unggahan pertama: tautan dosen dari data awal")
     cek("97 prodi didaftarkan dari daftar slug" in su.get("/super/tarik").get_data(as_text=True), "pesan registri awal")
-    cek(any(x["aksi"] == "registri-awal" and x.get("jumlah") == 97 for x in audit.baca()), "registri awal tercatat")
+    cek(any(x["aksi"] == "registri-awal" and x.get("jumlah") == 97 and x.get("tautan_dosen") == len(registri.baca_dosen_awal())
+            for x in audit.baca()), "registri awal tercatat, dengan jumlah tautan dosen")
 finally:
     shutil.rmtree(KERJA, ignore_errors=True)
 

@@ -20,15 +20,15 @@ Tiga prodi dengan jenjang, fakultas, dan lembaga akreditasi berbeda, dan koordin
 
 Dikerjakan superadmin UPA TIK, bersama admin VM untuk butir 1.
 
-0. **Versi yang di-deploy memuat Fase 2.** `docs/deploy.md` §3 mengambil branch `main`, yang sampai sekarang baru berisi
-   Fase 1. Langkah 0–5 Fase 2 (`fase/02-0-rencana` … `fase/02-5-panduan`) perlu digabung ke `main` lebih dulu, atau
-   admin VM men-deploy branch lain yang disepakati. Tanpa itu, staging tidak punya menu Isi halaman.
+0. **Versi yang di-deploy memuat Fase 2.** `docs/deploy.md` §3 mengambil branch `main`. Langkah 0–5 Fase 2 sudah
+   digabung ke `main` (PR #2, 27 Oktober 2026), jadi `main` sudah punya menu Isi halaman.
 1. **Staging tayang.** Pemeriksaan di `docs/deploy.md` §5 sudah dijalankan: situs staging menampilkan pita "Pratinjau
    staging", admin terbuka dari jaringan UNSRAT (dari luar jaringan 403), kontainer *healthy*, dan pemantau mencatat
    0 temuan. Sudah ada minimal dua akun superadmin.
 2. **Data www terbaru diunggah** di menu **Data www** (pratinjau, lalu terapkan).
-3. **Prodi pilot siap** di menu **Prodi**: aktif, slugnya benar, dan tautan dosennya terisi. Kesiapan per prodi terlihat
-   di Ringkasan prodi, bagian **Kesiapan situs**.
+3. **Prodi pilot siap** di menu **Prodi**: aktif, slugnya benar, dan tautan dosennya terisi. Pada VM baru, tautan dosen
+   94 prodi terisi otomatis dari data awal (K-P31). Kesiapan per prodi terlihat di Ringkasan prodi, bagian
+   **Kesiapan situs**.
 4. **Akun.** Untuk setiap prodi pilot, buat satu akun admin prodi (koordinator) dan satu atau dua operator di menu
    **Akun** → buat akun (peran, prodi). Setelah itu admin prodi juga bisa membuat operatornya sendiri.
    - Kata sandi sementara hanya tampil sekali di layar. Sampaikan langsung atau lewat telepon kepada pemiliknya, jangan

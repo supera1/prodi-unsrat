@@ -107,11 +107,14 @@ yang menyebut variabelnya.
 Saat pertama kali, kontainer admin dengan sendirinya:
 1. membuat kunci sesi di volume `prodi-rahasia`;
 2. memakai **data awal** (salinan data www, lihat `platform/data-awal/www/asal.json`) dan mendaftarkan 97 prodi dengan
-   slug yang disetujui (`platform/data-awal/slug.csv`);
+   slug yang disetujui (`platform/data-awal/slug.csv`), beserta tautan dosennya di dosen.unsrat.ac.id
+   (`platform/data-awal/dosen.csv`, K-P31);
 3. membangun semua situs (log: `Bangun semua (staging): … 3688 halaman`), lalu menjalankan admin
    (`Serving on http://0.0.0.0:8791`).
 
-Langkah 2 hanya terjadi sekali; setelah itu data dan registri di volume yang dipakai.
+Langkah 2 hanya terjadi sekali; setelah itu data dan registri di volume yang dipakai. VM yang registrinya sudah ada
+sebelum tautan dosen masuk data awal: superadmin mengunggah `platform/data-awal/dosen.csv` di menu **Tautan dosen**
+(pratinjau, lalu terapkan).
 
 **Buat akun superadmin** (sekali): `cd /opt/prodi-unsrat && sudo docker compose exec admin /bin/bash`, lalu di dalam
 kontainer:

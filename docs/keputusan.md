@@ -285,3 +285,26 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
     - Disimpan di `masukan.json`; setiap kiriman dan tanggapan masuk log audit.
 - **Konsekuensi:** masukan juga bisa datang dari luar admin (sesi pengenalan, telepon). Superadmin mencatatnya lewat
   menu yang sama supaya laporan pilot lengkap.
+
+### K-P31 — Tautan dosen tetap setiap prodi ikut data awal VM baru (Fase 2)
+- **Konteks:** halaman Dosen Tetap setiap situs menautkan daftar dosen prodi itu di dosen.unsrat.ac.id (`dosen_url` di
+  registri). Registri dibuat sekali di VM baru dari `slug.csv`, tanpa tautan dosen, sehingga semua situs menampilkan
+  "Tautan ke daftar dosen tetap program studi ini sedang disiapkan" sampai superadmin mengimpornya.
+- **Keputusan** (pengguna, 27 Oktober 2026: "Masukkan tautan dosen ke data-awal supaya VM baru (staging) langsung terisi
+  saat registri dibuat"):
+  - `platform/data-awal/dosen.csv` memakai format templat impor menu Tautan dosen, satu baris untuk setiap prodi
+    `slug.csv`. Tautan diterapkan di versi pertama registri, di setiap jalur pembuatannya: start VM baru
+    (`impor_www.py --isi-awal`), `registri.py --siapkan`, dan unggahan data www pertama di admin.
+  - **Asal data:** `program-studi-tautan.csv` dari pengguna (27 Oktober 2026), berisi 94 tautan dari dosen.unsrat.ac.id.
+    - 86 tautan dicocokkan lewat slug www (`slug_di_www` di `slug.csv`).
+    - 8 tautan dicocokkan menurut nama, dengan fakultas dan jenjang yang sama: Ilmu Administrasi Niaga → Ilmu
+      Administrasi Bisnis; Sp-1 Ilmu Penyakit Jantung → Sp-1 Ilmu Penyakit Jantung dan Pembuluh Darah; Sp-1 Ilmu
+      Penyakit Saraf → Sp-1 Neurologi; Pendidikan Profesi Apoteker → Profesi Apoteker; S1 Manajemen Sumber Daya
+      Perairan → S1 Manajemen Sumberdaya Perairan; S1 Pemanfaatan Sumber Daya Perikanan → S1 Pemanfaatan Sumberdaya
+      Perikanan; S2 Ilmu Linguistik → S2 Linguistik; S2 Kesehatan Masyarakat → S2 Ilmu Kesehatan Masyarakat.
+    - Tiga prodi tanpa tautan di sumber: Pendidikan Profesi Arsitek, Sp-1 Kedokteran Keluarga Layanan Primer, Sp-2
+      Subspesialis Ilmu Kesehatan Anak.
+  - Hanya alamat di `https://dosen.unsrat.ac.id/` yang dipakai; baris lain dilewati.
+- **Konsekuensi:** VM yang registrinya sudah ada tidak berubah sendiri. Superadmin mengunggah berkas yang sama di menu
+  Tautan dosen. Tautan yang berubah di dosen.unsrat.ac.id diperbarui lewat menu itu, dan data awal diperbarui pengembang
+  sesekali.
