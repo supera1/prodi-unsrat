@@ -1166,6 +1166,32 @@ ul.saring {
 	font-size: var(--unsrat-size-kecil);
 }
 
+/* the search box of a long table (aset/js/cari-tabel.js), added only with JavaScript */
+.cari-tabel {
+	margin-bottom: var(--unsrat-spasi-30);
+}
+
+.cari-tabel label {
+	display: block;
+	margin-bottom: var(--unsrat-spasi-10);
+	font-weight: 600;
+}
+
+.cari-tabel input {
+	width: 100%;
+	max-width: 28rem;
+	padding: var(--unsrat-spasi-20) var(--unsrat-spasi-30);
+	border: 1px solid var(--unsrat-abu-600);
+	border-radius: var(--unsrat-radius-kontrol);
+	font: inherit;
+}
+
+.cari-tabel__info {
+	margin: var(--unsrat-spasi-10) 0 0;
+	color: var(--unsrat-abu-600);
+	font-size: var(--unsrat-size-kecil);
+}
+
 /* embedded content of an extra page (K-P35): a frame as wide as the text, of a height the programme chose; a video
    keeps its 16:9 shape. The link below opens the same content in a new tab (phones, blocked services). */
 .sematan + .sematan {

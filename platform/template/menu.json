@@ -33,7 +33,10 @@
        {"id": "peraturan", "label": "Peraturan dan Panduan", "jenis": "wajib", "alamat": "akademik/peraturan-panduan",
         "deskripsi": "Peraturan akademik, panduan pembimbingan akademik, dan panduan tugas akhir."},
        {"id": "jadwal", "label": "Jadwal Kuliah dan Ujian", "jenis": "opsional", "alamat": "akademik/jadwal",
-        "deskripsi": "Jadwal kuliah, praktikum, dan ujian."}
+        "deskripsi": "Jadwal kuliah, praktikum, dan ujian."},
+       {"id": "tugas-akhir", "label": "Tugas Akhir", "jenis": "opsional", "bila_terisi": true,
+        "alamat": "akademik/tugas-akhir",
+        "deskripsi": "Judul tugas akhir (skripsi) mahasiswa beserta dosen pembimbingnya."}
      ]},
     {"id": "dosen", "label": "Dosen dan Tendik", "alamat": "dosen",
      "deskripsi": "Dosen tetap, kelompok keahlian, tenaga kependidikan, serta prestasi dan pengembangan sumber daya manusia.",

@@ -104,10 +104,12 @@ def masalah_tampil(templat, isi, masalah):
 
 class Tampil(object):
     """What rendering needs besides the values: the problem of each field, the address of a stored file, the list
-    items to show open, the item just removed (offered back)."""
+    items to show open, the item just removed (offered back), the page's spreadsheet import (lists kept in a
+    spreadsheet link there)."""
 
-    def __init__(self, galat=None, url_berkas=lambda rekam: "", buka=(), dihapus=None):
+    def __init__(self, galat=None, url_berkas=lambda rekam: "", buka=(), dihapus=None, url_impor=None):
         self.galat, self.url_berkas, self.buka, self.dihapus = galat or {}, url_berkas, set(buka), dihapus
+        self.url_impor = url_impor
 
 
 def _tersembunyi(teks):
@@ -241,7 +243,43 @@ def _tombol(aksi, label, konteks="", gaya="tombol--garis"):
             % (gaya, _e(aksi), _e(label), _tersembunyi(konteks)))
 
 
+CONTOH_EXCEL = 20             # rows of a list kept in a spreadsheet shown in the editor
+
+
+def _sel(x):
+    if x is True:
+        return "ya"
+    return "" if x in (None, False) or isinstance(x, dict) else str(x)
+
+
+def _daftar_excel(node, v, path, t):
+    """A list kept in a spreadsheet ("lewat_excel": thousands of final projects): its first rows, read only, and the
+    way to change it, the page's spreadsheet import, instead of thousands of fields."""
+    v = [x for x in v if isinstance(x, dict)] if isinstance(v, list) else []
+    kolom = [(k, n) for k, n in node["isi"]["bidang"] if n["jenis"] not in ("dokumen", "foto")]
+    impor = '<a href="%s">Impor dari Excel</a>' % _e(t.url_impor) if t.url_impor else "Impor dari Excel"
+    isi = ['<p>Tabel ini diubah lewat Excel karena bisa sangat panjang: %s. Unduh templatnya (berisi semua baris), ubah '
+           'di Excel, unggah, lalu pilih <strong>Ganti semua baris</strong> atau <strong>Tambahkan di bawah baris yang '
+           'ada</strong>.</p>' % impor]
+    if v:
+        isi.append('<div class="tabel-gulir"><table><thead><tr>%s</tr></thead><tbody>%s</tbody></table></div>' % (
+            "".join('<th scope="col">%s</th>' % _e(n["label"]) for _k, n in kolom),
+            "".join("<tr>%s</tr>" % "".join("<td>%s</td>" % _e(_sel(x.get(k))) for k, _n in kolom)
+                    for x in v[:CONTOH_EXCEL])))
+        if len(v) > CONTOH_EXCEL:
+            isi.append('<p class="keterangan">Ditampilkan %d baris pertama dari %d.</p>' % (CONTOH_EXCEL, len(v)))
+    bermasalah = len({k.split(".")[1] for k in t.galat if k.startswith(path + ".") and len(k.split(".")) > 1})
+    if bermasalah:
+        isi.append('<p class="pesan pesan--galat">%d baris perlu diperbaiki: perbaiki di Excel lalu impor ulang dengan '
+                   'Ganti semua baris.</p>' % bermasalah)
+    aria, ket = _keterangan(node, path, t)
+    return ('<fieldset class="daftar-sunting" id="%s"><legend>%s <span class="jumlah">(%d baris)</span></legend>%s%s'
+            '</fieldset>' % (_id(path), _e(node["label"]), len(v), ket, "".join(isi)))
+
+
 def _daftar(node, v, path, t):
+    if node.get("lewat_excel"):
+        return _daftar_excel(node, v, path, t)
     v = v if isinstance(v, list) else []
     n, isi_node, kata = len(v), node["isi"], kata_butir(node)
     objek = isi_node["jenis"] == "objek"
@@ -384,6 +422,8 @@ def _baca(node, nilai, path, k):
         for kunci, n, sub in berkas:           # after the texts, so a PDF is titled after its row
             _unggah(node, n, hasil, kunci, sub, k)
         return hasil
+    if j == "daftar" and node.get("lewat_excel"):
+        return nilai                           # changed through the spreadsheet import only
     if j == "daftar":
         return [_baca(node["isi"], x, "%s.%d" % (path, i), k) for i, x in enumerate(nilai if isinstance(nilai, list) else [])]
     if j == "centang":
@@ -505,7 +545,7 @@ def bagian_form(templat):
         j = node["jenis"]
         if j == "objek":
             return sum(hitung(n) for _k, n in node["bidang"])
-        if j == "daftar":
-            return node["maks"] * hitung(node["isi"])
+        if j == "daftar":                               # a list kept in a spreadsheet has no fields in the form
+            return 0 if node.get("lewat_excel") else node["maks"] * hitung(node["isi"])
         return {"dokumen": 2, "foto": 3}.get(j, 1)      # a file field and its "take off" box (and a photo's text)
     return hitung(templat) + 4                           # csrf, versi, aksi, and a spare

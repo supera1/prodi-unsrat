@@ -232,7 +232,8 @@ samping pada lebar 320 px kecuali di dalam wadah tabel.
 7. **Pilihan tambahan**: impor Excel tabel besar (dikerjakan, pembaruan §11; K-P34, `fase/02-7-impor-excel`); laporan
    perubahan data untuk pengelola www bila diperlukan pilot.
    **7b.** Halaman tambahan prodi dengan sematan dari daftar layanan tetap (K-P35, `fase/02-7b-halaman-tambahan`).
-   **7c.** Tugas akhir: tabel bawaan dengan impor Excel dan kotak cari, tanpa NIM (K-P35 nomor 4 dan 5).
+   **7c.** Tugas akhir: tabel bawaan dengan impor Excel dan kotak cari, tanpa NIM (K-P35 nomor 4 dan 5,
+   `fase/02-7c-tugas-akhir`).
 8. **Uji menyeluruh** dan `docs/log/fase-02.md`.
 
 Langkah 1–4 tidak bergantung pada staging. Langkah 5–6 menunggu staging tayang (§0).

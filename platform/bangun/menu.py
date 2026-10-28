@@ -5,6 +5,8 @@ A programme admin may (rencana §7, K-P2):
 - rename any item or group (label, 1-60 characters, no gambling text);
 - reorder the items inside a group (groups keep their order, so every site reads the same);
 - hide an item marked "opsional". Items marked "wajib" (needed for accreditation) or "otomatis" always stay.
+An optional item marked "bila_terisi" is on a site only while the programme has published its content (the builder
+leaves it out otherwise), so a page few programmes use (Tugas Akhir) never shows empty on the others.
 
 Settings live in prodi/<kode>/situs.json under "menu": {"<id>": {"label": "...", "urutan": 2, "sembunyi": true}}.
 A programme's extra pages (K-P35, halaman_tambahan.py) follow the pages of the group they belong to.
@@ -61,6 +63,8 @@ def _periksa_butir(b, induk, masalah, id_dipakai, alamat_dipakai):
             masalah.append("%s: jenis harus salah satu dari %s" % (b["id"], ", ".join(JENIS)))
         if b.get("jenis") == "otomatis" and b.get("templat") not in TEMPLAT:
             masalah.append("%s: halaman otomatis perlu templat yang dikenal" % b["id"])
+        if b.get("bila_terisi") and b.get("jenis") != "opsional":
+            masalah.append("%s: hanya halaman opsional yang tampil bila terisi" % b["id"])
 
 
 def baca_templat(path=MENU_JSON):
@@ -138,7 +142,8 @@ def susun(templat, pengaturan=None, tambahan=()):
         atur = pengaturan.get(b["id"], {})
         return {"id": b["id"], "label": (atur.get("label") or b["label"]).strip(), "label_asli": b["label"],
                 "alamat": b["alamat"], "deskripsi": b["deskripsi"], "jenis": b.get("jenis"),
-                "templat": b.get("templat"), "nav": b.get("nav", True), "kelompok": "anak" in b, "anak": []}
+                "templat": b.get("templat"), "nav": b.get("nav", True), "kelompok": "anak" in b, "anak": [],
+                "bila_terisi": bool(b.get("bila_terisi"))}
 
     hasil = []
     for b in templat:

@@ -223,7 +223,8 @@ def pasang(app, alat):
         buka = request.args.get("buka", "")
         d = ih.draf(data)
         t = penyunting.Tampil(galat, lambda r: url_berkas(kode, r), [buka] if penyunting.POLA_JALUR.match(buka) else [],
-                              d.get("dihapus") if d and dihapus_sah(d.get("dihapus")) else None)
+                              d.get("dihapus") if d and dihapus_sah(d.get("dihapus")) else None,
+                              url_for("isi_impor", kode=kode, id_=ini["id"]) if impor_tabel.tabel_halaman(ini["id"]) else None)
         return render_template("halaman_sunting.html", pr=g.prodi, ini=ini, data=data, k=ih.keadaan(kode, ini["id"], data),
                                formulir=Markup(penyunting.formulir(templat, isi, t)), masalah=masalah,
                                id_galat=penyunting._id, privasi=PRIVASI, admin=adalah_admin(g.akun),

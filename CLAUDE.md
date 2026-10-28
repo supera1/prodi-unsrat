@@ -88,6 +88,10 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   `platform/sematan.py` (Google Docs/Sheets/Slides/Forms/Drive/Calendar/Maps, YouTube); daftar itu juga mengisi CSP
   `frame-src` (`bangun.CSP`, `docker/nginx/header-keamanan.conf`) dan pemantau. Jangan menambah layanan tanpa keputusan
   baru.
+- Halaman Tugas Akhir (K-P35): halaman opsional `bila_terisi` (tampil hanya setelah terisi); tabelnya `lewat_excel`
+  (penyunting hanya meringkas, diubah lewat impor Excel), tanpa NIM. Tabel ≥ 30 baris di situs mendapat kotak cari
+  `platform/template/aset/js/cari-tabel.js` (satu-satunya JavaScript situs; tanpa skrip inline, situs tetap berfungsi
+  tanpa JavaScript).
 - Impor Excel tabel besar (K-P34): `platform/admin/impor_tabel.py` (templat .xlsx, pratinjau, tambah/ganti ke draf
   halaman; tautan "Impor dari Excel" di penyunting). Tabel yang memenuhi syarat dihitung dari templat isi
   (`tabel_halaman`), jadi tabel baru di `isi_halaman.TEMPLAT` ikut otomatis bila syaratnya terpenuhi.

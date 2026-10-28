@@ -38,7 +38,8 @@ Setelah masuk, Anda melihat **Ringkasan** prodi:
 
 ## Mengisi halaman
 
-Buka menu **Isi halaman**. Daftarnya memuat 22 halaman wajib akreditasi, 2 halaman opsional, dan halaman Akreditasi.
+Buka menu **Isi halaman**. Daftarnya memuat 22 halaman wajib akreditasi, 3 halaman opsional, halaman Akreditasi, dan
+halaman tambahan prodi bila ada.
 Saringan di atas daftar menampilkan halaman menurut keadaannya (menunggu persetujuan, dikembalikan, draf, terbit, belum
 diisi).
 
@@ -87,6 +88,18 @@ kepuasan, jadwal, dan beberapa lainnya) bisa diisi dari Excel. Di penyunting hal
 Hasil impor masuk ke draf: periksa di penyunting, lalu ajukan atau terbitkan seperti biasa. Kolom berkas (misalnya RPS
 atau bukti kerja sama) tidak ada di Excel; unggah PDF-nya lewat formulir. Saat mengganti semua baris, baris yang tidak
 berubah tetap membawa PDF-nya.
+
+Di situs, tabel yang panjang (30 baris atau lebih) mendapat kotak **Cari di tabel ini**. Kolom yang kosong di semua baris
+tidak ditampilkan.
+
+### Tugas Akhir
+
+Halaman **Tugas Akhir** (kelompok Akademik, opsional) memuat judul tugas akhir mahasiswa beserta pembimbingnya, sampai
+5.000 baris, **tanpa NIM**. Halaman ini baru tampil di situs setelah diterbitkan.
+
+- Tabelnya hanya diubah lewat Excel. Penyunting menampilkan 20 baris pertama dan tautan **Impor dari Excel**.
+- Berkas yang sudah dimiliki prodi bisa langsung diunggah bila nama kolomnya, misalnya, Judul Skripsi, Dosen Pembimbing 1,
+  dan Dosen Pembimbing 2. Kolom No dan NIM diabaikan, jadi tidak ikut tampil di situs.
 
 ### PDF dan foto
 
