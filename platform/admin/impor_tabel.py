@@ -40,6 +40,7 @@ from akses import akses  # noqa: E402
 
 MIN_BARIS = 50                 # a table this large is tedious to fill row by row
 MAKS_KOLOM = 40                # columns read from a sheet (a table has at most 8)
+MAKS_BARIS = 5000              # rows read from a file: the largest table (final projects) holds 5,000
 MEDIA = ("dokumen", "foto")
 BENAR = ("ya", "y", "1", "benar", "true", "x", "v", "✓", "✔")
 SALAH = ("tidak", "t", "0", "salah", "false", "-")
@@ -118,7 +119,7 @@ def _baca_xlsx(data):
         from openpyxl import load_workbook
         buku = load_workbook(io.BytesIO(data), read_only=True, data_only=True)
         lembar = buku.worksheets[0]
-        hasil = [[_sel_xlsx(c) for c in b] for b in lembar.iter_rows(max_row=impor_dosen.MAKS_BARIS + 2,
+        hasil = [[_sel_xlsx(c) for c in b] for b in lembar.iter_rows(max_row=MAKS_BARIS + 2,
                                                                        max_col=MAKS_KOLOM)]
         buku.close()
         return hasil
@@ -161,8 +162,8 @@ def baca_berkas(nama_berkas, data):
     hasil = [(i, b[:MAKS_KOLOM]) for i, b in enumerate(baris, 1) if any(teks_sel(v) for v in b)]
     if not hasil:
         raise ValueError("Berkas kosong.")
-    if len(hasil) > impor_dosen.MAKS_BARIS + 1:
-        raise ValueError("Terlalu banyak baris (maksimal %d)." % impor_dosen.MAKS_BARIS)
+    if len(hasil) > MAKS_BARIS + 1:
+        raise ValueError("Terlalu banyak baris (maksimal %d)." % MAKS_BARIS)
     return hasil
 
 
@@ -214,6 +215,9 @@ def rencana(node, baris, kode):
     nama = {}
     for k, n in kol:
         nama.setdefault(_nama_kolom(k), k)
+    for k, n in kol:
+        for x in n.get("alias", []):                      # other names the column often has ("Judul Skripsi")
+            nama.setdefault(_nama_kolom(x), k)
     for k, n in kol:
         nama[_nama_kolom(n["label"])] = k                 # a label wins over another column's key
     _no, kepala = baris[0]
@@ -407,7 +411,7 @@ def pasang(app, alat):
         daftar = [{"kunci": k, "node": n, "kolom": kolom(n), "berkas": kolom_berkas(n),
                    "jumlah": len(baris_sekarang(kode, id_, k))} for k, n in tabel_ada.items()]
         return render_template("halaman_impor.html", pr=g.prodi, ini=ini, daftar=daftar, petunjuk=petunjuk,
-                               maks_baris=impor_dosen.MAKS_BARIS), kode_status
+                               maks_baris=MAKS_BARIS), kode_status
 
     @app.route("/prodi/<kode>/halaman/<id_>/impor")
     @akses("prodi")

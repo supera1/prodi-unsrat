@@ -22,7 +22,7 @@
 		{% for x in b.butir %}<li>{{ x }}</li>{% endfor %}
 	{% if b.bernomor %}</ol>{% else %}</ul>{% endif %}
 	{% elif b.jenis == "tabel" %}
-	<div class="tabel-gulir" role="region" aria-labelledby="{{ b.id }}" tabindex="0">
+	<div class="tabel-gulir" role="region" aria-labelledby="{{ b.id }}" tabindex="0"{% if b.cari %} data-cari{% endif %}>
 		<table class="tabel-isi">
 			<caption class="tersembunyi">{{ b.judul }}</caption>
 			<thead><tr>{% for k in b.kolom %}<th scope="col">{{ k }}</th>{% endfor %}</tr></thead>

@@ -61,6 +61,7 @@ POLA_URL = re.compile(r"^https://[A-Za-z0-9.-]+(:[0-9]{1,5})?(/[^\s<>\"'\\]*)?$"
 TAUTAN = re.compile(r"\[([^\]\n]{1,200})\]\(([^)\s]{1,500})\)|(https://[^\s<>\"'\\]{1,500})")
 TEBAL = re.compile(r"\*\*(\S(?:[^*\n]{0,298}\S)?)\*\*")
 MAKS_URL = 500
+BARIS_CARI = 30                # a table of this many rows or more gets a search box on the site
 CONTOH = "[CONTOH]"
 TAMPIL = ("daftar", "tabel", "kartu", "dokumen", "galeri", "tautan", "bagian", "sematan")
 SKALAR = ("teks", "bilangan", "persen", "url", "pilihan", "centang", "dokumen")
@@ -243,6 +244,23 @@ TEMPLAT = {
                                     ("waktu", teks("Waktu", wajib=True, maks=100)),
                                     ("tempat", teks("Tempat", maks=150))], 100)),
         ("dokumen", dokumen_daftar("Jadwal dalam PDF"))),
+    # optional, on a site only once filled (menu.json "bila_terisi"); thousands of rows, changed through a spreadsheet
+    # (impor_tabel.py); no student numbers (K-P35)
+    "tugas-akhir": halaman(
+        ("uraian", uraian()),
+        ("daftar", dict(tabel("Daftar tugas akhir", [
+            ("judul", dict(teks("Judul", wajib=True, maks=500),
+                           alias=["Judul Skripsi", "Judul Tugas Akhir", "Judul TA"])),
+            ("tahun", dict(tahun("Tahun lulus"), alias=["Tahun", "Tahun Lulus"])),
+            ("mahasiswa", dict(teks("Mahasiswa", maks=150), alias=["Nama", "Nama Mahasiswa"])),
+            ("pembimbing_utama", dict(teks("Pembimbing 1", maks=150),
+                                      alias=["Dosen Pembimbing 1", "Pembimbing I", "Pembimbing Utama"])),
+            ("pembimbing_pendamping", dict(teks("Pembimbing 2", maks=150),
+                                           alias=["Dosen Pembimbing 2", "Pembimbing II", "Pembimbing Pendamping"])),
+            ("tautan", dict(url("Tautan naskah", bantuan="Alamat naskah di repositori, diawali https://"),
+                            alias=["Tautan", "URL", "Repositori"]))], 5000,
+            bantuan="Judul tugas akhir dan pembimbingnya, tanpa NIM. Tabel ini diubah lewat Excel."),
+            lewat_excel=True))),
     # Dosen dan Tendik
     "kelompok-keahlian": halaman(
         ("uraian", uraian()),
@@ -709,7 +727,10 @@ def tampilan(id_halaman, isi, media_ok=lambda rekam: True):
         if not item:
             continue
         if tampil == "tabel":
-            hasil.append(dict(dasar, jenis="tabel", kolom=[n["label"] for _k, n in bidang],
+            # a column empty in every row is left out (a list of final projects without years); a long table gets a
+            # search box on the site (cari-tabel.js), the whole table staying there without JavaScript
+            bidang = [(k, n) for k, n in bidang if any(not kosong(n, x.get(k)) for x in item)]
+            hasil.append(dict(dasar, jenis="tabel", kolom=[n["label"] for _k, n in bidang], cari=len(item) >= BARIS_CARI,
                               baris=[[sel(n, x.get(k)) for k, n in bidang] for x in item]))
         elif tampil == "kartu":
             kartu_ = []

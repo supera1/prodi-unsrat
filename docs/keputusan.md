@@ -387,8 +387,8 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
     tidak berubah tetap membawa berkasnya). Batas baris tabel tetap berlaku.
   - **Hasilnya masuk ke draf**, jadi tetap melewati alur K-P24: operator mengajukan, admin prodi menerbitkan. Versi
     sebelumnya ada di riwayat halaman, dan impor tercatat di log audit.
-  - Operator dan admin prodi boleh mengimpor, seperti menyimpan draf. Berkas paling besar 2 MB, paling banyak 2.000
-    baris dan 40 kolom yang dibaca.
+  - Operator dan admin prodi boleh mengimpor, seperti menyimpan draf. Berkas paling besar 2 MB, paling banyak 5.000
+    baris (2.000 sebelum halaman Tugas Akhir, K-P35) dan 40 kolom yang dibaca.
 
 ### K-P35 — Halaman tambahan prodi dengan sematan dari daftar layanan tetap (Fase 2 langkah 7b)
 - **Konteks:** pengguna ingin setiap prodi bisa menambah menu sendiri di luar halaman akreditasi, dengan isi unggahan PDF,
@@ -418,6 +418,17 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
     mengisi isinya seperti halaman lain. Superadmin punya daftar semua halaman tambahan beserta layanan yang disematkan
     (`/super/tambahan`); menurunkan halaman bermasalah dengan **Tarik dari situs**, dan menonaktifkan akun bila disusupi.
   - Halaman tambahan tidak dihitung di kelengkapan halaman wajib dan tidak diberi label kriteria.
+- **Pelaksanaan nomor 4 dan 5** (langkah 7c): halaman opsional **Tugas Akhir** (Akademik), tampil di situs hanya setelah
+  terisi (`bila_terisi` di `menu.json`):
+  - kolom judul, tahun lulus, mahasiswa, pembimbing 1 dan 2, tautan naskah, tanpa NIM; sampai 5.000 baris;
+  - tabelnya diubah lewat impor Excel saja (`lewat_excel`): penyunting menampilkan 20 baris pertama, bukan ribuan
+    isian; impor mengenali nama kolom yang biasa dipakai prodi (Judul Skripsi, Dosen Pembimbing 1 …) dan mengabaikan
+    No serta NIM;
+  - di situs, setiap tabel 30 baris atau lebih mendapat kotak cari: berkas `aset/js/cari-tabel.js` milik situs
+    (±2 KB, `defer`, hanya menambah teks, tanpa skrip inline). Tanpa JavaScript seluruh tabel tetap tampil. Uji Fase 1
+    yang dulu menuntut "tanpa skrip" disesuaikan ke standar CLAUDE.md: JavaScript situs sendiri paling banyak 100 KB
+    gzip, tanpa skrip inline, halaman tetap berfungsi tanpanya;
+  - kolom yang kosong di semua baris tidak ditampilkan (semua tabel).
 - **Konsekuensi:** isi sematan berada di luar saringan spam dan persetujuan admin, dan bisa berubah kapan saja di layanan
   asalnya. Risikonya dibatasi daftar layanan besar yang tetap, sandbox, dan daftar pemantauan superadmin. Pratinjau admin
   tidak memuat bingkai dari situs lain.

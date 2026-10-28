@@ -90,8 +90,11 @@ def periksa_situs(publik, label):
                     temuan.append((rel, "atribut style pada <%s>" % t))
                 if any(k.startswith("on") for k in a):
                     temuan.append((rel, "atribut on* pada <%s>" % t))
-                if t == "script" and a.get("type") != "application/ld+json":
-                    temuan.append((rel, "skrip selain JSON-LD"))
+                # scripts: JSON-LD data, or the site's own files (the search box of long tables, deferred, adding to
+                # a page that works without it); never inline, never from another host
+                if t == "script" and a.get("type") != "application/ld+json" and not (
+                        re.match(r"^(\.\./)*aset/js/[a-z-]+\.js\?v=[0-9a-f]+$", a.get("src") or "") and "defer" in a):
+                    temuan.append((rel, "skrip selain JSON-LD dan berkas aset/js situs"))
                 if t == "img" and "alt" not in a:
                     temuan.append((rel, "gambar tanpa alt"))
             for ld in p.ld:

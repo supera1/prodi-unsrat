@@ -65,7 +65,7 @@ Nilai `lembaga_akreditasi` di data resmi: `BAN-PT`.
 | 8. Pengabdian kepada Masyarakat | Pengabdian kepada Masyarakat |
 | 9. Luaran dan Capaian Tridharma | Publikasi Ilmiah, Luaran dan HKI, Organisasi dan Prestasi, Alumni dan Tracer Study, Survei Kepuasan |
 
-Halaman tanpa kriteria: Sejarah, Akreditasi.
+Halaman tanpa kriteria: Sejarah, Akreditasi, Tugas Akhir.
 
 ### LAM-PTKes — Instrumen akreditasi LAM-PTKes (draf)
 

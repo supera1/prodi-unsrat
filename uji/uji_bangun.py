@@ -215,7 +215,8 @@ try:
     lokasi.tulis("prodi/11901/situs", {"tagline": "<script>alert(1)</script>"}, "penguji", "uji", "uji")
     b = bangun_semua()
     n = periksa_situs(lokasi.publik(), "staging")
-    halaman_per_prodi = sum(1 for _ in menu_mod.halaman(menu_mod.susun(templat)))
+    # a page shown only once filled (Tugas Akhir) is not built while it is empty
+    halaman_per_prodi = sum(1 for b in menu_mod.halaman(menu_mod.susun(templat)) if not b.get("bila_terisi"))
     cek(n == 3 * halaman_per_prodi - 1 + 2, "jumlah halaman staging %d tidak sesuai" % n)
     beranda = baca_halaman("s1informatika/index.html")
     cek("Unggul &#34;berbudaya&#34; &amp; berdaya saing" in beranda, "tagline harus di-escape")

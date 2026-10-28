@@ -335,10 +335,13 @@ class Pembangun(object):
     def menu_prodi(self, kode):
         tambahan = self.tambahan_prodi(kode)
         try:
-            return menu_mod.susun(self.templat, self.situs(kode).get("menu"), tambahan)
+            menu = menu_mod.susun(self.templat, self.situs(kode).get("menu"), tambahan)
         except menu_mod.GagalMenu as e:
             self.peringatan.append("prodi %s: pengaturan menu diabaikan (%s)" % (kode, e))
-            return menu_mod.susun(self.templat, None, tambahan)
+            menu = menu_mod.susun(self.templat, None, tambahan)
+        for e in menu:          # a page shown only once it has content (Tugas Akhir) is left out while it has none
+            e["anak"] = [a for a in e["anak"] if not a.get("bila_terisi") or self.isi_halaman_prodi(kode, a["id"])]
+        return menu
 
     def tambahan_prodi(self, kode):
         """[(group, menu entry)] of the programme's extra pages that have published content to show (K-P35): an extra

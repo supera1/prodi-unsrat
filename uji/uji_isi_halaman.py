@@ -300,7 +300,10 @@ try:
             if x["judul"]:
                 cek('<h2 id="%s">%s</h2>' % (x["id"], str(ih.escape(x["judul"]))) in html, "%s: judul bagian %r" % (id_, x["judul"]))
         lain = halaman_html("s1elektro", butir["alamat"])
-        cek(lain and MENYUSUL in lain, "%s: prodi lain tetap kosong" % id_)
+        if butir.get("bila_terisi"):
+            cek(lain is None, "%s: tidak tampil di prodi lain selama kosong" % id_)
+        else:
+            cek(lain and MENYUSUL in lain, "%s: prodi lain tetap kosong" % id_)
     kerja = halaman_html("s1informatika", "profil/kerja-sama")
     cek('<th scope="col">Mitra</th>' in kerja and '<caption class="tersembunyi">Daftar kerja sama</caption>' in kerja
         and 'role="region" aria-labelledby="bagian-daftar" tabindex="0"' in kerja, "tabel kerja sama aksesibel")

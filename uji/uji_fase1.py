@@ -14,7 +14,8 @@ K4  a programme admin changes tagline, colours, logo and menu in the admin; the 
     automatic rebuild, and the site of another programme does not change by a single byte.
 K5  the stack stands apart from www's stack: no volume, network or container of it in docker-compose.yml.
 K6  every suite passes inside the image (Dockerfile runs them, this one included); the phase log is written.
-Also the minimum standard of CLAUDE.md: no script in any page (works without JavaScript), page and style sizes.
+Also the minimum standard of CLAUDE.md: works without JavaScript (no inline script; only the site's own deferred
+scripts, at most 100 KB gzip together), page and style sizes.
 
 www's data: the sibling checkout (../website-unsrat-2026) when it is there, else the copy shipped with the repository
 (platform/data-awal/www/), so this also runs inside the image.
@@ -242,21 +243,27 @@ try:
     print("K1: 97 situs staging, %d halaman lolos pemeriksaan halaman" % jumlah_halaman)
 
     # --- the minimum standard of every page (CLAUDE.md): no script, small pages and styles
-    berkas_js = [n for a, _d, ns in os.walk(lokasi.publik()) for n in ns if n.endswith((".js", ".mjs"))]
-    cek(not berkas_js, "tanpa berkas JavaScript: %r" % berkas_js[:3])
+    # JavaScript only adds to a page that works without it (the search box of long tables, K-P35): the site's own
+    # files under aset/js, deferred, at most 100 KB gzip together; no other script but JSON-LD data
+    berkas_js = {os.path.relpath(os.path.join(a, n), lokasi.publik()): os.path.join(a, n)
+                 for a, _d, ns in os.walk(lokasi.publik()) for n in ns if n.endswith((".js", ".mjs"))}
+    js_gzip = sum(len(gzip.compress(open(p, "rb").read())) for p in berkas_js.values())
+    cek(all(r.startswith("aset/js/") for r in berkas_js) and js_gzip <= 100 * 1024,
+        "JavaScript hanya di aset/js, %d B gzip (paling banyak 100 KB): %r" % (js_gzip, sorted(berkas_js)[:3]))
     terbesar, berskrip = (0, ""), []
     for path in semua_html:
         with open(path, "rb") as f:
             mentah = f.read()
-        if re.search(rb"<script(?![^>]*application/ld\+json)", mentah):
+        if re.search(rb'<script(?![^>]*application/ld\+json)(?![^>]*\bsrc="(\.\./)*aset/js/[a-z-]+\.js\?v=[0-9a-f]+" defer>)',
+                     mentah):
             berskrip.append(os.path.relpath(path, lokasi.publik()))
         terbesar = max(terbesar, (len(gzip.compress(mentah)), os.path.relpath(path, lokasi.publik())))
-    cek(not berskrip, "tanpa skrip selain data terstruktur JSON-LD: %r" % berskrip[:3])
+    cek(not berskrip, "tanpa skrip selain data terstruktur JSON-LD dan berkas aset/js situs: %r" % berskrip[:3])
     css = sum(len(gzip.compress(open(os.path.join(lokasi.publik(), "aset", "css", n), "rb").read()))
               for n in os.listdir(os.path.join(lokasi.publik(), "aset", "css")))
     cek(terbesar[0] < 30 * 1024 and css < 30 * 1024, "halaman terbesar %d B dan CSS %d B (gzip) di bawah 30 KB" % (terbesar[0], css))
-    print("standar halaman: tanpa skrip; halaman terbesar %.1f KB gzip (%s); CSS %.1f KB gzip"
-          % (terbesar[0] / 1024.0, terbesar[1], css / 1024.0))
+    print("standar halaman: JavaScript %.1f KB gzip, tanpa skrip inline; halaman terbesar %.1f KB gzip (%s); CSS %.1f KB gzip"
+          % (js_gzip / 1024.0, terbesar[0] / 1024.0, terbesar[1], css / 1024.0))
 
     # ============================================================== K2: the official data is exactly www's
     with io.open(os.path.join(WWW_ASLI, "prodi.json"), encoding="utf-8") as f:
