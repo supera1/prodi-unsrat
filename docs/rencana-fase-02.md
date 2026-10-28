@@ -1,7 +1,7 @@
 # Rencana Fase 2 — Penyunting halaman wajib dan pilot 3 prodi
 
-Status: **disetujui** (27 Oktober 2026) dengan semua usulan §11; dua prodi pilot selain S1 Teknik Informatika menyusul
-dari pengguna. Dikerjakan per langkah (§8). Keputusan: K-P23–K-P26.
+Status: **disetujui** (27 Oktober 2026) dengan semua usulan §11. Prodi pilot: S1 Teknik Informatika, S1 Pendidikan
+Dokter Gigi, dan S1 Teknik Elektro. Dikerjakan per langkah (§8). Keputusan: K-P23–K-P26.
 Dasar: [rencana Fase 1](rencana-fase-01.md) §2 dan [log Fase 1](log/fase-01.md).
 
 ---
@@ -22,7 +22,8 @@ Dasar: [rencana Fase 1](rencana-fase-01.md) §2 dan [log Fase 1](log/fase-01.md)
   | K-P16 | Data resmi dari www bisa diubah prodi sebagai timpaan per kolom |
   | K-P17, K-P19 | VM sendiri dengan `docker compose`; unggahan di volume lokal |
 
-- **Prasyarat pilot:** staging sudah di-deploy admin VM, dan data www terbaru sudah diunggah. Kedua kriteria Fase 1
+- **Prasyarat pilot:** staging sudah di-deploy admin VM, dan data www terbaru sudah diunggah. Staging cukup dibuka lewat
+  alamat IP VM; nama DNS dan HTTPS diperlukan untuk produksi (`docs/pilot-fase-02.md`). Kedua kriteria Fase 1
   yang masih terbuka ("tayang di staging" dan "berjalan di VM") menjadi syarat mulai pilot, bukan syarat mulai
   membangun penyunting.
 
@@ -225,7 +226,8 @@ samping pada lebar 320 px kecuali di dalam wadah tabel.
 4. **Dokumen Akreditasi dan label kriteria**: halaman dokumen sudah bisa dikerjakan; label menunggu daftar dari LPMPP.
 5. **Panduan dan persiapan pilot**: `docs/panduan-admin-prodi.md`, akun prodi pilot (dibuat superadmin di staging).
 6. **Pilot**: masukan dan perbaikan dalam beberapa langkah kecil (`fase/02-6a-…`, `fase/02-6b-…`).
-7. **Pilihan tambahan** bila diperlukan pilot: impor Excel tabel besar, laporan perubahan data untuk pengelola www.
+7. **Pilihan tambahan**: impor Excel tabel besar (dikerjakan, pembaruan §11); laporan perubahan data untuk pengelola
+   www bila diperlukan pilot.
 8. **Uji menyeluruh** dan `docs/log/fase-02.md`.
 
 Langkah 1–4 tidak bergantung pada staging. Langkah 5–6 menunggu staging tayang (§0).
@@ -269,3 +271,8 @@ Langkah 1–4 tidak bergantung pada staging. Langkah 5–6 menunggu staging taya
 Semua usulan di atas disetujui: pertanyaan 2–8 sesuai kolom "Usulan". Untuk pertanyaan 1, prodi pilot pertama adalah
 S1 Teknik Informatika, dan dua lainnya akan disebutkan pengguna. Pertanyaan 9 (jadwal deploy staging) tetap mengikuti
 admin VM; pilot dimulai setelah staging tayang.
+
+Pembaruan (pengguna, 27 Oktober 2026):
+- Prodi pilot kedua dan ketiga: **S1 Pendidikan Dokter Gigi** (12201, LAM-PTKes) dan **S1 Teknik Elektro** (20201,
+  LAM-Teknik).
+- Impor Excel untuk tabel besar dikerjakan di langkah 7 tanpa menunggu pilot (mengubah jawaban pertanyaan 7).

@@ -1,7 +1,14 @@
 # Persiapan pilot Fase 2 — tiga prodi di staging
 
-**Status (27 Oktober 2026):** aplikasinya siap. Pilot menunggu staging tayang (admin VM, [docs/deploy.md](deploy.md))
-dan dua prodi pilot dari pengguna. Rencana: [rencana Fase 2](rencana-fase-02.md) §6; keputusan K-P26.
+**Status (27 Oktober 2026):** aplikasinya siap dan ketiga prodi pilot sudah dipilih. Pilot menunggu staging tayang
+(admin VM, [docs/deploy.md](deploy.md)).
+
+**Staging** berarti stack yang sudah di-deploy admin VM di VM-nya dengan `PRODI_MODE=staging`. Nama DNS tidak
+diperlukan untuk pilot: situs dan admin dibuka lewat alamat IP VM (`http://<IP-VM>:<PORT_SITUS>/` dan
+`http://<IP-VM>:<PORT_ADMIN>/`, admin hanya dari jaringan UNSRAT atau VPN). Lewat IP, admin memakai HTTP biasa, sehingga
+kata sandi lewat jaringan kampus tanpa enkripsi. Itu masih diterima untuk staging, tetapi HTTPS lebih baik. HTTPS
+(Let's Encrypt atau sertifikat UNSRAT, `docs/deploy.md` §7) memerlukan nama DNS, misalnya `prodi.unsrat.ac.id` atau nama
+staging sementara; untuk produksi, DNS dan HTTPS wajib. Rencana: [rencana Fase 2](rencana-fase-02.md) §6; keputusan K-P26.
 
 Panduan untuk peserta: [docs/panduan-admin-prodi.md](panduan-admin-prodi.md), juga terbuka di admin lewat menu
 **Panduan**. Dokumen ini untuk superadmin UPA TIK dan pengguna yang memimpin pilot.
@@ -13,8 +20,11 @@ Tiga prodi dengan jenjang, fakultas, dan lembaga akreditasi berbeda, dan koordin
 | No | Prodi | Jenjang · fakultas · lembaga (data www) | Alamat staging | Admin prodi | Operator |
 |---|---|---|---|---|---|
 | 1 | S1 Teknik Informatika (55201) | S1 · Fakultas Teknik · LAM-Infokom | `/s1informatika/` | (diisi) | (diisi) |
-| 2 | (menunggu pengguna) | | | | |
-| 3 | (menunggu pengguna) | | | | |
+| 2 | S1 Pendidikan Dokter Gigi (12201) | S1 · Fakultas Kedokteran · LAM-PTKes | `/s1kedokterangigi/` | (diisi) | (diisi) |
+| 3 | S1 Teknik Elektro (20201) | S1 · Fakultas Teknik · LAM-Teknik | `/s1elektro/` | (diisi) | (diisi) |
+
+Ketiganya dinilai lembaga akreditasi yang berbeda, sehingga label kriteria tiga instrumen ikut dicoba. Pendidikan Dokter
+Gigi yang dipilih adalah program S1 (12201), bukan Profesi Dokter Gigi (12901).
 
 ## Sebelum pilot
 
