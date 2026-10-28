@@ -99,6 +99,8 @@ def pasang(app, alat):
                 "bentrok": [r for r in baris if r["bentrok"]], "timpaan": sum(1 for r in baris if r["timpaan"]),
                 "meta": meta, "umur_data": umur_hari(meta.get("ditarik")), "bangun": alat.antrean.status}
     alat.ringkasan = ringkasan
+    alat.simpan_sementara = lambda jenis, isi: simpan_sementara(jenis, isi)
+    alat.ambil_sementara = lambda jenis, token: ambil_sementara(jenis, token)
     alat.nama_berkas = lambda berkas: nama_berkas(berkas)
 
     def oleh():

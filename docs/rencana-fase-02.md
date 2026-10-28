@@ -229,8 +229,8 @@ samping pada lebar 320 px kecuali di dalam wadah tabel.
    **4b.** Label kriteria diisi admin prodi (K-P33, `fase/02-4b-kriteria-admin`).
 5. **Panduan dan persiapan pilot**: `docs/panduan-admin-prodi.md`, akun prodi pilot (dibuat superadmin di staging).
 6. **Pilot**: masukan dan perbaikan dalam beberapa langkah kecil (`fase/02-6a-…`, `fase/02-6b-…`).
-7. **Pilihan tambahan**: impor Excel tabel besar (dikerjakan, pembaruan §11); laporan perubahan data untuk pengelola
-   www bila diperlukan pilot.
+7. **Pilihan tambahan**: impor Excel tabel besar (dikerjakan, pembaruan §11; K-P34, `fase/02-7-impor-excel`); laporan
+   perubahan data untuk pengelola www bila diperlukan pilot.
 8. **Uji menyeluruh** dan `docs/log/fase-02.md`.
 
 Langkah 1–4 tidak bergantung pada staging. Langkah 5–6 menunggu staging tayang (§0).

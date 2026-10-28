@@ -82,6 +82,9 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   Untuk pengembang: `.venv/bin/python platform/isi_halaman.py daftar|contoh|tarik --prodi <kode>` (`contoh` hanya untuk
   melihat tampilan, bertanda `[CONTOH]`, ditolak di produksi). Templat situs: `platform/template/halaman/isi.html` +
   `_isi.html`; pratinjau admin memakai makro yang sama (`bangun.bagian_html`).
+- Impor Excel tabel besar (K-P34): `platform/admin/impor_tabel.py` (templat .xlsx, pratinjau, tambah/ganti ke draf
+  halaman; tautan "Impor dari Excel" di penyunting). Tabel yang memenuhi syarat dihitung dari templat isi
+  (`tabel_halaman`), jadi tabel baru di `isi_halaman.TEMPLAT` ikut otomatis bila syaratnya terpenuhi.
 - Label kriteria akreditasi (K-P25, K-P29, K-P33): diisi admin prodi di menu prodi "Kriteria akreditasi"
   (`platform/admin/kriteria_admin.py`, `data/prodi/<kode>/kriteria.json`). `platform/template/kriteria.json` +
   `platform/kriteria.py` berisi usulan bersama; lembaga berstatus `dikonfirmasi` hanya dipakai prodi yang belum mengisi

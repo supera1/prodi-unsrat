@@ -44,6 +44,7 @@ from markupsafe import Markup  # noqa: E402
 import bangun as bangun_mod  # noqa: E402
 import data_prodi  # noqa: E402
 import impor_dosen  # noqa: E402
+import impor_tabel  # noqa: E402
 import isi_halaman as ih  # noqa: E402
 import kriteria as kriteria_mod  # noqa: E402
 import lokasi  # noqa: E402
@@ -218,6 +219,7 @@ def pasang(app, alat):
                                formulir=Markup(penyunting.formulir(templat, isi, t)), masalah=masalah,
                                id_galat=penyunting._id, privasi=PRIVASI, admin=adalah_admin(g.akun),
                                maks_catatan=ih.MAKS_CATATAN, kriteria=label_kriteria(kode, ini["id"]),
+                               impor=[n["label"] for _k, n in impor_tabel.tabel_halaman(ini["id"])],
                                resmi=data_prodi.efektif(kode) if ini["id"] == "akreditasi" else None)
 
     def label_kriteria(kode, id_):
@@ -540,3 +542,4 @@ def pasang(app, alat):
         return resp
 
     alat.ringkasan_isi = ringkasan_isi
+    alat.ini_halaman = ini_

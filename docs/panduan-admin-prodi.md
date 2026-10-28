@@ -71,6 +71,23 @@ diperbaiki.
 - Baris yang dibiarkan kosong dibuang saat Anda menekan **Simpan draf**.
 - Baris tabel yang panjang bisa dilipat: klik judul barisnya untuk membuka atau menutup.
 
+### Mengisi tabel dari Excel
+
+Tabel besar (mata kuliah, kerja sama, penelitian, publikasi, PkM, luaran, prestasi, tenaga kependidikan, survei
+kepuasan, jadwal, dan beberapa lainnya) bisa diisi dari Excel. Di penyunting halamannya, klik **Impor dari Excel**.
+
+1. **Unduh templat (.xlsx)**. Templat sudah berisi nama kolom yang benar, baris yang ada di halaman, dan daftar pilihan;
+   lembar **Petunjuk** menjelaskan isi setiap kolom.
+2. Isi atau ubah barisnya di lembar **Data**. Jangan ubah baris pertama (nama kolom). Berkas CSV juga diterima.
+3. Pilih berkasnya, lalu tekan **Baca berkas**. Pratinjau menunjukkan baris yang siap diimpor dan baris yang bermasalah
+   beserta nomor barisnya di Excel. Baris bermasalah tidak ikut; perbaiki di Excel lalu unggah lagi.
+4. Pilih **Tambahkan di bawah baris yang ada** atau **Ganti semua baris**, lalu tekan **Masukkan ke draf**. Baris yang
+   sama persis dengan baris yang sudah ada tidak ditambahkan dua kali.
+
+Hasil impor masuk ke draf: periksa di penyunting, lalu ajukan atau terbitkan seperti biasa. Kolom berkas (misalnya RPS
+atau bukti kerja sama) tidak ada di Excel; unggah PDF-nya lewat formulir. Saat mengganti semua baris, baris yang tidak
+berubah tetap membawa PDF-nya.
+
 ### PDF dan foto
 
 - **PDF**: paling besar 20 MB. PDF yang terkunci kata sandi atau berisi skrip, formulir aktif, atau berkas sisipan
@@ -192,6 +209,7 @@ bisa diterbitkan lagi.
 | Belum diajukan: … isian perlu diperbaiki | Perbaiki isian yang ditandai merah, lalu ajukan lagi. |
 | Draf yang menunggu persetujuan tidak dapat dibuang | Tekan Batalkan pengajuan dulu. |
 | Tidak ada perubahan untuk disimpan | Tidak ada yang berubah sejak simpanan terakhir; tidak perlu tindakan. |
+| Pratinjau impor sudah tidak berlaku | Pratinjau impor Excel berlaku 30 menit dan sekali pakai. Unggah ulang berkasnya. |
 
 ## Bantuan
 

@@ -380,6 +380,14 @@ try:
         ("POST", "/prodi/%s/kriteria" % A, "kriteria_simpan", hanya("superuji", "adma", ya=302)),
         ("POST", "/prodi/%s/kriteria/usulan" % A, "kriteria_usulan", hanya("superuji", "adma", ya=400)),
         ("POST", "/prodi/%s/kriteria/kosongkan" % A, "kriteria_kosongkan", hanya("superuji", "adma", ya=302)),
+        # filling a large table from a spreadsheet (K-P34): operators of the programme too
+        ("GET", "/prodi/%s/halaman/kurikulum/impor" % A, "isi_impor", hanya("superuji", "adma", "opa", "opab")),
+        ("GET", "/prodi/%s/halaman/kurikulum/impor" % B, "isi_impor", hanya("superuji", "admb", "opb", "opab")),
+        ("GET", "/prodi/%s/halaman/kurikulum/impor/mata_kuliah.xlsx" % A, "isi_impor_templat",
+         hanya("superuji", "adma", "opa", "opab")),
+        ("POST", "/prodi/%s/halaman/kurikulum/impor" % A, "isi_impor_baca", hanya("superuji", "adma", "opa", "opab", ya=400)),
+        ("POST", "/prodi/%s/halaman/kurikulum/impor/terapkan" % A, "isi_impor_terapkan",
+         hanya("superuji", "adma", "opa", "opab", ya=302)),
         ("GET", "/super/kelengkapan", "super_kelengkapan", hanya("superuji")),
         ("GET", "/super/kelengkapan.csv", "super_kelengkapan_csv", hanya("superuji")),
         # the guide and the feedback (Fase 2 langkah 5): everybody logged in sends; only the superadmin reads all

@@ -498,6 +498,13 @@ def daftar_masalah(id_halaman, isi, kode):
     return _semua_masalah(id_halaman, isi, kode)
 
 
+def masalah_nilai(node, nilai, tempat, kode):
+    """Problems of one value of a template node as "where: problem" (a table row imported from a spreadsheet)."""
+    masalah = []
+    _periksa(node, nilai, tempat, kode, masalah)
+    return ["%s: %s" % (t, p) if t else p for _j, t, p in masalah]
+
+
 def periksa_jalur(id_halaman, isi, kode):
     """{form field name: its first problem}, for marking the fields of the editor ("" = the page itself)."""
     hasil = {}

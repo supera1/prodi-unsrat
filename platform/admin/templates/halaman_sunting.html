@@ -23,6 +23,7 @@
 <p class="jejak-admin"><a href="{{ url_for('isi_daftar', kode=pr.kode) }}">Isi halaman</a> › {{ ini.label }}</p>
 <h1>{{ ini.label }}</h1>
 <p class="keterangan">{{ ini.deskripsi }}</p>
+{% if impor %}<p class="keterangan">Tabel {{ impor | join(', ') }} bisa diisi dari Excel: <a href="{{ url_for('isi_impor', kode=pr.kode, id_=ini.id) }}">Impor dari Excel</a>.</p>{% endif %}
 {% if kriteria[1] %}<p class="keterangan">Kriteria akreditasi {{ kriteria[0].nama }}: {% for n, nama_k in kriteria[1] %}Kriteria {{ n }}, {{ nama_k }}{{ "; " if not loop.last }}{% endfor %}.</p>{% endif %}
 {% if resmi is not none %}
 <p class="pesan pesan--info">Status akreditasi tampil otomatis dari data resmi prodi{% if resmi.akreditasi %} ({{ resmi.akreditasi }}{% if resmi.lembaga_akreditasi %}, {{ resmi.lembaga_akreditasi }}{% endif %}){% endif %}; data resmi diubah lewat halaman Data prodi. Di sini cukup unggah dokumennya: sertifikat, SK, dan ringkasan hasil akreditasi yang boleh dipublikasikan.</p>
