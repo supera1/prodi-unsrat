@@ -6,7 +6,7 @@
 	{% for ep, label, admin_saja in [('dasbor_prodi', 'Ringkasan', false), ('isi_daftar', 'Isi halaman', false), ('pengumuman_daftar', 'Pengumuman', false),
 		('kriteria_prodi', 'Kriteria akreditasi', false),
 		('data_prodi_lihat', 'Data prodi', true), ('identitas_prodi', 'Identitas', true), ('beranda_prodi', 'Bagian depan beranda', true),
-		('menu_prodi', 'Menu', true), ('akun_prodi', 'Akun', true), ('riwayat_prodi', 'Riwayat', true), ('audit_prodi', 'Log audit', true)] %}
+		('menu_prodi', 'Menu', true), ('tambahan_prodi', 'Halaman tambahan', true), ('akun_prodi', 'Akun', true), ('riwayat_prodi', 'Riwayat', true), ('audit_prodi', 'Log audit', true)] %}
 	{% if not admin_saja or a.peran != 'operator' %}
 	<a href="{{ url_for(ep, kode=pr.kode) }}"{% if ep == aktif %} aria-current="page"{% endif %}>{{ label }}</a>
 	{% endif %}

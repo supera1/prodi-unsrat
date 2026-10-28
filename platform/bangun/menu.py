@@ -7,6 +7,7 @@ A programme admin may (rencana §7, K-P2):
 - hide an item marked "opsional". Items marked "wajib" (needed for accreditation) or "otomatis" always stay.
 
 Settings live in prodi/<kode>/situs.json under "menu": {"<id>": {"label": "...", "urutan": 2, "sembunyi": true}}.
+A programme's extra pages (K-P35, halaman_tambahan.py) follow the pages of the group they belong to.
 """
 from __future__ import print_function
 
@@ -121,8 +122,9 @@ def periksa_pengaturan(templat, pengaturan):
     return masalah
 
 
-def susun(templat, pengaturan=None):
-    """The menu of one programme site: labels and order applied, hidden items removed.
+def susun(templat, pengaturan=None, tambahan=()):
+    """The menu of one programme site: labels and order applied, hidden items removed, then the programme's extra
+    pages (tambahan: [(group id, entry)], halaman_tambahan.butir_menu) after the pages of their group.
 
     Returns a list of entries {"id", "label", "alamat", "deskripsi", "jenis", "templat", "nav", "kelompok", "anak"}:
     "kelompok" is True for a group, whose pages are in "anak" (empty for a page). Raises GagalMenu when the settings are not valid (the builder then stops for this
@@ -146,6 +148,7 @@ def susun(templat, pengaturan=None):
             anak = [(pengaturan.get(a["id"], {}).get("urutan", i), "urutan" not in pengaturan.get(a["id"], {}), i, a)
                     for i, a in enumerate(b["anak"]) if not pengaturan.get(a["id"], {}).get("sembunyi")]
             e["anak"] = [jadi(x[3]) for x in sorted(anak, key=lambda x: x[:3])]
+            e["anak"] += [dict(x) for induk, x in tambahan if induk == b["id"]]
         hasil.append(e)
     return hasil
 

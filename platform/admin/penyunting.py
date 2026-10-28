@@ -26,6 +26,7 @@ from bangun import ukuran  # noqa: E402
 
 import isi_halaman as ih  # noqa: E402
 import media  # noqa: E402
+import sematan  # noqa: E402
 
 UNGGAHAN = ("dokumen", "foto")
 AKSI_DAFTAR = ("tambah", "hapus", "naik", "turun")
@@ -390,6 +391,11 @@ def _baca(node, nilai, path, k):
     v = k.form.get(path)
     if v is None:
         return nilai                           # not in the form: unchanged
+    if j == "url" and node.get("sematan"):
+        # a share link or an embed code pasted from Google becomes the embed address (K-P35); what cannot be embedded
+        # stays as typed, and the checks say why
+        v = _teks(v, True)
+        return (sematan.normalkan(v)[0] or v) if v else v
     if j in ("teks", "url"):
         return _teks(v, j == "url" or not node["panjang"])
     v = v.strip()

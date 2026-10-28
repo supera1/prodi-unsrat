@@ -34,7 +34,7 @@
 		{% elif not d %}Belum ada isi; situs menampilkan “sedang dilengkapi”.
 		{% else %}Belum terbit; situs menampilkan “sedang dilengkapi”.
 		{% endif %}
-		{% if not ini.sembunyi %}<a href="{{ pr.alamat }}{{ ini.alamat }}/">Lihat halaman ini di situs ↗</a>{% endif %}
+		{% if not ini.sembunyi and (ini.jenis != 'tambahan' or k.tayang) %}<a href="{{ pr.alamat }}{{ ini.alamat }}/">Lihat halaman ini di situs ↗</a>{% endif %}
 	</p>
 	{% if d %}
 	<p><span class="status status--{{ d.status }}">{{ {'draf': 'Draf', 'menunggu': 'Menunggu persetujuan', 'dikembalikan': 'Dikembalikan'}[d.status] }}</span>

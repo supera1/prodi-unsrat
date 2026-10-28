@@ -1,0 +1,77 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{% block judul %}Halaman tambahan — {{ pr.nama }}{% endblock %}
+{% block isi %}
+{{ nav_prodi(pr, 'tambahan_prodi') }}
+<h1>Halaman tambahan</h1>
+<p>Halaman tambahan adalah halaman milik prodi di luar halaman akreditasi, misalnya formulir pendaftaran seminar, jadwal dari
+	Google Sheets, video profil, atau kumpulan dokumen. Isinya bisa berupa teks, sematan dari Google Docs, Sheets, Slides, Forms, Drive, Calendar, Maps, atau YouTube,
+	PDF, foto, dan tautan. Halaman tambahan tampil di menu sesudah halaman lain di kelompoknya, dan baru tampil di situs setelah
+	diterbitkan, seperti halaman lain. Paling banyak {{ maks }} halaman.</p>
+
+{% if daftar %}
+<form method="post" action="{{ url_for('tambahan_simpan', kode=pr.kode) }}" class="formulir">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<div class="tabel-gulir">
+		<table>
+			<thead><tr><th scope="col">Nama menu</th><th scope="col">Kelompok</th><th scope="col">Urutan</th><th scope="col">Alamat</th><th scope="col">Keadaan</th><th scope="col">Isi</th></tr></thead>
+			<tbody>
+				{% for h in daftar %}
+				<tr>
+					<td><label class="tersembunyi" for="label-{{ h.id }}">Nama menu {{ h.label }}</label>
+						<input id="label-{{ h.id }}" name="label-{{ h.id }}" type="text" value="{{ h.label }}" maxlength="{{ maks_label }}" required></td>
+					<td><label class="tersembunyi" for="kelompok-{{ h.id }}">Kelompok {{ h.label }}</label>
+						<select id="kelompok-{{ h.id }}" name="kelompok-{{ h.id }}">{% for k, label in kelompok.items() %}<option value="{{ k }}"{% if k == h.kelompok %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></td>
+					<td><label class="tersembunyi" for="urutan-{{ h.id }}">Urutan {{ h.label }}</label>
+						<input id="urutan-{{ h.id }}" name="urutan-{{ h.id }}" type="number" min="0" max="99" value="{{ loop.index0 }}" class="angka-kecil"></td>
+					<td>{% if h.k.tayang %}<a href="{{ pr.alamat }}{{ awalan }}/{{ h.alamat }}/">{{ awalan }}/{{ h.alamat }}/</a>{% else %}{{ awalan }}/{{ h.alamat }}/{% endif %}</td>
+					<td>{{ {'terbit': 'Terbit', 'menunggu': 'Menunggu persetujuan', 'dikembalikan': 'Dikembalikan', 'draf': 'Draf', 'kosong': 'Belum diisi'}[h.k.status] }}{% if h.k.status == 'terbit' and not h.k.tayang %} (tidak tampil){% endif %}</td>
+					<td><a href="{{ url_for('isi_sunting', kode=pr.kode, id_=h.id) }}">Sunting isi<span class="tersembunyi"> {{ h.label }}</span></a></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	<p class="keterangan">Alamat tetap seperti saat halaman dibuat, supaya tautan yang sudah dibagikan tidak rusak; nama menu dan kelompoknya boleh diganti.</p>
+	<button type="submit" class="tombol">Simpan nama, kelompok, dan urutan</button>
+</form>
+
+<section class="kartu" aria-labelledby="judul-hapus">
+	<h2 id="judul-hapus">Menghapus halaman tambahan</h2>
+	<p>Halaman yang dihapus hilang dari menu dan situs. Isinya tetap tersimpan di riwayat, tetapi tidak bisa dipasang lagi; untuk
+		sementara menurunkan halaman dari situs, pakai <strong>Tarik dari situs</strong> di penyunting halamannya.</p>
+	<ul class="daftar-tombol">
+		{% for h in daftar %}
+		<li>
+			<form method="post" action="{{ url_for('tambahan_hapus', kode=pr.kode, id_=h.id) }}">
+				<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+				<button type="submit" class="tombol tombol--kecil tombol--garis tombol--bahaya">Hapus “{{ h.label }}”</button>
+			</form>
+		</li>
+		{% endfor %}
+	</ul>
+</section>
+{% else %}
+<p>Belum ada halaman tambahan.</p>
+{% endif %}
+
+{% if daftar | length < maks %}
+<section class="kartu" aria-labelledby="judul-tambah">
+	<h2 id="judul-tambah">Tambah halaman</h2>
+	<form method="post" action="{{ url_for('tambahan_buat', kode=pr.kode) }}" class="formulir">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<div class="isian"><label for="label">Nama menu</label>
+			<input id="label" name="label" type="text" value="{{ isian.get('label', '') }}" maxlength="{{ maks_label }}" required>
+			<p class="keterangan">Mis. Database Skripsi, Pendaftaran Seminar, Video Profil.</p></div>
+		<div class="isian"><label for="kelompok">Kelompok menu</label>
+			<select id="kelompok" name="kelompok">{% for k, label in kelompok.items() %}<option value="{{ k }}"{% if k == isian.get('kelompok') %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+		<div class="isian"><label for="alamat">Alamat (opsional)</label>
+			<input id="alamat" name="alamat" type="text" value="{{ isian.get('alamat', '') }}" maxlength="{{ maks_alamat }}" spellcheck="false" autocomplete="off">
+			<p class="keterangan">Bagian akhir alamat halaman: {{ pr.alamat }}{{ awalan }}/<em>alamat</em>/. Huruf kecil, angka, dan tanda hubung. Bila kosong, dibuat dari nama menu. Tidak bisa diubah setelah halaman dibuat.</p></div>
+		<button type="submit" class="tombol">Buat halaman dan isi</button>
+	</form>
+</section>
+{% else %}
+<p class="keterangan">Sudah ada {{ maks }} halaman tambahan, jumlah paling banyak. Hapus salah satu untuk membuat yang baru.</p>
+{% endif %}
+{% endblock %}

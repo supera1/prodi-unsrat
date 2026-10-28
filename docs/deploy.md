@@ -269,7 +269,7 @@ admin → **Riwayat** (setiap berkas data punya versi sebelumnya).
 
 Baris di atas `PEMANTAU: ADA TEMUAN` menyebut jenisnya: `BERUBAH` (halaman berbeda dari hasil bangun), `ASING`
 (berkas yang tidak dibuat generator, mis. `.php`), `HILANG`, `SPAM` (teks judi, pinjol, jual ijazah, atau obat
-terlarang), `SKRIP` (skrip/iframe dari luar).
+terlarang), `SKRIP` (skrip/iframe dari luar, atau sematan halaman tambahan tanpa sandbox).
 1. Catat baris temuannya. Jangan langsung menghapus apa pun di VM.
 2. Admin → Bangun ulang → **Bangun ulang semua situs**: hasil bangun menimpa halaman yang diubah dan menghapus berkas
    asing. Periksa log pemantau berikutnya (atau jalankan

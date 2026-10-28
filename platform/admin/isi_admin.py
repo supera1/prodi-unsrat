@@ -43,6 +43,7 @@ from markupsafe import Markup  # noqa: E402
 
 import bangun as bangun_mod  # noqa: E402
 import data_prodi  # noqa: E402
+import halaman_tambahan  # noqa: E402
 import impor_dosen  # noqa: E402
 import impor_tabel  # noqa: E402
 import isi_halaman as ih  # noqa: E402
@@ -91,9 +92,11 @@ def adalah_admin(akun):
 
 def halaman_prodi(kode):
     """The programme's own pages in menu order: [(group label, [menu entry + "sembunyi", ...])]. A label the
-    programme gave a page in its menu settings is used; "sembunyi": an optional page the programme hides."""
+    programme gave a page in its menu settings is used; "sembunyi": an optional page the programme hides. The
+    programme's extra pages (K-P35) follow the pages of their group, with or without published content."""
     atur = (lokasi.baca("prodi/%s/situs" % kode) or {}).get("menu")
     atur = atur if isinstance(atur, dict) else {}
+    tambahan = [h for h in halaman_tambahan.baca(kode) if isinstance(h, dict) and ih.POLA_TAMBAHAN.match(str(h.get("id")))]
 
     def pengaturan(id_):
         return atur.get(id_) if isinstance(atur.get(id_), dict) else {}
@@ -102,6 +105,10 @@ def halaman_prodi(kode):
         anak = [dict(a, label=(pengaturan(a["id"]).get("label") or a["label"]),
                      sembunyi=bool(pengaturan(a["id"]).get("sembunyi")))
                 for a in k.get("anak", []) if a["id"] in ih.TEMPLAT]
+        anak += [dict(halaman_tambahan.butir_menu(h), sembunyi=False,
+                      deskripsi="Halaman tambahan prodi: tampil di situs setelah diterbitkan, sesudah halaman lain di "
+                                "kelompok ini.")
+                 for h in tambahan if h.get("kelompok") == k["id"]]
         if anak:
             hasil.append((pengaturan(k["id"]).get("label") or k["label"], anak))
     return hasil
@@ -120,7 +127,9 @@ def ringkasan_isi(kode, wajib=None):
     wajib = halaman_wajib() if wajib is None else wajib
     hasil = {"halaman": {}, "wajib": len(wajib), "terbit": 0, "kosong": 0, "menunggu": 0, "dikembalikan": 0, "draf": 0,
              "terakhir": ""}
-    for id_ in ih.TEMPLAT:
+    tambahan = [h["id"] for h in halaman_tambahan.baca(kode) if isinstance(h, dict)
+                and ih.POLA_TAMBAHAN.match(str(h.get("id")))]
+    for id_ in list(ih.TEMPLAT) + tambahan:
         k = ih.keadaan(kode, id_)
         hasil["halaman"][id_] = k
         if id_ in wajib:
@@ -179,7 +188,7 @@ def pasang(app, alat):
 
     def ini_(kode, id_):
         """The menu entry of a page of this programme that has a content template, or 404."""
-        if id_ not in ih.TEMPLAT:
+        if ih.templat_halaman(id_) is None:
             abort(404)
         for _kelompok, anak in halaman_prodi(kode):
             for a in anak:
@@ -197,7 +206,7 @@ def pasang(app, alat):
         return media.jalur_sah(jalur) and os.path.isfile(os.path.join(lokasi.unggahan(), *jalur.split("/")))
 
     def masalah_draf(id_, isi, kode):
-        return penyunting.masalah_tampil(ih.TEMPLAT[id_], isi, ih.daftar_masalah(id_, isi, kode))
+        return penyunting.masalah_tampil(ih.templat_halaman(id_), isi, ih.daftar_masalah(id_, isi, kode))
 
     def bangun(kode):
         r = registri.cari(registri.baca(), kode)
@@ -205,7 +214,7 @@ def pasang(app, alat):
             alat.antrean.minta(kode, g.akun["nama"])
 
     def tampil_sunting(kode, ini, data):
-        templat = ih.TEMPLAT[ini["id"]]
+        templat = ih.templat_halaman(ini["id"])
         isi = copy.deepcopy(ih.isi_kerja(data))
         masalah = masalah_draf(ini["id"], isi, kode)
         galat = {}
@@ -275,7 +284,7 @@ def pasang(app, alat):
     @akses("prodi")
     def isi_simpan(kode, id_):
         ini = ini_(kode, id_)
-        templat = ih.TEMPLAT[id_]
+        templat = ih.templat_halaman(id_)
         ke_sini = url_for("isi_sunting", kode=kode, id_=id_)
         aksi = request.form.get("aksi", "simpan")
         try:

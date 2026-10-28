@@ -50,6 +50,7 @@ os.environ.pop("PRODI_MODE", None)
 import akun  # noqa: E402
 import app as app_mod  # noqa: E402
 import audit  # noqa: E402
+import halaman_tambahan  # noqa: E402
 import impor_tabel  # noqa: E402
 import isi_admin  # noqa: E402
 import isi_halaman as ih  # noqa: E402
@@ -178,6 +179,8 @@ try:
     tampak["admin, terbit"] = halaman(ka, URL + "sejarah")
     tampak["riwayat halaman"] = halaman(ka, URL + "sejarah/riwayat")
     tampak["dasbor admin"] = halaman(ka, "/prodi/%s/" % A)
+    halaman_tambahan.tambah(A, "Video Profil", "profil", "", "adma")
+    tampak["halaman tambahan"] = halaman(ka, "/prodi/%s/tambahan" % A)
     tampak["impor"] = halaman(ko, URL + "kurikulum/impor")
     tampak["pratinjau impor"] = kirim(ko, URL + "kurikulum/impor", tabel="mata_kuliah", berkas=(io.BytesIO(
         impor_tabel.templat_xlsx(dict(impor_tabel.tabel_halaman("kurikulum"))["mata_kuliah"],
@@ -188,6 +191,8 @@ try:
     for di, labels in (("operator, draf", ("Simpan draf", "Simpan dan pratinjau", "Ajukan untuk diterbitkan", "Buang draf",
                                            "Riwayat halaman ini", "(wajib)", "Impor dari Excel")),
                        ("impor", ("Unduh templat (.xlsx)", "Baca berkas", "Petunjuk", "Data")),
+                       ("halaman tambahan", ("Nama menu", "Kelompok menu", "Buat halaman dan isi",
+                                             "Simpan nama, kelompok, dan urutan", "Hapus")),
                        ("pratinjau impor", ("Masukkan ke draf", "Tambahkan di bawah baris yang ada", "Ganti semua baris")),
                        ("operator, menunggu", ("Batalkan pengajuan",)),
                        ("admin, menunggu", ("Terbitkan", "Kembalikan dengan catatan", "Catatan untuk penulis")),
@@ -195,7 +200,8 @@ try:
                        ("riwayat halaman", ("Jadikan draf",)),
                        ("daftar, tabel, berkas", ("Tambah baris", "Naik", "Turun", "Hapus", "Kembalikan baris itu", "Lepas berkas ini")),
                        ("dasbor admin", ("Isi halaman", "Ringkasan", "Kesiapan situs", "Panduan", "Masukan", "Data prodi",
-                                         "Identitas", "Bagian depan beranda", "Menu", "Kriteria akreditasi", "Akun", "Log audit", "Riwayat",
+                                         "Identitas", "Bagian depan beranda", "Menu", "Kriteria akreditasi", "Halaman tambahan",
+                                         "Akun", "Log audit", "Riwayat",
                                          "Pengumuman", "Keluar"))):
         for label in labels:
             cek(label in teks, "panduan menyebut %r" % label)
