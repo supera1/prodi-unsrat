@@ -221,14 +221,15 @@ def pasang(app, alat):
                                resmi=data_prodi.efektif(kode) if ini["id"] == "akreditasi" else None)
 
     def label_kriteria(kode, id_):
-        """(body, [(number, name)]) of the criteria a page serves, once LPMPP confirmed the programme's body (K-P29)."""
+        """(body, [(number, name)]) of the criteria a page serves, as the site shows them (K-P29, K-P33)."""
         try:
             data = kriteria_mod.baca()
         except (OSError, ValueError):
-            return None, []
-        if kriteria_mod.periksa(data, set(ih.TEMPLAT)):
-            return None, []
-        lembaga = kriteria_mod.lembaga_untuk(data, (data_prodi.efektif(kode) or {}).get("lembaga_akreditasi"))
+            data = None
+        if data is not None and kriteria_mod.periksa(data, set(ih.TEMPLAT)):
+            data = None
+        lembaga, _masalah = kriteria_mod.untuk_prodi(kode, data, (data_prodi.efektif(kode) or {}).get("lembaga_akreditasi"),
+                                                     set(ih.TEMPLAT))
         return lembaga, kriteria_mod.label(lembaga, id_)
 
     def bentrok(kode, ini, pesan):
@@ -492,13 +493,15 @@ def pasang(app, alat):
     # -------------------------------------------------------------- completeness of every programme (superadmin)
 
     def kelengkapan():
-        """One row per registered programme: its data (alat.info_prodi) and ringkasan_isi()."""
+        """One row per registered programme: its data (alat.info_prodi), ringkasan_isi() and the number of its own
+        accreditation criteria (K-P33)."""
         wajib = halaman_wajib()
         baris = []
         for r in registri.baca()["prodi"]:
             info = alat.info_prodi(r["kode_pddikti"])
             if info:
-                baris.append(dict(info, isi=ringkasan_isi(info["kode"], wajib)))
+                baris.append(dict(info, isi=ringkasan_isi(info["kode"], wajib),
+                                  kriteria=len(kriteria_mod.baca_prodi(info["kode"]).get("kriteria") or [])))
         return sorted(baris, key=registri.kunci_urut), wajib
 
     @app.route("/super/kelengkapan")
@@ -522,13 +525,14 @@ def pasang(app, alat):
         buf = io.StringIO()
         tulis = csv.writer(buf)
         tulis.writerow(["kode_pddikti", "jenjang", "nama", "fakultas", "slug", "aktif", "wajib_terbit", "wajib_total",
-                        "menunggu", "dikembalikan", "draf", "terakhir_diubah"] +
+                        "menunggu", "dikembalikan", "draf", "terakhir_diubah", "kriteria_akreditasi"] +
                        [label.get(id_, id_) for id_ in halaman])
         for b in baris:
             x = b["isi"]
             tulis.writerow([impor_dosen.aman_csv(v) for v in [
                 b["kode"], b["jenjang"], b["nama"], b["unit"], b["slug"], "ya" if b["aktif"] else "tidak", x["terbit"],
-                x["wajib"], x["menunggu"], x["dikembalikan"], x["draf"], x["terakhir"].replace("T", " ")[:16]] +
+                x["wajib"], x["menunggu"], x["dikembalikan"], x["draf"], x["terakhir"].replace("T", " ")[:16],
+                b["kriteria"]] +
                 [keadaan_teks(x["halaman"][id_]) for id_ in halaman]])
         resp = make_response("﻿" + buf.getvalue())            # the BOM makes Excel read it as UTF-8
         resp.headers["Content-Type"] = "text/csv; charset=utf-8"

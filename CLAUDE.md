@@ -82,9 +82,11 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   Untuk pengembang: `.venv/bin/python platform/isi_halaman.py daftar|contoh|tarik --prodi <kode>` (`contoh` hanya untuk
   melihat tampilan, bertanda `[CONTOH]`, ditolak di produksi). Templat situs: `platform/template/halaman/isi.html` +
   `_isi.html`; pratinjau admin memakai makro yang sama (`bangun.bagian_html`).
-- Label kriteria akreditasi (K-P25, K-P29): `platform/template/kriteria.json` + `platform/kriteria.py`; hanya lembaga
-  berstatus `dikonfirmasi` (oleh LPMPP) yang tampil. `python3 platform/kriteria.py periksa|tabel`; tabelnya disalin ke
-  `docs/kriteria-akreditasi.md` (uji memastikan sama). Jangan mengisi kriteria LAM tanpa daftar dari LPMPP.
+- Label kriteria akreditasi (K-P25, K-P29, K-P33): diisi admin prodi di menu prodi "Kriteria akreditasi"
+  (`platform/admin/kriteria_admin.py`, `data/prodi/<kode>/kriteria.json`). `platform/template/kriteria.json` +
+  `platform/kriteria.py` berisi usulan bersama; lembaga berstatus `dikonfirmasi` hanya dipakai prodi yang belum mengisi
+  sendiri. `python3 platform/kriteria.py periksa|tabel`; tabelnya disalin ke `docs/kriteria-akreditasi.md` (uji
+  memastikan sama). Pengembang tidak mengisi kriteria LAM tanpa daftar dari LPMPP.
 - Bagian depan beranda (sebelum admin ada): `.venv/bin/python platform/tampilan_prodi.py lihat|atur|foto --prodi <kode>`.
   Nilai kartu resmi (akreditasi, gelar, SKS) tidak pernah boleh ditimpa (K-P15).
 - Admin (langkah 4): sekali `python3 platform/admin/siapkan.py` (kunci sesi di `rahasia/.env`), lalu

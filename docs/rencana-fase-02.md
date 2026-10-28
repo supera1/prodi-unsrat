@@ -150,6 +150,8 @@ samping pada lebar 320 px kecuali di dalam wadah tabel.
   - Supaya tidak ada yang dikarang, daftar label per lembaga dan pemetaan halaman → kriteria **disiapkan atau
     dikonfirmasi LPMPP UNSRAT** dulu.
   - Sebelum ada konfirmasi itu, label tidak ditampilkan. Pengembang hanya menyiapkan draf pemetaan untuk diperiksa.
+  - **Diubah K-P33 (27 Oktober 2026):** admin prodi mengisi daftar kriteria dan pemetaannya sendiri di menu Kriteria
+    akreditasi, tanpa menunggu LPMPP; draf pemetaan menjadi usulan untuk formulir itu.
 
 ### 3.8 Pilihan tambahan (dikerjakan bila pilot memerlukannya)
 
@@ -224,6 +226,7 @@ samping pada lebar 320 px kecuali di dalam wadah tabel.
 3. **Alur dan kelengkapan**: ajukan/terbitkan/kembalikan/tarik, penolakan simpanan yang saling menimpa, riwayat isi
    halaman, kelengkapan di dasbor prodi dan superadmin (dengan unduhan CSV).
 4. **Dokumen Akreditasi dan label kriteria**: halaman dokumen sudah bisa dikerjakan; label menunggu daftar dari LPMPP.
+   **4b.** Label kriteria diisi admin prodi (K-P33, `fase/02-4b-kriteria-admin`).
 5. **Panduan dan persiapan pilot**: `docs/panduan-admin-prodi.md`, akun prodi pilot (dibuat superadmin di staging).
 6. **Pilot**: masukan dan perbaikan dalam beberapa langkah kecil (`fase/02-6a-…`, `fase/02-6b-…`).
 7. **Pilihan tambahan**: impor Excel tabel besar (dikerjakan, pembaruan §11); laporan perubahan data untuk pengelola

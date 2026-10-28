@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Accreditation criteria labels of the programme pages (Fase 2 langkah 4, rencana §3.7, K-P25, K-P29).
+"""Accreditation criteria labels of the programme pages (Fase 2 langkah 4, rencana §3.7, K-P25, K-P29, K-P33).
 
 Every required page can carry the criterion of the accreditation instrument it serves ("Kriteria 2: Tata Pamong, Tata
 Kelola, dan Kerja Sama"), and the accreditation page lists the pages per criterion, so an assessor finds them by
@@ -16,11 +16,18 @@ on any site, so nothing unconfirmed is presented as fact.
 "alias" are the values of "lembaga_akreditasi" in the official data (www) that mean this body ("LAM-Teknik",
 "LAM-Tek"); a value no entry claims (empty, "BAN-PT / LAM-PTIP") gets no labels.
 
+A programme's admin can also set the criteria of its own site (K-P33): prodi/<kode>/kriteria.json holds one body in
+the same shape, without alias and status. When it has criteria it is what the site shows; otherwise a body confirmed
+in the shared file is shown, if any. The shared drafts serve as starting points ("usulan") for that form.
+
+    {"nama": "LAM Teknik", "instrumen": "...", "kriteria": [{"nomor": "1", "nama": "..."}], "halaman": {"visi-misi": ["1"]}}
+
     python3 platform/kriteria.py periksa      check the file
     python3 platform/kriteria.py tabel        the draft mapping as Markdown, for LPMPP (docs/kriteria-akreditasi.md)
 """
 from __future__ import print_function
 
+import copy
 import datetime
 import io
 import json
@@ -29,12 +36,24 @@ import re
 import sys
 
 PLATFORM = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, PLATFORM)
+sys.path.insert(0, os.path.join(PLATFORM, "pemantau"))
+
+import lokasi  # noqa: E402
+import saringan_spam  # noqa: E402
+
 KRITERIA_JSON = os.path.join(PLATFORM, "template", "kriteria.json")
 POLA_ID = re.compile(r"^[a-z][a-z0-9-]{1,30}$")
 POLA_NOMOR = re.compile(r"^[0-9A-Za-z.]{1,8}$")
 KONTROL = re.compile(r"[\x00-\x1f\x7f<>]")
 STATUS = ("draf", "dikonfirmasi")
 MAKS_NAMA = 150
+MAKS_LEMBAGA = 60
+MAKS_KRITERIA = 20             # criteria of one programme's body
+
+
+class GagalKriteria(ValueError):
+    """A programme's criteria were refused; the message is shown to its admin."""
 
 
 def baca(path=None):
@@ -115,6 +134,97 @@ def _tanggal(v):
 
 def _kunci(nama):
     return re.sub(r"\s+", " ", (nama or "").strip()).upper()
+
+
+def berkas_prodi(kode):
+    return "prodi/%s/kriteria" % kode
+
+
+def periksa_prodi(data, halaman_ada):
+    """Problems of a programme's own criteria (K-P33), as messages for its admin; empty list when they may be shown."""
+    if not isinstance(data, dict):
+        return ["kriteria prodi harus berupa objek"]
+    masalah = []
+    if not _teks(data.get("nama"), MAKS_LEMBAGA):
+        masalah.append("Nama lembaga harus diisi, paling panjang %d karakter, tanpa < > dan karakter kendali"
+                       % MAKS_LEMBAGA)
+    if data.get("instrumen", "") != "" and not _teks(data.get("instrumen")):
+        masalah.append("Nama instrumen paling panjang %d karakter, tanpa < > dan karakter kendali" % MAKS_NAMA)
+    kriteria = data.get("kriteria")
+    if not isinstance(kriteria, list):
+        return masalah + ["kriteria harus daftar"]
+    if len(kriteria) > MAKS_KRITERIA:
+        masalah.append("Paling banyak %d kriteria" % MAKS_KRITERIA)
+    nomor = set()
+    for i, k in enumerate(kriteria, 1):
+        if not isinstance(k, dict) or not isinstance(k.get("nomor"), str) or not POLA_NOMOR.match(k["nomor"]):
+            masalah.append("Kriteria baris %d: nomor harus 1-8 huruf atau angka (boleh titik), mis. 1, 2.1, C" % i)
+        elif k["nomor"] in nomor:
+            masalah.append("Kriteria baris %d: nomor %s sudah dipakai" % (i, k["nomor"]))
+        else:
+            nomor.add(k["nomor"])
+        if not isinstance(k, dict) or not _teks(k.get("nama")):
+            masalah.append("Kriteria baris %d: nama harus diisi, paling panjang %d karakter, tanpa < > dan karakter "
+                           "kendali" % (i, MAKS_NAMA))
+    halaman = data.get("halaman")
+    if not isinstance(halaman, dict):
+        return masalah + ["halaman harus objek {id halaman: [nomor kriteria]}"]
+    for id_, daftar in halaman.items():
+        if id_ not in halaman_ada:
+            masalah.append("halaman %r tidak dikenal" % id_)
+        elif not isinstance(daftar, list) or not daftar or not all(x in nomor for x in daftar) \
+                or len(set(daftar)) != len(daftar):
+            masalah.append("kriteria halaman %r harus nomor kriteria di atas, tanpa ganda" % id_)
+    for teks in [data.get("nama"), data.get("instrumen")] + [k.get("nama") for k in kriteria if isinstance(k, dict)]:
+        istilah = saringan_spam.cari(teks) if isinstance(teks, str) else None
+        if istilah:
+            masalah.append("memuat teks %s (%s)" % (saringan_spam.jenis(istilah), istilah))
+    return masalah
+
+
+def baca_prodi(kode):
+    """A programme's own criteria ({} when its admin never set them)."""
+    return lokasi.baca(berkas_prodi(kode)) or {}
+
+
+def simpan_prodi(kode, data, halaman_ada, oleh, aksi):
+    """Check and store a programme's own criteria (the previous version stays in the history). Pages without criteria
+    are left out; a body without criteria clears the labels (the shared file applies again)."""
+    bersih = {"nama": data.get("nama", ""), "instrumen": data.get("instrumen", ""),
+              "kriteria": list(data.get("kriteria") or []),
+              "halaman": {k: v for k, v in (data.get("halaman") or {}).items() if v}}
+    masalah = periksa_prodi(bersih, halaman_ada)
+    if masalah:
+        raise GagalKriteria("; ".join(masalah))
+    if not bersih["kriteria"] and bersih["halaman"]:
+        raise GagalKriteria("isi daftar kriteria dulu sebelum mencentang halaman")
+    lokasi.tulis(berkas_prodi(kode), bersih, oleh, "Kriteria akreditasi", aksi)
+
+
+def hapus_prodi(kode, oleh):
+    """Drop a programme's own criteria (kept in the history)."""
+    lokasi.tulis(berkas_prodi(kode), {}, oleh, "Kriteria akreditasi", "kriteria dikosongkan")
+
+
+def untuk_prodi(kode, data, nama_lembaga, halaman_ada):
+    """(body, problems) whose labels a programme's site shows: its own criteria when they have any (K-P33), otherwise a
+    body confirmed in the shared file (K-P29). Own criteria that do not pass periksa_prodi() show nothing."""
+    sendiri = baca_prodi(kode)
+    if sendiri.get("kriteria"):
+        masalah = periksa_prodi(sendiri, halaman_ada)
+        return (None, masalah) if masalah else (sendiri, [])
+    return lembaga_untuk(data, nama_lembaga), []
+
+
+def usulan(data):
+    """The bodies of the shared file that have a criteria list, drafts too: starting points for a programme's form."""
+    return [lb for lb in (data or {}).get("lembaga", []) if lb.get("kriteria")]
+
+
+def dari_usulan(lembaga):
+    """A programme's criteria filled from a body of the shared file (copied: the form changes it)."""
+    return {"nama": lembaga["nama"], "instrumen": lembaga["instrumen"], "kriteria": copy.deepcopy(lembaga["kriteria"]),
+            "halaman": copy.deepcopy(lembaga.get("halaman") or {})}
 
 
 def lembaga_untuk(data, nama_lembaga, termasuk_draf=False):

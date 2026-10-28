@@ -440,7 +440,7 @@ def pasang(app, alat):
                 bagian = "halaman %s" % label_halaman().get(m.group(2)[len("halaman-"):], m.group(2))
             else:
                 bagian = {"situs": "identitas dan beranda", "pengumuman": "pengumuman",
-                          "data": "data prodi"}.get(m.group(2), m.group(2))
+                          "data": "data prodi", "kriteria": "kriteria akreditasi"}.get(m.group(2), m.group(2))
             return "%s — %s" % (nama_semua().get(m.group(1), m.group(1)), bagian)
         return {"registri": "Registri prodi (slug, aktif, tautan dosen)", "warisan/prodi": "Data resmi prodi dari www",
                 "warisan/unit": "Data fakultas dari www", "warisan/kalender": "Kalender akademik dari www",

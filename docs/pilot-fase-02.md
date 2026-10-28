@@ -46,8 +46,9 @@ Dikerjakan superadmin UPA TIK, bersama admin VM untuk butir 1.
    - Saat pertama masuk, setiap pengguna wajib membuat kata sandinya sendiri.
 5. **Uji masuk.** Pastikan setiap peserta bisa membuka admin dari tempat kerjanya (jaringan kampus atau VPN) sebelum sesi
    pengenalan.
-6. **Label kriteria** tetap draf sampai LPMPP mengonfirmasi ([docs/kriteria-akreditasi.md](kriteria-akreditasi.md)).
-   Ini tidak menghalangi pilot.
+6. **Label kriteria** diisi admin prodi pilot sendiri di menu **Kriteria akreditasi** (K-P33), menurut instrumen
+   lembaganya. Formulirnya bisa dimulai dari usulan BAN-PT IAPS 4.0; untuk LAM, daftar kriterianya diketik dari
+   instrumen LAM masing-masing.
 
 ## Sesi pengenalan (±90 menit)
 

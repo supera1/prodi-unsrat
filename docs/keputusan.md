@@ -188,6 +188,7 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   saling menimpa ditolak. Kelengkapan halaman wajib tampil di dasbor prodi dan superadmin.
 
 ### K-P25 — Dokumen akreditasi hanya yang boleh publik; label kriteria dari LPMPP (Fase 2)
+- **Diubah K-P33:** label kriteria diisi admin prodi sendiri, tanpa menunggu LPMPP.
 - **Keputusan** (pengguna, 27 Oktober 2026): halaman Dokumen Akreditasi memuat dokumen yang boleh publik saja
   (sertifikat, SK, ringkasan); dokumen berisi data pribadi tidak diunggah ke situs. Label kriteria akreditasi per
   lembaga disiapkan atau dikonfirmasi LPMPP UNSRAT; sebelum itu tidak ditampilkan.
@@ -245,6 +246,7 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   operator melihat halaman yang dikembalikan.
 
 ### K-P29 — Dokumen akreditasi di halaman Akreditasi; label kriteria dari berkas yang dikonfirmasi LPMPP (Fase 2 langkah 4)
+- **Diubah K-P33** untuk label kriteria: yang diisi admin prodi didahulukan; berkas bersama tetap sebagai usulan.
 - **Konteks:** rencana §3.7 meminta satu halaman Dokumen Akreditasi per prodi ("misalnya `profil/dokumen-akreditasi`")
   dan label kriteria yang baru tampil setelah dikonfirmasi LPMPP (K-P25). Halaman **Akreditasi** (`profil/akreditasi`)
   sudah ada sejak Fase 1, menampilkan status dari data resmi, dan sudah menjanjikan "Sertifikat akreditasi sedang
@@ -349,3 +351,21 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   - Judul yang memuat istilah judi (mis. pengabdian tentang bahaya judi online) tetap ditolak; bila pilot
     memerlukannya, diputuskan terpisah.
   - Perubahan saringan dan pemeriksaan jaringan diusulkan juga untuk www (`docs/asal-modul.md`).
+
+### K-P33 — Label kriteria akreditasi diisi admin prodi (Fase 2 langkah 4b)
+- **Konteks:** K-P25 dan K-P29 menunda label kriteria sampai LPMPP mengonfirmasi daftar per lembaga. Daftar LAM belum
+  ada, sehingga situs pilot (LAM-Infokom, LAM-PTKes, LAM-Teknik) tidak akan punya label selama pilot.
+- **Keputusan** (pengguna, 27 Oktober 2026): label kriteria tidak menunggu LPMPP; admin prodi mengisi dan
+  memperbaruinya sendiri di admin.
+  - Menu prodi **Kriteria akreditasi** (`platform/admin/kriteria_admin.py`): nama lembaga dan instrumen, daftar kriteria
+    (paling banyak 20, nomor dan nama), dan centang kriteria per halaman. Admin prodi dan superadmin mengubah; operator
+    hanya melihat.
+  - Disimpan di `data/prodi/<kode>/kriteria.json`, tercatat di riwayat prodi dan log audit, tampil di situs pada bangun
+    berikutnya. Teks diperiksa seperti isi lain: tanpa markah, karakter kendali, dan teks spam.
+  - **Usulan:** `platform/template/kriteria.json` (draf BAN-PT IAPS 4.0) bisa mengisi formulir; isinya baru berlaku
+    setelah admin prodi memeriksa dan menyimpannya.
+  - Urutan yang dipakai situs: kriteria yang diisi prodi; bila kosong, lembaga yang dikonfirmasi di berkas bersama
+    (K-P29); bila tidak ada, tanpa label. Kriteria prodi yang rusak tidak tampil dan generator mencatat peringatan.
+  - Kelengkapan superadmin (layar dan CSV) menampilkan jumlah kriteria tiap prodi, supaya LPMPP bisa memeriksanya.
+- **Konsekuensi:** isi label menjadi tanggung jawab prodi, seperti isi halaman lain. LPMPP tetap bisa memeriksa lewat
+  kelengkapan dan situs, dan meminta perbaikan kepada admin prodi.

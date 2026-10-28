@@ -232,7 +232,8 @@ class Pembangun(object):
         self.berkas = {}      # published path -> bytes
         self.versi = {}       # published asset path -> short hash, for ?v=
         self.peringatan = []
-        # accreditation criteria labels: only bodies LPMPP confirmed are shown (K-P29); a broken file shows none
+        # accreditation criteria labels: a programme's own criteria (K-P33), else a body LPMPP confirmed (K-P29); a
+        # broken shared file only drops the latter
         try:
             self.kriteria = kriteria_mod.baca()
             masalah = kriteria_mod.periksa(self.kriteria, set(isi_halaman.TEMPLAT))
@@ -362,7 +363,10 @@ class Pembangun(object):
             for halaman_id in k["halaman"]:
                 if isi:
                     terkait.setdefault(halaman_id, []).append({"kategori": k, "butir": isi[:TERKAIT], "jumlah": len(isi)})
-        lembaga = kriteria_mod.lembaga_untuk(self.kriteria, p.get("lembaga_akreditasi"))
+        lembaga, masalah = kriteria_mod.untuk_prodi(kode, self.kriteria, p.get("lembaga_akreditasi"),
+                                                    set(isi_halaman.TEMPLAT))
+        if masalah:
+            self.peringatan.append("prodi %s: label kriteria diabaikan (%s)" % (kode, "; ".join(masalah[:3])))
         urut = [b["id"] for b in menu_mod.halaman(menu)]             # the pages this site has, in menu order
         ada = {b["id"]: b for b in menu_mod.halaman(menu)}
         peta_kriteria = [{"nomor": n, "nama": nama, "halaman": [ada[x] for x in sorted(ids, key=urut.index)]}

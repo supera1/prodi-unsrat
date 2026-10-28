@@ -124,7 +124,8 @@ sebelumnya disimpan sebagai versi. Tombol daftar (Tambah, Naik, Turun, Hapus) ti
 3. Tekan **Jadikan draf** untuk memakai versi itu lagi. Versi lama menjadi draf, lalu diajukan atau diterbitkan seperti
    perubahan lain. Situs tidak pernah berubah langsung dari riwayat.
 
-Admin prodi juga punya menu **Riwayat** untuk semua data prodi (identitas, beranda, menu, pengumuman, isi halaman): bandingkan
+Admin prodi juga punya menu **Riwayat** untuk semua data prodi (identitas, beranda, menu, kriteria akreditasi,
+pengumuman, isi halaman): bandingkan
 versi lama dengan sekarang lalu pulihkan. Pemulihan di menu ini langsung berlaku, jadi periksa dulu perbedaannya.
 
 ## Halaman Akreditasi
@@ -137,6 +138,21 @@ Anda cukup mengunggah dokumennya:
 
 Jangan unggah LED, LKPS, atau dokumen lain yang memuat data pribadi. Data resmi yang keliru diperbaiki admin prodi
 lewat menu **Data prodi**.
+
+## Kriteria akreditasi
+
+Menu **Kriteria akreditasi** (diisi admin prodi; operator hanya melihat) membuat setiap halaman menyebut kriteria
+instrumen akreditasi yang dilayaninya, dan halaman Akreditasi menampilkan daftar halaman per kriteria. Asesor jadi
+mudah menemukan bukti per kriteria.
+
+1. Periksa **Nama lembaga akreditasi** (terisi dari data resmi) dan isi nama instrumennya bila perlu.
+2. Isi **Daftar kriteria** menurut instrumen lembaga Anda: nomor dan nama setiap kriteria, paling banyak 20. Prodi yang
+   dinilai BAN-PT bisa memakai **Isi formulir dari usulan** (BAN-PT IAPS 4.0, 9 kriteria), lalu memeriksanya.
+3. Tekan **Simpan kriteria**. Tabel **Halaman per kriteria** muncul; centang kriteria untuk setiap halaman, lalu simpan
+   lagi.
+
+Selama daftar kriteria kosong, situs tidak menampilkan label kriteria. **Kosongkan kriteria** menghapus label dari
+situs; versi sebelumnya tetap ada di menu Riwayat.
 
 ## Pengumuman dan berita
 
@@ -151,6 +167,7 @@ bisa diterbitkan lagi.
 - **Identitas**: palet warna, logo prodi, dan media sosial.
 - **Bagian depan beranda**: latar (warna atau foto), judul, subjudul, kalimat pengantar, dan kartu fakta di beranda.
 - **Menu**: label dan urutan menu, serta menyembunyikan halaman opsional. Halaman wajib tidak bisa disembunyikan.
+- **Kriteria akreditasi**: daftar kriteria instrumen akreditasi dan halaman yang melayani setiap kriteria.
 - **Akun**: membuat akun operator, mengatur ulang kata sandinya, dan menonaktifkannya.
 - **Log audit**: siapa melakukan apa dan kapan.
 

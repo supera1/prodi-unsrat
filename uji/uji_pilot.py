@@ -187,7 +187,7 @@ try:
                        ("riwayat halaman", ("Jadikan draf",)),
                        ("daftar, tabel, berkas", ("Tambah baris", "Naik", "Turun", "Hapus", "Kembalikan baris itu", "Lepas berkas ini")),
                        ("dasbor admin", ("Isi halaman", "Ringkasan", "Kesiapan situs", "Panduan", "Masukan", "Data prodi",
-                                         "Identitas", "Bagian depan beranda", "Menu", "Akun", "Log audit", "Riwayat",
+                                         "Identitas", "Bagian depan beranda", "Menu", "Kriteria akreditasi", "Akun", "Log audit", "Riwayat",
                                          "Pengumuman", "Keluar"))):
         for label in labels:
             cek(label in teks, "panduan menyebut %r" % label)

@@ -374,6 +374,12 @@ try:
          hanya("superuji", "adma", "opa", "opab", ya=404)),
         ("GET", "/prodi/%s/halaman/sejarah/riwayat/20000101-000000-000000" % B, "isi_versi",
          hanya("superuji", "admb", "opb", "opab", ya=404)),
+        # accreditation criteria (K-P33): the programme's admins set them; its operators only see them
+        ("GET", "/prodi/%s/kriteria" % A, "kriteria_prodi", hanya("superuji", "adma", "opa", "opab")),
+        ("GET", "/prodi/%s/kriteria" % B, "kriteria_prodi", hanya("superuji", "admb", "opb", "opab")),
+        ("POST", "/prodi/%s/kriteria" % A, "kriteria_simpan", hanya("superuji", "adma", ya=302)),
+        ("POST", "/prodi/%s/kriteria/usulan" % A, "kriteria_usulan", hanya("superuji", "adma", ya=400)),
+        ("POST", "/prodi/%s/kriteria/kosongkan" % A, "kriteria_kosongkan", hanya("superuji", "adma", ya=302)),
         ("GET", "/super/kelengkapan", "super_kelengkapan", hanya("superuji")),
         ("GET", "/super/kelengkapan.csv", "super_kelengkapan_csv", hanya("superuji")),
         # the guide and the feedback (Fase 2 langkah 5): everybody logged in sends; only the superadmin reads all
