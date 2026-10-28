@@ -54,6 +54,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined  # noqa: E402
 from markupsafe import Markup, escape  # noqa: E402
 
 import data_prodi  # noqa: E402
+import halaman_tambahan  # noqa: E402
 import isi_halaman  # noqa: E402
 import kriteria as kriteria_mod  # noqa: E402
 import lokasi  # noqa: E402
@@ -61,6 +62,7 @@ import menu as menu_mod  # noqa: E402
 import media  # noqa: E402
 import pengumuman as pengumuman_mod  # noqa: E402
 import registri  # noqa: E402
+import sematan as sematan_mod  # noqa: E402
 import tampilan_prodi  # noqa: E402
 import warna as warna_mod  # noqa: E402
 from slug import POLA_SLUG  # noqa: E402
@@ -75,8 +77,8 @@ DOSEN_UMUM = "https://dosen.unsrat.ac.id"
 
 CSP = ("default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; "
        "font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://storage.googleapis.com; "
-       "frame-src 'self' https://storage.googleapis.com; connect-src 'self'; object-src 'none'; base-uri 'self'; "
-       "form-action 'self'")
+       "frame-src 'self' https://storage.googleapis.com " + sematan_mod.CSP_FRAME + "; connect-src 'self'; "
+       "object-src 'none'; base-uri 'self'; form-action 'self'")
 FONT = ("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..700"
         "&display=swap")
 
@@ -204,7 +206,7 @@ def bagian_html(bagian, media_url):
     _isi.html: the admin's preview."""
     return Markup(lingkungan().from_string('{% from "_isi.html" import bagian_isi with context %}'
                                            '{% for b in bagian %}{{ bagian_isi(b) }}{% endfor %}')
-                  .render(bagian=bagian, media_url=media_url))
+                  .render(bagian=bagian, media_url=media_url, sematan_aktif=False))
 
 
 # ------------------------------------------------------------------ the builder
@@ -232,6 +234,7 @@ class Pembangun(object):
         self.berkas = {}      # published path -> bytes
         self.versi = {}       # published asset path -> short hash, for ?v=
         self.peringatan = []
+        self.isi_siap = {}    # (kode, page id) -> the sections of its published content (isi_halaman_prodi)
         # accreditation criteria labels: a programme's own criteria (K-P33), else a body LPMPP confirmed (K-P29); a
         # broken shared file only drops the latter
         try:
@@ -330,11 +333,22 @@ class Pembangun(object):
         return lokasi.baca("prodi/%s/situs" % kode) or {}
 
     def menu_prodi(self, kode):
+        tambahan = self.tambahan_prodi(kode)
         try:
-            return menu_mod.susun(self.templat, self.situs(kode).get("menu"))
+            return menu_mod.susun(self.templat, self.situs(kode).get("menu"), tambahan)
         except menu_mod.GagalMenu as e:
             self.peringatan.append("prodi %s: pengaturan menu diabaikan (%s)" % (kode, e))
-            return menu_mod.susun(self.templat)
+            return menu_mod.susun(self.templat, None, tambahan)
+
+    def tambahan_prodi(self, kode):
+        """[(group, menu entry)] of the programme's extra pages that have published content to show (K-P35): an extra
+        page is on the site only while it has some."""
+        daftar = halaman_tambahan.baca(kode)
+        masalah = halaman_tambahan.periksa(daftar, halaman_tambahan.kelompok_ada(self.templat))
+        if masalah:
+            self.peringatan.append("prodi %s: halaman tambahan diabaikan (%s)" % (kode, "; ".join(masalah[:3])))
+            return []
+        return [(h["kelompok"], halaman_tambahan.butir_menu(h)) for h in daftar if self.isi_halaman_prodi(kode, h["id"])]
 
     def bangun_prodi(self, r):
         kode, slug = r["kode_pddikti"], r["slug"]
@@ -377,7 +391,7 @@ class Pembangun(object):
                     kurikulum=sorted({c["kurikulum"] for c in p.get("cpl", []) if c.get("kurikulum")}),
                     kabar_beranda=di_beranda, terkait=terkait, label_kategori=self.label_kategori, hero=hero,
                     logo=logo, media_sosial=media_sosial, lembaga_kriteria=lembaga, peta_kriteria=peta_kriteria,
-                    hari_ini=self.hari_ini)
+                    hari_ini=self.hari_ini, sematan_aktif=True, sandbox_sematan=sematan_mod.SANDBOX)
         for e in menu:
             for ini in [e] + e.get("anak", []):
                 kelompok = e if e["kelompok"] and ini is not e else None
@@ -404,8 +418,13 @@ class Pembangun(object):
     def isi_halaman_prodi(self, kode, id_halaman):
         """The sections of a programme's own page (isi_halaman.py, Fase 2), or None while it has no content to show:
         the page then says the programme is still filling it. Content that fails the checks is not shown at all."""
-        if id_halaman not in isi_halaman.TEMPLAT:
+        if isi_halaman.templat_halaman(id_halaman) is None:
             return None
+        if (kode, id_halaman) not in self.isi_siap:      # the menu asks first for the extra pages; warn only once
+            self.isi_siap[(kode, id_halaman)] = self._isi_halaman_prodi(kode, id_halaman)
+        return self.isi_siap[(kode, id_halaman)]
+
+    def _isi_halaman_prodi(self, kode, id_halaman):
         isi = isi_halaman.terbit(kode, id_halaman)
         if isi is None:
             return None

@@ -380,6 +380,13 @@ try:
         ("POST", "/prodi/%s/kriteria" % A, "kriteria_simpan", hanya("superuji", "adma", ya=302)),
         ("POST", "/prodi/%s/kriteria/usulan" % A, "kriteria_usulan", hanya("superuji", "adma", ya=400)),
         ("POST", "/prodi/%s/kriteria/kosongkan" % A, "kriteria_kosongkan", hanya("superuji", "adma", ya=302)),
+        # extra pages (K-P35): the programme's admins and the superadmin manage them; the superadmin sees all
+        ("GET", "/prodi/%s/tambahan" % A, "tambahan_prodi", hanya("superuji", "adma")),
+        ("GET", "/prodi/%s/tambahan" % B, "tambahan_prodi", hanya("superuji", "admb")),
+        ("POST", "/prodi/%s/tambahan" % A, "tambahan_buat", hanya("superuji", "adma", ya=400)),
+        ("POST", "/prodi/%s/tambahan/simpan" % A, "tambahan_simpan", hanya("superuji", "adma", ya=302)),
+        ("POST", "/prodi/%s/tambahan/x000000/hapus" % A, "tambahan_hapus", hanya("superuji", "adma", ya=404)),
+        ("GET", "/super/tambahan", "super_tambahan", hanya("superuji")),
         # filling a large table from a spreadsheet (K-P34): operators of the programme too
         ("GET", "/prodi/%s/halaman/kurikulum/impor" % A, "isi_impor", hanya("superuji", "adma", "opa", "opab")),
         ("GET", "/prodi/%s/halaman/kurikulum/impor" % B, "isi_impor", hanya("superuji", "admb", "opb", "opab")),

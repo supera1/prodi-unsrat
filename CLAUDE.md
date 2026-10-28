@@ -82,6 +82,12 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   Untuk pengembang: `.venv/bin/python platform/isi_halaman.py daftar|contoh|tarik --prodi <kode>` (`contoh` hanya untuk
   melihat tampilan, bertanda `[CONTOH]`, ditolak di produksi). Templat situs: `platform/template/halaman/isi.html` +
   `_isi.html`; pratinjau admin memakai makro yang sama (`bangun.bagian_html`).
+- Halaman tambahan prodi (K-P35): daftar di `platform/halaman_tambahan.py` (`data/prodi/<kode>/tambahan.json`, alamat
+  `/<slug>/halaman/<alamat>/`), isinya halaman `isi_halaman` dengan `TEMPLAT_TAMBAHAN` (id `x` + 6 heksa,
+  `templat_halaman()`); admin di `platform/admin/tambahan_admin.py`. Sematan hanya dari daftar tetap di
+  `platform/sematan.py` (Google Docs/Sheets/Slides/Forms/Drive/Calendar/Maps, YouTube); daftar itu juga mengisi CSP
+  `frame-src` (`bangun.CSP`, `docker/nginx/header-keamanan.conf`) dan pemantau. Jangan menambah layanan tanpa keputusan
+  baru.
 - Impor Excel tabel besar (K-P34): `platform/admin/impor_tabel.py` (templat .xlsx, pratinjau, tambah/ganti ke draf
   halaman; tautan "Impor dari Excel" di penyunting). Tabel yang memenuhi syarat dihitung dari templat isi
   (`tabel_halaman`), jadi tabel baru di `isi_halaman.TEMPLAT` ikut otomatis bila syaratnya terpenuhi.

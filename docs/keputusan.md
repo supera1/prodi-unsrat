@@ -389,3 +389,35 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
     sebelumnya ada di riwayat halaman, dan impor tercatat di log audit.
   - Operator dan admin prodi boleh mengimpor, seperti menyimpan draf. Berkas paling besar 2 MB, paling banyak 2.000
     baris dan 40 kolom yang dibaca.
+
+### K-P35 — Halaman tambahan prodi dengan sematan dari daftar layanan tetap (Fase 2 langkah 7b)
+- **Konteks:** pengguna ingin setiap prodi bisa menambah menu sendiri di luar halaman akreditasi, dengan isi unggahan PDF,
+  foto, dan sematan dari situs lain (Google Sheets, Docs, Forms, aplikasi lain). Contoh yang dirujuk, halaman database
+  skripsi situs WordPress Informatika, ternyata bukan sematan: tabel 1.522 baris (dengan NIM) dan skrip pencarian yang
+  ditempel langsung ke halaman. Cara tempel HTML dan skrip seperti itu sengaja ditutup di platform ini (CSP tanpa skrip
+  inline, semua teks di-escape, pemantau), karena justru itu jalan masuk judi online di situs `.ac.id`.
+- **Keputusan** (usulan pengembang, disetujui pengguna 28 Oktober 2026; nomor 3 dengan perubahan dari pengguna):
+  1. **Bentuk:** satu formulir untuk semua halaman tambahan, dengan bagian opsional: uraian, sematan, dokumen PDF, foto,
+     tautan, dan bagian tambahan (`isi_halaman.TEMPLAT_TAMBAHAN`). Isinya lewat penyunting, alur ajukan/terbitkan,
+     riwayat, dan saringan yang sama dengan halaman lain (K-P24).
+  2. **Letak:** admin prodi memilih kelompok menu yang ada (Profil sampai Fasilitas); halaman tambahan tampil sesudah
+     halaman bawaan kelompok itu, hanya setelah diterbitkan. Tanpa kelompok baru, sehingga struktur menu akreditasi tetap
+     sama di semua prodi. Alamatnya `/<slug>/halaman/<alamat>/`, dibuat dari nama dan tetap setelah dibuat, supaya tautan
+     yang sudah dibagikan tidak rusak; nama dan kelompok boleh diganti.
+  3. **Domain sematan: daftar tetap di kode, tanpa jalur menambah domain baru** (perubahan dari pengguna): Google Docs,
+     Sheets, Slides, Forms, Drive, Calendar, Maps, dan YouTube (versi tanpa kuki); tidak termasuk subdomain UNSRAT.
+     Mengubah daftar ini adalah keputusan baru. Hanya alamat yang disimpan, tidak pernah HTML: kode `<iframe>` yang
+     ditempel diambil alamatnya, tautan berbagi diubah ke alamat sematan (`platform/sematan.py`). Bingkai dibuat templat
+     dengan `sandbox` tanpa navigasi atas (isi sematan tidak bisa memindahkan pengunjung ke situs lain), `title`,
+     `loading="lazy"`, dan tautan "Buka di tab baru". CSP `frame-src` situs dan Nginx, serta pemantau, hanya mengizinkan
+     host itu; pemantau juga melaporkan sematan tanpa sandbox.
+  4. **Database skripsi:** tabel bawaan platform dengan impor Excel dan kotak cari, bukan sematan (langkah berikutnya).
+  5. **NIM** tidak ditampilkan di database skripsi.
+  6. **Batas:** 10 halaman tambahan per prodi, 5 sematan per halaman (juga 30 PDF dan 20 foto).
+  - Admin prodi dan superadmin membuat, mengganti nama, memindah, mengurutkan, dan menghapus halaman tambahan; operator
+    mengisi isinya seperti halaman lain. Superadmin punya daftar semua halaman tambahan beserta layanan yang disematkan
+    (`/super/tambahan`); menurunkan halaman bermasalah dengan **Tarik dari situs**, dan menonaktifkan akun bila disusupi.
+  - Halaman tambahan tidak dihitung di kelengkapan halaman wajib dan tidak diberi label kriteria.
+- **Konsekuensi:** isi sematan berada di luar saringan spam dan persetujuan admin, dan bisa berubah kapan saja di layanan
+  asalnya. Risikonya dibatasi daftar layanan besar yang tetap, sandbox, dan daftar pemantauan superadmin. Pratinjau admin
+  tidak memuat bingkai dari situs lain.

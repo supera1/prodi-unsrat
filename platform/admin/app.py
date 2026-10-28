@@ -48,6 +48,7 @@ import pengumuman_admin  # noqa: E402
 import prodi_admin  # noqa: E402
 import registri  # noqa: E402
 import superadmin  # noqa: E402
+import tambahan_admin  # noqa: E402
 from akses import akses  # noqa: E402
 
 SESI_MENIT = 120              # a session ends after this long without activity...
@@ -522,6 +523,7 @@ def buat_app(env=None):
     isi_admin.pasang(app, alat)
     impor_tabel.pasang(app, alat)
     kriteria_admin.pasang(app, alat)
+    tambahan_admin.pasang(app, alat)
     panduan.pasang(app, alat)
     masukan_admin.pasang(app, alat)
     app.antrean, app.penjadwal = antrean, penjadwal

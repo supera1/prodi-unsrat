@@ -8,7 +8,8 @@ site/manifes-publik.json, written by site/mockup/_rakit-publik.py at the last bu
 - HILANG   a published file that is gone;
 - SPAM     gambling text (saringan_spam.py, look-alike spellings included) in a page, script, style or data file;
 - SKRIP    a page without the Content-Security-Policy, an inline script, a <script>/<iframe> from a host outside
-           the allow-list, or a meta refresh (a redirect to another site).
+           the allow-list, an embed (<iframe> of an embed service) without a sandbox or with top navigation, or a
+           meta refresh (a redirect to another site).
 
     python site/pemantau/cek_integritas.py [--folder <docroot>] [--manifes <manifes-publik.json>]
 
@@ -28,12 +29,17 @@ import sys
 PEMANTAU = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.dirname(PEMANTAU)
 sys.path.insert(0, PEMANTAU)
+sys.path.insert(0, SITE)
 import saringan_spam  # noqa: E402
+import sematan  # noqa: E402
 
-# hosts the pages may load scripts or frames from (keep in step with CSP in site/mockup/_pasang-chrome.py)
-HOST_BOLEH = {"www.youtube-nocookie.com", "storage.googleapis.com", "peta.unsrat.ac.id"}
+# hosts the pages may load scripts or frames from: the uploads bucket and the embed services of the programmes' extra
+# pages (platform/sematan.py, K-P35), as the CSP of platform/bangun/bangun.py
+HOST_BOLEH = {"storage.googleapis.com"} | set(sematan.HOST)
 TEKS = (".html", ".htm", ".js", ".css", ".json", ".svg", ".txt", ".xml", ".ics")
 SKRIP_LUAR = re.compile(r'<(script|iframe)\b[^>]*\bsrc="(https?:)?//([^/"]+)', re.I)
+IFRAME_SEMATAN = re.compile(r'<iframe\b[^>]*\bsrc="https://(%s)/[^>]*>' % "|".join(re.escape(h) for h in sematan.HOST),
+                            re.I)
 SKRIP_INLINE = re.compile(r"<script\b(?![^>]*\bsrc=)(?![^>]*application/(ld\+)?json)[^>]*>\s*\S", re.I)
 REFRESH = re.compile(r'<meta[^>]+http-equiv="?refresh', re.I)
 
@@ -59,6 +65,9 @@ def periksa_teks(rel, teks):
         for m in SKRIP_LUAR.finditer(teks):
             if m.group(3).lower() not in HOST_BOLEH:
                 temuan.append(("SKRIP", rel, "<%s> dari host lain: %s" % (m.group(1).lower(), m.group(3))))
+        for m in IFRAME_SEMATAN.finditer(teks):
+            if not re.search(r'\ssandbox="[^"]*"', m.group(0)) or "allow-top-navigation" in m.group(0):
+                temuan.append(("SKRIP", rel, "sematan <iframe> dari %s tanpa sandbox" % m.group(1)))
         if REFRESH.search(teks):
             temuan.append(("SKRIP", rel, "meta refresh (pengalihan)"))
     return temuan

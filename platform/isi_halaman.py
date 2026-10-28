@@ -5,7 +5,9 @@ K-P29: its status comes from the official data, the programme adds the certifica
 documents).
 
 Every page has a content template (TEMPLAT): sections of fields, lists and tables that follow the page's description in
-the menu and what accreditation asks for, plus free extra sections at the end. The template drives:
+the menu and what accreditation asks for, plus free extra sections at the end. A programme's extra pages (K-P35,
+halaman_tambahan.py; ids "x" + 6 hex digits) share one template, TEMPLAT_TAMBAHAN: text, embedded content
+(sematan.py), PDFs, photos and links; templat_halaman() gives the template of any page. The template drives:
 - periksa(): what may be stored: types, lengths, choices, links to https:// addresses only, uploaded files of this
   programme only, no gambling text;
 - tampilan(): what the builder shows (headings, paragraphs, lists, tables, cards, documents, photos, links), as plain
@@ -50,6 +52,7 @@ from markupsafe import Markup, escape  # noqa: E402
 import lokasi  # noqa: E402
 import media  # noqa: E402
 import saringan_spam  # noqa: E402
+import sematan as sematan_mod  # noqa: E402
 
 POLA_KODE = re.compile(r"^[0-9A-Za-z]{3,12}$")
 KONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
@@ -59,7 +62,7 @@ TAUTAN = re.compile(r"\[([^\]\n]{1,200})\]\(([^)\s]{1,500})\)|(https://[^\s<>\"'
 TEBAL = re.compile(r"\*\*(\S(?:[^*\n]{0,298}\S)?)\*\*")
 MAKS_URL = 500
 CONTOH = "[CONTOH]"
-TAMPIL = ("daftar", "tabel", "kartu", "dokumen", "galeri", "tautan", "bagian")
+TAMPIL = ("daftar", "tabel", "kartu", "dokumen", "galeri", "tautan", "bagian", "sematan")
 SKALAR = ("teks", "bilangan", "persen", "url", "pilihan", "centang", "dokumen")
 
 
@@ -96,8 +99,9 @@ def persen(label, wajib=False):
     return {"jenis": "persen", "label": label, "wajib": wajib, "bantuan": "0 sampai 100, mis. 87,5."}
 
 
-def url(label="Alamat", wajib=False, bantuan="Alamat lengkap yang diawali https://"):
-    return {"jenis": "url", "label": label, "wajib": wajib, "bantuan": bantuan}
+def url(label="Alamat", wajib=False, bantuan="Alamat lengkap yang diawali https://", sematan=False):
+    """An https:// address. sematan: the embed address of an allowed service (sematan.py, K-P35)."""
+    return {"jenis": "url", "label": label, "wajib": wajib, "bantuan": bantuan, "sematan": sematan}
 
 
 def pilihan(label, opsi, wajib=False):
@@ -368,6 +372,33 @@ TEMPLAT = {
                                               ("tautan", url("Tautan"))], 50))),
 }
 
+# a programme's extra pages (K-P35): one template for all of them; their ids are made by halaman_tambahan.py
+POLA_TAMBAHAN = re.compile(r"^x[0-9a-f]{6}$")
+TEMPLAT_TAMBAHAN = halaman(
+    ("uraian", uraian(bantuan="Pengantar halaman. Paragraf dipisah baris kosong. Tautan: [teks](https://...); huruf "
+                              "tebal: **teks**; daftar: baris yang diawali \"- \".")),
+    ("sematan", daftar("Sematan", objek("Sematan", [
+        ("judul", teks("Judul", wajib=True, maks=150,
+                       bantuan="Tampil di atas sematan dan dibacakan pembaca layar, mis. Formulir pendaftaran seminar.")),
+        ("alamat", url("Alamat atau kode sematan", wajib=True, sematan=True,
+                       bantuan="Tempel tautan berbagi atau kode sematan (<iframe ...>) dari %s. Berkas Google harus "
+                               "dibuka untuk umum atau dipublikasikan ke web." % sematan_mod.NAMA_LAYANAN)),
+        ("tinggi", pilihan("Tinggi bingkai", sematan_mod.TINGGI)),
+        ("keterangan", teks("Keterangan", maks=300))]), "sematan", 5,
+        bantuan="Isi dari layanan lain yang tampil langsung di halaman ini. Pengunjung juga mendapat tautan untuk "
+                "membukanya di tab baru.")),
+    ("dokumen", dokumen_daftar("Dokumen PDF", maks=30)),
+    ("foto", foto_daftar("Foto", maks=20)),
+    ("tautan", tautan_daftar("Tautan", maks=20)))
+
+
+def templat_halaman(id_halaman):
+    """The content template of a page: its own for the master menu's pages, TEMPLAT_TAMBAHAN for an extra page's id,
+    else None."""
+    if id_halaman in TEMPLAT:
+        return TEMPLAT[id_halaman]
+    return TEMPLAT_TAMBAHAN if isinstance(id_halaman, str) and POLA_TAMBAHAN.match(id_halaman) else None
+
 
 # ------------------------------------------------------------------ checking stored content
 
@@ -454,6 +485,10 @@ def _periksa(node, v, tempat, kode, masalah, jalur=""):
     elif j == "persen":
         if isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 <= v <= 100 or round(v, 2) != v:
             salah("harus angka 0 sampai 100, paling banyak dua angka di belakang koma")
+    elif j == "url" and node.get("sematan"):
+        pesan = sematan_mod.periksa(v)
+        if pesan:
+            salah(pesan)
     elif j == "url":
         if not isinstance(v, str) or len(v) > MAKS_URL or not POLA_URL.match(v):
             salah("harus alamat lengkap yang diawali https://")
@@ -478,7 +513,7 @@ def _periksa(node, v, tempat, kode, masalah, jalur=""):
 
 
 def _semua_masalah(id_halaman, isi, kode):
-    templat = TEMPLAT.get(id_halaman)
+    templat = templat_halaman(id_halaman)
     if templat is None:
         return [("", "", "halaman %r tidak punya templat isi" % (id_halaman,))]
     if not POLA_KODE.match(kode or ""):
@@ -629,13 +664,14 @@ def tampilan(id_halaman, isi, media_ok=lambda rekam: True):
 
     A section is {"jenis", "judul", "id", ...}: "paragraf" (html), "daftar" (butir, bernomor), "tabel" (kolom, baris of
     cells), "kartu" (kartu: judul, rincian [(label, cell)], uraian [(label, html)], foto, dokumen [(label, record)]),
-    "dokumen" (dokumen: judul, tahun, keterangan, rekam), "galeri" (foto: rekam, keterangan), "tautan" (label, alamat).
-    Extra sections become "paragraf" sections with their own heading.
+    "dokumen" (dokumen: judul, tahun, keterangan, rekam), "galeri" (foto: rekam, keterangan), "tautan" (label, alamat),
+    "sematan" (sematan: judul, alamat, layanan, tinggi, keterangan; no heading of its own). Extra sections become
+    "paragraf" sections with their own heading.
 
     media_ok(record) publishes a stored file and says whether it is there. A missing file is counted; the item it
     belongs to is left out when the file is required (a document of a document list, a photo of a gallery), and only
     the file is left out when it is optional (the proof of a partnership, the SOP of a laboratory)."""
-    templat = TEMPLAT[id_halaman]
+    templat = templat_halaman(id_halaman)
     hasil, hilang = [], [0]
     isi = isi if isinstance(isi, dict) else {}
 
@@ -702,12 +738,17 @@ def tampilan(id_halaman, isi, media_ok=lambda rekam: True):
                                                          for x in item if x.get("berkas")]))
         elif tampil == "tautan":
             hasil.append(dict(dasar, jenis="tautan", tautan=[{"label": x.get("label"), "alamat": x.get("alamat")} for x in item]))
+        elif tampil == "sematan":                         # every embed has its own heading; the section has none
+            hasil.append(dict(dasar, judul="", jenis="sematan", sematan=[
+                {"judul": x.get("judul") or "", "alamat": x.get("alamat"), "layanan": sematan_mod.layanan(x.get("alamat")),
+                 "tinggi": (x.get("tinggi") or "Sedang").lower(), "keterangan": x.get("keterangan") or ""}
+                for x in item]))
         elif tampil == "bagian":
             for i, x in enumerate(item, 1):
                 hasil.append({"jenis": "paragraf", "judul": x.get("judul") or "", "id": "%s-%d" % (dasar["id"], i),
                               "html": teks_kaya(x.get("isi") or "")})
     return [b for b in hasil if b.get("html") or b.get("butir") or b.get("baris") or b.get("kartu") or b.get("dokumen")
-            or b.get("foto") or b.get("tautan")], hilang[0]
+            or b.get("foto") or b.get("tautan") or b.get("sematan")], hilang[0]
 
 
 # ------------------------------------------------------------------ stored content
@@ -722,7 +763,7 @@ _KUNCI = threading.Lock()
 
 
 def nama_berkas(kode, id_halaman):
-    if not POLA_KODE.match(kode or "") or id_halaman not in TEMPLAT:
+    if not POLA_KODE.match(kode or "") or templat_halaman(id_halaman) is None:
         raise GagalIsi("prodi atau halaman tidak dikenal")
     return "prodi/%s/halaman-%s" % (kode, id_halaman)
 
@@ -753,7 +794,7 @@ def isi_kerja(data):
 def terisi(kode, id_halaman):
     """True when the page shows content of its own on the site (published, valid, not empty)."""
     isi = terbit(kode, id_halaman)
-    return isi is not None and not periksa(id_halaman, isi, kode) and not kosong(TEMPLAT[id_halaman], isi)
+    return isi is not None and not periksa(id_halaman, isi, kode) and not kosong(templat_halaman(id_halaman), isi)
 
 
 def _sekarang():
@@ -788,7 +829,7 @@ def terbitkan(kode, id_halaman, isi, oleh, versi=None, dari_draf=False):
     masalah = periksa(id_halaman, isi, kode)
     if masalah:
         raise GagalIsi("%d isian perlu diperbaiki: %s" % (len(masalah), "; ".join(masalah[:5])))
-    if dari_draf and kosong(TEMPLAT[id_halaman], isi):
+    if dari_draf and kosong(templat_halaman(id_halaman), isi):
         raise GagalIsi("halaman ini belum berisi apa pun untuk diterbitkan")
     with _KUNCI:
         data = baca(kode, id_halaman)
@@ -887,7 +928,7 @@ def _boleh_disimpan(kode, id_halaman, isi, dihapus=None):
     nama_berkas(kode, id_halaman)
     if not isinstance(isi, dict):
         raise GagalIsi("isi halaman harus berupa objek")
-    templat = TEMPLAT[id_halaman]
+    templat = templat_halaman(id_halaman)
     if not _berkas_sendiri(templat, isi, kode):
         raise GagalIsi("draf merujuk berkas yang bukan milik prodi ini")
     if dihapus is not None:
@@ -915,7 +956,7 @@ def _siap_diterbitkan(id_halaman, isi, kode):
     masalah = periksa(id_halaman, isi, kode)
     if masalah:
         raise GagalIsi("%d isian perlu diperbaiki: %s" % (len(masalah), "; ".join(masalah[:5])))
-    if kosong(TEMPLAT[id_halaman], isi):
+    if kosong(templat_halaman(id_halaman), isi):
         raise GagalIsi("halaman ini belum berisi apa pun")
 
 
@@ -1006,7 +1047,7 @@ def keadaan(kode, id_halaman, data=None):
     data = baca(kode, id_halaman) if data is None else data
     d, t = draf(data), data.get("terbit") if isinstance(data.get("terbit"), dict) else None
     tayang = bool(t) and isinstance(t.get("isi"), dict) and not periksa(id_halaman, t["isi"], kode) \
-        and not kosong(TEMPLAT[id_halaman], t["isi"])
+        and not kosong(templat_halaman(id_halaman), t["isi"])
     diubah = data.get("diubah") if isinstance(data.get("diubah"), dict) else {}
     return {"status": "terbit" if t else (d.get("status") if d and d.get("status") in STATUS_DRAF else
                                           ("draf" if d else "kosong")),
@@ -1039,7 +1080,7 @@ def _saring(node, v, kode):
 def isi_sah(id_halaman, isi, kode):
     """A copy of content with every value that fails the checks left out: what the admin's preview of an unfinished
     draft shows (the site only ever shows content that passes them all)."""
-    return _saring(TEMPLAT[id_halaman], isi, kode)
+    return _saring(templat_halaman(id_halaman), isi, kode)
 
 
 # ------------------------------------------------------------------ sample content (looking at the pages; tests)

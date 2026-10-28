@@ -1,6 +1,8 @@
 {# The sections of a programme's own page (platform/isi_halaman.py tampilan()): paragraphs, lists, tables, cards,
-   documents, photos and links. Text arrives escaped; only the limited markup (links, bold, lists) is HTML.
-   Headings: the page's h1, then h2 per section, h3 per card, h4 inside a card. #}
+   documents, photos, links and embedded content. Text arrives escaped; only the limited markup (links, bold, lists)
+   is HTML. Headings: the page's h1, then h2 per section (per embed), h3 per card, h4 inside a card.
+   An embed (K-P35, platform/sematan.py) is a sandboxed frame without top navigation, with a link to open it in a new
+   tab; sematan_aktif is false in the admin's preview, which shows a placeholder instead of loading another site. #}
 
 {% macro sel_isi(c) -%}
 {%- if c.jenis == "teks" %}{{ c.html }}
@@ -79,6 +81,19 @@
 	<ul class="isi-tautan">
 		{% for t in b.tautan %}<li><a href="{{ t.alamat }}">{{ t.label }}</a></li>{% endfor %}
 	</ul>
+	{% elif b.jenis == "sematan" %}
+	{% for s in b.sematan %}
+	<div class="sematan sematan--{{ s.tinggi }}{% if s.layanan == 'YouTube' %} sematan--video{% endif %}">
+		<h2 id="{{ b.id }}-{{ loop.index }}">{{ s.judul }}</h2>
+		{% if s.keterangan %}<p>{{ s.keterangan }}</p>{% endif %}
+		{% if sematan_aktif %}
+		<iframe class="sematan__bingkai" src="{{ s.alamat }}" title="{{ s.judul }}" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="{{ sandbox_sematan }}" allow="fullscreen" allowfullscreen></iframe>
+		{% else %}
+		<p class="sematan__pengganti">{{ s.layanan }} tampil di sini pada situs. Pratinjau admin tidak memuat isi dari situs lain.</p>
+		{% endif %}
+		<p class="sematan__buka"><a href="{{ s.alamat }}" target="_blank" rel="noopener">Buka {{ s.layanan }} di tab baru<span class="tersembunyi">: {{ s.judul }}</span></a></p>
+	</div>
+	{% endfor %}
 	{% endif %}
 </section>
 {% endmacro %}

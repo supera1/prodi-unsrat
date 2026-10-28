@@ -35,8 +35,10 @@ from flask import abort, flash, g, make_response, redirect, render_template, req
 import akun as akun_mod  # noqa: E402
 import beda  # noqa: E402
 import data_prodi  # noqa: E402
+import halaman_tambahan  # noqa: E402
 import impor_dosen  # noqa: E402
 import impor_www  # noqa: E402
+import isi_halaman as ih  # noqa: E402
 import lokasi  # noqa: E402
 import registri  # noqa: E402
 import riwayat  # noqa: E402
@@ -438,11 +440,15 @@ def pasang(app, alat):
     def nama_berkas(berkas):
         m = re.match(r"^prodi/([0-9A-Za-z]{3,12})/(.+)$", berkas)
         if m:
-            if m.group(2).startswith("halaman-"):                 # a page's own content (isi_halaman.py)
-                bagian = "halaman %s" % label_halaman().get(m.group(2)[len("halaman-"):], m.group(2))
+            id_ = m.group(2)[len("halaman-"):] if m.group(2).startswith("halaman-") else None
+            if id_ and ih.POLA_TAMBAHAN.match(id_):             # an extra page (K-P35), also after it was removed
+                label = {h.get("id"): h.get("label") for h in halaman_tambahan.baca(m.group(1))}.get(id_)
+                bagian = "halaman tambahan %s" % (label or "%s (sudah dihapus)" % id_)
+            elif id_:                                             # a page's own content (isi_halaman.py)
+                bagian = "halaman %s" % label_halaman().get(id_, m.group(2))
             else:
-                bagian = {"situs": "identitas dan beranda", "pengumuman": "pengumuman",
-                          "data": "data prodi", "kriteria": "kriteria akreditasi"}.get(m.group(2), m.group(2))
+                bagian = {"situs": "identitas dan beranda", "pengumuman": "pengumuman", "data": "data prodi",
+                          "kriteria": "kriteria akreditasi", "tambahan": "daftar halaman tambahan"}.get(m.group(2), m.group(2))
             return "%s — %s" % (nama_semua().get(m.group(1), m.group(1)), bagian)
         return {"registri": "Registri prodi (slug, aktif, tautan dosen)", "warisan/prodi": "Data resmi prodi dari www",
                 "warisan/unit": "Data fakultas dari www", "warisan/kalender": "Kalender akademik dari www",

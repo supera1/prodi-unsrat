@@ -6,7 +6,7 @@
 	{% for a in ini.anak %}
 	<li class="kartu">
 		<h2 class="kartu__judul"><a href="{{ ke(slug ~ '/' ~ a.alamat) }}">{{ a.label }}</a></h2>
-		<p>{{ a.deskripsi }}</p>
+		{% if a.jenis != "tambahan" %}<p>{{ a.deskripsi }}</p>{% endif %}
 	</li>
 	{% endfor %}
 </ul>

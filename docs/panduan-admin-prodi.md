@@ -171,6 +171,33 @@ mudah menemukan bukti per kriteria.
 Selama daftar kriteria kosong, situs tidak menampilkan label kriteria. **Kosongkan kriteria** menghapus label dari
 situs; versi sebelumnya tetap ada di menu Riwayat.
 
+## Halaman tambahan
+
+Menu **Halaman tambahan** (admin prodi) untuk membuat halaman sendiri di luar halaman akreditasi, misalnya pendaftaran
+seminar, jadwal dari Google Sheets, video profil, atau kumpulan dokumen. Paling banyak 10 halaman.
+
+1. Isi **Nama menu**, pilih **Kelompok menu**, lalu tekan **Buat halaman dan isi**. Alamat halaman dibuat dari nama menu,
+   misalnya `.../halaman/pendaftaran-seminar/`, dan tidak bisa diubah setelah halaman dibuat.
+2. Penyunting halaman itu terbuka. Isi bagian yang diperlukan: uraian, sematan, dokumen PDF, foto, dan tautan. Bagian yang
+   kosong tidak tampil.
+3. Ajukan atau terbitkan seperti halaman lain. Halaman tambahan baru tampil di menu dan situs setelah diterbitkan,
+   sesudah halaman lain di kelompoknya.
+
+**Sematan** menampilkan isi dari Google Docs, Sheets, Slides, Forms, Drive, Calendar, Maps, atau YouTube langsung di
+halaman. Tempel tautan berbagi atau kode sematan (`<iframe ...>`) dari layanan itu; yang disimpan hanya alamatnya.
+Layanan lain tidak bisa disematkan; pasang sebagai tautan biasa.
+
+- Berkas Google harus dibuka untuk umum ("Siapa saja yang memiliki link") atau dipublikasikan ke web. Kalau tidak,
+  pengunjung hanya melihat halaman masuk Google.
+- Isi sematan bisa berubah kapan saja di Google tanpa melewati persetujuan di admin. Jaga akun Google prodi seperti akun
+  admin.
+- Jawaban Google Form tersimpan di akun Google prodi, di luar situs ini. Jangan meminta data pribadi yang tidak perlu.
+- Pengunjung selalu mendapat tautan untuk membuka sematan di tab baru, misalnya di ponsel.
+
+Nama menu, kelompok, dan urutannya diubah di menu Halaman tambahan, lalu **Simpan nama, kelompok, dan urutan**. Untuk
+menurunkan halaman sementara, pakai **Tarik dari situs** di penyuntingnya. **Hapus** menghapus halaman dari menu dan situs;
+isinya tetap tersimpan di riwayat.
+
 ## Pengumuman dan berita
 
 Menu **Pengumuman**: tulis judul, ringkasan, dan isi, lalu tambahkan foto atau PDF bila perlu. Operator mengajukan;
@@ -185,6 +212,7 @@ bisa diterbitkan lagi.
 - **Bagian depan beranda**: latar (warna atau foto), judul, subjudul, kalimat pengantar, dan kartu fakta di beranda.
 - **Menu**: label dan urutan menu, serta menyembunyikan halaman opsional. Halaman wajib tidak bisa disembunyikan.
 - **Kriteria akreditasi**: daftar kriteria instrumen akreditasi dan halaman yang melayani setiap kriteria.
+- **Halaman tambahan**: halaman milik prodi di luar halaman akreditasi, dengan teks, sematan, PDF, foto, dan tautan.
 - **Akun**: membuat akun operator, mengatur ulang kata sandinya, dan menonaktifkannya.
 - **Log audit**: siapa melakukan apa dan kapan.
 

@@ -746,6 +746,15 @@ dl.data dd {
 	font-weight: 700;
 }
 
+/* one button per item (the delete buttons of the extra pages), each in its own form */
+.daftar-tombol {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	padding: 0;
+	list-style: none;
+}
+
 /* the columns of a table on the spreadsheet import page, above its upload form */
 .impor-kolom {
 	margin-bottom: 1rem;

@@ -1166,6 +1166,46 @@ ul.saring {
 	font-size: var(--unsrat-size-kecil);
 }
 
+/* embedded content of an extra page (K-P35): a frame as wide as the text, of a height the programme chose; a video
+   keeps its 16:9 shape. The link below opens the same content in a new tab (phones, blocked services). */
+.sematan + .sematan {
+	margin-top: var(--unsrat-spasi-50);
+}
+
+.sematan__bingkai {
+	display: block;
+	width: 100%;
+	height: 40rem;
+	border: 1px solid var(--garis);
+	border-radius: var(--unsrat-radius-kontrol);
+	background: var(--unsrat-putih);
+}
+
+.sematan--pendek .sematan__bingkai {
+	height: 25rem;
+}
+
+.sematan--tinggi .sematan__bingkai {
+	height: 56rem;
+}
+
+.sematan--video .sematan__bingkai {
+	height: auto;
+	aspect-ratio: 16 / 9;
+}
+
+.sematan__pengganti {
+	padding: var(--unsrat-spasi-40);
+	border: 1px dashed var(--garis);
+	border-radius: var(--unsrat-radius-kontrol);
+	color: var(--unsrat-abu-600);
+}
+
+.sematan__buka {
+	margin-top: var(--unsrat-spasi-20);
+	font-size: var(--unsrat-size-kecil);
+}
+
 /* long text in the first column wraps here (the calendar's first column keeps its dates on one line) */
 .tabel-isi td:first-child {
 	white-space: normal;

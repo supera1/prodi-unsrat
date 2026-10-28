@@ -28,7 +28,7 @@
 				{% set k = a.k %}
 				<tr>
 					<td><a href="{{ url_for('isi_sunting', kode=pr.kode, id_=a.id) }}">{{ a.label }}</a>{% if a.sembunyi %} <span class="tanda">disembunyikan di menu</span>{% endif %}</td>
-					<td>{{ {'wajib': 'Wajib', 'opsional': 'Opsional'}.get(a.jenis, 'Pelengkap') }}</td>
+					<td>{{ {'wajib': 'Wajib', 'opsional': 'Opsional', 'tambahan': 'Tambahan'}.get(a.jenis, 'Pelengkap') }}</td>
 					<td>
 						{% if k.terbit %}<span class="status status--terbit">Terbit</span> {{ waktu(k.terbit.waktu) }}{% if not k.tayang %} <span class="keterangan">(tidak tampil: isi tidak lolos pemeriksaan)</span>{% endif %}
 						{% elif not k.draf %}Belum diisi
