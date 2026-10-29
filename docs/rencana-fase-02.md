@@ -234,6 +234,8 @@ samping pada lebar 320 px kecuali di dalam wadah tabel.
    **7b.** Halaman tambahan prodi dengan sematan dari daftar layanan tetap (K-P35, `fase/02-7b-halaman-tambahan`).
    **7c.** Tugas akhir: tabel bawaan dengan impor Excel dan kotak cari, tanpa NIM (K-P35 nomor 4 dan 5,
    `fase/02-7c-tugas-akhir`).
+   **7d.** Masukan pertama dari staging: bagan organisasi utuh selebar halaman, daftar pengumuman tanpa tautan
+   "Langganan lewat RSS" (`fase/02-7d-tampilan`).
 8. **Uji menyeluruh** dan `docs/log/fase-02.md`.
 
 Langkah 1–4 tidak bergantung pada staging. Langkah 5–6 menunggu staging tayang (§0).

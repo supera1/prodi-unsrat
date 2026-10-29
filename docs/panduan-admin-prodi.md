@@ -65,7 +65,7 @@ diperbaiki.
 
 ### Daftar dan tabel
 
-- **Tambah baris** (atau Tambah butir, Tambah dokumen, Tambah foto) menambah baris baru di akhir daftar.
+- **Tambah baris** (atau Tambah butir, Tambah dokumen, Tambah foto, Tambah gambar) menambah baris baru di akhir daftar.
 - **Naik** dan **Turun** memindahkan baris; **Hapus** menghapusnya. Baris yang baru dihapus bisa dikembalikan dengan
   **Kembalikan baris itu**, selama Anda belum menekan tombol lain.
 - Tombol-tombol ini langsung menyimpan draf.
@@ -108,6 +108,9 @@ Halaman **Tugas Akhir** (kelompok Akademik, opsional) memuat judul tugas akhir m
 - **Foto**: JPG atau PNG, paling besar 10 MB, lebar minimal 600 piksel. Data lokasi (GPS) di foto dibuang otomatis.
 - **Teks alternatif foto wajib**: gambarkan isi foto untuk pembaca layar, misalnya "Mahasiswa praktikum di
   laboratorium jaringan". Isi teks alternatif **sebelum** memilih foto.
+- **Bagan organisasi** tampil utuh selebar halaman, tanpa perlu diklik; di bawahnya ada tautan untuk membuka ukuran
+  penuhnya. Supaya tulisan di bagan terbaca, unggah gambar selebar 1600 piksel atau lebih. Foto di bagian lain tampil
+  sebagai galeri kecil yang dibuka dengan diklik.
 - Berkas yang sudah tersimpan tampil di formulir. Centang **Lepas berkas ini** (atau Lepas foto ini) untuk melepasnya,
   atau pilih berkas baru untuk menggantinya.
 - Satu kali simpan paling banyak 40 MB. Unggah berkas besar satu per satu.
