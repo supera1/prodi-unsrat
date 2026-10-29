@@ -1,6 +1,8 @@
 {# The sections of a programme's own page (platform/isi_halaman.py tampilan()): paragraphs, lists, tables, cards,
    documents, photos, links and embedded content. Text arrives escaped; only the limited markup (links, bold, lists)
    is HTML. Headings: the page's h1, then h2 per section (per embed), h3 per card, h4 inside a card.
+   A gallery shows thumbnails that open the photo; a "gambar" section (a chart) shows each picture whole at the page's
+   width, with a link to its largest size for zooming on a phone.
    An embed (K-P35, platform/sematan.py) is a sandboxed frame without top navigation, with a link to open it in a new
    tab; sematan_aktif is false in the admin's preview, which shows a placeholder instead of loading another site. #}
 
@@ -77,6 +79,16 @@
 		</li>
 		{% endfor %}
 	</ul>
+	{% elif b.jenis == "gambar" %}
+	{% for f in b.foto %}{% set besar = f.rekam | foto_varian %}
+	<figure class="isi-gambar">
+		<img src="{{ media_url(f.rekam | foto_varian(800)) }}"
+			srcset="{% for v in f.rekam.varian.values() | sort(attribute='lebar') %}{{ media_url(v) }} {{ v.lebar }}w{% if not loop.last %}, {% endif %}{% endfor %}"
+			sizes="(min-width: 800px) 48rem, 100vw" alt="{{ f.rekam.alt }}" width="{{ besar.lebar }}" height="{{ besar.tinggi }}"{% if not loop.first %} loading="lazy"{% endif %}>
+		{% if f.keterangan %}<figcaption>{{ f.keterangan }}</figcaption>{% endif %}
+	</figure>
+	<p class="isi-gambar__buka"><a href="{{ media_url(besar) }}">Buka gambar ukuran penuh<span class="tersembunyi">: {{ f.rekam.alt }}</span></a></p>
+	{% endfor %}
 	{% elif b.jenis == "tautan" %}
 	<ul class="isi-tautan">
 		{% for t in b.tautan %}<li><a href="{{ t.alamat }}">{{ t.label }}</a></li>{% endfor %}

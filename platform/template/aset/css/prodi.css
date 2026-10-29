@@ -1319,6 +1319,31 @@ ul.saring {
 	padding-left: 0;
 }
 
+/* a chart or diagram: whole, not cropped like the gallery's thumbnails; as wide as the page, or its own width when it is
+   narrower (never enlarged, which would blur its text) */
+.isi-gambar {
+	margin: 0 0 var(--unsrat-spasi-10);
+}
+
+.isi-gambar img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	border: 1px solid var(--unsrat-abu-300);
+	border-radius: var(--unsrat-radius-kontrol);
+}
+
+.isi-gambar figcaption {
+	margin-top: var(--unsrat-spasi-10);
+	color: var(--unsrat-abu-600);
+	font-size: var(--unsrat-size-kecil);
+}
+
+.isi-gambar__buka {
+	margin: 0 0 var(--unsrat-spasi-40);
+	font-size: var(--unsrat-size-kecil);
+}
+
 /* ---------------------------------------------------------------- accreditation criteria (Fase 2, kriteria.py) */
 
 /* the criteria a page serves, under the page title; text colour on the pale primary meets the contrast rules */

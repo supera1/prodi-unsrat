@@ -63,7 +63,7 @@ TEBAL = re.compile(r"\*\*(\S(?:[^*\n]{0,298}\S)?)\*\*")
 MAKS_URL = 500
 BARIS_CARI = 30                # a table of this many rows or more gets a search box on the site
 CONTOH = "[CONTOH]"
-TAMPIL = ("daftar", "tabel", "kartu", "dokumen", "galeri", "tautan", "bagian", "sematan")
+TAMPIL = ("daftar", "tabel", "kartu", "dokumen", "galeri", "gambar", "tautan", "bagian", "sematan")
 SKALAR = ("teks", "bilangan", "persen", "url", "pilihan", "centang", "dokumen")
 
 
@@ -149,6 +149,12 @@ def foto_daftar(label="Foto", maks=6):
     return daftar(label, objek("Foto", [("berkas", foto()), ("keterangan", teks("Keterangan foto", maks=300))]), "galeri", maks)
 
 
+def gambar_daftar(label, maks=2, bantuan=""):
+    """Pictures shown whole at the width of the page, not as a gallery to click (a chart, a diagram)."""
+    return daftar(label, objek("Gambar", [("berkas", foto("Gambar")), ("keterangan", teks("Keterangan gambar", maks=300))]),
+                  "gambar", maks, bantuan=bantuan)
+
+
 def tautan_daftar(label="Tautan", maks=10):
     return daftar(label, objek("Tautan", [("label", teks("Nama tautan", wajib=True, maks=150)),
                                           ("alamat", url(wajib=True))]), "tautan", maks)
@@ -197,7 +203,8 @@ TEMPLAT = {
         ("keterkaitan", paragraf("Keterkaitan dengan visi dan misi fakultas dan universitas")),
         ("dokumen", dokumen_daftar(bantuan="Mis. SK penetapan visi, misi, tujuan, dan strategi."))),
     "struktur-organisasi": halaman(
-        ("bagan", foto_daftar("Bagan organisasi", 2)),
+        ("bagan", gambar_daftar("Bagan organisasi", 2, "Bagan tampil utuh selebar halaman. Supaya tulisannya terbaca, "
+                                                        "unggah gambar selebar 1600 piksel atau lebih.")),
         ("pejabat", tabel("Pengelola program studi", [("jabatan", teks("Jabatan", wajib=True, maks=120)),
                                                      ("nama", teks("Nama", wajib=True, maks=150)),
                                                      ("periode", teks("Periode", maks=40))], 40)),
@@ -682,7 +689,8 @@ def tampilan(id_halaman, isi, media_ok=lambda rekam: True):
 
     A section is {"jenis", "judul", "id", ...}: "paragraf" (html), "daftar" (butir, bernomor), "tabel" (kolom, baris of
     cells), "kartu" (kartu: judul, rincian [(label, cell)], uraian [(label, html)], foto, dokumen [(label, record)]),
-    "dokumen" (dokumen: judul, tahun, keterangan, rekam), "galeri" (foto: rekam, keterangan), "tautan" (label, alamat),
+    "dokumen" (dokumen: judul, tahun, keterangan, rekam), "galeri" and "gambar" (foto: rekam, keterangan; "gambar" shows
+    each picture whole at the page's width), "tautan" (label, alamat),
     "sematan" (sematan: judul, alamat, layanan, tinggi, keterangan; no heading of its own). Extra sections become
     "paragraf" sections with their own heading.
 
@@ -754,9 +762,9 @@ def tampilan(id_halaman, isi, media_ok=lambda rekam: True):
             hasil.append(dict(dasar, jenis="dokumen", dokumen=[
                 {"judul": x.get("judul"), "tahun": x.get("tahun"), "keterangan": x.get("keterangan") or "",
                  "rekam": x.get("berkas")} for x in item if x.get("berkas")]))
-        elif tampil == "galeri":
-            hasil.append(dict(dasar, jenis="galeri", foto=[{"rekam": x.get("berkas"), "keterangan": x.get("keterangan") or ""}
-                                                         for x in item if x.get("berkas")]))
+        elif tampil in ("galeri", "gambar"):
+            hasil.append(dict(dasar, jenis=tampil, foto=[{"rekam": x.get("berkas"), "keterangan": x.get("keterangan") or ""}
+                                                       for x in item if x.get("berkas")]))
         elif tampil == "tautan":
             hasil.append(dict(dasar, jenis="tautan", tautan=[{"label": x.get("label"), "alamat": x.get("alamat")} for x in item]))
         elif tampil == "sematan":                         # every embed has its own heading; the section has none
