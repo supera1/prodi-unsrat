@@ -5,9 +5,10 @@ K-P29: its status comes from the official data, the programme adds the certifica
 documents).
 
 Every page has a content template (TEMPLAT): sections of fields, lists and tables that follow the page's description in
-the menu and what accreditation asks for, plus free extra sections at the end. A programme's extra pages (K-P35,
-halaman_tambahan.py; ids "x" + 6 hex digits) share one template, TEMPLAT_TAMBAHAN: text, embedded content
-(sematan.py), PDFs, photos and links; templat_halaman() gives the template of any page. The template drives:
+the menu and what accreditation asks for, embedded content (sematan.py, K-P36) after its introduction, and free extra
+sections at the end. A programme's extra pages (K-P35, halaman_tambahan.py; ids "x" + 6 hex digits) share one template,
+TEMPLAT_TAMBAHAN: text, embedded content, PDFs, photos and links; templat_halaman() gives the template of any page.
+The template drives:
 - periksa(): what may be stored: types, lengths, choices, links to https:// addresses only, uploaded files of this
   programme only, no gambling text;
 - tampilan(): what the builder shows (headings, paragraphs, lists, tables, cards, documents, photos, links), as plain
@@ -164,14 +165,44 @@ def uraian(label="", bantuan=""):
     return paragraf(label, bantuan=bantuan)
 
 
+# shown under the heading of every embed section, also while it is empty; the editor keeps the line breaks
+CARA_SEMATAN = ("Isi dari layanan lain yang tampil langsung di halaman, dengan tautan untuk membukanya di tab baru. "
+                "Cara menyematkan:\n"
+                "PDF di Google Drive: Bagikan → Akses umum \"Siapa saja yang memiliki link\" → Salin link.\n"
+                "Google Sheets atau Docs: bagikan ke \"Siapa saja yang memiliki link\", atau File → Bagikan → "
+                "Publikasikan ke web.\n"
+                "Google Forms: Kirim → tab <> → Salin.\n"
+                "Tekan Tambah sematan, lalu tempel hasilnya di Alamat atau kode sematan. Dokumen resmi akreditasi tetap "
+                "diunggah sebagai PDF.")
+
+
+def sematan_daftar(maks=5):
+    """Embedded content of an allowed service (sematan.py; K-P35 on extra pages, K-P36 on every page)."""
+    return daftar("Sematan", objek("Sematan", [
+        ("judul", teks("Judul", wajib=True, maks=150,
+                       bantuan="Tampil di atas sematan dan dibacakan pembaca layar, mis. Jadwal kuliah semester ganjil.")),
+        ("alamat", url("Alamat atau kode sematan", wajib=True, sematan=True,
+                       bantuan="Tempel tautan berbagi atau kode sematan (<iframe ...>) dari %s. Berkas Google harus "
+                               "dibuka untuk umum atau dipublikasikan ke web." % sematan_mod.NAMA_LAYANAN)),
+        ("tinggi", pilihan("Tinggi bingkai", sematan_mod.TINGGI)),
+        ("keterangan", teks("Keterangan", maks=300))]), "sematan", maks, bantuan=CARA_SEMATAN)
+
+
 TAMBAHAN = daftar("Bagian tambahan", objek("Bagian", [("judul", teks("Judul bagian", wajib=True, maks=150)),
                                                       ("isi", paragraf("Isi bagian"))]),
                   "bagian", 10, bantuan="Untuk hal yang belum ada tempatnya di atas.")
 
 
 def halaman(*bagian):
-    """A page: its sections, then the free extra sections."""
-    return objek("", list(bagian) + [("tambahan", TAMBAHAN)])
+    """A page: its sections with the embeds (K-P36) right after its introduction ("uraian"), else before its documents,
+    else after its last section; then the free extra sections."""
+    bagian = list(bagian)
+    kunci = [k for k, _n in bagian]
+    if "sematan" not in kunci:
+        letak = kunci.index("uraian") + 1 if "uraian" in kunci else kunci.index("dokumen") if "dokumen" in kunci \
+            else len(bagian)
+        bagian.insert(max(letak, 1), ("sematan", sematan_daftar()))
+    return objek("", bagian + [("tambahan", TAMBAHAN)])
 
 
 def tabel(label, kolom, maks=200, bantuan=""):
@@ -402,16 +433,7 @@ POLA_TAMBAHAN = re.compile(r"^x[0-9a-f]{6}$")
 TEMPLAT_TAMBAHAN = halaman(
     ("uraian", uraian(bantuan="Pengantar halaman. Paragraf dipisah baris kosong. Tautan: [teks](https://...); huruf "
                               "tebal: **teks**; daftar: baris yang diawali \"- \".")),
-    ("sematan", daftar("Sematan", objek("Sematan", [
-        ("judul", teks("Judul", wajib=True, maks=150,
-                       bantuan="Tampil di atas sematan dan dibacakan pembaca layar, mis. Formulir pendaftaran seminar.")),
-        ("alamat", url("Alamat atau kode sematan", wajib=True, sematan=True,
-                       bantuan="Tempel tautan berbagi atau kode sematan (<iframe ...>) dari %s. Berkas Google harus "
-                               "dibuka untuk umum atau dipublikasikan ke web." % sematan_mod.NAMA_LAYANAN)),
-        ("tinggi", pilihan("Tinggi bingkai", sematan_mod.TINGGI)),
-        ("keterangan", teks("Keterangan", maks=300))]), "sematan", 5,
-        bantuan="Isi dari layanan lain yang tampil langsung di halaman ini. Pengunjung juga mendapat tautan untuk "
-                "membukanya di tab baru.")),
+    ("sematan", sematan_daftar()),
     ("dokumen", dokumen_daftar("Dokumen PDF", maks=30)),
     ("foto", foto_daftar("Foto", maks=20)),
     ("tautan", tautan_daftar("Tautan", maks=20)))
@@ -1141,8 +1163,9 @@ def _contoh(node, n, berkas_contoh):
         return 2025 if node["format"] == "tahun" else max(node["minimum"], min(node["maksimum"], 12))
     if j == "persen":
         return 42.5
-    if j == "url":
-        return "https://www.unsrat.ac.id/"
+    if j == "url":                                     # an embed: the form of address an allowed service embeds
+        return "https://docs.google.com/document/d/CONTOH-dokumen-sematan/preview" if node.get("sematan") \
+            else "https://www.unsrat.ac.id/"
     if j == "pilihan":
         return node["opsi"][0]
     if j == "centang":

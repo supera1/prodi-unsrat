@@ -105,7 +105,8 @@ Alasan memilih isi terstruktur (bukan satu kotak teks bebas per halaman):
 | Sistem informasi | Tabel (nama sistem, fungsi, tautan) |
 
 Halaman opsional: **Jadwal** (dokumen PDF atau tabel), **Kelompok keahlian** (tabel kelompok, ketua, anggota, topik).
-Setiap halaman juga punya paragraf pengantar dan bagian tambahan bebas.
+Setiap halaman juga punya paragraf pengantar dan bagian tambahan bebas, dan sejak langkah 7e bagian Sematan di bawah
+pengantar (K-P36).
 
 ### 3.4 Alur dan peran
 
@@ -236,6 +237,7 @@ samping pada lebar 320 px kecuali di dalam wadah tabel.
    `fase/02-7c-tugas-akhir`).
    **7d.** Masukan pertama dari staging: bagan organisasi utuh selebar halaman, daftar pengumuman tanpa tautan
    "Langganan lewat RSS" (`fase/02-7d-tampilan`).
+   **7e.** Sematan juga di halaman bawaan, di bawah Uraian (K-P36, `fase/02-7e-sematan-halaman`).
 8. **Uji menyeluruh** dan `docs/log/fase-02.md`.
 
 Langkah 1–4 tidak bergantung pada staging. Langkah 5–6 menunggu staging tayang (§0).

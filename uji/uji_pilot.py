@@ -188,8 +188,11 @@ try:
     tampak["daftar, tabel, berkas"] = py.formulir(ih.TEMPLAT["kerja-sama"], {"daftar": [{"mitra": "Mitra", "bukti": {
         "jenis": "pdf", "jalur": "%s/202610-0123456789ab.pdf" % A, "judul": "Bukti", "halaman": 1, "ukuran": 1000}},
         {"mitra": "Mitra kedua"}]}, py.Tampil(dihapus={"jalur": "daftar", "indeks": 1, "nilai": {"mitra": "Lain"}}))
+    tampak["sematan"] = py.formulir(ih.TEMPLAT["jadwal"], {"sematan": [{
+        "judul": "Jadwal kuliah", "alamat": "https://drive.google.com/file/d/1PdfJadwalKuliahContoh0123/preview"}]}, py.Tampil())
     for di, labels in (("operator, draf", ("Simpan draf", "Simpan dan pratinjau", "Ajukan untuk diterbitkan", "Buang draf",
                                            "Riwayat halaman ini", "(wajib)", "Impor dari Excel")),
+                       ("sematan", ("Tambah sematan", "Judul", "Alamat atau kode sematan", "Tinggi bingkai")),
                        ("impor", ("Unduh templat (.xlsx)", "Baca berkas", "Petunjuk", "Data")),
                        ("halaman tambahan", ("Nama menu", "Kelompok menu", "Buat halaman dan isi",
                                              "Simpan nama, kelompok, dan urutan", "Hapus")),
