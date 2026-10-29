@@ -362,6 +362,10 @@ try:
     cek(item[0].findtext("link") == "https://prodi.unsrat.ac.id/s1informatika/pengumuman/%s/" % utama, "RSS: tautan lengkap, terbaru dulu")
     cek(item[0].findtext("pubDate").endswith("+0800"), "RSS: waktu WITA")
     cek(ET.fromstring(baca("s1elektro/pengumuman/rss.xml").encode("utf-8")).findall("./channel/item") == [], "RSS kosong sah")
+    daftar = baca(p + "index.html")
+    cek("Langganan lewat RSS" not in daftar and "rss.xml</a>" not in daftar and 'class="kabar-bawah"' in daftar
+        and 'type="application/rss+xml"' in daftar, "daftar pengumuman tanpa tautan RSS; umpan tetap diumumkan di kepala")
+    cek('class="kabar-bawah"' not in baca("s1elektro/pengumuman/index.html"), "tanpa arsip tidak ada bagian bawah kosong")
 
     temuan = cek_integritas.periksa(pub, lokasi.manifes())[0]
     cek(not temuan, "cek integritas bersih: %r" % temuan[:3])

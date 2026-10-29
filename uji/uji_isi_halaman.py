@@ -162,7 +162,7 @@ try:
                 cek(all(n["jenis"] in ih.SKALAR for _k, n in isi["bidang"]), "%s: kolom tabel hanya nilai biasa" % tempat)
             if node["tampil"] == "kartu":
                 cek(isi["bidang"][0][1]["jenis"] == "teks" and isi["bidang"][0][1]["wajib"], "%s: kartu berjudul" % tempat)
-            if node["tampil"] in ("dokumen", "galeri"):
+            if node["tampil"] in ("dokumen", "galeri", "gambar"):
                 berkas = dict(isi["bidang"]).get("berkas")
                 cek(berkas and berkas["jenis"] == ("dokumen" if node["tampil"] == "dokumen" else "foto") and berkas["wajib"],
                     "%s: butir %s wajib berberkas" % (tempat, node["tampil"]))
@@ -326,6 +326,15 @@ try:
     sejarah = halaman_html("s1informatika", "profil/sejarah")
     cek('<ul class="galeri isi-galeri">' in sejarah and "<figcaption>[CONTOH] Keterangan foto</figcaption>" in sejarah,
         "galeri foto sejarah")
+    struktur = halaman_html("s1informatika", "profil/struktur-organisasi")
+    bagan = re.search(r'<figure class="isi-gambar">(.*?)</figure>\s*<p class="isi-gambar__buka"><a href="([^"]+)">Buka gambar '
+                      r'ukuran penuh', struktur, re.S)
+    cek(bagan and "<a " not in bagan.group(1) and re.search(r'srcset="\S+ 400w, \S+ 800w, \S+ 1200w"', bagan.group(1))
+        and 'width="1200" height="900"' in bagan.group(1) and "isi-galeri" not in struktur,
+        "bagan organisasi utuh selebar halaman, gambarnya bukan tautan")
+    cek(bagan and os.path.isfile(os.path.normpath(os.path.join(lokasi.publik(), "s1informatika", "profil",
+                                                                "struktur-organisasi", bagan.group(2)))),
+        "ukuran penuh bagan diterbitkan")
     cek('<ul class="isi-dokumen">' in visi and "PDF, 1 halaman" in visi, "daftar dokumen dengan jumlah halaman dan ukuran")
     cek('<ul class="isi-tautan">' in halaman_html("s1informatika", "fasilitas/perpustakaan"), "daftar tautan")
     jumlah, temuan = periksa_situs(lokasi.publik(), "isi")
