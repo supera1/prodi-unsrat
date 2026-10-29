@@ -2,9 +2,9 @@
 {% block judul %}Halaman tambahan prodi{% endblock %}
 {% block isi %}
 <h1>Halaman tambahan prodi</h1>
-<p>Halaman yang dibuat admin prodi di luar halaman akreditasi (K-P35), beserta layanan yang disematkan di isi terbitnya. Sematan
-	hanya bisa dari {{ layanan }}. Bila ada isi yang tidak pantas, buka penyuntingnya lalu tekan <strong>Tarik dari situs</strong>;
-	bila akun prodi dicurigai disusupi, nonaktifkan akunnya di menu Akun.</p>
+<p>Halaman yang dibuat admin prodi di luar halaman akreditasi (K-P35), beserta layanan yang disematkan di isi terbitnya, lalu
+	halaman bawaan yang memuat sematan (K-P36). Sematan hanya bisa dari {{ layanan }}. Bila ada isi yang tidak pantas, buka
+	penyuntingnya lalu tekan <strong>Tarik dari situs</strong>; bila akun prodi dicurigai disusupi, nonaktifkan akunnya di menu Akun.</p>
 {% if baris %}
 <div class="tabel-gulir">
 	<table>
@@ -26,5 +26,24 @@
 </div>
 {% else %}
 <p>Belum ada prodi yang membuat halaman tambahan.</p>
+{% endif %}
+<h2>Sematan di halaman bawaan</h2>
+{% if bawaan %}
+<div class="tabel-gulir">
+	<table>
+		<thead><tr><th scope="col">Prodi</th><th scope="col">Halaman</th><th scope="col">Sematan</th></tr></thead>
+		<tbody>
+			{% for b in bawaan %}
+			<tr>
+				<td>{{ b.prodi.nama }}</td>
+				<td><a href="{{ url_for('isi_sunting', kode=b.prodi.kode, id_=b.id) }}">{{ b.label }}</a>{% if b.k.tayang %} (<a href="{{ b.prodi.alamat }}{{ b.alamat }}/">situs<span class="tersembunyi"> {{ b.label }}</span></a>){% endif %}</td>
+				<td>{{ b.layanan | join(', ') or '—' }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% else %}
+<p>Belum ada halaman bawaan yang memuat sematan.</p>
 {% endif %}
 {% endblock %}

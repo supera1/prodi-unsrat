@@ -168,9 +168,15 @@ try:
                     "%s: butir %s wajib berberkas" % (tempat, node["tampil"]))
         elif j in ("teks", "bilangan", "persen", "url", "pilihan", "dokumen", "foto"):
             cek(isinstance(node.get("label"), str), "%s: label" % tempat)
+    sematan_tambahan = dict(ih.TEMPLAT_TAMBAHAN["bidang"])["sematan"]
     for id_, t in ih.TEMPLAT.items():
         periksa_node(t, id_)
         cek(t["bidang"][-1][0] == "tambahan", "%s: bagian tambahan di akhir" % id_)
+        kunci = [k for k, _n in t["bidang"]]
+        letak = kunci.index("uraian") + 1 if "uraian" in kunci else kunci.index("dokumen") - 1 if "dokumen" in kunci \
+            else len(kunci) - 2
+        cek(kunci.count("sematan") == 1 and kunci[letak] == "sematan" and dict(t["bidang"])["sematan"] == sematan_tambahan,
+            "%s: sematan (K-P36) di bawah uraian, di atas dokumen, atau di akhir: %r" % (id_, kunci))
         cek(all(n["label"] for k, n in t["bidang"][1:]), "%s: setiap bagian sesudah pengantar berjudul" % id_)
 
     # ============================================================== sample content passes, empty content is empty
@@ -326,6 +332,12 @@ try:
     sejarah = halaman_html("s1informatika", "profil/sejarah")
     cek('<ul class="galeri isi-galeri">' in sejarah and "<figcaption>[CONTOH] Keterangan foto</figcaption>" in sejarah,
         "galeri foto sejarah")
+    jadwal = halaman_html("s1informatika", "akademik/jadwal")
+    bingkai = re.findall(r"<iframe[^>]*>", jadwal)
+    cek(len(bingkai) == 3 and all('sandbox="%s"' % ih.sematan_mod.SANDBOX in f and 'title="[CONTOH] Judul"' in f
+                                  and 'loading="lazy"' in f for f in bingkai)
+        and jadwal.index("[CONTOH] Uraian") < jadwal.index("<iframe") < jadwal.index('id="bagian-jadwal"'),
+        "sematan halaman bawaan: bersandbox, di antara uraian dan tabel jadwal")
     struktur = halaman_html("s1informatika", "profil/struktur-organisasi")
     bagan = re.search(r'<figure class="isi-gambar">(.*?)</figure>\s*<p class="isi-gambar__buka"><a href="([^"]+)">Buka gambar '
                       r'ukuran penuh', struktur, re.S)

@@ -117,12 +117,13 @@ def _tersembunyi(teks):
 
 
 def _keterangan(node, path, t, tambahan=""):
-    """The help text and the problem of a field, and the aria-describedby that points at them."""
+    """The help text and the problem of a field, and the aria-describedby that points at them. A help text's line breaks
+    are kept (the steps of isi_halaman.CARA_SEMATAN)."""
     bantuan = " ".join(x for x in (node.get("bantuan") or "", tambahan) if x)
     ids, isi = [], ""
     if bantuan:
         ids.append(_id(path) + "-bantuan")
-        isi += '<p class="keterangan" id="%s-bantuan">%s</p>' % (_id(path), _e(bantuan))
+        isi += '<p class="keterangan" id="%s-bantuan">%s</p>' % (_id(path), "<br>".join(_e(b) for b in bantuan.split("\n")))
     if path in t.galat:
         ids.append(_id(path) + "-galat")
         isi += '<p class="galat-isian" id="%s-galat">%s</p>' % (_id(path), _e(t.galat[path]))

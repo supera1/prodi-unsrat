@@ -4,8 +4,9 @@
     /prodi/<kode>/tambahan                 the programme's extra pages; POST adds one and opens its editor
     /prodi/<kode>/tambahan/simpan          POST: the names, groups and order of the pages
     /prodi/<kode>/tambahan/<id>/hapus      POST: take a page off the menu and the site (its content stays in the history)
-    /super/tambahan                        akses("super"): every programme's extra pages and what they embed, to watch
-                                           them (a page comes off the site with "Tarik dari situs" in its editor)
+    /super/tambahan                        akses("super"): every programme's extra pages and what they embed, and the
+                                           built-in pages that embed something (K-P36), to watch them (a page comes off
+                                           the site with "Tarik dari situs" in its editor)
 
 The programme's admins and the superadmin manage the pages; the content of a page is written in the page editor
 (isi_admin.py) like any other page, operators included.
@@ -25,6 +26,7 @@ from flask import abort, flash, g, redirect, render_template, request, url_for  
 import halaman_tambahan as ht  # noqa: E402
 import isi_halaman as ih  # noqa: E402
 import lokasi  # noqa: E402
+import menu as menu_mod  # noqa: E402
 import registri  # noqa: E402
 import sematan as sematan_mod  # noqa: E402
 from akses import akses  # noqa: E402
@@ -47,6 +49,16 @@ def isi_terbit(kode, id_):
     layanan = sorted({sematan_mod.layanan(x.get("alamat")) for x in isi.get("sematan") or [] if isinstance(x, dict)}
                      - {""})
     return layanan, len(isi.get("dokumen") or []), len(isi.get("foto") or [])
+
+
+def sematan_bawaan(kode):
+    """The built-in pages whose published content embeds something (K-P36): [(page id, embedded services)]."""
+    hasil = []
+    for id_ in ih.TEMPLAT:
+        sematan = [x for x in (ih.terbit(kode, id_) or {}).get("sematan") or [] if isinstance(x, dict)]
+        if sematan:
+            hasil.append((id_, sorted({sematan_mod.layanan(x.get("alamat")) for x in sematan} - {""})))
+    return hasil
 
 
 def pasang(app, alat):
@@ -126,11 +138,15 @@ def pasang(app, alat):
     @app.route("/super/tambahan")
     @akses("super")
     def super_tambahan():
-        baris = []
+        baris, bawaan = [], []
+        butir = menu_mod.semua_butir(menu_mod.baca_templat())
         for r in registri.baca()["prodi"]:
             info = alat.info_prodi(r["kode_pddikti"])
             if not info:
                 continue
+            for id_, layanan in sematan_bawaan(info["kode"]):
+                bawaan.append({"prodi": info, "id": id_, "label": butir.get(id_, {}).get("label", id_), "layanan": layanan,
+                               "alamat": butir.get(id_, {}).get("alamat", ""), "k": ih.keadaan(info["kode"], id_)})
             kelompok = label_kelompok(info["kode"])
             for h in ht.baca(info["kode"]):
                 if not isinstance(h, dict) or not ih.POLA_TAMBAHAN.match(str(h.get("id"))):
@@ -139,4 +155,6 @@ def pasang(app, alat):
                 baris.append(dict(h, prodi=info, k=ih.keadaan(info["kode"], h["id"]), layanan=layanan, n_pdf=n_pdf,
                                   n_foto=n_foto, nama_kelompok=kelompok.get(h.get("kelompok"), h.get("kelompok"))))
         baris.sort(key=lambda b: (registri.kunci_urut(b["prodi"]), b["label"]))
-        return render_template("super_tambahan.html", baris=baris, awalan=ht.AWALAN, layanan=sematan_mod.NAMA_LAYANAN)
+        bawaan.sort(key=lambda b: (registri.kunci_urut(b["prodi"]), b["label"]))
+        return render_template("super_tambahan.html", baris=baris, bawaan=bawaan, awalan=ht.AWALAN,
+                               layanan=sematan_mod.NAMA_LAYANAN)

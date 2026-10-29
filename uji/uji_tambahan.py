@@ -359,6 +359,39 @@ try:
     r = isi_admin.ringkasan_isi(A)
     cek(r["wajib"] == 22 and r["terbit"] == 0 and baru["id"] in r["halaman"], "kelengkapan tetap 22 halaman wajib")
 
+    # an embed on a built-in page (K-P36): the Jadwal page, right under its introduction, from a Drive share link
+    J = "/prodi/%s/halaman/jadwal" % A
+    DRIVE = "https://drive.google.com/file/d/1PdfJadwalKuliahContoh0123/preview"
+    teks = ko.get(J).get_data(as_text=True)
+    cek(teks.index('id="f-uraian"') < teks.index('id="f-sematan"') < teks.index('id="f-jadwal"')
+        and "Cara menyematkan:<br>PDF di Google Drive: Bagikan" in teks and "Siapa saja yang memiliki link" in teks
+        and "Tambah sematan" in teks, "penyunting Jadwal: Sematan di bawah Uraian, cara menyematkan per baris")
+    r = kirim(ko, J, versi="0", aksi="tambah:sematan", uraian="Jadwal kuliah semester ganjil.")
+    d = ih.draf(ih.baca(A, "jadwal"))
+    cek(r.status_code == 302 and d and d["isi"].get("sematan") == [{}]
+        and "Alamat atau kode sematan" in ko.get(J).get_data(as_text=True), "Tambah sematan: isian sematan terbuka")
+    r = kirim(ko, J, versi=str(ih.baca(A, "jadwal")["versi"]), aksi="ajukan", uraian="Jadwal kuliah semester ganjil.",
+              **{"sematan.0.judul": "Jadwal kuliah", "sematan.0.alamat": "https://evil.example/jadwal"})
+    d = ih.draf(ih.baca(A, "jadwal"))
+    cek(r.status_code == 302 and d and d["status"] == "draf" and "hanya dari Google Docs" in ko.get(J).get_data(as_text=True),
+        "sematan dari layanan lain ditolak; ketikan tetap di draf")
+    r = kirim(ko, J, versi=str(ih.baca(A, "jadwal")["versi"]), aksi="ajukan", uraian="Jadwal kuliah semester ganjil.",
+              **{"sematan.0.judul": "Jadwal kuliah", "sematan.0.tinggi": "Tinggi",
+                 "sematan.0.alamat": DRIVE.replace("/preview", "/view?usp=sharing")})
+    d = ih.draf(ih.baca(A, "jadwal"))
+    cek(r.status_code == 302 and d["status"] == "menunggu" and d["isi"]["sematan"][0]["alamat"] == DRIVE,
+        "tautan berbagi Google Drive menjadi alamat sematan: %r" % d["isi"].get("sematan"))
+    r = kirim(ka, J, versi=str(ih.baca(A, "jadwal")["versi"]), aksi="terbitkan", uraian="Jadwal kuliah semester ganjil.",
+              **{"sematan.0.judul": "Jadwal kuliah", "sematan.0.tinggi": "Tinggi", "sematan.0.alamat": DRIVE})
+    teks = halaman_situs(A, "akademik/jadwal") or ""
+    cek(r.status_code == 302 and 'src="%s"' % DRIVE in teks and 'sandbox="%s"' % sematan.SANDBOX in teks
+        and "sematan--tinggi" in teks and "Buka Google Drive di tab baru" in teks
+        and teks.index("Jadwal kuliah semester ganjil.") < teks.index("<iframe"),
+        "Jadwal terbit dengan sematan Google Drive di bawah uraian")
+    bawaan = ks.get("/super/tambahan").get_data(as_text=True).split("Sematan di halaman bawaan")[-1]
+    cek("Jadwal Kuliah dan Ujian" in bawaan and "Google Drive" in bawaan and "akademik/jadwal/\">situs" in bawaan,
+        "daftar superadmin memuat sematan di halaman bawaan")
+
     # renaming, moving, reordering, removing; another programme
     h3 = ht.tambah(A, "Video Profil", "profil", "", "adma")
     r = kirim(ka, U + "/simpan", **{"label-%s" % baru["id"]: "Seminar Proposal", "kelompok-%s" % baru["id"]: "akademik",
