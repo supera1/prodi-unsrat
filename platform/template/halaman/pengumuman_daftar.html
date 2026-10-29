@@ -1,4 +1,5 @@
-{# List of announcements: all, one category, or one year; PER_HALAMAN per page. #}
+{# List of announcements: all, one category, or one year; PER_HALAMAN per page. The feed (rss.xml) has no link on the
+   page; feed readers find it through the <link rel="alternate"> of prodi.html. #}
 {% extends "prodi.html" %}
 {% from "_kabar.html" import kartu_kabar with context %}
 {% block judul %}{% if saring %}{{ saring.label }} — {% endif %}{{ ini.label }}{% if nomor > 1 %} (halaman {{ nomor }}){% endif %} — {{ nama }} — UNSRAT{% endblock %}
@@ -43,8 +44,8 @@
 			</ul>
 		</nav>
 		{% endif %}
+		{% if tahun_ada %}
 		<div class="kabar-bawah">
-			{% if tahun_ada %}
 			<nav aria-label="Arsip per tahun">
 				<p class="kabar-bawah__judul">Arsip</p>
 				<ul class="saring saring--kecil">
@@ -53,9 +54,8 @@
 					{% endfor %}
 				</ul>
 			</nav>
-			{% endif %}
-			<p><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman ~ '/rss.xml') }}">Langganan lewat RSS</a></p>
 		</div>
+		{% endif %}
 	</div>
 </div>
 {% endblock %}
