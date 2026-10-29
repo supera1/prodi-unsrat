@@ -432,3 +432,24 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
 - **Konsekuensi:** isi sematan berada di luar saringan spam dan persetujuan admin, dan bisa berubah kapan saja di layanan
   asalnya. Risikonya dibatasi daftar layanan besar yang tetap, sandbox, dan daftar pemantauan superadmin. Pratinjau admin
   tidak memuat bingkai dari situs lain.
+
+### K-P36 — Sematan juga di halaman bawaan (Fase 2 langkah 7e)
+- **Konteks:** masukan pertama dari staging (29 Oktober 2026). Halaman Jadwal Kuliah dan Ujian prodi pilot hanya bisa
+  menautkan PDF di Google Drive lewat teks Uraian. Pengguna ingin jadwal dari Google Sheets, Drive, atau Forms tampil
+  langsung di halaman, dengan keterangan cara menyematkannya seperti keterangan cara membuat tautan. K-P35 hanya
+  mengatur sematan di halaman tambahan.
+- **Keputusan** (usulan pengembang, disetujui pengguna 29 Oktober 2026):
+  1. Setiap halaman yang punya penyunting mendapat bagian **Sematan**, sama dengan bagian Sematan halaman tambahan
+     (`isi_halaman.sematan_daftar`): judul, alamat atau kode sematan, tinggi bingkai, keterangan; paling banyak 5.
+  2. **Letak:** tepat di bawah Uraian; pada halaman tanpa Uraian, di atas Dokumen, atau di akhir halaman. Di penyunting
+     dan di situs letaknya sama.
+  3. **Bagian terpisah, bukan kode di dalam teks Uraian:** setiap sematan mendapat pesan salah sendiri, judul untuk
+     pembaca layar, dan pilihan tinggi; Uraian tetap teks biasa; caranya sama dengan halaman tambahan.
+  4. **Daftar layanan tetap seperti K-P35 nomor 3**, tanpa domain baru; CSP, sandbox, dan pemantau tidak berubah karena
+     sudah berlaku untuk seluruh situs.
+  5. Keterangan cara menyematkan (Google Drive, Sheets/Docs, Forms) tampil di bawah judul bagian Sematan, juga saat
+     masih kosong, dan di panduan admin prodi (bagian "Sematan").
+  6. Daftar pemantauan superadmin (`/super/tambahan`) ikut menampilkan halaman bawaan yang memuat sematan.
+- **Konsekuensi:** sama dengan K-P35: isi sematan di luar saringan spam dan persetujuan admin. Panduan menyarankan
+  dokumen resmi akreditasi tetap diunggah sebagai PDF, yang tersimpan di riwayat situs. Kelengkapan halaman wajib tidak
+  berubah: sematan adalah bagian opsional.

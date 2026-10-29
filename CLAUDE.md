@@ -87,7 +87,8 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   `templat_halaman()`); admin di `platform/admin/tambahan_admin.py`. Sematan hanya dari daftar tetap di
   `platform/sematan.py` (Google Docs/Sheets/Slides/Forms/Drive/Calendar/Maps, YouTube); daftar itu juga mengisi CSP
   `frame-src` (`bangun.CSP`, `docker/nginx/header-keamanan.conf`) dan pemantau. Jangan menambah layanan tanpa keputusan
-  baru.
+  baru. Bagian Sematan yang sama ada di setiap halaman bawaan, di bawah uraian (`isi_halaman.sematan_daftar`, disisipkan
+  `halaman()`; K-P36).
 - Halaman Tugas Akhir (K-P35): halaman opsional `bila_terisi` (tampil hanya setelah terisi); tabelnya `lewat_excel`
   (penyunting hanya meringkas, diubah lewat impor Excel), tanpa NIM. Tabel ≥ 30 baris di situs mendapat kotak cari
   `platform/template/aset/js/cari-tabel.js` (satu-satunya JavaScript situs; tanpa skrip inline, situs tetap berfungsi

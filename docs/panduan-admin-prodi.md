@@ -63,9 +63,40 @@ diperbaiki.
   (pinjol), jual-beli ijazah, dan obat terlarang. Menulis tentang pinjaman online, misalnya judul penelitian, tetap
   boleh.
 
+### Sematan
+
+Bagian **Sematan**, tepat di bawah Uraian, menampilkan isi dari Google Drive, Sheets, Docs, Slides, Forms, Calendar,
+Maps, atau YouTube langsung di halaman. Contohnya jadwal kuliah dari Google Sheets atau PDF yang disimpan di Google Drive.
+Bagian ini ada di setiap halaman yang punya penyunting, termasuk halaman tambahan, paling banyak 5 sematan per halaman.
+Pada halaman tanpa Uraian, letaknya di atas bagian Dokumen atau di akhir halaman.
+
+1. Ambil tautannya dari layanan itu:
+   - **PDF atau berkas lain di Google Drive:** klik kanan berkas → **Bagikan** → Akses umum **Siapa saja yang memiliki
+     link** → **Salin link**.
+   - **Google Sheets atau Docs:** bagikan ke **Siapa saja yang memiliki link**, atau **File → Bagikan → Publikasikan ke
+     web**.
+   - **Google Forms:** **Kirim** → tab `<>` → **Salin**.
+   - **YouTube:** **Bagikan** → **Salin**.
+2. Di penyunting, tekan **Tambah sematan**. Isi **Judul**, yang tampil di atas sematan, lalu tempel tautan atau kode
+   `<iframe ...>` tadi di **Alamat atau kode sematan**. Saat disimpan, alamatnya diubah otomatis ke bentuk sematan.
+3. Pilih **Tinggi bingkai**: Tinggi untuk PDF dan tabel panjang, Sedang atau Pendek untuk formulir singkat dan peta.
+
+Yang perlu diperhatikan:
+
+- Berkas Google harus dibuka untuk umum ("Siapa saja yang memiliki link") atau dipublikasikan ke web. Kalau tidak,
+  pengunjung hanya melihat halaman masuk Google.
+- Isi sematan bisa berubah kapan saja di Google tanpa melewati persetujuan di admin. Jaga akun Google prodi seperti akun
+  admin.
+- Dokumen resmi akreditasi, misalnya SK dan sertifikat, tetap diunggah sebagai PDF di bagian Dokumen. PDF yang diunggah
+  tersimpan di riwayat situs, sedangkan berkas di Google Drive bisa berubah atau terhapus tanpa jejak.
+- Jawaban Google Form tersimpan di akun Google prodi, di luar situs ini. Jangan meminta data pribadi yang tidak perlu.
+- Hanya layanan di atas yang bisa disematkan; yang lain dipasang sebagai tautan biasa. Pengunjung selalu mendapat
+  tautan untuk membuka sematan di tab baru, misalnya di ponsel.
+
 ### Daftar dan tabel
 
-- **Tambah baris** (atau Tambah butir, Tambah dokumen, Tambah foto, Tambah gambar) menambah baris baru di akhir daftar.
+- **Tambah baris** (atau Tambah butir, Tambah dokumen, Tambah foto, Tambah gambar, Tambah sematan) menambah baris baru di
+  akhir daftar.
 - **Naik** dan **Turun** memindahkan baris; **Hapus** menghapusnya. Baris yang baru dihapus bisa dikembalikan dengan
   **Kembalikan baris itu**, selama Anda belum menekan tombol lain.
 - Tombol-tombol ini langsung menyimpan draf.
@@ -199,16 +230,7 @@ seminar, jadwal dari Google Sheets, video profil, atau kumpulan dokumen. Paling 
 3. Ajukan atau terbitkan seperti halaman lain. Halaman tambahan baru tampil di menu dan situs setelah diterbitkan,
    sesudah halaman lain di kelompoknya.
 
-**Sematan** menampilkan isi dari Google Docs, Sheets, Slides, Forms, Drive, Calendar, Maps, atau YouTube langsung di
-halaman. Tempel tautan berbagi atau kode sematan (`<iframe ...>`) dari layanan itu; yang disimpan hanya alamatnya.
-Layanan lain tidak bisa disematkan; pasang sebagai tautan biasa.
-
-- Berkas Google harus dibuka untuk umum ("Siapa saja yang memiliki link") atau dipublikasikan ke web. Kalau tidak,
-  pengunjung hanya melihat halaman masuk Google.
-- Isi sematan bisa berubah kapan saja di Google tanpa melewati persetujuan di admin. Jaga akun Google prodi seperti akun
-  admin.
-- Jawaban Google Form tersimpan di akun Google prodi, di luar situs ini. Jangan meminta data pribadi yang tidak perlu.
-- Pengunjung selalu mendapat tautan untuk membuka sematan di tab baru, misalnya di ponsel.
+Sematan di halaman tambahan diisi seperti di halaman lain; lihat bagian **Sematan** di atas.
 
 Nama menu, kelompok, dan urutannya diubah di menu Halaman tambahan, lalu **Simpan nama, kelompok, dan urutan**. Untuk
 menurunkan halaman sementara, pakai **Tarik dari situs** di penyuntingnya. **Hapus** menghapus halaman dari menu dan situs;
