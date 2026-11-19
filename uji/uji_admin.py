@@ -395,6 +395,15 @@ try:
         ("POST", "/prodi/%s/halaman/kurikulum/impor" % A, "isi_impor_baca", hanya("superuji", "adma", "opa", "opab", ya=400)),
         ("POST", "/prodi/%s/halaman/kurikulum/impor/terapkan" % A, "isi_impor_terapkan",
          hanya("superuji", "adma", "opa", "opab", ya=302)),
+        # the English version of a page (Fase 5, K-P37): operators too, as the page itself
+        ("GET", "/prodi/%s/halaman/sejarah/en" % A, "isi_sunting_en", hanya("superuji", "adma", "opa", "opab")),
+        ("POST", "/prodi/%s/halaman/sejarah/en" % A, "isi_simpan_en", hanya("superuji", "adma", "opa", "opab", ya=400)),
+        ("GET", "/prodi/%s/halaman/sejarah/en/pratinjau" % A, "isi_pratinjau_en", hanya("superuji", "adma", "opa", "opab")),
+        ("GET", "/prodi/%s/halaman/sejarah/en/riwayat" % A, "isi_riwayat_en", hanya("superuji", "adma", "opa", "opab")),
+        ("GET", "/prodi/%s/halaman/sejarah/en/riwayat/20000101-000000-000000" % A, "isi_versi_en",
+         hanya("superuji", "adma", "opa", "opab", ya=404)),
+        ("POST", "/prodi/%s/halaman/sejarah/en/riwayat/20000101-000000-000000" % A, "isi_pakai_versi_en",
+         hanya("superuji", "adma", "opa", "opab", ya=404)),
         ("GET", "/super/kelengkapan", "super_kelengkapan", hanya("superuji")),
         ("GET", "/super/kelengkapan.csv", "super_kelengkapan_csv", hanya("superuji")),
         # the guide and the feedback (Fase 2 langkah 5): everybody logged in sends; only the superadmin reads all

@@ -9,6 +9,10 @@ akses("prodi"): operators too, except where noted.
                                               tambah:<list> | hapus|naik|turun:<list>.<i>
     /prodi/<kode>/halaman/<id>/pratinjau      the draft as the site would show it, with the site's styles
     /prodi/<kode>/halaman/<id>/riwayat        the page's versions; /riwayat/<versi> one of them (POST: make it the draft)
+    /prodi/<kode>/halaman/<id>/en             its English version (Fase 5, K-P37, isi_inggris.py): the Indonesian texts
+                                              with an English field each; POST aksi=simpan | pratinjau | ajukan |
+                                              batal-ajukan | kembalikan | terbitkan | tarik | buang. /en/pratinjau,
+                                              /en/riwayat and /en/riwayat/<versi> as for the page
     /prodi/<kode>/pratinjau/warna.css         the programme's colours, for the previews
     /aset-situs/<nama>                        the site's style sheets (tokens.css, prodi.css), for the previews
     /super/kelengkapan (.csv)                 akses("super"): the required pages of every programme, for LPMPP
@@ -47,6 +51,7 @@ import halaman_tambahan  # noqa: E402
 import impor_dosen  # noqa: E402
 import impor_tabel  # noqa: E402
 import isi_halaman as ih  # noqa: E402
+import isi_inggris  # noqa: E402
 import kriteria as kriteria_mod  # noqa: E402
 import lokasi  # noqa: E402
 import media  # noqa: E402
@@ -123,22 +128,28 @@ def halaman_wajib():
 def ringkasan_isi(kode, wajib=None):
     """What a programme's own pages hold: {"halaman": {id: isi_halaman.keadaan}, "wajib": number of required pages,
     "terbit": required pages the site shows, "kosong": required pages with nothing yet, "menunggu" / "dikembalikan" /
-    "draf": drafts of any page in that status, "terakhir": the last change}."""
+    "draf": drafts of any page in that status (either language), "terakhir": the last change; "en": {id: the English
+    version's isi_inggris.keadaan}, "en_terbit": required pages whose English version shows, "en_perlu": pages whose
+    published English version lacks translations of the Indonesian published content}."""
     wajib = halaman_wajib() if wajib is None else wajib
-    hasil = {"halaman": {}, "wajib": len(wajib), "terbit": 0, "kosong": 0, "menunggu": 0, "dikembalikan": 0, "draf": 0,
-             "terakhir": ""}
+    hasil = {"halaman": {}, "en": {}, "wajib": len(wajib), "terbit": 0, "kosong": 0, "menunggu": 0, "dikembalikan": 0,
+             "draf": 0, "terakhir": "", "en_terbit": 0, "en_perlu": 0}
     tambahan = [h["id"] for h in halaman_tambahan.baca(kode) if isinstance(h, dict)
                 and ih.POLA_TAMBAHAN.match(str(h.get("id")))]
     for id_ in list(ih.TEMPLAT) + tambahan:
         k = ih.keadaan(kode, id_)
         hasil["halaman"][id_] = k
+        en = hasil["en"][id_] = isi_inggris.keadaan(kode, id_, k)
         if id_ in wajib:
             hasil["terbit"] += k["tayang"]
             hasil["kosong"] += k["status"] == "kosong"
-        status_draf = (k["draf"] or {}).get("status")
-        if status_draf in ih.STATUS_DRAF:
-            hasil[status_draf] += 1
-        hasil["terakhir"] = max(hasil["terakhir"], k["waktu"] or "")
+            hasil["en_terbit"] += en["tayang"]
+        hasil["en_perlu"] += bool(en["terbit"] and en["perlu"])
+        for x in (k, en):                       # a draft waiting in either language is one to look at
+            status_draf = (x["draf"] or {}).get("status")
+            if status_draf in ih.STATUS_DRAF:
+                hasil[status_draf] += 1
+        hasil["terakhir"] = max(hasil["terakhir"], k["waktu"] or "", en["waktu"] or "")
     return hasil
 
 
@@ -162,6 +173,11 @@ def inti(x):
     if isinstance(x, list):
         return [inti(v) for v in x]
     return x
+
+
+def saring_cocok_en(k, status):
+    """saring_cocok for the English version: a draft of it in that status."""
+    return status in ih.STATUS_DRAF and k["draf"] is not None and k["draf"].get("status") == status
 
 
 def keadaan_teks(k):
@@ -255,6 +271,23 @@ def pasang(app, alat):
                                isi_html=bangun_mod.bagian_html(bagian, lambda r: url_berkas(kode, r)) if bagian else "",
                                n_masalah=len(masalah_draf(ini["id"], isi, kode)), **tambahan)
 
+    def pratinjau_en(kode, ini, en, **tambahan):
+        """The preview of an English version: the Indonesian published content (its draft while nothing is published)
+        with these translations, as the English site would show it."""
+        id_ = ini["id"]
+        templat = ih.templat_halaman(id_)
+        data_id = ih.baca(kode, id_)
+        sumber = (data_id.get("terbit") or {}).get("isi") if isinstance(data_id.get("terbit"), dict) else None
+        sumber = sumber if isinstance(sumber, dict) else ih.isi_kerja(data_id)
+        en_sah = ih.isi_sah(isi_inggris.id_en(id_), en, kode)
+        bagian, hilang = ih.tampilan(id_, isi_inggris.terjemahkan(templat, ih.isi_sah(id_, sumber, kode), en_sah),
+                                     berkas_ada, "en")
+        n_masalah = len(ih.periksa(isi_inggris.id_en(id_), en, kode))
+        return render_template("halaman_pratinjau.html", pr=g.prodi, ini=dict(ini, label=ini.get("label_en") or ini["label"]),
+                               hilang=hilang, bahasa="en", n_masalah=n_masalah,
+                               isi_html=bangun_mod.bagian_html(bagian, lambda r: url_berkas(kode, r), "en") if bagian else "",
+                               **tambahan)
+
     # -------------------------------------------------------------- the list of pages
 
     @app.route("/prodi/<kode>/halaman")
@@ -266,13 +299,15 @@ def pasang(app, alat):
         r = ringkasan_isi(kode)
         kelompok = []
         for label, anak in halaman_prodi(kode):
-            anak = [dict(a, k=r["halaman"][a["id"]]) for a in anak]
-            anak = [a for a in anak if not status or saring_cocok(a["k"], status)]
+            anak = [dict(a, k=r["halaman"][a["id"]], en=r["en"][a["id"]]) for a in anak]
+            anak = [a for a in anak if not status or saring_cocok(a["k"], status) or saring_cocok_en(a["en"], status)]
             if anak:
                 kelompok.append((label, anak))
-        jumlah = {s: sum(1 for k in r["halaman"].values() if saring_cocok(k, s)) for s in STATUS}
+        jumlah = {s: sum(1 for id_, k in r["halaman"].items() if saring_cocok(k, s) or saring_cocok_en(r["en"][id_], s))
+                  for s in STATUS}
+        reg = registri.cari(registri.baca(), kode) or {}
         return render_template("halaman_daftar.html", pr=g.prodi, kelompok=kelompok, r=r, jumlah=jumlah, status=status,
-                               NAMA_STATUS=NAMA_STATUS, admin=adalah_admin(g.akun))
+                               NAMA_STATUS=NAMA_STATUS, admin=adalah_admin(g.akun), inggris=bool(reg.get("inggris")))
 
     # -------------------------------------------------------------- one page
 
@@ -403,6 +438,139 @@ def pasang(app, alat):
             return redirect(ke_sini)
         return redirect(url_for("isi_sunting", kode=kode, id_=id_, buka=tujuan) + "#" + penyunting._id(tujuan))
 
+    # -------------------------------------------------------------- the English version (Fase 5, K-P37)
+
+    def tampil_sunting_en(kode, ini, data_en=None, kode_status=200):
+        id_ = ini["id"]
+        templat = ih.templat_halaman(id_)
+        data_en = ih.baca(kode, isi_inggris.id_en(id_)) if data_en is None else data_en
+        sumber, versi_id = isi_inggris.isi_sumber(kode, id_)
+        en = isi_inggris.rapi(ih.isi_kerja(data_en))
+        butir = isi_inggris.butir_formulir(templat, sumber, en)
+        galat = {}
+        for jalur, _tempat, pesan in ih.daftar_masalah(isi_inggris.id_en(id_), en, kode):
+            galat.setdefault(jalur, pesan)
+        k_id = ih.keadaan(kode, id_)
+        reg = registri.cari(registri.baca(), kode) or {}
+        return render_template("halaman_sunting_en.html", pr=g.prodi, ini=ini, data=data_en, versi_id=versi_id,
+                               k=isi_inggris.keadaan(kode, id_, k_id), k_id=k_id, butir=butir, galat=galat,
+                               admin=adalah_admin(g.akun), maks_catatan=ih.MAKS_CATATAN, inggris=bool(reg.get("inggris")),
+                               lewat_excel=any(t["lewat_excel"] for t in isi_inggris.perlu_terjemah(templat, sumber))), \
+            kode_status
+
+    @app.route("/prodi/<kode>/halaman/<id_>/en")
+    @akses("prodi")
+    def isi_sunting_en(kode, id_):
+        return tampil_sunting_en(kode, ini_(kode, id_))
+
+    @app.route("/prodi/<kode>/halaman/<id_>/en", methods=["POST"])
+    @akses("prodi")
+    def isi_simpan_en(kode, id_):
+        """The English form: the same buttons and rules as the page's own form (isi_simpan), without lists or files."""
+        ini = ini_(kode, id_)
+        id_en = isi_inggris.id_en(id_)
+        ke_sini = url_for("isi_sunting_en", kode=kode, id_=id_)
+        aksi = request.form.get("aksi", "simpan")
+        try:
+            versi = int(request.form.get("versi", ""))
+            versi_id = int(request.form.get("versi_id", ""))
+        except ValueError:
+            abort(400, "Formulir tidak lengkap. Muat ulang halaman lalu coba lagi.")
+        if aksi not in AKSI or aksi == "pulihkan-butir":
+            abort(400)
+        admin = adalah_admin(g.akun)
+        if aksi in ADMIN_SAJA and not admin:
+            abort(403, "Hanya admin prodi yang dapat melakukan ini.")
+        data = ih.baca(kode, id_en)
+        try:
+            ih.cek_versi(data, versi)
+        except ih.GagalIsi as e:
+            return bentrok(kode, ini, str(e))
+        oleh = g.akun["nama"]
+        d = ih.draf(data)
+        if aksi == "buang":
+            if not admin and d and d.get("status") == "menunggu":
+                flash("Draf yang menunggu persetujuan tidak dapat dibuang; batalkan pengajuannya dulu.", "galat")
+                return redirect(ke_sini)
+            try:
+                ih.buang_draf(kode, id_en, oleh, versi)
+            except ih.GagalIsi as e:
+                return bentrok(kode, ini, str(e))
+            alat.catat("isi-en-draf-dibuang", prodi=kode, halaman=id_)
+            flash("Draf versi Inggris dibuang.", "ok")
+            return redirect(ke_sini)
+
+        # what the form holds: the translations of the Indonesian draft's and published texts
+        data_id = ih.baca(kode, id_)
+        terbit_id = (data_id.get("terbit") or {}).get("isi") if isinstance(data_id.get("terbit"), dict) else None
+        sumber = [x for x in ((ih.draf(data_id) or {}).get("isi"), terbit_id) if isinstance(x, dict)]
+        lama = isi_inggris.rapi(ih.isi_kerja(data))
+        isi, tak_cocok = isi_inggris.dari_formulir(ih.templat_halaman(id_), lama, request.form, sumber)
+        if tak_cocok or versi_id != data_id.get("versi", 0):
+            flash("Versi Indonesia halaman ini berubah saat Anda menerjemahkan. %s" % (
+                "Terjemahan untuk %d teks yang berubah tidak tersimpan; periksa lagi formulirnya." % len(tak_cocok)
+                if tak_cocok else "Periksa teks yang ditandai berubah."), "galat")
+        berubah = inti(isi) != inti(lama)
+
+        def simpan_ketikan(riwayat_=True):
+            if berubah:
+                ih.simpan_draf(kode, id_en, isi, oleh, versi, riwayat=riwayat_)
+
+        try:
+            if aksi in ("ajukan", "terbitkan") and not berubah and (d is None or (aksi == "ajukan" and d.get("status") == "menunggu")):
+                flash("Draf ini sudah menunggu persetujuan." if d else "Tidak ada perubahan untuk %s." % (
+                    "diajukan" if aksi == "ajukan" else "diterbitkan"), "info")
+                return redirect(ke_sini)
+            if aksi == "ajukan":
+                ih.ajukan(kode, id_en, isi, oleh, versi)
+            elif aksi == "terbitkan":
+                ih.terbitkan(kode, id_en, isi, oleh, versi, dari_draf=True)
+            elif aksi == "batal-ajukan":
+                ih.batal_ajukan(kode, id_en, oleh, versi, isi if berubah else None)
+            elif aksi == "kembalikan":
+                ih.kembalikan(kode, id_en, request.form.get("catatan", ""), oleh, versi, isi if berubah else None)
+            elif aksi == "tarik":
+                ih.tarik(kode, id_en, oleh, versi, isi if berubah else None)
+            else:
+                simpan_ketikan(aksi == "simpan")
+        except ih.GagalIsi as e:
+            if "baru saja diubah" in str(e):
+                return bentrok(kode, ini, str(e))
+            if aksi in BERHASIL:
+                try:
+                    simpan_ketikan()
+                except ih.GagalIsi as e2:
+                    flash("Draf tidak disimpan: %s." % e2, "galat")
+                flash("%s: %s." % (GAGAL[aksi], e), "galat")
+            else:
+                flash("Draf tidak disimpan: %s." % e, "galat")
+            return redirect(ke_sini)
+
+        if aksi in BERHASIL:
+            alat.catat(AUDIT[aksi].replace("isi-", "isi-en-"), prodi=kode, halaman=id_)
+            if aksi in ("terbitkan", "tarik"):
+                bangun(kode)
+            flash(BERHASIL[aksi].replace("halaman kembali “sedang dilengkapi” dan isinya tetap ada di draf",
+                                         "versi Inggris halaman ini tidak tampil lagi; terjemahannya tetap ada di draf"), "ok")
+            return redirect(ke_sini)
+        if aksi == "pratinjau":
+            return redirect(url_for("isi_pratinjau_en", kode=kode, id_=id_))
+        if berubah:
+            alat.catat("isi-en-draf-disimpan", prodi=kode, halaman=id_)
+            flash("Draf versi Inggris disimpan. Situs tetap menampilkan versi Inggris yang sudah terbit.", "ok")
+        else:
+            flash("Tidak ada perubahan untuk disimpan.", "info")
+        return redirect(ke_sini)
+
+    @app.route("/prodi/<kode>/halaman/<id_>/en/pratinjau")
+    @akses("prodi")
+    def isi_pratinjau_en(kode, id_):
+        ini = ini_(kode, id_)
+        data = ih.baca(kode, isi_inggris.id_en(id_))
+        judul = "Pratinjau versi Inggris (%s)" % ("draf" if ih.draf(data) else "sudah terbit")
+        return pratinjau_en(kode, ini, ih.isi_kerja(data), judul=judul, kembali=url_for("isi_sunting_en", kode=kode, id_=id_),
+                            kembali_teks="Kembali ke penyunting versi Inggris")
+
     # -------------------------------------------------------------- previews
 
     @app.route("/prodi/<kode>/halaman/<id_>/pratinjau")
@@ -452,22 +620,22 @@ def pasang(app, alat):
             hasil.append(("draf", "Draf (%s)" % NAMA_STATUS.get(d.get("status"), "Draf").lower()))
         return hasil
 
-    @app.route("/prodi/<kode>/halaman/<id_>/riwayat")
-    @akses("prodi")
-    def isi_riwayat(kode, id_):
+    def riwayat_halaman(kode, id_, en):
+        """The versions of a page (en: of its English version)."""
         ini = ini_(kode, id_)
-        berkas = ih.nama_berkas(kode, id_)
+        id_simpan = isi_inggris.id_en(id_) if en else id_
+        berkas = ih.nama_berkas(kode, id_simpan)
         semua = [v for v in riwayat.daftar(1000000) if v["berkas"] == berkas]
-        daftar = [dict(v, perubahan=nama_perubahan(v.get("aksi")), bagian=bagian_versi(versi_halaman(kode, id_, v["versi"])))
+        daftar = [dict(v, perubahan=nama_perubahan(v.get("aksi")),
+                       bagian=bagian_versi(versi_halaman(kode, id_simpan, v["versi"])))
                   for v in semua[:RIWAYAT_TAMPIL]]
         return render_template("halaman_riwayat.html", pr=g.prodi, ini=ini, daftar=daftar, lebih=len(semua) - len(daftar),
-                               data=ih.baca(kode, id_), admin=adalah_admin(g.akun))
+                               data=ih.baca(kode, id_simpan), admin=adalah_admin(g.akun), akhiran="_en" if en else "")
 
-    @app.route("/prodi/<kode>/halaman/<id_>/riwayat/<versi_lama>")
-    @akses("prodi")
-    def isi_versi(kode, id_, versi_lama):
+    def versi_lama_halaman(kode, id_, versi_lama, en):
         ini = ini_(kode, id_)
-        lama = versi_halaman(kode, id_, versi_lama)
+        id_simpan = isi_inggris.id_en(id_) if en else id_
+        lama = versi_halaman(kode, id_simpan, versi_lama)
         ada = dict(bagian_versi(lama))
         bagian = request.args.get("bagian") or ("terbit" if "terbit" in ada else "draf")
         if bagian not in ada:
@@ -475,14 +643,17 @@ def pasang(app, alat):
         diubah = lama.get("diubah") if isinstance(lama.get("diubah"), dict) else {}
         judul = "Versi lama (%s%s), %s" % (diubah.get("waktu", "").replace("T", " ")[:16] or versi_lama,
                                            " oleh %s" % diubah["oleh"] if diubah.get("oleh") else "", ada[bagian].lower())
-        return pratinjau(kode, ini, lama[bagian]["isi"], judul=judul,
-                         kembali=url_for("isi_riwayat", kode=kode, id_=id_), kembali_teks="Kembali ke riwayat halaman")
+        kembali = url_for("isi_riwayat_en" if en else "isi_riwayat", kode=kode, id_=id_)
+        if en:
+            return pratinjau_en(kode, ini, lama[bagian]["isi"], judul=judul, kembali=kembali,
+                                kembali_teks="Kembali ke riwayat versi Inggris")
+        return pratinjau(kode, ini, lama[bagian]["isi"], judul=judul, kembali=kembali,
+                         kembali_teks="Kembali ke riwayat halaman")
 
-    @app.route("/prodi/<kode>/halaman/<id_>/riwayat/<versi_lama>", methods=["POST"])
-    @akses("prodi")
-    def isi_pakai_versi(kode, id_, versi_lama):
+    def pakai_versi_halaman(kode, id_, versi_lama, en):
         ini = ini_(kode, id_)
-        versi_halaman(kode, id_, versi_lama)
+        id_simpan = isi_inggris.id_en(id_) if en else id_
+        versi_halaman(kode, id_simpan, versi_lama)
         try:
             versi = int(request.form.get("versi", ""))
         except ValueError:
@@ -491,28 +662,59 @@ def pasang(app, alat):
         if bagian not in ("terbit", "draf"):
             abort(400)
         try:
-            ih.pakai_versi(kode, id_, versi_lama, bagian, g.akun["nama"], versi)
+            ih.pakai_versi(kode, id_simpan, versi_lama, bagian, g.akun["nama"], versi)
         except ih.GagalIsi as e:
             if "baru saja diubah" in str(e):
                 return bentrok(kode, ini, str(e))
             flash("Versi itu tidak dijadikan draf: %s." % e, "galat")
-            return redirect(url_for("isi_riwayat", kode=kode, id_=id_))
-        alat.catat("isi-versi-dipakai", prodi=kode, halaman=id_, versi=versi_lama, bagian=bagian)
+            return redirect(url_for("isi_riwayat_en" if en else "isi_riwayat", kode=kode, id_=id_))
+        alat.catat("isi-en-versi-dipakai" if en else "isi-versi-dipakai", prodi=kode, halaman=id_, versi=versi_lama,
+                   bagian=bagian)
         flash("Versi lama dijadikan draf. Periksa isinya, lalu %s." % (
             "terbitkan" if adalah_admin(g.akun) else "ajukan untuk diterbitkan"), "ok")
-        return redirect(url_for("isi_sunting", kode=kode, id_=id_))
+        return redirect(url_for("isi_sunting_en" if en else "isi_sunting", kode=kode, id_=id_))
+
+    @app.route("/prodi/<kode>/halaman/<id_>/riwayat")
+    @akses("prodi")
+    def isi_riwayat(kode, id_):
+        return riwayat_halaman(kode, id_, False)
+
+    @app.route("/prodi/<kode>/halaman/<id_>/riwayat/<versi_lama>")
+    @akses("prodi")
+    def isi_versi(kode, id_, versi_lama):
+        return versi_lama_halaman(kode, id_, versi_lama, False)
+
+    @app.route("/prodi/<kode>/halaman/<id_>/riwayat/<versi_lama>", methods=["POST"])
+    @akses("prodi")
+    def isi_pakai_versi(kode, id_, versi_lama):
+        return pakai_versi_halaman(kode, id_, versi_lama, False)
+
+    @app.route("/prodi/<kode>/halaman/<id_>/en/riwayat")
+    @akses("prodi")
+    def isi_riwayat_en(kode, id_):
+        return riwayat_halaman(kode, id_, True)
+
+    @app.route("/prodi/<kode>/halaman/<id_>/en/riwayat/<versi_lama>")
+    @akses("prodi")
+    def isi_versi_en(kode, id_, versi_lama):
+        return versi_lama_halaman(kode, id_, versi_lama, True)
+
+    @app.route("/prodi/<kode>/halaman/<id_>/en/riwayat/<versi_lama>", methods=["POST"])
+    @akses("prodi")
+    def isi_pakai_versi_en(kode, id_, versi_lama):
+        return pakai_versi_halaman(kode, id_, versi_lama, True)
 
     # -------------------------------------------------------------- completeness of every programme (superadmin)
 
     def kelengkapan():
-        """One row per registered programme: its data (alat.info_prodi), ringkasan_isi() and the number of its own
-        accreditation criteria (K-P33)."""
+        """One row per registered programme: its data (alat.info_prodi), ringkasan_isi(), the number of its own
+        accreditation criteria (K-P33), and whether its English version is switched on (K-P37)."""
         wajib = halaman_wajib()
         baris = []
         for r in registri.baca()["prodi"]:
             info = alat.info_prodi(r["kode_pddikti"])
             if info:
-                baris.append(dict(info, isi=ringkasan_isi(info["kode"], wajib),
+                baris.append(dict(info, isi=ringkasan_isi(info["kode"], wajib), inggris=bool(r.get("inggris")),
                                   kriteria=len(kriteria_mod.baca_prodi(info["kode"]).get("kriteria") or [])))
         return sorted(baris, key=registri.kunci_urut), wajib
 
@@ -537,14 +739,15 @@ def pasang(app, alat):
         buf = io.StringIO()
         tulis = csv.writer(buf)
         tulis.writerow(["kode_pddikti", "jenjang", "nama", "fakultas", "slug", "aktif", "wajib_terbit", "wajib_total",
-                        "menunggu", "dikembalikan", "draf", "terakhir_diubah", "kriteria_akreditasi"] +
+                        "menunggu", "dikembalikan", "draf", "terakhir_diubah", "kriteria_akreditasi", "inggris_aktif",
+                        "wajib_terbit_en", "perlu_diperbarui_en"] +
                        [label.get(id_, id_) for id_ in halaman])
         for b in baris:
             x = b["isi"]
             tulis.writerow([impor_dosen.aman_csv(v) for v in [
                 b["kode"], b["jenjang"], b["nama"], b["unit"], b["slug"], "ya" if b["aktif"] else "tidak", x["terbit"],
                 x["wajib"], x["menunggu"], x["dikembalikan"], x["draf"], x["terakhir"].replace("T", " ")[:16],
-                b["kriteria"]] +
+                b["kriteria"], "ya" if b["inggris"] else "tidak", x["en_terbit"], x["en_perlu"]] +
                 [keadaan_teks(x["halaman"][id_]) for id_ in halaman]])
         resp = make_response("﻿" + buf.getvalue())            # the BOM makes Excel read it as UTF-8
         resp.headers["Content-Type"] = "text/csv; charset=utf-8"

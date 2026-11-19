@@ -352,7 +352,8 @@ try:
     # the list of pages
     r = ka.get("/prodi/%s/halaman" % A)
     teks = r.get_data(as_text=True)
-    cek(r.status_code == 200 and teks.count('href="%s' % URL) == len(ih.TEMPLAT), "daftar memuat ke-24 halaman")
+    cek(r.status_code == 200 and len(re.findall(r'href="%s[^"/]+"' % re.escape(URL), teks)) == len(ih.TEMPLAT)
+        and teks.count('/en">') == len(ih.TEMPLAT), "daftar memuat ke-24 halaman, masing-masing dengan versi Inggrisnya")
     cek("0 dari 22" in teks and "Belum diisi" in teks, "daftar: jumlah halaman wajib yang berisi")
     cek("Isi halaman" in ka.get("/prodi/%s/" % A).get_data(as_text=True) and
         'href="/prodi/%s/halaman"' % A in ka.get("/prodi/%s/" % A).get_data(as_text=True), "dasbor menautkan isi halaman")

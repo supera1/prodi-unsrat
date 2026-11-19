@@ -453,6 +453,10 @@ def pasang(app, alat):
         m = re.match(r"^prodi/([0-9A-Za-z]{3,12})/(.+)$", berkas)
         if m:
             id_ = m.group(2)[len("halaman-"):] if m.group(2).startswith("halaman-") else None
+            inggris = bool(id_) and id_.endswith("-en") and ih.templat_halaman(id_[:-3]) is not None \
+                and ih.templat_halaman(id_) is None
+            if inggris:                                           # the English version of a page (K-P37)
+                id_ = id_[:-3]
             if id_ and ih.POLA_TAMBAHAN.match(id_):             # an extra page (K-P35), also after it was removed
                 label = {h.get("id"): h.get("label") for h in halaman_tambahan.baca(m.group(1))}.get(id_)
                 bagian = "halaman tambahan %s" % (label or "%s (sudah dihapus)" % id_)
@@ -461,7 +465,7 @@ def pasang(app, alat):
             else:
                 bagian = {"situs": "identitas dan beranda", "pengumuman": "pengumuman", "data": "data prodi",
                           "kriteria": "kriteria akreditasi", "tambahan": "daftar halaman tambahan"}.get(m.group(2), m.group(2))
-            return "%s — %s" % (nama_semua().get(m.group(1), m.group(1)), bagian)
+            return "%s — %s%s" % (nama_semua().get(m.group(1), m.group(1)), bagian, " (versi Inggris)" if inggris else "")
         return {"registri": "Registri prodi (slug, aktif, tautan dosen)", "warisan/prodi": "Data resmi prodi dari www",
                 "warisan/unit": "Data fakultas dari www", "warisan/kalender": "Kalender akademik dari www",
                 "warisan/universitas": "Identitas universitas dari www", "warisan/meta": "Catatan tarik data"}.get(berkas, berkas)

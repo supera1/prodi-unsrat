@@ -1,0 +1,133 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{# The English version of a page (Fase 5, K-P37, isi_inggris.py): every Indonesian text once, with its English field.
+   The same buttons and review as the page's own form. #}
+{% block judul %}{{ ini.label }} (versi Inggris) — {{ pr.nama }}{% endblock %}
+{% macro tombol_simpan() %}
+{% set menunggu = k.draf and k.draf.status == 'menunggu' %}
+<div class="tombol-baris">
+	<button type="submit" class="tombol" name="aksi" value="simpan">Simpan draf</button>
+	<button type="submit" class="tombol tombol--garis" name="aksi" value="pratinjau">Simpan dan pratinjau</button>
+	{% if admin %}
+	<button type="submit" class="tombol tombol--garis" name="aksi" value="terbitkan">{{ 'Terbitkan perubahan' if k.terbit else 'Terbitkan' }}</button>
+	{% elif menunggu %}
+	<button type="submit" class="tombol tombol--garis" name="aksi" value="batal-ajukan">Batalkan pengajuan</button>
+	{% else %}
+	<button type="submit" class="tombol tombol--garis" name="aksi" value="ajukan">Ajukan untuk diterbitkan</button>
+	{% endif %}
+</div>
+{% endmacro %}
+{% block isi %}
+{% set d = k.draf %}
+{% set menunggu = d and d.status == 'menunggu' %}
+{{ nav_prodi(pr, 'isi_daftar') }}
+<p class="jejak-admin"><a href="{{ url_for('isi_daftar', kode=pr.kode) }}">Isi halaman</a> › <a href="{{ url_for('isi_sunting', kode=pr.kode, id_=ini.id) }}">{{ ini.label }}</a> › Versi Inggris</p>
+<h1>{{ ini.label }}: versi Inggris</h1>
+<nav class="tab-bahasa" aria-label="Bahasa isi halaman">
+	<a href="{{ url_for('isi_sunting', kode=pr.kode, id_=ini.id) }}">Bahasa Indonesia</a>
+	<a href="{{ url_for('isi_sunting_en', kode=pr.kode, id_=ini.id) }}" aria-current="page" lang="en">English</a>
+</nav>
+{% if ini.label_en %}<p class="keterangan">Nama halaman di situs berbahasa Inggris: <span lang="en">{{ ini.label_en }}</span>.</p>{% endif %}
+{% if not inggris %}<p class="pesan pesan--info">Versi Inggris situs prodi ini belum diaktifkan superadmin. Terjemahan tetap bisa disiapkan dan diterbitkan sekarang; halaman berbahasa Inggris tampil setelah versi Inggris diaktifkan.</p>{% endif %}
+{% if not k_id.terbit %}<p class="pesan pesan--info">Versi Indonesia halaman ini belum terbit. Versi Inggris baru tampil di situs setelah versi Indonesia terbit.</p>{% endif %}
+<section class="kartu tindakan-status" aria-label="Keadaan versi Inggris">
+	<p>
+		{% if k.terbit %}<span class="status status--terbit">Terbit</span> {{ (k.terbit.waktu | replace('T', ' '))[:16] }} oleh {{ k.terbit.oleh }}{% if not k.tayang and k_id.tayang %}, tetapi <strong>tidak tampil</strong>: terjemahannya tidak lolos pemeriksaan sekarang{% endif %}.
+		{% elif not d %}Belum ada terjemahan; halaman ini belum ada di situs berbahasa Inggris.
+		{% else %}Belum terbit; halaman ini belum ada di situs berbahasa Inggris.
+		{% endif %}
+		{% if k.tayang and inggris and not ini.sembunyi %}<a href="{{ pr.alamat }}en/{{ ini.alamat }}/">Lihat versi Inggris di situs ↗</a>{% endif %}
+	</p>
+	{% if k.terbit and k.perlu %}
+	<p class="pesan pesan--info"><strong>Perlu diperbarui:</strong> {{ k.perlu }} teks versi Indonesia yang terbit belum diterjemahkan, atau berubah sejak diterjemahkan. Baris yang teks wajibnya belum diterjemahkan belum tampil di versi Inggris.</p>
+	{% endif %}
+	{% if d %}
+	<p><span class="status status--{{ d.status }}">{{ {'draf': 'Draf', 'menunggu': 'Menunggu persetujuan', 'dikembalikan': 'Dikembalikan'}[d.status] }}</span>
+		{% if menunggu %}diajukan {{ (d.diajukan.waktu | replace('T', ' '))[:16] }} oleh {{ d.diajukan.oleh }}{% if admin %}: periksa lewat pratinjau, lalu terbitkan atau kembalikan dengan catatan{% else %}; admin prodi akan memeriksanya{% endif %}.
+		{% endif %}
+		Terakhir disimpan {{ (d.waktu | replace('T', ' '))[:16] }} oleh {{ d.oleh }}.</p>
+	{% if d.status == 'dikembalikan' and d.catatan %}
+	<div class="pesan pesan--info"><p><strong>Catatan dari {{ d.catatan.oleh }}</strong> ({{ (d.catatan.waktu | replace('T', ' '))[:16] }}):</p>
+		<p class="catatan-admin">{{ d.catatan.isi }}</p>
+		<p>Perbaiki drafnya, lalu ajukan lagi.</p></div>
+	{% endif %}
+	{% endif %}
+	<p><a href="{{ url_for('isi_riwayat_en', kode=pr.kode, id_=ini.id) }}">Riwayat versi Inggris</a></p>
+</section>
+{% if galat %}
+<div class="pesan pesan--galat" id="ringkasan-galat">
+	<p>Versi Inggris ini belum dapat {{ 'diterbitkan' if admin else 'diajukan' }}: {{ galat | length }} terjemahan perlu diperbaiki.</p>
+	<ul>
+		{% for jalur, pesan in galat.items() %}
+		<li>{% if jalur %}<a href="#f-{{ jalur | replace('.', '-') }}">{{ pesan }}</a>{% else %}{{ pesan }}{% endif %}</li>
+		{% endfor %}
+	</ul>
+</div>
+{% endif %}
+<details class="petunjuk">
+	<summary>Cara menerjemahkan</summary>
+	<ul>
+		<li>Setiap teks versi Indonesia halaman ini tampil sekali dengan isian bahasa Inggrisnya. Teks yang sama di beberapa baris cukup diterjemahkan sekali.</li>
+		<li>Nama orang, nama mitra, kode, nama sistem, dan nama jurnal tidak diterjemahkan: tampil apa adanya. Angka, tahun, tautan, PDF, foto, dan sematan mengikuti versi Indonesia.</li>
+		<li>Judul karya (penelitian, publikasi, pengabdian, luaran) dan teks alternatif foto boleh dikosongkan: tampil dalam bahasa aslinya.</li>
+		<li>Teks lain wajib diterjemahkan. Baris tabel yang teks wajibnya belum diterjemahkan belum tampil di versi Inggris.</li>
+		<li>Markahnya sama dengan versi Indonesia: <code>[teks tautan](https://alamat.lengkap)</code>, <code>**tebal**</code>, dan baris yang diawali “- ”.</li>
+		{% if lewat_excel %}<li>Tabel yang diisi lewat Excel (misalnya daftar tugas akhir) tampil dalam bahasa aslinya.</li>{% endif %}
+		<li>Bila versi Indonesia berubah, halaman ini ditandai <strong>perlu diperbarui</strong>. Uraian yang berubah tetap memakai terjemahan lamanya sampai diperbarui.</li>
+	</ul>
+	<p><a href="{{ url_for('panduan') }}#versi-bahasa-inggris">Panduan lengkap: versi bahasa Inggris</a></p>
+</details>
+<form method="post" action="{{ url_for('isi_simpan_en', kode=pr.kode, id_=ini.id) }}" class="formulir formulir--sunting">
+	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+	<input type="hidden" name="versi" value="{{ data.versi or 0 }}">
+	<input type="hidden" name="versi_id" value="{{ versi_id }}">
+	{{ tombol_simpan() }}
+	{% if admin and menunggu %}
+	<div class="kartu kembalikan">
+		<div class="isian"><label for="catatan">Catatan untuk penulis, bila dikembalikan</label>
+			<textarea id="catatan" name="catatan" rows="3" aria-describedby="catatan-ket"></textarea>
+			<p class="keterangan" id="catatan-ket">Apa yang perlu diperbaiki sebelum diajukan lagi; paling banyak {{ maks_catatan }} karakter.</p></div>
+		<button type="submit" class="tombol tombol--garis" name="aksi" value="kembalikan">Kembalikan dengan catatan</button>
+	</div>
+	{% endif %}
+	{% if butir %}
+	<div class="kartu">
+		{% for b in butir %}
+		{% set nama = 't.' ~ b.kunci %}
+		{% set id_isian = 'f-t-' ~ b.kunci %}
+		{% set ket = [id_isian ~ '-sumber'] + ([id_isian ~ '-lama'] if b.jenis == 'lama' else []) + ([id_isian ~ '-galat'] if galat.get(nama) else []) %}
+		<div class="isian isian--terjemah{% if galat.get(nama) %} isian--galat{% endif %}">
+			<label for="{{ id_isian }}">{{ b.tempat }} <span class="keterangan">(bahasa Inggris{{ ', boleh dikosongkan' if b.boleh }})</span></label>
+			<p class="terjemah__sumber" id="{{ id_isian }}-sumber" lang="id"><span class="tersembunyi">Teks Indonesia: </span>{{ b.teks }}</p>
+			{% if b.panjang %}
+			<textarea id="{{ id_isian }}" name="{{ nama }}" rows="{{ 8 if b.kaya else 3 }}" maxlength="{{ b.maks }}" lang="en" aria-describedby="{{ ket | join(' ') }}"{% if galat.get(nama) %} aria-invalid="true"{% endif %}>{{ b.nilai }}</textarea>
+			{% else %}
+			<input id="{{ id_isian }}" name="{{ nama }}" type="text" value="{{ b.nilai }}" maxlength="{{ b.maks }}" lang="en" aria-describedby="{{ ket | join(' ') }}"{% if galat.get(nama) %} aria-invalid="true"{% endif %}>
+			{% endif %}
+			{% if b.jenis == 'lama' %}<p class="keterangan terjemah__lama" id="{{ id_isian }}-lama">Teks Indonesia ini berubah sejak diterjemahkan; isian ini masih berisi terjemahan lamanya. Periksa dan sesuaikan: menyimpan formulir menandainya sudah diperbarui.</p>{% endif %}
+			{% if galat.get(nama) %}<p class="galat-isian" id="{{ id_isian }}-galat">{{ galat[nama] }}</p>{% endif %}
+		</div>
+		{% endfor %}
+	</div>
+	{% else %}
+	<p class="pesan pesan--info">Versi Indonesia halaman ini belum punya teks untuk diterjemahkan. Isi dulu versi Indonesianya.</p>
+	{% endif %}
+	{{ tombol_simpan() }}
+	{% if (d and (admin or not menunggu)) or (admin and k.terbit) %}
+	<div class="zona-bahaya">
+		{% if d and (admin or not menunggu) %}
+		<p class="tombol-baris">
+			<button type="submit" class="tombol tombol--garis tombol--bahaya" name="aksi" value="buang" formnovalidate>Buang draf</button>
+			<span class="keterangan">{{ 'Penyunting kembali ke terjemahan yang sudah terbit.' if k.terbit else 'Versi Inggris kembali kosong.' }} Draf yang dibuang tetap tersimpan di riwayat.</span>
+		</p>
+		{% endif %}
+		{% if admin and k.terbit %}
+		<p class="tombol-baris">
+			<button type="submit" class="tombol tombol--garis tombol--bahaya" name="aksi" value="tarik" formnovalidate>Tarik dari situs</button>
+			<span class="keterangan">Versi Inggris halaman ini tidak tampil lagi; terjemahannya tetap ada di draf dan di riwayat.</span>
+		</p>
+		{% endif %}
+	</div>
+	{% endif %}
+</form>
+{% endblock %}
