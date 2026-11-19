@@ -38,6 +38,20 @@
 </section>
 
 <section class="kartu">
+	<h2>Versi bahasa Inggris</h2>
+	<p>Versi bahasa Inggris (<code>/{{ r.slug }}/en/</code>) <strong>{{ 'aktif' if r.inggris else 'nonaktif' }}</strong>.</p>
+	<form method="post" action="{{ url_for('super_prodi_inggris', kode=b.kode) }}" class="sebaris">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<input type="hidden" name="inggris" value="{{ '0' if r.inggris else '1' }}">
+		<button type="submit" class="tombol tombol--kecil tombol--garis">{{ 'Nonaktifkan versi Inggris' if r.inggris else 'Aktifkan versi Inggris' }}</button>
+	</form>
+	<p class="keterangan">Saat aktif, situs prodi mendapat versi bahasa Inggris dan tombol English di setiap halaman yang punya
+		versi Inggris. Untuk sekarang versi Inggris memuat halaman dari data resmi berbahasa Inggris: beranda, Profil Lulusan dan
+		CPL, Spesifikasi, Akreditasi, Dosen Tetap, Kalender, dan Kontak. Halaman yang diisi prodi menyusul setelah penyunting
+		bahasa Inggris tersedia.</p>
+</section>
+
+<section class="kartu">
 	<h2>Tautan dosen tetap</h2>
 	<form method="post" action="{{ url_for('super_prodi_dosen', kode=b.kode) }}" class="formulir">
 		<input type="hidden" name="csrf" value="{{ token_csrf() }}">

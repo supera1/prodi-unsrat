@@ -214,6 +214,18 @@ def pasang(app, alat):
         flash("Situs prodi %s. Situs dibangun ulang." % ("diaktifkan" if aktif else "dinonaktifkan"), "ok")
         return redirect(url_for("super_prodi_detail", kode=kode))
 
+    @app.route("/super/prodi/<kode>/inggris", methods=["POST"])
+    @akses("super")
+    def super_prodi_inggris(kode):
+        r = kode_terdaftar(kode)
+        inggris = request.form.get("inggris") == "1"
+        registri.atur(kode, oleh(), inggris=inggris)
+        alat.catat("inggris-diaktifkan" if inggris else "inggris-dinonaktifkan", prodi=kode)
+        if r.get("aktif"):
+            bangun(kode)
+        flash("Versi bahasa Inggris %s. Situs dibangun ulang." % ("diaktifkan" if inggris else "dinonaktifkan"), "ok")
+        return redirect(url_for("super_prodi_detail", kode=kode))
+
     @app.route("/super/prodi/<kode>/dosen", methods=["POST"])
     @akses("super")
     def super_prodi_dosen(kode):

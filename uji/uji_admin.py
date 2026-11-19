@@ -415,6 +415,7 @@ try:
         ("GET", "/super/prodi/%s" % A, "super_prodi_detail", hanya("superuji")),
         ("POST", "/super/prodi/%s/slug" % A, "super_prodi_slug", hanya("superuji", ya=302)),
         ("POST", "/super/prodi/%s/aktif" % A, "super_prodi_aktif", hanya("superuji", ya=302)),
+        ("POST", "/super/prodi/%s/inggris" % A, "super_prodi_inggris", hanya("superuji", ya=302)),
         ("POST", "/super/prodi/%s/dosen" % A, "super_prodi_dosen", hanya("superuji", ya=302)),
         ("POST", "/super/prodi/%s/bangun" % A, "super_prodi_bangun", hanya("superuji", ya=302)),
         ("POST", "/super/prodi/daftar", "super_prodi_daftar", hanya("superuji", ya=400)),
