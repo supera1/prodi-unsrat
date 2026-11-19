@@ -2,8 +2,9 @@
 """A programme's extra pages (K-P35): pages its admin adds to a group of the menu, beside the accreditation pages.
 
 prodi/<kode>/tambahan.json (lokasi.py):
-    {"halaman": [{"id": "x1a2b3c", "label": "Database Skripsi", "kelompok": "akademik", "alamat": "database-skripsi",
-                  "dibuat": {"oleh", "waktu"}}, ...]}
+    {"halaman": [{"id": "x1a2b3c", "label": "Database Skripsi", "label_en": "Thesis Database", "kelompok": "akademik",
+                  "alamat": "database-skripsi", "dibuat": {"oleh", "waktu"}}, ...]}
+label_en (optional): its name on the English site (K-P37); without it the page is not on the English site.
 in menu order within each group. A page's content is a page of isi_halaman.py (prodi/<kode>/halaman-<id>.json,
 template TEMPLAT_TAMBAHAN: text, embedded content, PDFs, photos, links), written, submitted and published like the
 others (K-P24). The site lists an extra page after the group's own pages, once it has published content; its address
@@ -85,6 +86,12 @@ def periksa(daftar, kelompok=None):
             masalah.append("%s: nama menu sudah dipakai halaman tambahan lain" % di)
         if isinstance(nama, str):
             label.add(nama.lower())
+        nama_en = h.get("label_en", "")
+        if nama_en != "" and (not isinstance(nama_en, str) or not nama_en.strip() or nama_en != nama_en.strip()
+                              or len(nama_en) > MAKS_LABEL or LARANGAN.search(nama_en)):
+            masalah.append("%s: nama menu Inggris harus 1-%d karakter, tanpa < > dan karakter kendali" % (di, MAKS_LABEL))
+        elif nama_en and saringan_spam.cari(nama_en):
+            masalah.append("%s: nama menu Inggris memuat teks %s" % (di, saringan_spam.jenis(saringan_spam.cari(nama_en))))
         if h.get("kelompok") not in kelompok:
             masalah.append("%s: kelompok menu tidak dikenal" % di)
         a = h.get("alamat")
@@ -123,19 +130,22 @@ def _id_baru(daftar):
             return id_
 
 
-def tambah(kode, label, kelompok, alamat, oleh):
+def tambah(kode, label, kelompok, alamat, oleh, label_en=""):
     """Add a page at the end of its group; returns it. alamat: as typed, or made from the label when empty."""
     daftar = list(baca(kode))
     label = (label or "").strip()
     alamat = (alamat or "").strip().lower() or alamat_dari(label)
     h = {"id": _id_baru(daftar), "label": label, "kelompok": kelompok, "alamat": alamat,
          "dibuat": {"oleh": oleh, "waktu": datetime.datetime.now().isoformat(timespec="seconds")}}
+    if (label_en or "").strip():
+        h["label_en"] = label_en.strip()
     simpan(kode, daftar + [h], oleh, "tambah halaman %s" % alamat)
     return h
 
 
 def ubah(kode, perubahan, oleh):
-    """Change the label, the group and the order of the pages: perubahan {id: {"label", "kelompok", "urutan"}}.
+    """Change the label (and its English one), the group and the order of the pages: perubahan {id: {"label",
+    "label_en", "kelompok", "urutan"}}; an empty label_en takes the English name away.
     Pages keep their address. Pages without a new position keep theirs relative to the others."""
     daftar = []
     for i, h in enumerate(baca(kode)):
@@ -143,6 +153,11 @@ def ubah(kode, perubahan, oleh):
         baru = dict(h)
         if "label" in p:
             baru["label"] = (p["label"] or "").strip()
+        if "label_en" in p:
+            if (p["label_en"] or "").strip():
+                baru["label_en"] = p["label_en"].strip()
+            else:
+                baru.pop("label_en", None)
         if "kelompok" in p:
             baru["kelompok"] = p["kelompok"]
         urutan = p.get("urutan", i)
@@ -166,5 +181,6 @@ def hapus(kode, id_, oleh):
 def butir_menu(h):
     """An extra page as an entry of a built menu (menu.susun)."""
     return {"id": h["id"], "label": h["label"], "label_asli": h["label"], "alamat": "%s/%s" % (AWALAN, h["alamat"]),
-            "deskripsi": h["label"] + ".", "label_en": "", "deskripsi_en": "", "jenis": "tambahan", "templat": None,
+            "deskripsi": h["label"] + ".", "label_en": h.get("label_en") or "",
+            "deskripsi_en": (h["label_en"] + ".") if h.get("label_en") else "", "jenis": "tambahan", "templat": None,
             "nav": True, "kelompok": False, "anak": []}

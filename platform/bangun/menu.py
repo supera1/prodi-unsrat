@@ -2,13 +2,15 @@
 """The master menu of every programme site (platform/template/menu.json) and a programme's own menu settings.
 
 A programme admin may (rencana §7, K-P2):
-- rename any item or group (label, 1-60 characters, no gambling text);
+- rename any item or group (label, 1-60 characters, no gambling text), in English too (label_en: the English site,
+  K-P37);
 - reorder the items inside a group (groups keep their order, so every site reads the same);
 - hide an item marked "opsional". Items marked "wajib" (needed for accreditation) or "otomatis" always stay.
 An optional item marked "bila_terisi" is on a site only while the programme has published its content (the builder
 leaves it out otherwise), so a page few programmes use (Tugas Akhir) never shows empty on the others.
 
-Settings live in prodi/<kode>/situs.json under "menu": {"<id>": {"label": "...", "urutan": 2, "sembunyi": true}}.
+Settings live in prodi/<kode>/situs.json under "menu": {"<id>": {"label": "...", "label_en": "...", "urutan": 2,
+"sembunyi": true}}.
 Every item has an English label and description too (label_en, deskripsi_en: the English sites, K-P37).
 A programme's extra pages (K-P35, halaman_tambahan.py) follow the pages of the group they belong to.
 """
@@ -108,17 +110,19 @@ def periksa_pengaturan(templat, pengaturan):
         if b is None:
             masalah.append("butir menu %r tidak ada di template" % id_)
             continue
-        if not isinstance(atur, dict) or set(atur) - {"label", "urutan", "sembunyi"}:
-            masalah.append("%s: hanya label, urutan, dan sembunyi yang bisa diatur" % id_)
+        if not isinstance(atur, dict) or set(atur) - {"label", "label_en", "urutan", "sembunyi"}:
+            masalah.append("%s: hanya label, label Inggris, urutan, dan sembunyi yang bisa diatur" % id_)
             continue
-        label = atur.get("label")
-        if label is not None:
+        for kunci, nama in (("label", "label"), ("label_en", "label Inggris")):
+            label = atur.get(kunci)
+            if label is None:
+                continue
             if not isinstance(label, str) or not label.strip() or len(label.strip()) > MAKS_LABEL:
-                masalah.append("%s: label harus 1-%d karakter" % (id_, MAKS_LABEL))
+                masalah.append("%s: %s harus 1-%d karakter" % (id_, nama, MAKS_LABEL))
             elif saringan_spam.cari(label):
-                masalah.append("%s: label memuat istilah terlarang" % id_)
+                masalah.append("%s: %s memuat istilah terlarang" % (id_, nama))
             elif re.search(r"[<>\x00-\x1f]", label):
-                masalah.append("%s: label memuat karakter terlarang" % id_)
+                masalah.append("%s: %s memuat karakter terlarang" % (id_, nama))
         if "urutan" in atur and (not isinstance(atur["urutan"], int) or isinstance(atur["urutan"], bool)
                                  or not 0 <= atur["urutan"] <= 99):
             masalah.append("%s: urutan harus angka 0-99" % id_)
@@ -144,7 +148,8 @@ def susun(templat, pengaturan=None, tambahan=()):
     def jadi(b):
         atur = pengaturan.get(b["id"], {})
         return {"id": b["id"], "label": (atur.get("label") or b["label"]).strip(), "label_asli": b["label"],
-                "label_en": b["label_en"], "alamat": b["alamat"], "deskripsi": b["deskripsi"],
+                "label_en": (atur.get("label_en") or b["label_en"]).strip(), "alamat": b["alamat"],
+                "deskripsi": b["deskripsi"],
                 "deskripsi_en": b["deskripsi_en"], "jenis": b.get("jenis"),
                 "templat": b.get("templat"), "nav": b.get("nav", True), "kelompok": "anak" in b, "anak": [],
                 "bila_terisi": bool(b.get("bila_terisi"))}
