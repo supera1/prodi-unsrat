@@ -1,7 +1,7 @@
 {# Accreditation: the status from the official data; the documents (certificate, decree, summary) from the programme
    (isi_halaman.py "akreditasi", K-P29); once LPMPP confirmed the programme's accreditation body, its pages per
-   criterion (kriteria.py). The English version (K-P37) shows the status; its documents come with the English content
-   of the page (Fase 5 langkah 2). #}
+   criterion (kriteria.py). The English version (K-P37) shows the status, and the documents once the page has an
+   English version (isi_inggris.py). #}
 {% extends "halaman.html" %}
 {% from "_isi.html" import bagian_isi with context %}
 {% block isi_halaman %}
@@ -20,12 +20,10 @@
 {% else %}
 <p class="catatan catatan--menyusul">{{ _("Status akreditasi sedang dilengkapi.") }}</p>
 {% endif %}
-{% if bahasa == 'id' %}
 {% if isi_bagian %}
 {% for b in isi_bagian %}{{ bagian_isi(b) }}{% endfor %}
-{% else %}
+{% elif bahasa == 'id' %}
 <p class="catatan catatan--menyusul">Sertifikat akreditasi sedang dilengkapi oleh Program Studi {{ nama }}.</p>
-{% endif %}
 {% endif %}
 {% set peta = peta_kriteria | selectattr("halaman") | list %}
 {% if peta %}

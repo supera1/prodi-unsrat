@@ -38,6 +38,7 @@ from __future__ import print_function
 
 import argparse
 import datetime
+import hashlib
 import json
 import os
 import re
@@ -50,6 +51,7 @@ sys.path.insert(0, os.path.join(PLATFORM, "pemantau"))
 
 from markupsafe import Markup, escape  # noqa: E402
 
+import bahasa as bahasa_mod  # noqa: E402
 import lokasi  # noqa: E402
 import media  # noqa: E402
 import saringan_spam  # noqa: E402
@@ -74,10 +76,12 @@ class GagalIsi(ValueError):
 
 # ------------------------------------------------------------------ template nodes (the vocabulary of www's editor.py)
 
-def teks(label, wajib=False, maks=300, panjang=False, kaya=False, bantuan=""):
-    """A line of text (or, panjang, several lines). kaya: the limited markup of a paragraph."""
+def teks(label, wajib=False, maks=300, panjang=False, kaya=False, bantuan="", terjemah=True):
+    """A line of text (or, panjang, several lines). kaya: the limited markup of a paragraph. terjemah: how the English
+    version shows it (isi_inggris.py, K-P37): True, translated (untranslated, it is left out); "boleh", translated
+    when the programme chose to, else as written (titles of works); False, as written (names, codes)."""
     return {"jenis": "teks", "label": label, "wajib": wajib, "maks": maks, "panjang": panjang, "kaya": kaya,
-            "bantuan": bantuan}
+            "bantuan": bantuan, "terjemah": terjemah}
 
 
 def paragraf(label="", maks=10000, bantuan=""):
@@ -237,8 +241,8 @@ TEMPLAT = {
         ("bagan", gambar_daftar("Bagan organisasi", 2, "Bagan tampil utuh selebar halaman. Supaya tulisannya terbaca, "
                                                         "unggah gambar selebar 1600 piksel atau lebih.")),
         ("pejabat", tabel("Pengelola program studi", [("jabatan", teks("Jabatan", wajib=True, maks=120)),
-                                                     ("nama", teks("Nama", wajib=True, maks=150)),
-                                                     ("periode", teks("Periode", maks=40))], 40)),
+                                                     ("nama", teks("Nama", wajib=True, maks=150, terjemah=False)),
+                                                     ("periode", teks("Periode", maks=40, terjemah=False))], 40)),
         ("tata_pamong", paragraf("Tata pamong dan tata kelola")),
         ("dokumen", dokumen_daftar(bantuan="Mis. SK struktur organisasi, uraian tugas."))),
     "penjaminan-mutu": halaman(
@@ -253,7 +257,7 @@ TEMPLAT = {
     "kerja-sama": halaman(
         ("uraian", uraian()),
         ("daftar", tabel("Daftar kerja sama", [
-            ("mitra", teks("Mitra", wajib=True, maks=200)),
+            ("mitra", teks("Mitra", wajib=True, maks=200, terjemah=False)),
             ("jenis", pilihan("Bidang", ("Pendidikan", "Penelitian", "Pengabdian kepada masyarakat"), wajib=True)),
             ("tingkat", pilihan("Tingkat", TINGKAT, wajib=True)),
             ("bentuk", teks("Bentuk kegiatan", maks=300)),
@@ -266,7 +270,7 @@ TEMPLAT = {
         ("struktur", paragraf("Struktur kurikulum")),
         ("mata_kuliah", tabel("Mata kuliah", [
             ("semester", bilangan("Semester", 1, 14, wajib=True)),
-            ("kode", teks("Kode", maks=20)),
+            ("kode", teks("Kode", maks=20, terjemah=False)),
             ("nama", teks("Mata kuliah", wajib=True, maks=150)),
             ("sks", bilangan("SKS", 0, 30, wajib=True)),
             ("sifat", pilihan("Sifat", ("Wajib", "Pilihan"))),
@@ -287,13 +291,13 @@ TEMPLAT = {
     "tugas-akhir": halaman(
         ("uraian", uraian()),
         ("daftar", dict(tabel("Daftar tugas akhir", [
-            ("judul", dict(teks("Judul", wajib=True, maks=500),
+            ("judul", dict(teks("Judul", wajib=True, maks=500, terjemah="boleh"),
                            alias=["Judul Skripsi", "Judul Tugas Akhir", "Judul TA"])),
             ("tahun", dict(tahun("Tahun lulus"), alias=["Tahun", "Tahun Lulus"])),
-            ("mahasiswa", dict(teks("Mahasiswa", maks=150), alias=["Nama", "Nama Mahasiswa"])),
-            ("pembimbing_utama", dict(teks("Pembimbing 1", maks=150),
+            ("mahasiswa", dict(teks("Mahasiswa", maks=150, terjemah=False), alias=["Nama", "Nama Mahasiswa"])),
+            ("pembimbing_utama", dict(teks("Pembimbing 1", maks=150, terjemah=False),
                                       alias=["Dosen Pembimbing 1", "Pembimbing I", "Pembimbing Utama"])),
-            ("pembimbing_pendamping", dict(teks("Pembimbing 2", maks=150),
+            ("pembimbing_pendamping", dict(teks("Pembimbing 2", maks=150, terjemah=False),
                                            alias=["Dosen Pembimbing 2", "Pembimbing II", "Pembimbing Pendamping"])),
             ("tautan", dict(url("Tautan naskah", bantuan="Alamat naskah di repositori, diawali https://"),
                             alias=["Tautan", "URL", "Repositori"]))], 5000,
@@ -303,49 +307,49 @@ TEMPLAT = {
     "kelompok-keahlian": halaman(
         ("uraian", uraian()),
         ("daftar", kartu("Kelompok keahlian", [("nama", teks("Nama kelompok", wajib=True, maks=150)),
-                                               ("ketua", teks("Ketua", maks=150)),
-                                               ("anggota", teks("Anggota", maks=1000, panjang=True)),
+                                               ("ketua", teks("Ketua", maks=150, terjemah=False)),
+                                               ("anggota", teks("Anggota", maks=1000, panjang=True, terjemah=False)),
                                                ("topik", teks("Topik penelitian", maks=1000, panjang=True))], 30))),
     "tendik": halaman(
         ("uraian", uraian()),
-        ("daftar", tabel("Tenaga kependidikan", [("nama", teks("Nama", wajib=True, maks=150)),
+        ("daftar", tabel("Tenaga kependidikan", [("nama", teks("Nama", wajib=True, maks=150, terjemah=False)),
                                                 ("tugas", teks("Tugas atau jabatan", wajib=True, maks=150)),
                                                 ("unit", teks("Unit kerja", maks=150))], 100))),
     "pengembangan-sdm": halaman(
         ("uraian", uraian()),
-        ("studi_lanjut", tabel("Studi lanjut dosen", [("nama", teks("Nama dosen", wajib=True, maks=150)),
+        ("studi_lanjut", tabel("Studi lanjut dosen", [("nama", teks("Nama dosen", wajib=True, maks=150, terjemah=False)),
                                                       ("jenjang", teks("Jenjang", maks=30)),
                                                       ("bidang", teks("Bidang studi", maks=150)),
-                                                      ("institusi", teks("Perguruan tinggi", maks=200)),
+                                                      ("institusi", teks("Perguruan tinggi", maks=200, terjemah=False)),
                                                       ("tahun", tahun("Tahun mulai"))], 100)),
-        ("pelatihan", tabel("Pelatihan, seminar, dan sertifikasi", [("nama", teks("Nama dosen", wajib=True, maks=150)),
+        ("pelatihan", tabel("Pelatihan, seminar, dan sertifikasi", [("nama", teks("Nama dosen", wajib=True, maks=150, terjemah=False)),
                                                                     ("kegiatan", teks("Kegiatan", wajib=True, maks=300)),
                                                                     ("tingkat", pilihan("Tingkat", TINGKAT)),
                                                                     ("tahun", tahun())], 200)),
-        ("prestasi", tabel("Prestasi dosen", [("nama", teks("Nama dosen", wajib=True, maks=150)),
+        ("prestasi", tabel("Prestasi dosen", [("nama", teks("Nama dosen", wajib=True, maks=150, terjemah=False)),
                                               ("prestasi", teks("Prestasi", wajib=True, maks=300)),
                                               ("tingkat", pilihan("Tingkat", TINGKAT)),
                                               ("tahun", tahun())], 200))),
     # Riset dan PkM
     "penelitian": halaman(
         ("agenda", paragraf("Agenda penelitian")),
-        ("daftar", tabel("Penelitian", [("judul", teks("Judul", wajib=True, maks=300)),
-                                        ("ketua", teks("Ketua", maks=150)),
+        ("daftar", tabel("Penelitian", [("judul", teks("Judul", wajib=True, maks=300, terjemah="boleh")),
+                                        ("ketua", teks("Ketua", maks=150, terjemah=False)),
                                         ("tahun", tahun(wajib=True)),
                                         ("dana", teks("Sumber dana", maks=150)),
                                         ("mahasiswa", centang("Melibatkan mahasiswa"))], 300))),
     "publikasi": halaman(
         ("uraian", uraian()),
-        ("daftar", tabel("Publikasi", [("judul", teks("Judul", wajib=True, maks=300)),
-                                       ("penulis", teks("Penulis", maks=300)),
-                                       ("wadah", teks("Jurnal, prosiding, atau media", maks=200)),
+        ("daftar", tabel("Publikasi", [("judul", teks("Judul", wajib=True, maks=300, terjemah="boleh")),
+                                       ("penulis", teks("Penulis", maks=300, terjemah=False)),
+                                       ("wadah", teks("Jurnal, prosiding, atau media", maks=200, terjemah=False)),
                                        ("tahun", tahun(wajib=True)),
                                        ("tautan", url("Tautan (DOI/URL)"))], 500))),
     "pkm": halaman(
         ("uraian", uraian()),
-        ("daftar", tabel("Pengabdian kepada masyarakat", [("judul", teks("Judul", wajib=True, maks=300)),
-                                                          ("ketua", teks("Ketua", maks=150)),
-                                                          ("mitra", teks("Mitra atau lokasi", maks=200)),
+        ("daftar", tabel("Pengabdian kepada masyarakat", [("judul", teks("Judul", wajib=True, maks=300, terjemah="boleh")),
+                                                          ("ketua", teks("Ketua", maks=150, terjemah=False)),
+                                                          ("mitra", teks("Mitra atau lokasi", maks=200, terjemah=False)),
                                                           ("tahun", tahun(wajib=True)),
                                                           ("dana", teks("Sumber dana", maks=150)),
                                                           ("mahasiswa", centang("Melibatkan mahasiswa"))], 300))),
@@ -354,15 +358,15 @@ TEMPLAT = {
         ("daftar", tabel("Luaran penelitian dan pengabdian", [
             ("jenis", pilihan("Jenis", ("HKI (hak cipta, merek, desain)", "Paten", "Buku", "Teknologi tepat guna",
                                         "Produk", "Lainnya"), wajib=True)),
-            ("judul", teks("Judul", wajib=True, maks=300)),
+            ("judul", teks("Judul", wajib=True, maks=300, terjemah="boleh")),
             ("tahun", tahun()),
-            ("nomor", teks("Nomor atau identitas", maks=100)),
+            ("nomor", teks("Nomor atau identitas", maks=100, terjemah=False)),
             ("tautan", url("Tautan"))], 300))),
     # Mahasiswa dan Alumni
     "penerimaan": halaman(
         ("uraian", uraian()),
         ("tautan", tautan_daftar("Tautan penerimaan", 5)),
-        ("data", tabel("Data penerimaan", [("tahun", teks("Tahun akademik", wajib=True, maks=20)),
+        ("data", tabel("Data penerimaan", [("tahun", teks("Tahun akademik", wajib=True, maks=20, terjemah=False)),
                                            ("daya_tampung", bilangan("Daya tampung")),
                                            ("pendaftar", bilangan("Pendaftar")),
                                            ("lulus", bilangan("Lulus seleksi")),
@@ -374,9 +378,9 @@ TEMPLAT = {
                                                 ("tautan", url("Tautan"))], 20))),
     "organisasi-prestasi": halaman(
         ("uraian", uraian()),
-        ("organisasi", kartu("Organisasi kemahasiswaan", [("nama", teks("Nama organisasi", wajib=True, maks=150)),
+        ("organisasi", kartu("Organisasi kemahasiswaan", [("nama", teks("Nama organisasi", wajib=True, maks=150, terjemah="boleh")),
                                                           ("uraian", teks("Uraian", maks=1000, panjang=True))], 30)),
-        ("prestasi", tabel("Prestasi mahasiswa", [("kegiatan", teks("Kegiatan atau lomba", wajib=True, maks=200)),
+        ("prestasi", tabel("Prestasi mahasiswa", [("kegiatan", teks("Kegiatan atau lomba", wajib=True, maks=200, terjemah="boleh")),
                                                   ("tingkat", pilihan("Tingkat", TINGKAT, wajib=True)),
                                                   ("tahun", tahun(wajib=True)),
                                                   ("capaian", teks("Capaian", wajib=True, maks=150))], 300,
@@ -423,7 +427,7 @@ TEMPLAT = {
         ("tautan", tautan_daftar("Tautan sumber referensi"))),
     "sistem-informasi": halaman(
         ("uraian", uraian()),
-        ("daftar", tabel("Sistem informasi", [("nama", teks("Nama sistem", wajib=True, maks=150)),
+        ("daftar", tabel("Sistem informasi", [("nama", teks("Nama sistem", wajib=True, maks=150, terjemah=False)),
                                               ("fungsi", teks("Fungsi", maks=300)),
                                               ("tautan", url("Tautan"))], 50))),
 }
@@ -439,9 +443,27 @@ TEMPLAT_TAMBAHAN = halaman(
     ("tautan", tautan_daftar("Tautan", maks=20)))
 
 
+# the English version of a page (Fase 5 langkah 2, K-P37; isi_inggris.py) is stored as a page of its own, "<id>:en" in
+# prodi/<kode>/halaman-<id>-en.json, with the same drafts, review and history: its content is not a copy of the page
+# but its translations, {"teks": {Indonesian text: English text}, "asal": {field outside a list: the Indonesian text
+# it was translated from}}, which the builder lays over the Indonesian content.
+EN = ":en"
+MAKS_TERJEMAHAN = 20000         # texts of one page's English version
+MAKS_TEKS_EN = 10000
+TEMPLAT_EN = {"jenis": "terjemahan", "label": "Terjemahan bahasa Inggris", "maks": MAKS_TERJEMAHAN}
+POLA_JALUR_EN = re.compile(r"^[a-z][a-z_]*(\.alt)?$")
+
+
+def kunci_teks(teks):
+    """A short fixed name for a text (the English form's field names)."""
+    return hashlib.sha256(teks.encode("utf-8")).hexdigest()[:16]
+
+
 def templat_halaman(id_halaman):
     """The content template of a page: its own for the master menu's pages, TEMPLAT_TAMBAHAN for an extra page's id,
-    else None."""
+    TEMPLAT_EN for the English version of either ("<id>:en"), else None."""
+    if isinstance(id_halaman, str) and id_halaman.endswith(EN):
+        return TEMPLAT_EN if templat_halaman(id_halaman[:-len(EN)]) is not None else None
     if id_halaman in TEMPLAT:
         return TEMPLAT[id_halaman]
     return TEMPLAT_TAMBAHAN if isinstance(id_halaman, str) and POLA_TAMBAHAN.match(id_halaman) else None
@@ -505,6 +527,9 @@ def _periksa(node, v, tempat, kode, masalah, jalur=""):
             else:
                 _periksa(isi, x, di, kode, masalah, sub)
         return
+    if j == "terjemahan":
+        _periksa_terjemahan(node, v, masalah)
+        return
     if v is None or (isinstance(v, str) and not v.strip()):
         if node.get("wajib"):
             salah("wajib diisi")
@@ -559,6 +584,40 @@ def _periksa(node, v, tempat, kode, masalah, jalur=""):
             salah("teks alternatif foto wajib diisi (maksimal 200 karakter, tanpa istilah terlarang)")
 
 
+def _periksa_terjemahan(node, v, masalah):
+    """The translations of a page's English version: plain texts and the limited markup, no gambling text. Each
+    problem's field name is the English form's ("t.<kunci_teks(Indonesian text)>")."""
+    if not isinstance(v, dict) or not isinstance(v.get("teks", {}), dict) or not isinstance(v.get("asal", {}), dict):
+        masalah.append(("", "", "terjemahan harus berupa objek teks"))
+        return
+    teks_en, asal = v.get("teks", {}), v.get("asal", {})
+    if len(teks_en) > node["maks"]:
+        masalah.append(("", "", "paling banyak %d terjemahan" % node["maks"]))
+    for sumber, en in list(teks_en.items())[:node["maks"]]:
+        if not isinstance(sumber, str) or not sumber.strip() or len(sumber) > MAKS_TEKS_EN:
+            masalah.append(("", "", "teks sumber terjemahan tidak sah"))
+            continue
+        jalur, tempat = "t.%s" % kunci_teks(sumber), "Terjemahan “%s”" % (sumber[:40] + ("…" if len(sumber) > 40 else ""))
+        if not isinstance(en, str) or not en.strip():
+            masalah.append((jalur, tempat, "terjemahan kosong"))
+        elif len(en) > MAKS_TEKS_EN:
+            masalah.append((jalur, tempat, "terlalu panjang (maksimal %d karakter)" % MAKS_TEKS_EN))
+        elif KONTROL.search(en):
+            masalah.append((jalur, tempat, "memuat karakter yang tidak boleh"))
+        else:
+            m = _teks_kaya_masalah(en)
+            if m:
+                masalah.append((jalur, tempat, m))
+            istilah = saringan_spam.cari(en)
+            if istilah:
+                masalah.append((jalur, tempat, "memuat teks %s (%s)" % (saringan_spam.jenis(istilah), istilah)))
+    for jalur, sumber in asal.items():
+        if not isinstance(jalur, str) or not POLA_JALUR_EN.match(jalur) or not isinstance(sumber, str) \
+                or len(sumber) > MAKS_TEKS_EN:
+            masalah.append(("", "", "asal terjemahan tidak sah"))
+            break
+
+
 def _semua_masalah(id_halaman, isi, kode):
     templat = templat_halaman(id_halaman)
     if templat is None:
@@ -604,6 +663,8 @@ def kosong(node, v):
         return not isinstance(v, dict) or all(kosong(n, v.get(k)) for k, n in node["bidang"])
     if j == "daftar":
         return not v
+    if j == "terjemahan":
+        return not isinstance(v, dict) or not v.get("teks")
     if j == "centang":
         return v is not True
     if isinstance(v, str):
@@ -679,8 +740,9 @@ def angka(v, format="angka"):
     return "{:,}".format(int(v)).replace(",", ".")
 
 
-def sel(node, v):
-    """One value as shown in a table cell or a card: {"jenis": "teks"|"tautan"|"dokumen"|"ya"|"kosong", ...}."""
+def sel(node, v, _=lambda teks: teks):
+    """One value as shown in a table cell or a card: {"jenis": "teks"|"tautan"|"dokumen"|"ya"|"kosong", ...}.
+    _: the translator of the page's language (bahasa.py), for the fixed choices."""
     j = node["jenis"]
     if kosong(node, v):
         return {"jenis": "kosong"}
@@ -694,7 +756,7 @@ def sel(node, v):
         pendek = re.sub(r"^https://(www\.)?", "", v).rstrip("/")
         return {"jenis": "tautan", "alamat": v, "label": pendek if len(pendek) <= 40 else pendek[:39] + "…"}
     if j == "pilihan":
-        return {"jenis": "teks", "html": escape(v)}
+        return {"jenis": "teks", "html": escape(_(v))}
     if j == "centang":
         return {"jenis": "ya"}
     if j == "dokumen":
@@ -706,7 +768,7 @@ def _paragraf_polos(teks):
     return Markup("<p>%s</p>") % Markup("<br>").join(escape(b) for b in teks.splitlines() if b.strip())
 
 
-def tampilan(id_halaman, isi, media_ok=lambda rekam: True):
+def tampilan(id_halaman, isi, media_ok=lambda rekam: True, bahasa="id"):
     """The sections the site shows, in order, without empty ones: ([section, ...], files missing).
 
     A section is {"jenis", "judul", "id", ...}: "paragraf" (html), "daftar" (butir, bernomor), "tabel" (kolom, baris of
@@ -718,8 +780,12 @@ def tampilan(id_halaman, isi, media_ok=lambda rekam: True):
 
     media_ok(record) publishes a stored file and says whether it is there. A missing file is counted; the item it
     belongs to is left out when the file is required (a document of a document list, a photo of a gallery), and only
-    the file is left out when it is optional (the proof of a partnership, the SOP of a laboratory)."""
+    the file is left out when it is optional (the proof of a partnership, the SOP of a laboratory).
+
+    bahasa "en": the headings, column names and fixed choices in English (the content itself is already English:
+    isi_inggris.terjemahkan)."""
     templat = templat_halaman(id_halaman)
+    _ = bahasa_mod.penerjemah(bahasa)
     hasil, hilang = [], [0]
     isi = isi if isinstance(isi, dict) else {}
 
@@ -743,7 +809,7 @@ def tampilan(id_halaman, isi, media_ok=lambda rekam: True):
         v = isi.get(kunci)
         if kosong(node, v):
             continue
-        dasar = {"judul": node["label"], "id": "bagian-%s" % kunci.replace("_", "-")}
+        dasar = {"judul": _(node["label"]) if node["label"] else "", "id": "bagian-%s" % kunci.replace("_", "-")}
         if node["jenis"] == "teks":
             hasil.append(dict(dasar, jenis="paragraf", html=teks_kaya(v)))
             continue
@@ -760,8 +826,8 @@ def tampilan(id_halaman, isi, media_ok=lambda rekam: True):
             # a column empty in every row is left out (a list of final projects without years); a long table gets a
             # search box on the site (cari-tabel.js), the whole table staying there without JavaScript
             bidang = [(k, n) for k, n in bidang if any(not kosong(n, x.get(k)) for x in item)]
-            hasil.append(dict(dasar, jenis="tabel", kolom=[n["label"] for _k, n in bidang], cari=len(item) >= BARIS_CARI,
-                              baris=[[sel(n, x.get(k)) for k, n in bidang] for x in item]))
+            hasil.append(dict(dasar, jenis="tabel", kolom=[_(n["label"]) for _k, n in bidang], cari=len(item) >= BARIS_CARI,
+                              baris=[[sel(n, x.get(k), _) for k, n in bidang] for x in item]))
         elif tampil == "kartu":
             kartu_ = []
             for x in item:
@@ -773,11 +839,11 @@ def tampilan(id_halaman, isi, media_ok=lambda rekam: True):
                     if n["jenis"] == "foto":
                         k["foto"] = nilai
                     elif n["jenis"] == "dokumen":
-                        k["dokumen"].append((n["label"], nilai))
+                        k["dokumen"].append((_(n["label"]), nilai))
                     elif n["jenis"] == "teks" and n["panjang"]:
-                        k["uraian"].append((n["label"], teks_kaya(nilai) if n["kaya"] else _paragraf_polos(nilai)))
+                        k["uraian"].append((_(n["label"]), teks_kaya(nilai) if n["kaya"] else _paragraf_polos(nilai)))
                     else:
-                        k["rincian"].append((n["label"], sel(n, nilai)))
+                        k["rincian"].append((_(n["label"]), sel(n, nilai, _)))
                 kartu_.append(k)
             hasil.append(dict(dasar, jenis="kartu", kartu=kartu_))
         elif tampil == "dokumen":
@@ -816,6 +882,8 @@ _KUNCI = threading.Lock()
 def nama_berkas(kode, id_halaman):
     if not POLA_KODE.match(kode or "") or templat_halaman(id_halaman) is None:
         raise GagalIsi("prodi atau halaman tidak dikenal")
+    if id_halaman.endswith(EN):
+        return "prodi/%s/halaman-%s-en" % (kode, id_halaman[:-len(EN)])
     return "prodi/%s/halaman-%s" % (kode, id_halaman)
 
 
@@ -1117,6 +1185,20 @@ def rapikan(node, v):
 
 def _saring(node, v, kode):
     j = node["jenis"]
+    if j == "terjemahan":                       # each translation on its own: a bad one does not drop the others
+        teks_en = v.get("teks") if isinstance(v, dict) and isinstance(v.get("teks"), dict) else {}
+        asal = v.get("asal") if isinstance(v, dict) and isinstance(v.get("asal"), dict) else {}
+        hasil = {"teks": {}, "asal": {}}
+        for sumber, en in teks_en.items():
+            masalah = []
+            _periksa_terjemahan(node, {"teks": {sumber: en}}, masalah)
+            if not masalah:
+                hasil["teks"][sumber] = en
+        masalah = []
+        _periksa_terjemahan(node, {"asal": asal}, masalah)
+        if not masalah:
+            hasil["asal"] = dict(asal)
+        return hasil
     if j == "objek":
         if not isinstance(v, dict):
             return {}
