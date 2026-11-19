@@ -3,11 +3,10 @@
 Situs ke-97 program studi Universitas Sam Ratulangi di `https://prodi.unsrat.ac.id/<slug>/`, dengan template seragam
 yang mengikuti kriteria akreditasi dan bisa disesuaikan oleh tiap prodi.
 
-> **Status 27 Oktober 2026:** Fase 1 selesai dan digabung ke `main` (PR #1): 97 situs prodi, data resmi dari www yang
-> diuji sama persis, admin tiga peran, stack Docker untuk VM sendiri ([log](docs/log/fase-01.md), panduan admin VM:
-> [docs/deploy.md](docs/deploy.md)). Fase 2 (penyunting halaman wajib dan pilot 3 prodi,
-> [rencana](docs/rencana-fase-02.md), disetujui): langkah 1–5 selesai, termasuk panduan admin prodi dan
-> [persiapan pilot](docs/pilot-fase-02.md). Pilot (langkah 6) menunggu staging tayang dan dua prodi pilot.
+> **Status 19 November 2026:** Fase 1 selesai (PR #1). Fase 2 (penyunting halaman wajib,
+> [rencana](docs/rencana-fase-02.md)): langkah 1–7 selesai, termasuk halaman tambahan, impor Excel, dan tugas akhir;
+> situs tayang di produksi `https://prodi.unsrat.ac.id` dengan prodi pilot. Fase 5 (versi bahasa Inggris,
+> [rencana](docs/rencana-fase-05.md), disetujui) dikerjakan lebih dulu dari Fase 3 dan 4.
 > Rencana: [docs/rencana-fase-01.md](docs/rencana-fase-01.md) · Keputusan: [docs/keputusan.md](docs/keputusan.md)
 
 ## Cara kerja singkat
@@ -81,6 +80,18 @@ Stack Docker lengkap di komputer sendiri: [docs/deploy.md §13](docs/deploy.md#1
 | 4 | Dokumen Akreditasi (di halaman Akreditasi) dan label kriteria (draf untuk LPMPP, [panduan](docs/kriteria-akreditasi.md)) | selesai |
 | 5 | [Panduan admin prodi](docs/panduan-admin-prodi.md) (juga di admin), menu Masukan, [persiapan pilot](docs/pilot-fase-02.md) | selesai |
 | 5b | Tautan dosen 94 prodi (dosen.unsrat.ac.id) di data awal VM baru (K-P31) | selesai, menunggu tinjauan |
-| 6 | Pilot 3 prodi | menunggu staging dan dua prodi pilot |
-| 7 | Pilihan tambahan (bila pilot memerlukan) | — |
+| 6 | Pilot 3 prodi | berjalan (staging, lalu produksi) |
+| 7 | Pilihan tambahan: impor Excel, halaman tambahan dan sematan, tugas akhir, masukan pilot (7–7e) | selesai |
 | 8 | Uji menyeluruh + log fase | — |
+
+## Urutan Fase 5 (versi bahasa Inggris)
+
+| Langkah | Isi | Status |
+|---|---|---|
+| 0 | [Rencana Fase 5](docs/rencana-fase-05.md) (K-P37) | disetujui |
+| 1 | Kerangka bahasa di situs: teks dan label Inggris, `/<slug>/en/` dari data resmi, tombol bahasa, `hreflang`, sitemap | — |
+| 2 | Isi Inggris di penyunting: tab English, alur, tanda perlu diperbarui | — |
+| 3 | Terjemahan mesin (DeepL) dengan glosarium dan batas pemakaian | — |
+| 4 | Pengumuman berbahasa Inggris (opsional) | — |
+| 5 | Panduan dan pilot | — |
+| 6 | Uji menyeluruh + log fase | — |
