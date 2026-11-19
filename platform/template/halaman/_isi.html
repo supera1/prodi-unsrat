@@ -10,7 +10,7 @@
 {%- if c.jenis == "teks" %}{{ c.html }}
 {%- elif c.jenis == "tautan" %}<a href="{{ c.alamat }}">{{ c.label }}</a>
 {%- elif c.jenis == "dokumen" %}<a href="{{ media_url(c.rekam) }}">PDF<span class="tersembunyi">: {{ c.rekam.judul }}</span></a> <span class="isi-info">{{ c.rekam.ukuran | ukuran }}</span>
-{%- elif c.jenis == "ya" %}Ya
+{%- elif c.jenis == "ya" %}{{ _("Ya") }}
 {%- endif %}
 {%- endmacro %}
 
@@ -63,7 +63,7 @@
 		{% for d in b.dokumen %}
 		<li>
 			<a href="{{ media_url(d.rekam) }}">{{ d.judul }}</a>
-			<span class="isi-info">PDF, {{ d.rekam.halaman }} halaman, {{ d.rekam.ukuran | ukuran }}{% if d.tahun %}, {{ d.tahun }}{% endif %}</span>
+			<span class="isi-info">{{ _("PDF, %s halaman") | format(d.rekam.halaman) }}, {{ d.rekam.ukuran | ukuran }}{% if d.tahun %}, {{ d.tahun }}{% endif %}</span>
 			{% if d.keterangan %}<br>{{ d.keterangan }}{% endif %}
 		</li>
 		{% endfor %}
@@ -87,7 +87,7 @@
 			sizes="(min-width: 800px) 48rem, 100vw" alt="{{ f.rekam.alt }}" width="{{ besar.lebar }}" height="{{ besar.tinggi }}"{% if not loop.first %} loading="lazy"{% endif %}>
 		{% if f.keterangan %}<figcaption>{{ f.keterangan }}</figcaption>{% endif %}
 	</figure>
-	<p class="isi-gambar__buka"><a href="{{ media_url(besar) }}">Buka gambar ukuran penuh<span class="tersembunyi">: {{ f.rekam.alt }}</span></a></p>
+	<p class="isi-gambar__buka"><a href="{{ media_url(besar) }}">{{ _("Buka gambar ukuran penuh") }}<span class="tersembunyi">: {{ f.rekam.alt }}</span></a></p>
 	{% endfor %}
 	{% elif b.jenis == "tautan" %}
 	<ul class="isi-tautan">
@@ -103,7 +103,7 @@
 		{% else %}
 		<p class="sematan__pengganti">{{ s.layanan }} tampil di sini pada situs. Pratinjau admin tidak memuat isi dari situs lain.</p>
 		{% endif %}
-		<p class="sematan__buka"><a href="{{ s.alamat }}" target="_blank" rel="noopener">Buka {{ s.layanan }} di tab baru<span class="tersembunyi">: {{ s.judul }}</span></a></p>
+		<p class="sematan__buka"><a href="{{ s.alamat }}" target="_blank" rel="noopener">{{ _("Buka %s di tab baru") | format(s.layanan) }}<span class="tersembunyi">: {{ s.judul }}</span></a></p>
 	</div>
 	{% endfor %}
 	{% endif %}

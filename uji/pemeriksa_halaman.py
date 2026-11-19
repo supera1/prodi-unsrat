@@ -75,8 +75,10 @@ def periksa_situs(publik, label):
             p.feed(teks)
             tag = p.tag
             html = [a for t, a in tag if t == "html"]
-            if not html or html[0].get("lang") != "id":
-                temuan.append((rel, "lang bukan id"))
+            # the English version of a programme lives in <slug>/en/ (K-P37); every other page is Indonesian
+            bahasa = "en" if rel.split("/")[1:2] == ["en"] else "id"
+            if not html or html[0].get("lang") != bahasa:
+                temuan.append((rel, "lang bukan %s" % bahasa))
             if sum(1 for t, _a in tag if t == "h1") != 1:
                 temuan.append((rel, "jumlah h1 bukan 1"))
             if not p.judul.strip():

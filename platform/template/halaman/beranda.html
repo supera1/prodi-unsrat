@@ -7,7 +7,7 @@
 	<div class="wadah pahlawan__isi">
 		{% if hero.label %}<p class="pahlawan__label">{{ hero.label }}</p>{% endif %}
 		<h1 id="judul-prodi">{{ hero.judul }}</h1>
-		{% if hero.subjudul %}<p class="pahlawan__en"{% if hero.subjudul_bawaan %} lang="en"{% endif %}>{{ hero.subjudul }}</p>{% endif %}
+		{% if hero.subjudul %}<p class="pahlawan__en"{% if hero.subjudul_bawaan %} lang="{{ 'id' if bahasa == 'en' else 'en' }}"{% endif %}>{{ hero.subjudul }}</p>{% endif %}
 		<p class="pahlawan__pengantar">{{ hero.pengantar }}</p>
 		{% if hero.kartu %}
 		<dl class="fakta">
@@ -25,32 +25,32 @@
 <div class="wadah beranda">
 	{% if kabar_beranda %}
 	<section class="beranda__bagian" aria-labelledby="judul-kabar">
-		<h2 id="judul-kabar">Pengumuman terbaru</h2>
+		<h2 id="judul-kabar">{{ _("Pengumuman terbaru") }}</h2>
 		<ul class="kabar-daftar kabar-daftar--ringkas">
 			{% for b in kabar_beranda %}{{ kartu_kabar(b, 3) }}{% endfor %}
 		</ul>
-		<p><a class="tombol tombol--garis" href="{{ ke(slug ~ '/pengumuman') }}">Semua pengumuman</a></p>
+		<p><a class="tombol tombol--garis" href="{{ ke(slug ~ '/pengumuman') }}">{{ _("Semua pengumuman") }}</a></p>
 	</section>
 	{% endif %}
 
 	<section class="beranda__bagian" aria-labelledby="judul-lulusan">
-		<h2 id="judul-lulusan">Profil lulusan</h2>
-		{% if p.bidang_kerja %}
-		<p>{{ p.bidang_kerja }}</p>
+		<h2 id="judul-lulusan">{{ _("Profil lulusan") }}</h2>
+		{% if bidang_kerja %}
+		<p>{{ bidang_kerja }}</p>
 		{% else %}
-		<p class="catatan catatan--menyusul">Profil lulusan sedang dilengkapi.</p>
+		<p class="catatan catatan--menyusul">{{ _("Profil lulusan sedang dilengkapi.") }}</p>
 		{% endif %}
 		{% for e in menu if e.anak %}{% for a in e.anak if a.id == 'profil-lulusan' %}
-		<p><a class="tombol" href="{{ ke(slug ~ '/' ~ a.alamat) }}">{{ a.label }}{% if p.cpl %} ({{ p.cpl | length }} CPL){% endif %}</a></p>
+		<p><a class="tombol" href="{{ ke(akar ~ '/' ~ a.alamat) }}">{{ a.label }}{% if p.cpl %} ({{ _("%d CPL") | format(p.cpl | length) }}){% endif %}</a></p>
 		{% endfor %}{% endfor %}
 	</section>
 
 	<section class="beranda__bagian" aria-labelledby="judul-jelajahi">
-		<h2 id="judul-jelajahi">Jelajahi program studi</h2>
+		<h2 id="judul-jelajahi">{{ _("Jelajahi program studi") }}</h2>
 		<ul class="kartu-daftar kartu-daftar--tiga">
 			{% for e in menu if e.anak %}
 			<li class="kartu">
-				<h3 class="kartu__judul"><a href="{{ ke(slug ~ '/' ~ e.alamat) }}">{{ e.label }}</a></h3>
+				<h3 class="kartu__judul"><a href="{{ ke(akar ~ '/' ~ e.alamat) }}">{{ e.label }}</a></h3>
 				<p>{{ e.deskripsi }}</p>
 			</li>
 			{% endfor %}
@@ -58,8 +58,8 @@
 	</section>
 
 	<section class="beranda__bagian" aria-labelledby="judul-kontak">
-		<h2 id="judul-kontak">Hubungi kami</h2>
-		<p>{% if p.surel %}Surel: <a href="mailto:{{ p.surel }}">{{ p.surel }}</a>. {% endif %}<a href="{{ ke(slug ~ '/kontak') }}">Kontak dan lokasi</a></p>
+		<h2 id="judul-kontak">{{ _("Hubungi kami") }}</h2>
+		<p>{% if p.surel %}{{ _("Surel:") }} <a href="mailto:{{ p.surel }}">{{ p.surel }}</a>. {% endif %}<a href="{{ ke(akar ~ '/kontak') }}">{{ _("Kontak dan lokasi") }}</a></p>
 	</section>
 </div>
 {% endblock %}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ bahasa }}">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="{{ csp }}">
@@ -12,6 +12,9 @@
 {% if kanonik %}
 <link rel="canonical" href="{{ kanonik }}">
 {% endif %}
+{% for kode_bahasa, alamat_bahasa in versi_bahasa | default([]) %}
+<link rel="alternate" hreflang="{{ kode_bahasa }}" href="{{ alamat_bahasa }}">
+{% endfor %}
 <link rel="icon" type="image/png" href="{{ aset('aset/img/lambang-64.png') }}">
 <link rel="apple-touch-icon" href="{{ aset('aset/img/lambang-192.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,18 +26,21 @@
 {% block kepala_tambahan %}{% endblock %}
 </head>
 <body>
-<a class="lewati" href="#konten">Langsung ke konten utama</a>
+<a class="lewati" href="#konten">{{ _("Langsung ke konten utama") }}</a>
 {% if not produksi %}
-<p class="pita-staging">Pratinjau staging situs program studi UNSRAT. Halaman bertanda “sedang dilengkapi” akan diisi oleh program studi.</p>
+<p class="pita-staging">{{ _("Pratinjau staging situs program studi UNSRAT. Halaman bertanda “sedang dilengkapi” akan diisi oleh program studi.") }}</p>
 {% endif %}
 <div class="bar-atas">
 	<div class="wadah bar-atas__isi">
-		<a class="bar-atas__univ" href="{{ www }}/">{{ univ.get('identitas', {}).get('nama', {}).get('id') or 'Universitas Sam Ratulangi' }}</a>
-		<nav aria-label="Tautan universitas">
+		<a class="bar-atas__univ" href="{{ www }}/">{{ univ.get('identitas', {}).get('nama', {}).get(bahasa) or _("Universitas Sam Ratulangi") }}</a>
+		<nav aria-label="{{ _('Tautan universitas') }}">
 			<ul class="bar-atas__daftar">
-				<li><a href="{{ ke('') }}">Semua program studi</a></li>
+				{% if pasangan | default(none) %}
+				<li><a class="bar-atas__bahasa" href="{{ pasangan }}" hreflang="{{ 'en' if bahasa == 'id' else 'id' }}" lang="{{ 'en' if bahasa == 'id' else 'id' }}">{{ 'English' if bahasa == 'id' else 'Bahasa Indonesia' }}</a></li>
+				{% endif %}
+				<li><a href="{{ ke('') }}">{{ _("Semua program studi") }}</a></li>
 				{% for t in univ.get('utilitas', []) %}
-				<li><a href="{{ t.href }}">{{ t.label }}</a></li>
+				<li><a href="{{ t.href }}">{{ t.label | data_bahasa }}</a></li>
 				{% endfor %}
 			</ul>
 		</nav>

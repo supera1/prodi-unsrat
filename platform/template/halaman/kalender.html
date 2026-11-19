@@ -1,6 +1,11 @@
-{# The university's academic calendar, from www (warisan/kalender.json). #}
+{# The university's academic calendar, from www (warisan/kalender.json). www has no English calendar yet: the English
+   page points to the Indonesian one (rencana Fase 5 §2). #}
 {% extends "halaman.html" %}
 {% block isi_halaman %}
+{% if bahasa == 'en' %}
+<p class="pengantar">{{ _("Kalender akademik Universitas Sam Ratulangi saat ini hanya tersedia dalam bahasa Indonesia.") }}</p>
+<p><a class="tombol" href="{{ pasangan }}" hreflang="id">{{ _("Buka kalender akademik (bahasa Indonesia)") }}</a></p>
+{% else %}
 {% if kalender.get('teks') %}<p class="pengantar">{{ kalender.teks | tautan_md }}</p>{% endif %}
 {% set ada = namespace(n=0) %}
 {% for s in kalender.get('semester', []) if s.get('tampil') %}
@@ -32,4 +37,5 @@
 <p class="catatan catatan--menyusul">Kalender akademik sedang dilengkapi.</p>
 {% endif %}
 <p>Sumber: <a href="{{ alamat_www('kalender-akademik.html') }}">kalender akademik di www.unsrat.ac.id</a>.</p>
+{% endif %}
 {% endblock %}

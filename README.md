@@ -89,7 +89,7 @@ Stack Docker lengkap di komputer sendiri: [docs/deploy.md §13](docs/deploy.md#1
 | Langkah | Isi | Status |
 |---|---|---|
 | 0 | [Rencana Fase 5](docs/rencana-fase-05.md) (K-P37) | disetujui |
-| 1 | Kerangka bahasa di situs: teks dan label Inggris, `/<slug>/en/` dari data resmi, tombol bahasa, `hreflang`, sitemap | — |
+| 1 | Kerangka bahasa di situs: teks dan label Inggris, `/<slug>/en/` dari data resmi, tombol bahasa, `hreflang`, sitemap, saklar superadmin | selesai, menunggu tinjauan |
 | 2 | Isi Inggris di penyunting: tab English, alur, tanda perlu diperbarui | — |
 | 3 | Terjemahan mesin (DeepL) dengan glosarium dan batas pemakaian | — |
 | 4 | Pengumuman berbahasa Inggris (opsional) | — |

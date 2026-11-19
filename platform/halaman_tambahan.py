@@ -166,5 +166,5 @@ def hapus(kode, id_, oleh):
 def butir_menu(h):
     """An extra page as an entry of a built menu (menu.susun)."""
     return {"id": h["id"], "label": h["label"], "label_asli": h["label"], "alamat": "%s/%s" % (AWALAN, h["alamat"]),
-            "deskripsi": h["label"] + ".", "jenis": "tambahan", "templat": None, "nav": True, "kelompok": False,
-            "anak": []}
+            "deskripsi": h["label"] + ".", "label_en": "", "deskripsi_en": "", "jenis": "tambahan", "templat": None,
+            "nav": True, "kelompok": False, "anak": []}

@@ -9,6 +9,7 @@ An optional item marked "bila_terisi" is on a site only while the programme has 
 leaves it out otherwise), so a page few programmes use (Tugas Akhir) never shows empty on the others.
 
 Settings live in prodi/<kode>/situs.json under "menu": {"<id>": {"label": "...", "urutan": 2, "sembunyi": true}}.
+Every item has an English label and description too (label_en, deskripsi_en: the English sites, K-P37).
 A programme's extra pages (K-P35, halaman_tambahan.py) follow the pages of the group they belong to.
 """
 from __future__ import print_function
@@ -53,6 +54,8 @@ def _periksa_butir(b, induk, masalah, id_dipakai, alamat_dipakai):
         masalah.append("%s: alamat harus di bawah %s/" % (b["id"], induk["alamat"]))
     if not b.get("label") or not b.get("deskripsi"):
         masalah.append("%s: label dan deskripsi wajib" % b["id"])
+    if not b.get("label_en") or not b.get("deskripsi_en"):
+        masalah.append("%s: label_en dan deskripsi_en wajib (versi bahasa Inggris, K-P37)" % b["id"])
     if "anak" in b:
         if induk:
             masalah.append("%s: kelompok tidak boleh bersarang" % b["id"])
@@ -141,7 +144,8 @@ def susun(templat, pengaturan=None, tambahan=()):
     def jadi(b):
         atur = pengaturan.get(b["id"], {})
         return {"id": b["id"], "label": (atur.get("label") or b["label"]).strip(), "label_asli": b["label"],
-                "alamat": b["alamat"], "deskripsi": b["deskripsi"], "jenis": b.get("jenis"),
+                "label_en": b["label_en"], "alamat": b["alamat"], "deskripsi": b["deskripsi"],
+                "deskripsi_en": b["deskripsi_en"], "jenis": b.get("jenis"),
                 "templat": b.get("templat"), "nav": b.get("nav", True), "kelompok": "anak" in b, "anak": [],
                 "bila_terisi": bool(b.get("bila_terisi"))}
 

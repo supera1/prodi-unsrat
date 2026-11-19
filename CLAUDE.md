@@ -84,6 +84,11 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   Untuk pengembang: `.venv/bin/python platform/isi_halaman.py daftar|contoh|tarik --prodi <kode>` (`contoh` hanya untuk
   melihat tampilan, bertanda `[CONTOH]`, ditolak di produksi). Templat situs: `platform/template/halaman/isi.html` +
   `_isi.html`; pratinjau admin memakai makro yang sama (`bangun.bagian_html`).
+- Versi bahasa Inggris (Fase 5, K-P37): `/<slug>/en/` hanya untuk prodi yang registrinya bertanda `inggris` (saklar di
+  superadmin, detail prodi). Teks tetap templat situs ditulis Indonesia di dalam `_("...")` (dengan `| format(...)`
+  untuk nilai); terjemahannya di `platform/template/teks-en.json`, dibaca `platform/bahasa.py`. Teks baru di templat
+  wajib masuk kamus: `python3 platform/bahasa.py periksa`, `uji/uji_inggris.py`. Menu induk wajib `label_en` dan
+  `deskripsi_en`. Tautan di dalam situs prodi memakai `ke(akar ~ ...)`, bukan `ke(slug ~ ...)`.
 - Halaman tambahan prodi (K-P35): daftar di `platform/halaman_tambahan.py` (`data/prodi/<kode>/tambahan.json`, alamat
   `/<slug>/halaman/<alamat>/`), isinya halaman `isi_halaman` dengan `TEMPLAT_TAMBAHAN` (id `x` + 6 heksa,
   `templat_halaman()`); admin di `platform/admin/tambahan_admin.py`. Sematan hanya dari daftar tetap di
