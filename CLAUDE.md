@@ -89,6 +89,10 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   untuk nilai); terjemahannya di `platform/template/teks-en.json`, dibaca `platform/bahasa.py`. Teks baru di templat
   wajib masuk kamus: `python3 platform/bahasa.py periksa`, `uji/uji_inggris.py`. Menu induk wajib `label_en` dan
   `deskripsi_en`. Tautan di dalam situs prodi memakai `ke(akar ~ ...)`, bukan `ke(slug ~ ...)`.
+  Isi Inggris halaman (langkah 2): halaman `"<id>:en"` di `isi_halaman.py` (`halaman-<id>-en.json`), berisi memori
+  terjemahan per teks; digabung ke isi Indonesia oleh `platform/isi_inggris.py`. Kolom templat isi yang tidak
+  diterjemahkan: `teks(..., terjemah=False)` (nama, kode) atau `"boleh"` (judul karya). Penyunting: rute `/en` di
+  `isi_admin.py`, templat `halaman_sunting_en.html`.
 - Halaman tambahan prodi (K-P35): daftar di `platform/halaman_tambahan.py` (`data/prodi/<kode>/tambahan.json`, alamat
   `/<slug>/halaman/<alamat>/`), isinya halaman `isi_halaman` dengan `TEMPLAT_TAMBAHAN` (id `x` + 6 heksa,
   `templat_halaman()`); admin di `platform/admin/tambahan_admin.py`. Sematan hanya dari daftar tetap di

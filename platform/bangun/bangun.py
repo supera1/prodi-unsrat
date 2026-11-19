@@ -17,8 +17,9 @@ Output (PRODI_PUBLIK, the only folder the web server serves):
     <slug>/<group>/[<page>/]index.html
     <slug>/warna.css                 the programme's colours (custom properties only)
     <slug>/en/...                    the English version of a programme whose registry entry has "inggris" (Fase 5,
-                                     K-P37): the pages it has in English (HALAMAN_EN; the programme's own pages from
-                                     langkah 2), the same paths under en/, with hreflang and a language link
+                                     K-P37): the pages from the official data (HALAMAN_EN) and the programme's own
+                                     pages with a published English version (isi_inggris.py), the same paths under
+                                     en/, with hreflang and a language link
     <slug>/pengumuman/               announcements and news (pengumuman.py): list pages (/halaman/<n>/), one page per
                                      item (/<id>/), per category (/kategori/<id>/), per year (/arsip/<yyyy>/), rss.xml
     unggahan/<kode>/...              uploaded photos and PDFs of published items and pages (PRODI_PENYIMPANAN=lokal only)
@@ -60,6 +61,7 @@ import bahasa as bahasa_mod  # noqa: E402
 import data_prodi  # noqa: E402
 import halaman_tambahan  # noqa: E402
 import isi_halaman  # noqa: E402
+import isi_inggris  # noqa: E402
 import kriteria as kriteria_mod  # noqa: E402
 import lokasi  # noqa: E402
 import menu as menu_mod  # noqa: E402
@@ -210,10 +212,10 @@ def lingkungan(bahasa="id"):
     return env
 
 
-def bagian_html(bagian, media_url):
+def bagian_html(bagian, media_url, bahasa="id"):
     """The sections of a programme's own page (isi_halaman.tampilan) as the site shows them, with the macros of
     _isi.html: the admin's preview."""
-    return Markup(lingkungan().from_string('{% from "_isi.html" import bagian_isi with context %}'
+    return Markup(lingkungan(bahasa).from_string('{% from "_isi.html" import bagian_isi with context %}'
                                            '{% for b in bagian %}{{ bagian_isi(b) }}{% endfor %}')
                   .render(bagian=bagian, media_url=media_url, sematan_aktif=False))
 
@@ -245,6 +247,7 @@ class Pembangun(object):
         self.versi = {}       # published asset path -> short hash, for ?v=
         self.peringatan = []
         self.isi_siap = {}    # (kode, page id) -> the sections of its published content (isi_halaman_prodi)
+        self.isi_siap_en = {}  # the same for the English version (isi_halaman_prodi_en)
         # accreditation criteria labels: a programme's own criteria (K-P33), else a body LPMPP confirmed (K-P29); a
         # broken shared file only drops the latter
         try:
@@ -415,7 +418,7 @@ class Pembangun(object):
                     akar=slug, jenjang_panjang=bahasa_mod.jenjang_panjang(p["jenjang"], "id"),
                     bidang_kerja=p.get("bidang_kerja") or "", cpl=p.get("cpl") or [])
         # the English version (K-P37): only for a programme the superadmin switched it on for
-        menu_en = self.menu_inggris(menu) if r.get("inggris") else []
+        menu_en = self.menu_inggris(menu, kode) if r.get("inggris") else []
         ada_en = {b["id"] for b in menu_mod.halaman(menu_en)}
 
         def folder_bahasa(alamat):
@@ -448,15 +451,22 @@ class Pembangun(object):
             return "kelompok.html"
         return ini["templat"] + ".html" if ini["templat"] else "isi.html"
 
-    def menu_inggris(self, menu):
-        """The menu of a programme's English version: the pages it has in English (HALAMAN_EN), with the master menu's
-        English labels and descriptions; a group only while it has such a page."""
+    def menu_inggris(self, menu, kode):
+        """The menu of a programme's English version: the pages it has in English (HALAMAN_EN, and its own pages with
+        English content to show), with the master menu's English labels and descriptions; a group only while it has
+        such a page. An extra page needs its English name (label_en) too."""
         def en(b):
-            return dict(b, label=b["label_en"], deskripsi=b["deskripsi_en"], anak=[])
+            return dict(b, label=b["label_en"], deskripsi=b["deskripsi_en"] or b["label_en"] + ".", anak=[])
+
+        def ada(a):
+            if a.get("templat") in HALAMAN_EN:
+                return True
+            return (a.get("templat") is None and bool(a.get("label_en"))
+                    and self.isi_halaman_prodi_en(kode, a["id"]) is not None)
         hasil = []
         for e in menu:
             if e["kelompok"]:
-                anak = [en(a) for a in e["anak"] if a.get("templat") in HALAMAN_EN]
+                anak = [en(a) for a in e["anak"] if ada(a)]
                 if anak:
                     hasil.append(dict(en(e), anak=anak))
             elif e.get("templat") in HALAMAN_EN:
@@ -491,12 +501,41 @@ class Pembangun(object):
                 folder = folder_bahasa(ini["alamat"])
                 konteks = dict(umum_en, ini=ini, kelompok=e if e["kelompok"] and ini is not e else None,
                                kanonik=self.kanonik(folder["en"]), versi_folder=folder, label_kriteria=None,
-                               isi_bagian=None)
+                               isi_bagian=self.isi_halaman_prodi_en(kode, ini["id"])
+                               if isi_halaman.templat_halaman(ini["id"]) is not None else None)
                 if ini["alamat"] == "":
                     konteks["json_ld"] = self.json_ld_prodi(p, unit_en, folder["en"], "en")
                     if hero["latar"]["jenis"] == "foto":
                         konteks["og_gambar"] = self.media_mutlak(hero["latar"]["foto"]["varian"]["1600"])
                 self.render(self.templat_halaman(ini), posixpath.join(folder["en"], "index.html"), **konteks)
+
+    def isi_halaman_prodi_en(self, kode, id_halaman):
+        """The sections of the English version of a programme's own page, or None: both versions published and
+        valid, the Indonesian content with its texts translated (isi_inggris.terjemahkan)."""
+        if (kode, id_halaman) not in self.isi_siap_en:
+            self.isi_siap_en[(kode, id_halaman)] = self._isi_halaman_prodi_en(kode, id_halaman)
+        return self.isi_siap_en[(kode, id_halaman)]
+
+    def _isi_halaman_prodi_en(self, kode, id_halaman):
+        if self.isi_halaman_prodi(kode, id_halaman) is None:            # the Indonesian page has nothing to show
+            return None
+        id_en = isi_inggris.id_en(id_halaman)
+        en = isi_halaman.terbit(kode, id_en)
+        if en is None:
+            return None
+        if self.produksi and isi_halaman.bertanda_contoh(en):
+            self.peringatan.append("prodi %s: versi Inggris halaman %s bertanda %s, tidak diterbitkan di produksi"
+                                   % (kode, id_halaman, isi_halaman.CONTOH))
+            return None
+        masalah = isi_halaman.periksa(id_en, en, kode)
+        if masalah:
+            self.peringatan.append("prodi %s: versi Inggris halaman %s diabaikan (%s)" % (kode, id_halaman,
+                                                                                          "; ".join(masalah[:3])))
+            return None
+        templat = isi_halaman.templat_halaman(id_halaman)
+        isi = isi_inggris.terjemahkan(templat, isi_halaman.terbit(kode, id_halaman), en)
+        bagian, _hilang = isi_halaman.tampilan(id_halaman, isi, self.terbitkan_media, "en")
+        return bagian or None
 
     def isi_halaman_prodi(self, kode, id_halaman):
         """The sections of a programme's own page (isi_halaman.py, Fase 2), or None while it has no content to show:

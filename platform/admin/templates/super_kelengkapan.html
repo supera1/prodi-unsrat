@@ -14,7 +14,7 @@
 <div class="tabel-gulir">
 	<table>
 		<thead><tr><th scope="col">Prodi</th><th scope="col">Fakultas</th><th scope="col">Wajib terbit</th><th scope="col">Menunggu</th>
-			<th scope="col">Dikembalikan</th><th scope="col">Draf</th><th scope="col">Terakhir diubah</th><th scope="col">Kriteria akreditasi</th></tr></thead>
+			<th scope="col">Dikembalikan</th><th scope="col">Draf</th><th scope="col">Terakhir diubah</th><th scope="col">Kriteria akreditasi</th><th scope="col">Versi Inggris</th></tr></thead>
 		<tbody>
 			{% for b in baris %}
 			<tr>
@@ -26,6 +26,7 @@
 				<td class="sel-angka">{{ b.isi.draf or '' }}</td>
 				<td>{{ (b.isi.terakhir | replace('T', ' '))[:16] or '—' }}</td>
 				<td class="sel-angka">{{ b.kriteria or '—' }}</td>
+				<td>{% if b.inggris %}aktif, {% endif %}{{ b.isi.en_terbit }}/{{ b.isi.wajib }}{% if b.isi.en_perlu %}<br><span class="tanda">{{ b.isi.en_perlu }} perlu diperbarui</span>{% endif %}</td>
 			</tr>
 			{% endfor %}
 		</tbody>

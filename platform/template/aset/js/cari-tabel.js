@@ -1,8 +1,13 @@
 /* A search box above every long table of a programme's page (a table the builder marks with data-cari, 30 rows or
    more: final projects, publications, courses). Added here, so without JavaScript the whole table stays as it is.
-   Typed words must all appear in a row (letter case and accents ignored); the number of rows shown is announced. */
+   Typed words must all appear in a row (letter case and accents ignored); the number of rows shown is announced. Its
+   words follow the page's language (the English version, K-P37). */
 (function () {
 	"use strict";
+
+	var inggris = document.documentElement.lang === "en";
+	var kata_ = inggris ? {cari: "Search this table", baris: " rows", dari: " of "} :
+		{cari: "Cari di tabel ini", baris: " baris", dari: " dari "};
 
 	function normal(teks) {
 		return teks.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -27,12 +32,12 @@
 		masukan.id = "cari-tabel-" + (i + 1);
 		masukan.autocomplete = "off";
 		label.htmlFor = masukan.id;
-		label.textContent = "Cari di tabel ini";
+		label.textContent = kata_.cari;
 		info.className = "cari-tabel__info";
 		info.setAttribute("aria-live", "polite");
 
 		function jumlah(n) {
-			info.textContent = n === baris.length ? baris.length + " baris" : n + " dari " + baris.length + " baris";
+			info.textContent = n === baris.length ? baris.length + kata_.baris : n + kata_.dari + baris.length + kata_.baris;
 		}
 
 		function saring() {

@@ -619,6 +619,56 @@ dl.data dd {
 	font-weight: 700;
 }
 
+/* the two languages of a page's content (Fase 5, K-P37): tabs above the form */
+.tab-bahasa {
+	display: flex;
+	gap: 0.25rem;
+	margin: 0 0 1rem;
+	border-bottom: 2px solid var(--abu-200);
+}
+
+.tab-bahasa a {
+	padding: 0.4rem 1rem;
+	border: 2px solid transparent;
+	border-bottom: 0;
+	border-radius: 4px 4px 0 0;
+	text-decoration: none;
+	font-weight: 700;
+}
+
+.tab-bahasa a[aria-current] {
+	margin-bottom: -2px;
+	border-color: var(--abu-200);
+	background: #fff;
+	color: var(--abu-900);
+}
+
+/* an English field with the Indonesian text it translates */
+.isian--terjemah {
+	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--abu-200);
+}
+
+.terjemah__sumber {
+	max-width: 48rem;
+	margin: 0 0 0.5rem;
+	padding: 0.5rem 0.75rem;
+	border-left: 4px solid var(--abu-200);
+	background: var(--abu-50);
+	white-space: pre-wrap;
+}
+
+.isian--terjemah textarea {
+	width: 100%;
+	max-width: 48rem;
+}
+
+.terjemah__lama {
+	padding: 0.25rem 0.5rem;
+	background: var(--kuning-pucat);
+	color: var(--abu-900);
+}
+
 .status {
 	display: inline-block;
 	padding: 0 0.6em;

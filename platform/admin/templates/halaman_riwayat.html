@@ -1,10 +1,10 @@
 {% extends "dasar.html" %}
 {% from "_nav_prodi.html" import nav_prodi %}
-{% block judul %}Riwayat {{ ini.label }} — {{ pr.nama }}{% endblock %}
+{% block judul %}Riwayat {{ ini.label }}{{ ' (versi Inggris)' if akhiran }} — {{ pr.nama }}{% endblock %}
 {% block isi %}
 {{ nav_prodi(pr, 'isi_daftar') }}
-<p class="jejak-admin"><a href="{{ url_for('isi_daftar', kode=pr.kode) }}">Isi halaman</a> › <a href="{{ url_for('isi_sunting', kode=pr.kode, id_=ini.id) }}">{{ ini.label }}</a> › Riwayat</p>
-<h1>Riwayat: {{ ini.label }}</h1>
+<p class="jejak-admin"><a href="{{ url_for('isi_daftar', kode=pr.kode) }}">Isi halaman</a> › <a href="{{ url_for('isi_sunting' ~ akhiran, kode=pr.kode, id_=ini.id) }}">{{ ini.label }}{{ ' (versi Inggris)' if akhiran }}</a> › Riwayat</p>
+<h1>Riwayat: {{ ini.label }}{{ ' (versi Inggris)' if akhiran }}</h1>
 <p>Sebelum isi halaman ini berubah (draf disimpan, diajukan, diterbitkan, dikembalikan, ditarik, dibuang), isi sebelumnya
 	disimpan sebagai versi. Versi lama bisa dilihat, dan isinya bisa dijadikan draf: draf itu lalu {{ 'Anda terbitkan' if admin else 'diajukan' }} seperti
 	perubahan lain, jadi situs tidak pernah berubah langsung dari riwayat.</p>
@@ -20,8 +20,8 @@
 				<td>
 					{% for bagian, label in v.bagian %}
 					<div class="versi-bagian">
-						<a href="{{ url_for('isi_versi', kode=pr.kode, id_=ini.id, versi_lama=v.versi, bagian=bagian) }}">{{ label }}</a>
-						<form method="post" action="{{ url_for('isi_pakai_versi', kode=pr.kode, id_=ini.id, versi_lama=v.versi) }}" class="sebaris">
+						<a href="{{ url_for('isi_versi' ~ akhiran, kode=pr.kode, id_=ini.id, versi_lama=v.versi, bagian=bagian) }}">{{ label }}</a>
+						<form method="post" action="{{ url_for('isi_pakai_versi' ~ akhiran, kode=pr.kode, id_=ini.id, versi_lama=v.versi) }}" class="sebaris">
 							<input type="hidden" name="csrf" value="{{ token_csrf() }}">
 							<input type="hidden" name="versi" value="{{ data.versi or 0 }}">
 							<input type="hidden" name="bagian" value="{{ bagian }}">

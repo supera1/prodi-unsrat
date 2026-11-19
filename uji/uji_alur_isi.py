@@ -267,7 +267,8 @@ try:
     cek("1 halaman menunggu persetujuan Anda" in teks and "Menunggu persetujuan (1)" in teks and "diajukan" in teks and "oleh opa" in teks,
         "daftar admin: halaman yang menunggu")
     teks = ka.get("/prodi/%s/halaman?status=menunggu" % A).get_data(as_text=True)
-    cek(teks.count('href="%s' % URL) == 1 and "Sejarah" in teks, "saringan menunggu: satu halaman")
+    cek(len(re.findall(r'href="%s[^"/]+"' % re.escape(URL), teks)) == 1 and "Sejarah" in teks,    # each row also links its English version
+        "saringan menunggu: satu halaman")
     cek(ka.get("/prodi/%s/halaman?status=aneh" % A).status_code == 404, "saringan yang tidak dikenal")
     teks = ka.get("/prodi/%s/" % A).get_data(as_text=True)
     cek("1 halaman menunggu persetujuan Anda" in teks and "0 dari 22" in teks, "dasbor admin: halaman yang menunggu")
@@ -384,9 +385,12 @@ try:
     baris = list(csv.reader(io.StringIO(teks.lstrip("﻿"))))
     kepala, data_a = baris[0], [b for b in baris[1:] if b[0] == A][0]
     kolom = dict(zip(kepala, data_a))
-    cek(kepala[:13] == ["kode_pddikti", "jenjang", "nama", "fakultas", "slug", "aktif", "wajib_terbit", "wajib_total", "menunggu",
-                        "dikembalikan", "draf", "terakhir_diubah", "kriteria_akreditasi"]
-        and len(kepala) == 13 + len(ih.TEMPLAT), "kolom CSV: %r" % kepala[:13])
+    cek(kepala[:16] == ["kode_pddikti", "jenjang", "nama", "fakultas", "slug", "aktif", "wajib_terbit", "wajib_total", "menunggu",
+                        "dikembalikan", "draf", "terakhir_diubah", "kriteria_akreditasi", "inggris_aktif",
+                        "wajib_terbit_en", "perlu_diperbarui_en"]
+        and len(kepala) == 16 + len(ih.TEMPLAT), "kolom CSV: %r" % kepala[:16])
+    cek(kolom["inggris_aktif"] == "tidak" and kolom["wajib_terbit_en"] == "0" and kolom["perlu_diperbarui_en"] == "0",
+        "CSV: kolom versi Inggris")
     cek(kolom["wajib_terbit"] == "1" and kolom["wajib_total"] == "22" and kolom["menunggu"] == "1" and kolom["draf"] == "2",
         "CSV: jumlah prodi A: %r" % [kolom[x] for x in ("wajib_terbit", "menunggu", "draf")])
     cek(kolom["Perpustakaan dan Referensi"].startswith("terbit 20") and kolom["Ruang Kuliah dan Ruang Pendukung"] == "menunggu persetujuan"

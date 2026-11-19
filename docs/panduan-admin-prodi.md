@@ -192,6 +192,34 @@ Admin prodi juga punya menu **Riwayat** untuk semua data prodi (identitas, beran
 pengumuman, isi halaman): bandingkan
 versi lama dengan sekarang lalu pulihkan. Pemulihan di menu ini langsung berlaku, jadi periksa dulu perbedaannya.
 
+## Versi bahasa Inggris
+
+Situs prodi bisa punya versi bahasa Inggris di `.../<slug>/en/`, misalnya untuk akreditasi internasional. Versi ini
+tayang setelah superadmin UPA TIK mengaktifkannya untuk prodi Anda. Sebelum itu, terjemahan tetap bisa disiapkan dan
+diterbitkan.
+
+- Beranda, Profil Lulusan dan CPL, Spesifikasi, Akreditasi, Dosen Tetap, Kalender, dan Kontak berbahasa Inggris
+  langsung dari data resmi www.
+- Halaman yang diisi prodi diterjemahkan di penyuntingnya: buka halaman di menu **Isi halaman**, lalu pilih tab
+  **English**. Kolom **English** di daftar Isi halaman menunjukkan keadaan versi Inggris setiap halaman.
+
+Di tab **English**, setiap teks versi Indonesia tampil sekali dengan isian bahasa Inggrisnya:
+
+1. Isi terjemahannya. Teks yang sama di beberapa baris cukup diterjemahkan sekali.
+2. **Simpan draf**, **Simpan dan pratinjau**, lalu ajukan atau terbitkan seperti versi Indonesia. Versi Inggris punya
+   riwayatnya sendiri (**Riwayat versi Inggris**).
+3. Halaman tampil di situs berbahasa Inggris setelah versi Indonesia **dan** versi Inggrisnya terbit.
+
+Yang perlu diketahui:
+
+- Nama orang, nama mitra, kode mata kuliah, nama sistem, dan nama jurnal tidak diterjemahkan. Angka, tahun, tautan, PDF,
+  foto, dan sematan mengikuti versi Indonesia.
+- Judul karya (penelitian, publikasi, pengabdian, luaran) dan teks alternatif foto boleh dikosongkan: tampil dalam
+  bahasa aslinya. Tabel yang diisi lewat Excel, misalnya daftar tugas akhir, tampil dalam bahasa aslinya.
+- Teks lain wajib diterjemahkan. Baris tabel yang teks wajibnya belum diterjemahkan belum tampil di versi Inggris.
+- Bila versi Indonesia yang terbit berubah, halamannya ditandai **perlu diperbarui**. Uraian yang berubah tetap memakai
+  terjemahan lamanya sampai diperbarui; isiannya diberi tanda kuning untuk diperiksa.
+
 ## Halaman Akreditasi
 
 Status akreditasi (peringkat, lembaga, masa berlaku) tampil otomatis dari data resmi prodi. Di halaman Akreditasi
