@@ -453,3 +453,28 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
 - **Konsekuensi:** sama dengan K-P35: isi sematan di luar saringan spam dan persetujuan admin. Panduan menyarankan
   dokumen resmi akreditasi tetap diunggah sebagai PDF, yang tersimpan di riwayat situs. Kelengkapan halaman wajib tidak
   berubah: sematan adalah bagian opsional.
+
+### K-P37 — Versi bahasa Inggris bawaan platform dengan draf terjemahan mesin (Fase 5)
+- **Konteks:** akreditasi internasional mewajibkan situs prodi berbahasa Inggris. Pengguna meminta pilihan, termasuk
+  alat pihak ketiga seperti GTranslate dan TrueLang (19 November 2026). Situs sudah tayang di produksi.
+- **Pilihan yang ditolak:** widget terjemahan gratis (skrip pihak ketiga di setiap halaman, melanggar CSP, tidak
+  diindeks, tidak tampil tanpa JavaScript); proxy terjemahan berbayar seperti Weglot atau GTranslate berbayar (biaya per
+  kata untuk 97 prodi; isi disajikan vendor di luar alur persetujuan, saringan spam, dan pemantau); plugin WordPress
+  seperti TrueLang (platform ini bukan WordPress).
+- **Keputusan** (usulan pengembang, disetujui pengguna 19 November 2026; rinciannya di
+  [rencana Fase 5](rencana-fase-05.md)):
+  1. Versi Inggris di `/<slug>/en/<alamat yang sama>/`, halaman statis dengan `hreflang` dan tombol bahasa tanpa
+     JavaScript. Halaman tanpa isi Inggris terbit tidak dibuat. Versi Inggris tayang per prodi setelah diaktifkan
+     superadmin.
+  2. Isi Inggris diisi di penyunting (tab English) dengan alur persetujuan dan riwayat sendiri; struktur, angka, dan
+     berkas mengikuti versi Indonesia; tanda "perlu diperbarui" bila versi Indonesia berubah.
+  3. Draf terjemahan mesin dari **DeepL API** di server admin (pustaka standar, tanpa paket baru), dengan glosarium dari
+     data resmi, perlindungan markah, saringan spam, dan batas pemakaian; wajib diperiksa sebelum terbit. Penyedia di
+     balik antarmuka yang bisa diganti.
+  4. Data resmi berbahasa Inggris dari www (nama, bidang kerja, CPL) dipakai langsung. Kalender menunggu versi Inggris
+     dari www. Pengumuman berbahasa Inggris opsional, belakangan.
+  5. Nama mata kuliah diterjemahkan; judul tugas akhir tetap bahasa asli kecuali prodi memilih menerjemahkan.
+  6. Fase 5 dikerjakan lebih dulu dari Fase 3 dan 4. Prodi pilot: prodi yang menuju akreditasi internasional; sampai
+     disebutkan, tiga prodi pilot Fase 2.
+- **Konsekuensi:** teks isi halaman dikirim ke penyedia terjemahan saat tombol dipakai; kunci API disimpan di `.env`.
+  Prodi memelihara dua versi isi; kelengkapan versi Inggris dipantau superadmin.

@@ -12,11 +12,13 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
   antarmuka harus sederhana dan sulit dirusak. Tidak ada peran admin fakultas (K-P2).
 - Audiens: asesor akreditasi, calon mahasiswa, mahasiswa, alumni, pengguna lulusan. Banyak pengguna ponsel dengan
   koneksi terbatas di Indonesia Timur.
-- Bahasa: Indonesia; bahasa Inggris di `/<slug>/en/` menyusul (Fase 5, alamatnya sudah dicadangkan).
+- Bahasa: Indonesia; versi Inggris di `/<slug>/en/` sedang dikerjakan (Fase 5, K-P37): isi Inggris dari penyunting
+  dengan draf terjemahan mesin yang ditinjau prodi, tanpa skrip pihak ketiga.
 
 ## Dokumen (baca bagian yang relevan sebelum mengerjakan fitur)
 - `docs/rencana-fase-01.md` — rencana Fase 1 (selesai): arsitektur, model data, peran, template, urutan kerja.
 - `docs/rencana-fase-02.md` — rencana Fase 2: penyunting halaman wajib, alur isi, kelengkapan, pilot 3 prodi.
+- `docs/rencana-fase-05.md` — rencana Fase 5: versi bahasa Inggris `/<slug>/en/` dan terjemahan mesin.
 - `docs/keputusan.md` — log keputusan (K-P1, …). Tambahkan entri setiap ada keputusan baru.
 - `docs/asal-modul.md` — modul yang disalin dari repo www beserta versi asalnya.
 - `docs/panduan-admin-prodi.md` — panduan untuk admin prodi dan operator (juga menu Panduan di admin);
