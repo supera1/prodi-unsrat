@@ -108,6 +108,7 @@ def halaman_prodi(kode):
     hasil = []
     for k in menu_mod.baca_templat():
         anak = [dict(a, label=(pengaturan(a["id"]).get("label") or a["label"]),
+                     label_en=(pengaturan(a["id"]).get("label_en") or a["label_en"]),
                      sembunyi=bool(pengaturan(a["id"]).get("sembunyi")))
                 for a in k.get("anak", []) if a["id"] in ih.TEMPLAT]
         anak += [dict(halaman_tambahan.butir_menu(h), sembunyi=False,

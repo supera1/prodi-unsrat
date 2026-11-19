@@ -85,11 +85,12 @@ def pasang(app, alat):
     def tambahan_buat(kode):
         f = request.form
         try:
-            h = ht.tambah(kode, f.get("label", ""), f.get("kelompok", ""), f.get("alamat", ""), g.akun["nama"])
+            h = ht.tambah(kode, f.get("label", ""), f.get("kelompok", ""), f.get("alamat", ""), g.akun["nama"],
+                          f.get("label_en", ""))
         except ht.GagalTambahan as e:
             flash("Halaman tambahan tidak dibuat: %s." % e, "galat")
             return tampil(kode, 400, {"label": f.get("label", ""), "kelompok": f.get("kelompok", ""),
-                                      "alamat": f.get("alamat", "")})
+                                      "alamat": f.get("alamat", ""), "label_en": f.get("label_en", "")})
         alat.catat("tambahan-dibuat", prodi=kode, halaman=h["id"], alamat=h["alamat"])
         flash("Halaman tambahan “%s” dibuat dengan alamat %s/%s/. Isi halamannya di bawah; halaman ini tampil di situs "
               "setelah diterbitkan." % (h["label"], ht.AWALAN, h["alamat"]), "ok")
@@ -104,6 +105,8 @@ def pasang(app, alat):
             p = {}
             if "label-%s" % h.get("id") in f:
                 p["label"] = f.get("label-%s" % h["id"], "")
+            if "label_en-%s" % h.get("id") in f:
+                p["label_en"] = f.get("label_en-%s" % h["id"], "")
             if "kelompok-%s" % h.get("id") in f:
                 p["kelompok"] = f.get("kelompok-%s" % h["id"], "")
             urutan = f.get("urutan-%s" % h.get("id"), "").strip()

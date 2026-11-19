@@ -52,16 +52,20 @@ def dari_formulir(form):
     kriteria = []
     for i in range(n):
         nomor, nama = (form.get("k-%d-nomor" % i) or "").strip(), (form.get("k-%d-nama" % i) or "").strip()
+        nama_en = (form.get("k-%d-nama_en" % i) or "").strip()
         if nomor or nama:
-            kriteria.append({"nomor": nomor, "nama": nama})
+            kriteria.append(dict({"nomor": nomor, "nama": nama}, **({"nama_en": nama_en} if nama_en else {})))
     ada = {k["nomor"] for k in kriteria}
     halaman = {}
     for id_ in ih.TEMPLAT:
         dipilih = [x for x in form.getlist("h-%s" % id_) if x in ada]
         if dipilih:
             halaman[id_] = sorted(set(dipilih), key=[k["nomor"] for k in kriteria].index)
-    return {"nama": (form.get("nama") or "").strip(), "instrumen": (form.get("instrumen") or "").strip(),
-            "kriteria": kriteria, "halaman": halaman}
+    hasil = {"nama": (form.get("nama") or "").strip(), "instrumen": (form.get("instrumen") or "").strip(),
+             "kriteria": kriteria, "halaman": halaman}
+    if (form.get("instrumen_en") or "").strip():
+        hasil["instrumen_en"] = form.get("instrumen_en").strip()
+    return hasil
 
 
 def pasang(app, alat):
