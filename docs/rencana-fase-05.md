@@ -102,6 +102,16 @@ Dasar: [rencana Fase 2](rencana-fase-02.md), keputusan K-P23–K-P36, dan pandua
 - **Tabel panjang:** nama mata kuliah diterjemahkan. Judul tugas akhir dibiarkan dalam bahasa aslinya secara bawaan;
   prodi boleh memilih menerjemahkannya.
 - Daftar Isi halaman mendapat kolom **English**: belum ada, draf, menunggu, terbit, perlu diperbarui.
+- **Pelaksanaan (langkah 2, 19 November 2026):**
+  - isi Inggris disimpan sebagai memori terjemahan per teks (`{"teks": {teks Indonesia: teks Inggris}, "asal": {...}}`),
+    bukan salinan halaman. Terjemahan dicari menurut bunyi teksnya, jadi baris yang ditambah, dihapus, atau diurutkan
+    ulang di versi Indonesia tidak pernah tertukar dengan terjemahan baris lain (`platform/isi_inggris.py`);
+  - "perlu diperbarui" dihitung dari cakupan: teks versi Indonesia yang terbit yang belum punya terjemahan. Cara ini
+    menggantikan sidik isi, dengan hasil yang sama dan tanpa catatan yang bisa usang;
+  - nama orang, nama mitra, kode, nama sistem, dan nama jurnal tidak diterjemahkan (`terjemah=False` di templat);
+    judul karya dan nama organisasi boleh diterjemahkan (`"boleh"`); teks alternatif foto juga boleh;
+  - tabel yang diisi lewat Excel (judul tugas akhir) tampil dalam bahasa aslinya; pilihan menerjemahkannya dibuat
+    bersama terjemahan mesin di langkah 3, karena ribuan judul tidak muat di formulir.
 
 ### 3.5 Terjemahan mesin
 
@@ -143,7 +153,7 @@ Dasar: [rencana Fase 2](rencana-fase-02.md), keputusan K-P23–K-P36, dan pandua
 
 | Berkas | Isi |
 |---|---|
-| `data/prodi/<kode>/halaman-<id>-en.json` | Isi Inggris sebuah halaman: `terbit` (isi, oleh, waktu, sidik isi Indonesia dasarnya), `draf` (isi, status, tanda terjemahan mesin), `versi`. Nama ini sah menurut `lokasi.NAMA_SAH`, jadi riwayat langsung berlaku |
+| `data/prodi/<kode>/halaman-<id>-en.json` | Isi Inggris sebuah halaman, halaman `"<id>:en"` di `isi_halaman.py`: `terbit` dan `draf` berisi memori terjemahan (§3.4), dengan status, catatan, dan `versi` yang sama dengan halaman lain. Nama ini sah menurut `lokasi.NAMA_SAH`, jadi riwayat langsung berlaku |
 | `data/prodi/<kode>/situs.json` | `en`: aktif atau tidak, label menu Inggris, bagian depan beranda Inggris |
 | `data/prodi/<kode>/tambahan.json` | `label_en` setiap halaman tambahan |
 | `data/prodi/<kode>/kriteria.json` | label kriteria Inggris |
