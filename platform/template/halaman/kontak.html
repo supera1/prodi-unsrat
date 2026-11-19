@@ -3,19 +3,19 @@
 {% block isi_halaman %}
 <p class="pengantar">{{ ini.deskripsi }}</p>
 <dl class="tabel-data">
-	<div><dt>Program studi</dt><dd>{{ nama }}</dd></div>
-	{% if p.surel %}<div><dt>Surel program studi</dt><dd><a href="mailto:{{ p.surel }}">{{ p.surel }}</a></dd></div>{% endif %}
-	<div><dt>Fakultas</dt><dd>{% if unit.get('website') %}<a href="{{ unit.website }}">{{ unit.nama }}</a>{% else %}{{ unit.nama }}{% endif %}</dd></div>
-	{% if unit.get('surel') %}<div><dt>Surel fakultas</dt><dd><a href="mailto:{{ unit.surel }}">{{ unit.surel }}</a></dd></div>{% endif %}
+	<div><dt>{{ _("Program studi") }}</dt><dd>{{ nama }}</dd></div>
+	{% if p.surel %}<div><dt>{{ _("Surel program studi") }}</dt><dd><a href="mailto:{{ p.surel }}">{{ p.surel }}</a></dd></div>{% endif %}
+	<div><dt>{{ _("Fakultas") }}</dt><dd>{% if unit.get('website') %}<a href="{{ unit.website }}">{{ unit.nama }}</a>{% else %}{{ unit.nama }}{% endif %}</dd></div>
+	{% if unit.get('surel') %}<div><dt>{{ _("Surel fakultas") }}</dt><dd><a href="mailto:{{ unit.surel }}">{{ unit.surel }}</a></dd></div>{% endif %}
 </dl>
 {% set kontak = univ.get('kontak', {}) %}
-<h2>Universitas Sam Ratulangi</h2>
+<h2>{{ _("Universitas Sam Ratulangi") }}</h2>
 <dl class="tabel-data">
-	{% if kontak.get('alamat', {}).get('id') %}
-	<div><dt>Alamat</dt><dd>{% for baris in kontak.alamat.id %}{{ baris }}{% if not loop.last %}<br>{% endif %}{% endfor %}</dd></div>
+	{% if kontak.get('alamat', {}).get(bahasa) %}
+	<div><dt>{{ _("Alamat") }}</dt><dd>{% for baris in kontak.alamat[bahasa] %}{{ baris }}{% if not loop.last %}<br>{% endif %}{% endfor %}</dd></div>
 	{% endif %}
-	{% if kontak.get('telepon') %}<div><dt>Telepon</dt><dd>{{ kontak.telepon | join(', ') }}</dd></div>{% endif %}
-	{% if kontak.get('jam') %}<div><dt>Jam layanan</dt><dd>{{ kontak.get('hari', {}).get('id', '') }} {{ kontak.jam }}</dd></div>{% endif %}
-	<div><dt>Situs web</dt><dd><a href="{{ www }}/">www.unsrat.ac.id</a></dd></div>
+	{% if kontak.get('telepon') %}<div><dt>{{ _("Telepon") }}</dt><dd>{{ kontak.telepon | join(', ') }}</dd></div>{% endif %}
+	{% if kontak.get('jam') %}<div><dt>{{ _("Jam layanan") }}</dt><dd>{{ kontak.get('hari', {}).get(bahasa, '') }} {{ kontak.jam }}</dd></div>{% endif %}
+	<div><dt>{{ _("Situs web") }}</dt><dd><a href="{{ www }}/">www.unsrat.ac.id</a></dd></div>
 </dl>
 {% endblock %}

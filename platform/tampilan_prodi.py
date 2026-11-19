@@ -204,23 +204,29 @@ def periksa_identitas(situs):
     return masalah
 
 
-def bawaan_dan_resmi(p, nama_unit):
-    """(default texts, official cards) of a programme's front section, from its effective data (data_prodi.py)."""
+def bawaan_dan_resmi(p, nama_unit, bahasa="id"):
+    """(default texts, official cards) of a programme's front section, from its effective data (data_prodi.py). In
+    English (K-P37) from the official English name, with the Indonesian name as the subtitle."""
+    import bahasa as bahasa_mod
     import registri
-    jenjang = registri.JENJANG_PANJANG.get(p["jenjang"], p["jenjang"])
-    bawaan = {"label": "Program Studi %s · %s" % (jenjang, nama_unit), "judul": registri.nama_tampil(p),
-              "subjudul": p.get("nama_en") or "",
-              "pengantar": "Program studi %s di %s, Universitas Sam Ratulangi, Manado." % (jenjang.lower(), nama_unit)}
+    _ = bahasa_mod.penerjemah(bahasa)
+    jenjang = bahasa_mod.jenjang_panjang(p["jenjang"], bahasa)
+    bawaan = {"label": _("Program Studi %s · %s") % (jenjang, nama_unit), "judul": bahasa_mod.nama_tampil(p, bahasa),
+              "subjudul": (registri.nama_tampil(p) if p.get("nama_en") else "") if bahasa == "en"
+              else p.get("nama_en") or "",
+              "pengantar": _("Program studi %s di %s, Universitas Sam Ratulangi, Manado.") % (jenjang.lower(), nama_unit)}
     resmi = []
     if registri.label_akreditasi(p.get("akreditasi")):
-        resmi.append({"id": "akreditasi", "label": "Akreditasi", "nilai": registri.label_akreditasi(p["akreditasi"]),
+        resmi.append({"id": "akreditasi", "label": _("Akreditasi"),
+                      "nilai": bahasa_mod.label_akreditasi(p["akreditasi"], bahasa),
                       "keterangan": p.get("lembaga_akreditasi") or "", "sorot": True})
     if p.get("gelar"):
-        resmi.append({"id": "gelar", "label": "Gelar", "nilai": p["gelar"], "keterangan": "", "sorot": False})
+        resmi.append({"id": "gelar", "label": _("Gelar"), "nilai": p["gelar"], "keterangan": "", "sorot": False})
     if p.get("sks"):
-        resmi.append({"id": "sks", "label": "Beban studi", "nilai": "%s SKS" % p["sks"], "keterangan": "", "sorot": False})
+        resmi.append({"id": "sks", "label": _("Beban studi"), "nilai": _("%s SKS") % p["sks"], "keterangan": "",
+                      "sorot": False})
     if p.get("internasional"):
-        resmi.append({"id": "internasional", "label": "Akreditasi internasional", "nilai": p["internasional"],
+        resmi.append({"id": "internasional", "label": _("Akreditasi internasional"), "nilai": p["internasional"],
                       "keterangan": "", "sorot": False})
     return bawaan, resmi
 

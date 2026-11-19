@@ -3,13 +3,13 @@
 {% extends "prodi.html" %}
 {% block isi %}
 <div class="wadah halaman{% if kelompok %} halaman--samping{% endif %}">
-	<nav class="jejak" aria-label="Jejak halaman">
+	<nav class="jejak" aria-label="{{ _('Jejak halaman') }}">
 		<ol>
-			<li><a href="{{ ke(slug) }}">{{ nama }}</a></li>
+			<li><a href="{{ ke(akar) }}">{{ nama }}</a></li>
 			{% if kelompok %}
-			<li><a href="{{ ke(slug ~ '/' ~ kelompok.alamat) }}">{{ kelompok.label }}</a></li>
+			<li><a href="{{ ke(akar ~ '/' ~ kelompok.alamat) }}">{{ kelompok.label }}</a></li>
 			{% endif %}
-			<li><a href="{{ ke(slug ~ '/' ~ ini.alamat) }}" aria-current="page">{{ ini.label }}</a></li>
+			<li><a href="{{ ke(akar ~ '/' ~ ini.alamat) }}" aria-current="page">{{ ini.label }}</a></li>
 		</ol>
 	</nav>
 	<article class="halaman__isi">
@@ -18,10 +18,10 @@
 	</article>
 	{% if kelompok %}
 	<nav class="samping" aria-labelledby="samping-judul">
-		<h2 id="samping-judul" class="samping__judul"><a href="{{ ke(slug ~ '/' ~ kelompok.alamat) }}">{{ kelompok.label }}</a></h2>
+		<h2 id="samping-judul" class="samping__judul"><a href="{{ ke(akar ~ '/' ~ kelompok.alamat) }}">{{ kelompok.label }}</a></h2>
 		<ul>
 			{% for a in kelompok.anak %}
-			<li><a href="{{ ke(slug ~ '/' ~ a.alamat) }}"{% if a.id == ini.id %} aria-current="page"{% endif %}>{{ a.label }}</a></li>
+			<li><a href="{{ ke(akar ~ '/' ~ a.alamat) }}"{% if a.id == ini.id %} aria-current="page"{% endif %}>{{ a.label }}</a></li>
 			{% endfor %}
 		</ul>
 	</nav>

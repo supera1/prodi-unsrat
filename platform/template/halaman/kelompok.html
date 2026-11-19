@@ -5,7 +5,7 @@
 <ul class="kartu-daftar">
 	{% for a in ini.anak %}
 	<li class="kartu">
-		<h2 class="kartu__judul"><a href="{{ ke(slug ~ '/' ~ a.alamat) }}">{{ a.label }}</a></h2>
+		<h2 class="kartu__judul"><a href="{{ ke(akar ~ '/' ~ a.alamat) }}">{{ a.label }}</a></h2>
 		{% if a.jenis != "tambahan" %}<p>{{ a.deskripsi }}</p>{% endif %}
 	</li>
 	{% endfor %}

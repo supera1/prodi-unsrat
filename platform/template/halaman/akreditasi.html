@@ -1,39 +1,42 @@
 {# Accreditation: the status from the official data; the documents (certificate, decree, summary) from the programme
    (isi_halaman.py "akreditasi", K-P29); once LPMPP confirmed the programme's accreditation body, its pages per
-   criterion (kriteria.py). #}
+   criterion (kriteria.py). The English version (K-P37) shows the status; its documents come with the English content
+   of the page (Fase 5 langkah 2). #}
 {% extends "halaman.html" %}
 {% from "_isi.html" import bagian_isi with context %}
 {% block isi_halaman %}
 <p class="pengantar">{{ ini.deskripsi }}</p>
 {% if p.akreditasi | akreditasi %}
 <dl class="tabel-data">
-	<div><dt>Peringkat akreditasi</dt><dd><span class="lencana lencana--aksen">{{ p.akreditasi | akreditasi }}</span></dd></div>
-	<div><dt>Lembaga akreditasi</dt><dd>{{ p.lembaga_akreditasi or 'Sedang dilengkapi' }}</dd></div>
+	<div><dt>{{ _("Peringkat akreditasi") }}</dt><dd><span class="lencana lencana--aksen">{{ p.akreditasi | akreditasi }}</span></dd></div>
+	<div><dt>{{ _("Lembaga akreditasi") }}</dt><dd>{{ p.lembaga_akreditasi or _('Sedang dilengkapi') }}</dd></div>
 	{% if tampil_berlaku and p.berlaku_hingga | tanggal %}
-	<div><dt>Berlaku hingga</dt><dd>{{ p.berlaku_hingga | tanggal }}</dd></div>
+	<div><dt>{{ _("Berlaku hingga") }}</dt><dd>{{ p.berlaku_hingga | tanggal }}</dd></div>
 	{% endif %}
 	{% if p.internasional %}
-	<div><dt>Akreditasi internasional</dt><dd>{{ p.internasional }}</dd></div>
+	<div><dt>{{ _("Akreditasi internasional") }}</dt><dd>{{ p.internasional }}</dd></div>
 	{% endif %}
 </dl>
 {% else %}
-<p class="catatan catatan--menyusul">Status akreditasi sedang dilengkapi.</p>
+<p class="catatan catatan--menyusul">{{ _("Status akreditasi sedang dilengkapi.") }}</p>
 {% endif %}
+{% if bahasa == 'id' %}
 {% if isi_bagian %}
 {% for b in isi_bagian %}{{ bagian_isi(b) }}{% endfor %}
 {% else %}
 <p class="catatan catatan--menyusul">Sertifikat akreditasi sedang dilengkapi oleh Program Studi {{ nama }}.</p>
 {% endif %}
+{% endif %}
 {% set peta = peta_kriteria | selectattr("halaman") | list %}
 {% if peta %}
 <section class="peta-kriteria" aria-labelledby="peta-kriteria">
-	<h2 id="peta-kriteria">Halaman menurut kriteria akreditasi {{ lembaga_kriteria.nama }}</h2>
+	<h2 id="peta-kriteria">{{ _("Halaman menurut kriteria akreditasi %s") | format(lembaga_kriteria.nama) }}</h2>
 	{% if lembaga_kriteria.instrumen %}<p class="isi-info">{{ lembaga_kriteria.instrumen }}</p>{% endif %}
 	<dl class="peta-kriteria__daftar">
 		{% for k in peta %}
 		<div>
-			<dt>Kriteria {{ k.nomor }}: {{ k.nama }}</dt>
-			<dd><ul>{% for h in k.halaman %}<li><a href="{{ ke(slug ~ '/' ~ h.alamat) }}">{{ h.label }}</a></li>{% endfor %}</ul></dd>
+			<dt>{{ _("Kriteria %s:") | format(k.nomor) }} {{ k.nama }}</dt>
+			<dd><ul>{% for h in k.halaman %}<li><a href="{{ ke(akar ~ '/' ~ h.alamat) }}">{{ h.label }}</a></li>{% endfor %}</ul></dd>
 		</div>
 		{% endfor %}
 	</dl>

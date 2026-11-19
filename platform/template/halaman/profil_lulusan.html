@@ -1,22 +1,22 @@
-{# Graduate profile and learning outcomes (CPL), from the official data. #}
+{# Graduate profile and learning outcomes (CPL), from the official data (in English: bidang_kerja_en, isi_en). #}
 {% extends "halaman.html" %}
 {% block isi_halaman %}
 <p class="pengantar">{{ ini.deskripsi }}</p>
-<h2>Bidang kerja lulusan</h2>
-{% if p.bidang_kerja %}
-<p>{{ p.bidang_kerja }}</p>
+<h2>{{ _("Bidang kerja lulusan") }}</h2>
+{% if bidang_kerja %}
+<p>{{ bidang_kerja }}</p>
 {% else %}
-<p class="catatan catatan--menyusul">Bidang kerja lulusan sedang dilengkapi.</p>
+<p class="catatan catatan--menyusul">{{ _("Bidang kerja lulusan sedang dilengkapi.") }}</p>
 {% endif %}
-<h2>Capaian pembelajaran lulusan</h2>
-{% if p.cpl %}
-{% if kurikulum %}<p>Kurikulum {{ kurikulum | join(', ') }}.</p>{% endif %}
+<h2>{{ _("Capaian pembelajaran lulusan") }}</h2>
+{% if cpl %}
+{% if kurikulum %}<p>{{ _("Kurikulum %s.") | format(kurikulum | join(', ')) }}</p>{% endif %}
 <ol class="daftar-cpl">
-	{% for c in p.cpl %}
+	{% for c in cpl %}
 	<li>{% if c.kode %}<span class="daftar-cpl__kode">{{ c.kode }}</span> {% endif %}{{ c.isi }}</li>
 	{% endfor %}
 </ol>
 {% else %}
-<p class="catatan catatan--menyusul">Capaian pembelajaran lulusan sedang dilengkapi.</p>
+<p class="catatan catatan--menyusul">{{ _("Capaian pembelajaran lulusan sedang dilengkapi.") }}</p>
 {% endif %}
 {% endblock %}

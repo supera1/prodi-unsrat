@@ -221,8 +221,9 @@ def ganti_slug(kode, slug_baru, oleh):
     lokasi.tulis("registri", registri, oleh, "Registri", "slug %s: %s -> %s" % (kode, lama, slug_baru))
 
 
-def atur(kode, oleh, aktif=None, dosen_url=None):
-    """Turn a site on or off, or set its lecturer link (an address on dosen.unsrat.ac.id, or empty)."""
+def atur(kode, oleh, aktif=None, dosen_url=None, inggris=None):
+    """Turn a site on or off, set its lecturer link (an address on dosen.unsrat.ac.id, or empty), or turn its English
+    version on or off (inggris, K-P37: /<slug>/en/)."""
     registri = baca()
     r = cari(registri, kode)
     if r is None:
@@ -235,6 +236,8 @@ def atur(kode, oleh, aktif=None, dosen_url=None):
         r["dosen_url"] = dosen_url
     if aktif is not None:
         r["aktif"] = bool(aktif)
+    if inggris is not None:
+        r["inggris"] = bool(inggris)
     r["diubah"] = _hari_ini()
     lokasi.tulis("registri", registri, oleh, "Registri", "atur %s" % kode)
 
