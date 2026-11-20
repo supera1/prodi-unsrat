@@ -388,12 +388,20 @@ def buat_app(env=None):
         jumlah = {s: sum(1 for b in butir if b.get("status") == s) for s in pengumuman.STATUS}
         terbaru = sorted(butir, key=lambda b: b.get("diubah", ""), reverse=True)[:5]
         isi = alat.ringkasan_isi(kode)
+        r = registri_per_kode().get(kode, {})
+        # the English version (K-P37): what shows, what lags behind, what waits for a check
+        en = {"aktif": bool(r.get("inggris")), "terbit": isi["en_terbit"], "wajib": isi["wajib"], "perlu": isi["en_perlu"],
+              "mesin": isi["en_mesin"],
+              "pengumuman": sum(1 for b in pengumuman.baca(kode)["butir"]
+                                if b.get("status") == "terbit" and pengumuman.inggris(b)),
+              "pengumuman_mesin": sum(1 for b in butir if pengumuman.keadaan_en(b) == "mesin")}
         siap = []
         if not operator:
             situs = lokasi.baca("prodi/%s/situs" % kode) or {}
-            r = registri_per_kode().get(kode, {})
             p = data_prodi.efektif(kode)
             kurang = tarik_www.kekurangan(p) if p else []
+            en["kurang"] = tarik_www.kekurangan_en(p, data_prodi.unit_per_kode().get(p.get("unit_kode"), {})) if p else []
+            en["beranda"] = bool(situs.get("en"))
             operator_n = sum(1 for a in akun_mod.terlihat_oleh(g.akun, kode) if a["peran"] == "operator" and a["aktif"])
             siap = [
                 (not kurang, "Data prodi lengkap" if not kurang else "Data prodi masih kosong: %s" % ", ".join(kurang),
@@ -410,7 +418,7 @@ def buat_app(env=None):
                  url_for("isi_daftar", kode=kode)),
             ]
         return render_template("prodi.html", p=g.prodi, jumlah=jumlah, terbaru=terbaru, siap=siap, operator=operator,
-                               NAMA_STATUS=pengumuman_admin.NAMA_STATUS, isi=isi)
+                               NAMA_STATUS=pengumuman_admin.NAMA_STATUS, isi=isi, en=en)
 
     # -------------------------------------------------------------- accounts
 

@@ -194,12 +194,24 @@ Dasar: [rencana Fase 2](rencana-fase-02.md), keputusan K-P23–K-P36, dan pandua
 
 ## 6. Pilot
 
-- **Prodi pilot:** prodi yang sedang menuju akreditasi internasional. Selama belum disebutkan, dipakai tiga prodi pilot
-  Fase 2: S1 Teknik Informatika, S1 Pendidikan Dokter Gigi, dan S1 Teknik Elektro.
+- **Prodi pilot:** prodi yang sedang menuju akreditasi internasional. Pengguna menyebutkannya pada 20 November 2026:
+  S1 Teknik Informatika, S2 Informatika, S1 Biologi, S1 Agribisnis, S1 Kehutanan, dan S1 Agroteknologi. Sebelumnya,
+  selama belum disebutkan, rencana ini memakai tiga prodi pilot Fase 2.
 - **Pelaksanaan:** versi Inggris diaktifkan untuk prodi pilot setelah isinya cukup; masukan dikumpulkan lewat menu
   Masukan; perbaikan dikerjakan per langkah kecil.
 - **Ukuran keberhasilan** (usulan): setiap prodi pilot menerbitkan versi Inggris beranda dan minimal 15 dari 22 halaman
   wajib tanpa bantuan pengembang; terjemahan mesin dipakai dan diperiksa; tidak ada istilah resmi yang salah tayang.
+- **Pelaksanaan (langkah 5, 20 November 2026):**
+  - persiapan pilot di [docs/pilot-fase-05.md](pilot-fase-05.md);
+  - Ringkasan prodi mendapat kotak **Versi bahasa Inggris**: status saklar, halaman wajib yang terbit dalam bahasa
+    Inggris, halaman perlu diperbarui, terjemahan mesin yang belum diperiksa, pengumuman Inggris, dan kekurangan data
+    resmi berbahasa Inggris. Ini kriteria selesai §9 tentang dasbor prodi;
+  - panduan mendapat urutan kerja yang disarankan;
+  - keterangan saklar superadmin diperbarui;
+  - batas CPL di Data prodi diselaraskan dengan data www. Sebelumnya 21 prodi, termasuk S2 Informatika dan
+    S1 Agribisnis, tidak bisa menyimpan formulir Data prodi sama sekali.
+  - Saklar keenam prodi dinyalakan superadmin di produksi setelah sesi pengenalan. Bagian dari data resmi sudah cukup,
+    karena data resmi Inggris keenamnya lengkap, dan halaman prodi baru muncul setelah versi Inggrisnya terbit.
 
 ## 7. Uji
 
@@ -266,3 +278,9 @@ sebenarnya (ujinya memakai penyedia tiruan).
 
 Rencana opsi D disetujui dengan semua usulan di atas ("Setuju, mulai langkah 0"). Prodi pilot belum disebutkan, jadi
 dipakai tiga prodi pilot Fase 2 sampai ada prodi lain yang disebutkan.
+
+### Jawaban (pengguna, 20 November 2026)
+
+Prodi pilot versi Inggris: S1 Teknik Informatika (55201), S2 Informatika (55100), S1 Biologi (46201), S1 Agribisnis
+(54201), S1 Kehutanan (54251; disebut pengguna "S1 Ilmu Kehutanan"), dan S1 Agroteknologi (54211). Pengguna juga
+meminta langkah 5 dimulai ("Boleh mulai langkah 5").

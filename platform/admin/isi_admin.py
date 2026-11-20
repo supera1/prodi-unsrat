@@ -135,10 +135,11 @@ def ringkasan_isi(kode, wajib=None):
     "terbit": required pages the site shows, "kosong": required pages with nothing yet, "menunggu" / "dikembalikan" /
     "draf": drafts of any page in that status (either language), "terakhir": the last change; "en": {id: the English
     version's isi_inggris.keadaan}, "en_terbit": required pages whose English version shows, "en_perlu": pages whose
-    published English version lacks translations of the Indonesian published content}."""
+    published English version lacks translations of the Indonesian published content, "en_mesin": pages whose English
+    draft holds machine translations not checked yet}."""
     wajib = halaman_wajib() if wajib is None else wajib
     hasil = {"halaman": {}, "en": {}, "wajib": len(wajib), "terbit": 0, "kosong": 0, "menunggu": 0, "dikembalikan": 0,
-             "draf": 0, "terakhir": "", "en_terbit": 0, "en_perlu": 0}
+             "draf": 0, "terakhir": "", "en_terbit": 0, "en_perlu": 0, "en_mesin": 0}
     tambahan = [h["id"] for h in halaman_tambahan.baca(kode) if isinstance(h, dict)
                 and ih.POLA_TAMBAHAN.match(str(h.get("id")))]
     for id_ in list(ih.TEMPLAT) + tambahan:
@@ -150,6 +151,8 @@ def ringkasan_isi(kode, wajib=None):
             hasil["kosong"] += k["status"] == "kosong"
             hasil["en_terbit"] += en["tayang"]
         hasil["en_perlu"] += bool(en["terbit"] and en["perlu"])
+        isi_draf_en = (en["draf"] or {}).get("isi")
+        hasil["en_mesin"] += bool(isinstance(isi_draf_en, dict) and isi_draf_en.get("mesin"))
         for x in (k, en):                       # a draft waiting in either language is one to look at
             status_draf = (x["draf"] or {}).get("status")
             if status_draf in ih.STATUS_DRAF:

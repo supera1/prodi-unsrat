@@ -93,6 +93,6 @@ Stack Docker lengkap di komputer sendiri: [docs/deploy.md §13](docs/deploy.md#1
 | 2a | Isi Inggris di penyunting: tab English, alur dan riwayat, tanda perlu diperbarui, kolom English, kelengkapan | selesai |
 | 2b | Teks Inggris lainnya: bagian depan beranda, label menu, nama halaman tambahan, label kriteria | selesai |
 | 3 | Terjemahan mesin (DeepL) dengan istilah tetap, pemeriksaan hasil, dan batas pemakaian | selesai |
-| 4 | Pengumuman berbahasa Inggris: isian Inggris dan terjemahan mesin di formulir pengumuman, menu News di versi Inggris | selesai, menunggu tinjauan |
-| 5 | Panduan dan pilot | — |
+| 4 | Pengumuman berbahasa Inggris: isian Inggris dan terjemahan mesin di formulir pengumuman, menu News di versi Inggris | selesai |
+| 5 | Panduan dan pilot: kotak versi Inggris di Ringkasan prodi, [persiapan pilot](docs/pilot-fase-05.md) enam prodi, batas CPL Data prodi | selesai, menunggu tinjauan; pilot menunggu deploy |
 | 6 | Uji menyeluruh + log fase | — |

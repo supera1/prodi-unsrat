@@ -475,6 +475,7 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
      dari www. Pengumuman berbahasa Inggris opsional, belakangan.
   5. Nama mata kuliah diterjemahkan; judul tugas akhir tetap bahasa asli kecuali prodi memilih menerjemahkan.
   6. Fase 5 dikerjakan lebih dulu dari Fase 3 dan 4. Prodi pilot: prodi yang menuju akreditasi internasional; sampai
-     disebutkan, tiga prodi pilot Fase 2.
+     disebutkan, tiga prodi pilot Fase 2. Disebutkan pengguna 20 November 2026: S1 Teknik Informatika, S2 Informatika,
+     S1 Biologi, S1 Agribisnis, S1 Kehutanan, dan S1 Agroteknologi ([persiapan pilot](pilot-fase-05.md)).
 - **Konsekuensi:** teks isi halaman dikirim ke penyedia terjemahan saat tombol dipakai; kunci API disimpan di `.env`.
   Prodi memelihara dua versi isi; kelengkapan versi Inggris dipantau superadmin.

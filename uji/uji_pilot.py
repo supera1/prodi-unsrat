@@ -226,7 +226,7 @@ try:
                        ("dasbor admin", ("Isi halaman", "Ringkasan", "Kesiapan situs", "Panduan", "Masukan", "Data prodi",
                                          "Identitas", "Bagian depan beranda", "Menu", "Kriteria akreditasi", "Halaman tambahan",
                                          "Akun", "Log audit", "Riwayat",
-                                         "Pengumuman", "Keluar"))):
+                                         "Pengumuman", "Keluar", "Versi bahasa Inggris", "Data resmi berbahasa Inggris"))):
         for label in labels:
             cek(label in teks, "panduan menyebut %r" % label)
             cek(label in tampak[di], "%r yang disebut panduan tampil di admin (%s)" % (label, di))
