@@ -49,8 +49,12 @@ FIELD_UBAH = {
     "internasional": ("Akreditasi internasional", 120, "teks"),
     "cpl": ("Capaian pembelajaran lulusan (CPL)", 0, "cpl"),
 }
-MAKS_CPL = 40
+# The limits accept every value www gives (data awal, October 2026: up to 45 CPL, curriculum names up to 78
+# characters); a programme whose own www data failed them could not save its data form at all.
+MAKS_CPL = 60
 MAKS_CPL_ISI = 2000
+MAKS_CPL_KODE = 20
+MAKS_CPL_KURIKULUM = 100
 POLA_SUREL = re.compile(r"^[^@\s<>]+@[^@\s<>]+\.[a-z]{2,}$")
 POLA_KODE = re.compile(r"^[0-9A-Za-z]{3,12}$")
 
@@ -190,8 +194,8 @@ def periksa_nilai(f, v, unit=None):
                     continue
                 _periksa_teks("CPL ke-%d" % i, c.get("isi"), MAKS_CPL_ISI, masalah, wajib=True, panjang=True)
                 _periksa_teks("CPL ke-%d (bahasa Inggris)" % i, c.get("isi_en"), MAKS_CPL_ISI, masalah, panjang=True)
-                _periksa_teks("Kode CPL ke-%d" % i, c.get("kode"), 20, masalah)
-                _periksa_teks("Kurikulum CPL ke-%d" % i, c.get("kurikulum"), 20, masalah)
+                _periksa_teks("Kode CPL ke-%d" % i, c.get("kode"), MAKS_CPL_KODE, masalah)
+                _periksa_teks("Kurikulum CPL ke-%d" % i, c.get("kurikulum"), MAKS_CPL_KURIKULUM, masalah)
     return masalah
 
 
@@ -217,6 +221,8 @@ def simpan(kode, perubahan, oleh):
         masalah += periksa_nilai(f, v, unit_prodi())
     if masalah:
         raise GagalData("; ".join(masalah))
+    if "cpl" in perubahan:                    # every CPL with all its fields, as a pull from www stores them
+        perubahan = dict(perubahan, cpl=[{k: c.get(k) or "" for k in tarik_www.FIELD_CPL} for c in perubahan["cpl"]])
     data = baca(kode)
     kini = gabung(p_www, data, unit)
     berubah = []

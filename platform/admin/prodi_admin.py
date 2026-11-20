@@ -95,6 +95,8 @@ def pasang(app, alat):
         return render_template("prodi_data.html", pr=g.prodi, p=p, www=p_www, data=data, field=data_prodi.FIELD_UBAH,
                                bentrok={b[0]: b for b in data_prodi.bentrok(kode, p_www, data)}, unit=unit,
                                jenjang=list(registri.slug_mod.AWALAN_JENJANG), kosong=JUMLAH_CPL_KOSONG,
+                               maks_cpl={"isi": data_prodi.MAKS_CPL_ISI, "kode": data_prodi.MAKS_CPL_KODE,
+                                         "kurikulum": data_prodi.MAKS_CPL_KURIKULUM},
                                akreditasi_ada=akreditasi_ada, lembaga_ada=lembaga_ada), kode_status
 
     def bangun(kode):

@@ -93,11 +93,11 @@
 		<fieldset class="cpl-baris">
 			<legend>{% if c %}CPL ke-{{ loop.index }}{% if c.kode %} (kode {{ c.kode }}){% endif %}{% else %}CPL baru{% endif %}</legend>
 			<div class="cpl-baris__kecil">
-				<div class="isian"><label for="cpl-{{ i }}-kode">Kode</label><input id="cpl-{{ i }}-kode" name="cpl-{{ i }}-kode" type="text" value="{{ c.kode or '' }}" maxlength="20"></div>
-				<div class="isian"><label for="cpl-{{ i }}-kurikulum">Kurikulum</label><input id="cpl-{{ i }}-kurikulum" name="cpl-{{ i }}-kurikulum" type="text" value="{{ c.kurikulum or '' }}" maxlength="20" placeholder="2025/2026"></div>
+				<div class="isian"><label for="cpl-{{ i }}-kode">Kode</label><input id="cpl-{{ i }}-kode" name="cpl-{{ i }}-kode" type="text" value="{{ c.kode or '' }}" maxlength="{{ maks_cpl.kode }}"></div>
+				<div class="isian"><label for="cpl-{{ i }}-kurikulum">Kurikulum</label><input id="cpl-{{ i }}-kurikulum" name="cpl-{{ i }}-kurikulum" type="text" value="{{ c.kurikulum or '' }}" maxlength="{{ maks_cpl.kurikulum }}" placeholder="2025/2026"></div>
 			</div>
-			<div class="isian"><label for="cpl-{{ i }}-isi">Isi</label><textarea id="cpl-{{ i }}-isi" name="cpl-{{ i }}-isi" rows="3" maxlength="2000">{{ c.isi or '' }}</textarea></div>
-			<div class="isian"><label for="cpl-{{ i }}-isi_en">Isi (bahasa Inggris)</label><textarea id="cpl-{{ i }}-isi_en" name="cpl-{{ i }}-isi_en" rows="3" maxlength="2000" lang="en">{{ c.isi_en or '' }}</textarea></div>
+			<div class="isian"><label for="cpl-{{ i }}-isi">Isi</label><textarea id="cpl-{{ i }}-isi" name="cpl-{{ i }}-isi" rows="3" maxlength="{{ maks_cpl.isi }}">{{ c.isi or '' }}</textarea></div>
+			<div class="isian"><label for="cpl-{{ i }}-isi_en">Isi (bahasa Inggris)</label><textarea id="cpl-{{ i }}-isi_en" name="cpl-{{ i }}-isi_en" rows="3" maxlength="{{ maks_cpl.isi }}" lang="en">{{ c.isi_en or '' }}</textarea></div>
 		</fieldset>
 		{% endfor %}
 	</section>

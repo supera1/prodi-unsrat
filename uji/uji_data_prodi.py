@@ -125,11 +125,15 @@ try:
                         ("sks", 500, "SKS 500"), ("sks", "tidak sah", "SKS bukan angka"), ("unit_kode", "fx", "unit"),
                         ("unit_kode", "upa-tik", "unit yang bukan fakultas"),
                         ("surel", "bukan-surel", "surel"), ("berlaku_hingga", "2026-02-30", "tanggal"),
-                        ("cpl", [{"kode": "C", "isi": ""}], "CPL tanpa isi"), ("cpl", [{"isi": "x"}] * 41, "CPL terlalu banyak"),
+                        ("cpl", [{"kode": "C", "isi": ""}], "CPL tanpa isi"), ("cpl", [{"isi": "x"}] * (dp.MAKS_CPL + 1), "CPL terlalu banyak"),
                         ("cpl", [{"isi": "x", "bobot": 1}], "kolom CPL asing"), ("cpl", [{"isi": "Capaian judi togel online"}], "CPL judi"),
                         ("kode_pddikti", "99999", "kode tidak bisa diubah"), ("slug", "lain", "slug www tidak bisa diubah")):
         harus_gagal(dp.simpan, "%s harus ditolak" % label, A, {f: v}, "penguji")
     cek(dp.baca(A)["timpaan"] == {"akreditasi": "Baik Sekali"}, "penolakan tidak mengubah apa pun")
+    dp.simpan(B, {"cpl": [{"isi": "Capaian baru."}]}, "penguji")
+    cek(dp.efektif(B)["cpl"] == [{"kode": "", "isi": "Capaian baru.", "isi_en": "", "kurikulum": ""}],
+        "CPL disimpan dengan semua kolomnya: %r" % dp.efektif(B)["cpl"])
+    dp.pakai_www(B, "cpl", "penguji")
     dp.simpan(A, {"unit_kode": "fmipa", "sks": 146}, "penguji")
     cek(dp.efektif(A)["unit"] == "Fakultas MIPA" and dp.efektif(A)["sks"] == 146, "pindah fakultas memperbarui nama fakultas")
     dp.simpan(A, {"unit_kode": "ft", "sks": 144}, "penguji")
@@ -240,6 +244,24 @@ try:
     cek("<strong>1</strong> prodi dengan data yang bentrok dengan www" in teks
         and "<strong>1</strong> prodi mengubah data resminya sendiri" in teks, "dasbor superadmin: timpaan dan bentrok")
     cek("lembaga_akreditasi" in s.get("/super/prodi/%s" % A).get_data(as_text=True), "halaman prodi superadmin menyebut kolomnya")
+
+    # --- every programme of the data awal can save its data form unchanged: the limits accept what www gives
+    # (S2 Informatika has 42 CPL, S1 Agribisnis curriculum names longer than 20 characters)
+    awal = os.path.join(AKAR, "platform", "data-awal", "www")
+    with io.open(os.path.join(awal, "prodi.json"), encoding="utf-8") as f:
+        program_awal = json.load(f)["program"]
+    with io.open(os.path.join(awal, "unit.json"), encoding="utf-8") as f:
+        unit_awal = {u["kode"]: u for u in json.load(f)["unit"]}
+    ditolak = {}
+    for p in program_awal:
+        masalah = [m for f in dp.FIELD_UBAH for m in dp.periksa_nilai(f, p.get(f), unit_awal)]
+        if masalah:
+            ditolak[p["kode_pddikti"]] = masalah[:2]
+    cek(len(program_awal) == 97 and not ditolak, "formulir Data prodi setiap prodi data awal bisa disimpan: %r" % ditolak)
+    cek(dp.periksa_nilai("cpl", [{"kode": "", "isi": "Capaian.", "isi_en": "", "kurikulum": ""}] * (dp.MAKS_CPL + 1)),
+        "CPL di atas batas tetap ditolak")
+    cek(dp.periksa_nilai("cpl", [{"kode": "", "isi": "Capaian.", "isi_en": "", "kurikulum": "k" * (dp.MAKS_CPL_KURIKULUM + 1)}]),
+        "nama kurikulum di atas batas tetap ditolak")
 
     app.antrean.minta(None, "penguji")
     jumlah, temuan = periksa_situs(lokasi.publik(), "data-prodi")
