@@ -222,6 +222,23 @@ def kekurangan(p):
             if p.get(f) in (None, "", []) or (f == "akreditasi" and p.get(f) == "belum")]   # "belum": www's "not filled in"
 
 
+def kekurangan_en(p, unit=None):
+    """What the English version of a programme's site (K-P37) lacks from the official data: its English name, the
+    English text of its graduates' fields of work, the English text of its CPL, its faculty's English name (unit). The
+    English site leaves those out or falls back to the Indonesian text."""
+    hasil = []
+    if not (p.get("nama_en") or "").strip():
+        hasil.append("nama prodi")
+    if (p.get("bidang_kerja") or "").strip() and not (p.get("bidang_kerja_en") or "").strip():
+        hasil.append("bidang kerja lulusan")
+    tanpa = sum(1 for c in p.get("cpl") or [] if not (c.get("isi_en") or "").strip())
+    if tanpa:
+        hasil.append("%d CPL" % tanpa)
+    if unit is not None and not (unit.get("nama_en") or "").strip():
+        hasil.append("nama fakultas")
+    return hasil
+
+
 def _beda_cpl(lama, baru):
     lama_k = {c["kode"] or c["isi"]: c for c in lama}
     baru_k = {c["kode"] or c["isi"]: c for c in baru}

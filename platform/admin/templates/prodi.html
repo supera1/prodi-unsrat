@@ -41,6 +41,28 @@
 	{% endif %}
 	<p><a class="tombol" href="{{ url_for('pengumuman_baru', kode=p.kode) }}">Buat pengumuman</a></p>
 </section>
+<section class="kartu" aria-labelledby="judul-en">
+	<h2 id="judul-en">Versi bahasa Inggris</h2>
+	{% if en.aktif %}
+	<p>Versi bahasa Inggris situs ini <strong>aktif</strong>: <a href="{{ p.alamat }}en/">{{ p.alamat }}en/</a>.</p>
+	{% else %}
+	<p>Versi bahasa Inggris situs ini <strong>belum diaktifkan</strong> superadmin UPA TIK. Terjemahan tetap bisa disiapkan dan diterbitkan; halamannya tampil di <code>{{ p.alamat }}en/</code> setelah diaktifkan.</p>
+	{% endif %}
+	<p><strong>{{ en.terbit }} dari {{ en.wajib }}</strong> halaman wajib akreditasi sudah terbit dalam bahasa Inggris.</p>
+	<ul class="angka">
+		{% if en.perlu %}<li><a href="{{ url_for('isi_daftar', kode=p.kode) }}"><strong>{{ en.perlu }}</strong> halaman perlu diperbarui</a></li>{% endif %}
+		{% if en.mesin %}<li><a href="{{ url_for('isi_daftar', kode=p.kode) }}"><strong>{{ en.mesin }}</strong> halaman dengan terjemahan mesin belum diperiksa</a></li>{% endif %}
+		<li><a href="{{ url_for('pengumuman_daftar', kode=p.kode, status='terbit') }}"><strong>{{ en.pengumuman }}</strong> pengumuman berbahasa Inggris terbit</a></li>
+		{% if en.pengumuman_mesin %}<li><a href="{{ url_for('pengumuman_daftar', kode=p.kode) }}"><strong>{{ en.pengumuman_mesin }}</strong> pengumuman dengan terjemahan mesin belum diperiksa</a></li>{% endif %}
+	</ul>
+	{% if not operator %}
+	<ul class="daftar-periksa">
+		<li class="{{ 'belum' if en.kurang else 'ok' }}"><span class="tersembunyi">{{ 'Belum:' if en.kurang else 'Selesai:' }}</span><a href="{{ url_for('data_prodi_lihat', kode=p.kode) }}">{% if en.kurang %}Data resmi berbahasa Inggris masih kosong: {{ en.kurang | join(', ') }}{% else %}Data resmi berbahasa Inggris lengkap{% endif %}</a></li>
+		<li class="{{ 'ok' if en.beranda else 'belum' }}"><span class="tersembunyi">{{ 'Selesai:' if en.beranda else 'Belum:' }}</span><a href="{{ url_for('beranda_prodi', kode=p.kode) }}">Bagian depan beranda berbahasa Inggris {{ 'sudah disesuaikan' if en.beranda else 'masih bawaan (opsional)' }}</a></li>
+	</ul>
+	{% endif %}
+	<p><a href="{{ url_for('panduan') }}#versi-bahasa-inggris">Cara mengisi versi bahasa Inggris</a></p>
+</section>
 {% if siap %}
 <section class="kartu">
 	<h2>Kesiapan situs</h2>
