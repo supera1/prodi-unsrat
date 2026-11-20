@@ -3,8 +3,11 @@
 {# The English version of a page (Fase 5, K-P37, isi_inggris.py): every Indonesian text once, with its English field.
    The same buttons and review as the page's own form. #}
 {% block judul %}{{ ini.label }} (versi Inggris) — {{ pr.nama }}{% endblock %}
-{% macro tombol_simpan() %}
+{% macro tombol_simpan(posisi) %}
 {% set menunggu = k.draf and k.draf.status == 'menunggu' %}
+{% if n_mesin %}
+<p class="cek-mesin"><label><input type="checkbox" name="periksa_mesin" value="1" id="periksa-mesin-{{ posisi }}"> Saya sudah memeriksa {{ n_mesin }} terjemahan mesin di halaman ini</label></p>
+{% endif %}
 <div class="tombol-baris">
 	<button type="submit" class="tombol" name="aksi" value="simpan">Simpan draf</button>
 	<button type="submit" class="tombol tombol--garis" name="aksi" value="pratinjau">Simpan dan pratinjau</button>
@@ -81,7 +84,7 @@
 	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
 	<input type="hidden" name="versi" value="{{ data.versi or 0 }}">
 	<input type="hidden" name="versi_id" value="{{ versi_id }}">
-	{{ tombol_simpan() }}
+	{{ tombol_simpan('atas') }}
 	{% if admin and menunggu %}
 	<div class="kartu kembalikan">
 		<div class="isian"><label for="catatan">Catatan untuk penulis, bila dikembalikan</label>
@@ -90,12 +93,22 @@
 		<button type="submit" class="tombol tombol--garis" name="aksi" value="kembalikan">Kembalikan dengan catatan</button>
 	</div>
 	{% endif %}
+	{% if mesin and (mesin.n_semua or mesin.n_excel) %}
+	<section class="kartu terjemah-mesin" aria-labelledby="judul-mesin">
+		<h2 id="judul-mesin">Terjemahan mesin ({{ mesin.penyedia }})</h2>
+		<p>Mengisi isian yang masih kosong dengan terjemahan dari versi Indonesia: <strong>{{ mesin.n }} teks</strong>, ±{{ mesin.karakter }} karakter. Hasilnya masuk draf dan ditandai “terjemahan mesin”: periksa setiap terjemahan sebelum mengajukan atau menerbitkan. Nama prodi, fakultas, dan universitas memakai nama Inggris dari data resmi.</p>
+		{% if mesin.n_semua > mesin.n %}<p><label><input type="checkbox" name="timpa" value="1"> Terjemahkan ulang juga {{ mesin.n_semua - mesin.n }} teks yang sudah diterjemahkan (menimpa terjemahannya)</label></p>{% endif %}
+		{% if mesin.n_excel %}<p><label><input type="checkbox" name="excel" value="1"> Terjemahkan juga {{ mesin.n_excel }} judul di tabel Excel (±{{ mesin.karakter_excel }} karakter); tanpa ini judulnya tampil dalam bahasa aslinya</label></p>{% endif %}
+		<p class="keterangan">Teks halaman ini dikirim ke {{ mesin.penyedia }} untuk diterjemahkan. Sisa batas terjemahan mesin prodi ini hari ini: {{ mesin.sisa }} karakter.</p>
+		<button type="submit" class="tombol tombol--garis" name="aksi" value="terjemahkan">Terjemahkan dari versi Indonesia</button>
+	</section>
+	{% endif %}
 	{% if butir %}
 	<div class="kartu">
 		{% for b in butir %}
 		{% set nama = 't.' ~ b.kunci %}
 		{% set id_isian = 'f-t-' ~ b.kunci %}
-		{% set ket = [id_isian ~ '-sumber'] + ([id_isian ~ '-lama'] if b.jenis == 'lama' else []) + ([id_isian ~ '-galat'] if galat.get(nama) else []) %}
+		{% set ket = [id_isian ~ '-sumber'] + ([id_isian ~ '-lama'] if b.jenis == 'lama' else []) + ([id_isian ~ '-mesin'] if b.mesin else []) + ([id_isian ~ '-galat'] if galat.get(nama) else []) %}
 		<div class="isian isian--terjemah{% if galat.get(nama) %} isian--galat{% endif %}">
 			<label for="{{ id_isian }}">{{ b.tempat }} <span class="keterangan">(bahasa Inggris{{ ', boleh dikosongkan' if b.boleh }})</span></label>
 			<p class="terjemah__sumber" id="{{ id_isian }}-sumber" lang="id"><span class="tersembunyi">Teks Indonesia: </span>{{ b.teks }}</p>
@@ -104,6 +117,7 @@
 			{% else %}
 			<input id="{{ id_isian }}" name="{{ nama }}" type="text" value="{{ b.nilai }}" maxlength="{{ b.maks }}" lang="en" aria-describedby="{{ ket | join(' ') }}"{% if galat.get(nama) %} aria-invalid="true"{% endif %}>
 			{% endif %}
+			{% if b.mesin %}<p class="keterangan terjemah__mesin" id="{{ id_isian }}-mesin">Terjemahan mesin: periksa dan sesuaikan bila perlu.</p>{% endif %}
 			{% if b.jenis == 'lama' %}<p class="keterangan terjemah__lama" id="{{ id_isian }}-lama">Teks Indonesia ini berubah sejak diterjemahkan; isian ini masih berisi terjemahan lamanya. Periksa dan sesuaikan: menyimpan formulir menandainya sudah diperbarui.</p>{% endif %}
 			{% if galat.get(nama) %}<p class="galat-isian" id="{{ id_isian }}-galat">{{ galat[nama] }}</p>{% endif %}
 		</div>
@@ -112,7 +126,7 @@
 	{% else %}
 	<p class="pesan pesan--info">Versi Indonesia halaman ini belum punya teks untuk diterjemahkan. Isi dulu versi Indonesianya.</p>
 	{% endif %}
-	{{ tombol_simpan() }}
+	{{ tombol_simpan('bawah') }}
 	{% if (d and (admin or not menunggu)) or (admin and k.terbit) %}
 	<div class="zona-bahaya">
 		{% if d and (admin or not menunggu) %}

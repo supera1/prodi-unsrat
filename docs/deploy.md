@@ -98,10 +98,37 @@ Perubahan berlaku setelah `sudo docker compose up -d`.
 | `PORT_SITUS_HTTPS` | `8443` | Port situs HTTPS di VM (§7B: biasanya `443`). Tanpa `HTTPS_DI_VM=1` tidak ada yang mendengarkan di sana |
 | `PORT_ADMIN_HTTPS` | `8444` | Port admin HTTPS di VM (§7B) |
 | `UJI_SAAT_BUILD` | `1` | `0` melewati uji saat build. **Hanya** untuk perbaikan darurat; jalankan uji sesudahnya (§8) |
+| `TERJEMAH_PENYEDIA` | kosong | `deepl`: tombol **Terjemahkan dari versi Indonesia** di penyunting versi Inggris (§4A). Kosong: tanpa terjemahan mesin |
+| `TERJEMAH_KUNCI` | kosong | Kunci API DeepL. **Rahasia**: hanya di `.env` VM ini, tidak pernah di Git, surel, atau chat (§4A) |
+| `TERJEMAH_BATAS_HARIAN` | `50000` | Karakter terjemahan mesin per prodi per hari |
+| `TERJEMAH_BATAS_BULANAN` | `500000` | Karakter terjemahan mesin semua prodi per bulan (kuota DeepL API Free: 500.000 per bulan) |
 
 Nilai yang salah atau terlalu longgar (mis. `ADMIN_IP_BOLEH` bukan alamat jaringan atau `0.0.0.0/0`, produksi tanpa
 `ADMIN_HTTPS=1`) membuat kontainer `web` atau `admin` berhenti dengan pesan di log yang menyebut variabelnya. Admin
 memeriksa pengaturannya sebelum membangun situs; situs tetap menyajikan hasil bangun terakhir.
+
+### 4A. Terjemahan mesin (DeepL)
+
+Penyunting versi Inggris (Fase 5, K-P37) bisa mengisi draf terjemahan lewat DeepL API. Teks halaman dikirim dari
+kontainer `admin` ke `api.deepl.com` (atau `api-free.deepl.com` untuk kunci DeepL API Free, yang berakhiran `:fx`)
+lewat HTTPS, jadi VM perlu boleh keluar ke internet di port 443.
+
+1. Kunci API dibuat pemilik akun DeepL (UPA TIK) di akun DeepL → **API Keys**. Kunci itu diserahkan langsung kepada admin
+   VM, bukan lewat chat, surel, atau tiket.
+2. Di VM, isi `.env` lalu batasi izin bacanya:
+
+   ```bash
+   sudo nano /opt/prodi-unsrat/.env      # TERJEMAH_PENYEDIA=deepl dan TERJEMAH_KUNCI=<kunci>
+   sudo chmod 600 /opt/prodi-unsrat/.env
+   sudo docker compose up -d
+   ```
+3. Periksa: penyunting versi Inggris sebuah halaman (menu Isi halaman → tab **English**) menampilkan kotak
+   **Terjemahan mesin (DeepL)**, dan dasbor superadmin menampilkan pemakaian bulan ini.
+
+Batas harian per prodi dan batas bulanan semua prodi (`TERJEMAH_BATAS_HARIAN`, `TERJEMAH_BATAS_BULANAN`) menjaga kuota
+akun DeepL; sesuaikan dengan paket akunnya. Kunci yang ditolak DeepL, kuota yang habis, atau DeepL yang tidak dapat
+dihubungi tidak merusak draf: admin prodi mendapat pesannya dan tetap bisa menerjemahkan sendiri. Bila kunci bocor,
+cabut di akun DeepL, buat yang baru, ganti di `.env`, lalu `sudo docker compose up -d`.
 
 ## 5. Nyalakan pertama kali
 

@@ -11,7 +11,9 @@ akses("prodi"): operators too, except where noted.
     /prodi/<kode>/halaman/<id>/riwayat        the page's versions; /riwayat/<versi> one of them (POST: make it the draft)
     /prodi/<kode>/halaman/<id>/en             its English version (Fase 5, K-P37, isi_inggris.py): the Indonesian texts
                                               with an English field each; POST aksi=simpan | pratinjau | ajukan |
-                                              batal-ajukan | kembalikan | terbitkan | tarik | buang. /en/pratinjau,
+                                              batal-ajukan | kembalikan | terbitkan | tarik | buang | terjemahkan
+                                              (machine translation, terjemah_mesin.py; its texts are checked before
+                                              they are submitted or published: periksa_mesin=1). /en/pratinjau,
                                               /en/riwayat and /en/riwayat/<versi> as for the page
     /prodi/<kode>/pratinjau/warna.css         the programme's colours, for the previews
     /aset-situs/<nama>                        the site's style sheets (tokens.css, prodi.css), for the previews
@@ -59,6 +61,7 @@ import menu as menu_mod  # noqa: E402
 import penyunting  # noqa: E402
 import registri  # noqa: E402
 import riwayat  # noqa: E402
+import terjemah_mesin  # noqa: E402
 import warna as warna_mod  # noqa: E402
 from akses import akses  # noqa: E402
 
@@ -83,6 +86,7 @@ GAGAL = {"ajukan": "Belum diajukan", "batal-ajukan": "Pengajuan tidak dibatalkan
          "terbitkan": "Belum diterbitkan", "tarik": "Belum ditarik"}
 AUDIT = {"ajukan": "isi-diajukan", "batal-ajukan": "isi-pengajuan-dibatalkan", "kembalikan": "isi-dikembalikan",
          "terbitkan": "isi-diterbitkan", "tarik": "isi-ditarik"}
+AKSI_EN = tuple(a for a in AKSI if a != "pulihkan-butir") + ("terjemahkan",)
 # the history: the change that followed a version
 PERUBAHAN = (("simpan draf", "Draf disimpan"), ("batal ajukan", "Pengajuan dibatalkan"), ("ajukan", "Diajukan"),
              ("kembalikan", "Dikembalikan dengan catatan"), ("terbitkan", "Diterbitkan"), ("tarik", "Ditarik dari situs"),
@@ -453,7 +457,17 @@ def pasang(app, alat):
             galat.setdefault(jalur, pesan)
         k_id = ih.keadaan(kode, id_)
         reg = registri.cari(registri.baca(), kode) or {}
+        mesin = None
+        if alat.penerjemah is not None:                  # what "Terjemahkan dari versi Indonesia" would send
+            kosong_ = isi_inggris.sasaran_mesin(templat, sumber, en)
+            semua = isi_inggris.sasaran_mesin(templat, sumber, en, timpa=True)
+            excel = [t for t in isi_inggris.sasaran_mesin(templat, sumber, en, timpa=True, excel=True) if t not in semua]
+            pakai = int(terjemah_mesin.pemakaian(kode)["hari"].get(terjemah_mesin.hari_ini(), 0))
+            mesin = {"penyedia": alat.penerjemah.nama, "n": len(kosong_), "karakter": sum(map(len, kosong_)),
+                     "n_semua": len(semua), "karakter_semua": sum(map(len, semua)), "n_excel": len(excel),
+                     "karakter_excel": sum(map(len, excel)), "sisa": max(0, alat.batas_terjemah[0] - pakai)}
         return render_template("halaman_sunting_en.html", pr=g.prodi, ini=ini, data=data_en, versi_id=versi_id,
+                               mesin=mesin, n_mesin=len(en.get("mesin", [])),
                                k=isi_inggris.keadaan(kode, id_, k_id), k_id=k_id, butir=butir, galat=galat,
                                admin=adalah_admin(g.akun), maks_catatan=ih.MAKS_CATATAN, inggris=bool(reg.get("inggris")),
                                lewat_excel=any(t["lewat_excel"] for t in isi_inggris.perlu_terjemah(templat, sumber))), \
@@ -477,7 +491,7 @@ def pasang(app, alat):
             versi_id = int(request.form.get("versi_id", ""))
         except ValueError:
             abort(400, "Formulir tidak lengkap. Muat ulang halaman lalu coba lagi.")
-        if aksi not in AKSI or aksi == "pulihkan-butir":
+        if aksi not in AKSI_EN or (aksi == "terjemahkan" and alat.penerjemah is None):
             abort(400)
         admin = adalah_admin(g.akun)
         if aksi in ADMIN_SAJA and not admin:
@@ -506,12 +520,19 @@ def pasang(app, alat):
         terbit_id = (data_id.get("terbit") or {}).get("isi") if isinstance(data_id.get("terbit"), dict) else None
         sumber = [x for x in ((ih.draf(data_id) or {}).get("isi"), terbit_id) if isinstance(x, dict)]
         lama = isi_inggris.rapi(ih.isi_kerja(data))
-        isi, tak_cocok = isi_inggris.dari_formulir(ih.templat_halaman(id_), lama, request.form, sumber)
+        templat = ih.templat_halaman(id_)
+        isi, tak_cocok = isi_inggris.dari_formulir(templat, lama, request.form, sumber)
         if tak_cocok or versi_id != data_id.get("versi", 0):
             flash("Versi Indonesia halaman ini berubah saat Anda menerjemahkan. %s" % (
                 "Terjemahan untuk %d teks yang berubah tidak tersimpan; periksa lagi formulirnya." % len(tak_cocok)
                 if tak_cocok else "Periksa teks yang ditandai berubah."), "galat")
+        if aksi in ("ajukan", "terbitkan") and isi.get("mesin") and request.form.get("periksa_mesin") == "1":
+            isi = dict(isi)
+            del isi["mesin"]                       # a person checked the machine's texts (K-P37)
         berubah = inti(isi) != inti(lama)
+
+        if aksi == "terjemahkan":
+            return terjemahkan_en(kode, id_, isi, berubah, versi, ke_sini)
 
         def simpan_ketikan(riwayat_=True):
             if berubah:
@@ -561,6 +582,51 @@ def pasang(app, alat):
             flash("Draf versi Inggris disimpan. Situs tetap menampilkan versi Inggris yang sudah terbit.", "ok")
         else:
             flash("Tidak ada perubahan untuk disimpan.", "info")
+        return redirect(ke_sini)
+
+    def terjemahkan_en(kode, id_, isi, berubah, versi, ke_sini):
+        """aksi=terjemahkan: what the form holds, with machine translations of the texts it lacks (timpa: of all;
+        excel: also of the lists kept in spreadsheets), stored as the draft, marked to be checked."""
+        id_en = isi_inggris.id_en(id_)
+        templat = ih.templat_halaman(id_)
+        sumber = ih.isi_kerja(ih.baca(kode, id_))
+        oleh = g.akun["nama"]
+        sasaran = isi_inggris.sasaran_mesin(templat, sumber, isi, timpa=request.form.get("timpa") == "1",
+                                            excel=request.form.get("excel") == "1")
+        n = sum(len(t) for t in sasaran)
+        try:
+            if not sasaran:
+                raise terjemah_mesin.GagalTerjemah("semua teks halaman ini sudah diterjemahkan")
+            terjemah_mesin.periksa_batas(kode, n, [r["kode_pddikti"] for r in registri.baca()["prodi"]],
+                                         alat.batas_terjemah)
+            p = data_prodi.efektif(kode) or {}
+            glos = terjemah_mesin.glosarium(p, data_prodi.unit_per_kode().values(), lokasi.baca("warisan/universitas"))
+            hasil = terjemah_mesin.terjemahkan(alat.penerjemah, sasaran, glos)
+        except terjemah_mesin.GagalTerjemah as e:
+            try:
+                if berubah:
+                    ih.simpan_draf(kode, id_en, isi, oleh, versi)
+            except ih.GagalIsi as e2:
+                if "baru saja diubah" in str(e2):
+                    return bentrok(kode, ini_(kode, id_), str(e2))
+                flash("Draf tidak disimpan: %s." % e2, "galat")
+            flash("Terjemahan mesin tidak dijalankan: %s." % e, "galat" if sasaran else "info")
+            return redirect(ke_sini)
+        terjemah_mesin.catat_pemakaian(kode, n)
+        try:
+            ih.simpan_draf(kode, id_en, isi_inggris.pasang_mesin(templat, sumber, isi, hasil), oleh, versi)
+        except ih.GagalIsi as e:
+            if "baru saja diubah" in str(e):
+                return bentrok(kode, ini_(kode, id_), str(e))
+            flash("Draf tidak disimpan: %s." % e, "galat")
+            return redirect(ke_sini)
+        gagal = sum(1 for v in hasil.values() if not v)
+        alat.catat("isi-en-terjemahan-mesin", prodi=kode, halaman=id_, teks=len(sasaran) - gagal, karakter=n,
+                   penyedia=alat.penerjemah.nama)
+        flash("%d teks diterjemahkan mesin (%s, %d karakter) dan disimpan sebagai draf. Periksa setiap isian bertanda "
+              "“terjemahan mesin” sebelum mengajukan atau menerbitkan.%s" % (
+                  len(sasaran) - gagal, alat.penerjemah.nama, n,
+                  " %d teks tidak kembali utuh dan dibiarkan kosong; terjemahkan sendiri." % gagal if gagal else ""), "ok")
         return redirect(ke_sini)
 
     @app.route("/prodi/<kode>/halaman/<id_>/en/pratinjau")

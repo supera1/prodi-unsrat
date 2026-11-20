@@ -134,6 +134,16 @@ Dasar: [rencana Fase 2](rencana-fase-02.md), keputusan K-P23–K-P36, dan pandua
   `TERJEMAH_BATAS_HARIAN`, `TERJEMAH_BATAS_BULANAN`. Tanpa kunci, tombol tidak tampil dan isi Inggris diketik sendiri.
   Kunci API disiapkan UPA TIK; harga dan kuota penyedia diperiksa saat langkah 3.
 
+- **Pelaksanaan (langkah 3, 20 November 2026):**
+  - istilah tetap tidak dikirim sebagai glosarium DeepL, karena dukungan glosarium untuk bahasa Indonesia tidak
+    pasti. Istilah itu dikunci sebelum dikirim: diganti nama Inggrisnya di dalam `<keep>` (`ignore_tags`), sehingga
+    hasilnya pasti dan tidak bergantung pada penyedia. Tautan menjadi `<a href>` (teksnya diterjemahkan, alamatnya
+    tidak), dan huruf tebal menjadi `<b>`. Teks dikirim per baris, lalu daftar dan paragraf disusun kembali;
+  - hasil mesin ditandai di memori terjemahan (`"mesin"`). Pengajuan dan penerbitan ditolak sampai admin atau
+    operator mencentang **Saya sudah memeriksa terjemahan mesin di halaman ini**. Isian yang diubah dianggap sudah
+    diperiksa;
+  - judul tabel Excel (tugas akhir) ikut diterjemahkan hanya bila pilihannya dicentang (keputusan nomor 4).
+
 ### 3.6 Mengaktifkan versi Inggris dan kelengkapan
 
 - Superadmin mengaktifkan versi Inggris per prodi di menu Prodi. Syarat yang ditampilkan (bukan pemaksaan): bagian

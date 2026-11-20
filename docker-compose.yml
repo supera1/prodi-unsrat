@@ -37,6 +37,11 @@ services:
       ADMIN_AWALAN: ${ADMIN_AWALAN:-}                      # path of the admin under a shared address, e.g. /admin
       PROXY_TERPERCAYA: "1"                                # the web container (Nginx) is the one proxy in front
       PRODI_BANGUN_HARIAN: ${PRODI_BANGUN_HARIAN:-02:30}   # daily rebuild (expired announcements leave the sites)
+      # machine translation for the English editor (Fase 5, K-P37): "deepl" and its API key (secret: only in .env)
+      TERJEMAH_PENYEDIA: ${TERJEMAH_PENYEDIA:-}
+      TERJEMAH_KUNCI: ${TERJEMAH_KUNCI:-}
+      TERJEMAH_BATAS_HARIAN: ${TERJEMAH_BATAS_HARIAN:-50000}     # characters per programme per day
+      TERJEMAH_BATAS_BULANAN: ${TERJEMAH_BATAS_BULANAN:-500000}  # characters for all programmes per month
     volumes:
       - prodi-data:/srv/prodi
       - prodi-rahasia:/srv/prodi-rahasia

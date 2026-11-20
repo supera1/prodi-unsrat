@@ -210,6 +210,17 @@ Di tab **English**, setiap teks versi Indonesia tampil sekali dengan isian bahas
    riwayatnya sendiri (**Riwayat versi Inggris**).
 3. Halaman tampil di situs berbahasa Inggris setelah versi Indonesia **dan** versi Inggrisnya terbit.
 
+**Terjemahan mesin.** Bila server sudah disambungkan ke DeepL, tab **English** memuat kotak **Terjemahan mesin**.
+Tombol **Terjemahkan dari versi Indonesia** mengisi isian yang masih kosong, lalu menyimpannya sebagai draf.
+
+- Setiap hasil mesin ditandai **terjemahan mesin**. Periksa dan sesuaikan; isian yang Anda ubah dianggap sudah diperiksa.
+- Sebelum mengajukan atau menerbitkan, centang **Saya sudah memeriksa terjemahan mesin di halaman ini**.
+- Nama prodi, fakultas, dan universitas selalu memakai nama Inggris dari data resmi; tautan dan huruf tebal tetap.
+- Pilihan **Terjemahkan ulang** menimpa terjemahan yang sudah ada. Di halaman Tugas Akhir, judul tabel Excel ikut
+  diterjemahkan hanya bila pilihannya dicentang.
+- Teks halaman dikirim ke DeepL. Ada batas karakter per prodi per hari; bila tercapai, coba lagi besok atau terjemahkan
+  sendiri.
+
 Yang perlu diketahui:
 
 - Nama orang, nama mitra, kode mata kuliah, nama sistem, dan nama jurnal tidak diterjemahkan. Angka, tahun, tautan, PDF,

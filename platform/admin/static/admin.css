@@ -669,6 +669,19 @@ dl.data dd {
 	color: var(--abu-900);
 }
 
+/* a machine's translation until a person checks it (terjemah_mesin.py) */
+.terjemah__mesin {
+	padding: 0.25rem 0.5rem;
+	background: var(--biru-50);
+	color: var(--abu-900);
+}
+
+.cek-mesin {
+	margin: 0 0 0.5rem;
+	padding: 0.5rem 0.75rem;
+	background: var(--biru-50);
+}
+
 .status {
 	display: inline-block;
 	padding: 0 0.6em;

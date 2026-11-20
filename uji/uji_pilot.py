@@ -189,12 +189,22 @@ try:
         "jenis": "pdf", "jalur": "%s/202610-0123456789ab.pdf" % A, "judul": "Bukti", "halaman": 1, "ukuran": 1000}},
         {"mitra": "Mitra kedua"}]}, py.Tampil(dihapus={"jalur": "daftar", "indeks": 1, "nilai": {"mitra": "Lain"}}))
     tampak["versi inggris"] = halaman(ko, URL + "sejarah/en")
+    mesin = app_mod.buat_app({"SECRET_KEY": "k" * 64, "ADMIN_IP_BOLEH": "103.84.116.0/24", "PRODI_BANGUN": "mati",
+                              "TERJEMAH_PENYEDIA": "tiruan"}).test_client()
+    mesin.environ_base["REMOTE_ADDR"] = "103.84.116.99"
+    mesin.get("/masuk")
+    with mesin.session_transaction() as s_:
+        token = s_["csrf"]
+    cek(mesin.post("/masuk", data={"csrf": token, "pengguna": "opa", "sandi": SANDI["opa"]}).status_code == 302,
+        "operator masuk ke admin berterjemahan mesin")
+    tampak["terjemahan mesin"] = halaman(mesin, URL + "sejarah/en")
     tampak["sematan"] = py.formulir(ih.TEMPLAT["jadwal"], {"sematan": [{
         "judul": "Jadwal kuliah", "alamat": "https://drive.google.com/file/d/1PdfJadwalKuliahContoh0123/preview"}]}, py.Tampil())
     for di, labels in (("operator, draf", ("Simpan draf", "Simpan dan pratinjau", "Ajukan untuk diterbitkan", "Buang draf",
                                            "Riwayat halaman ini", "(wajib)", "Impor dari Excel")),
                        ("sematan", ("Tambah sematan", "Judul", "Alamat atau kode sematan", "Tinggi bingkai")),
                        ("versi inggris", ("English", "Simpan draf", "Simpan dan pratinjau", "Riwayat versi Inggris")),
+                       ("terjemahan mesin", ("Terjemahan mesin", "Terjemahkan dari versi Indonesia")),
                        ("impor", ("Unduh templat (.xlsx)", "Baca berkas", "Petunjuk", "Data")),
                        ("halaman tambahan", ("Nama menu", "Nama menu (bahasa Inggris)", "Kelompok menu", "Buat halaman dan isi",
                                              "Simpan nama, kelompok, dan urutan", "Hapus")),

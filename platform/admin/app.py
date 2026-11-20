@@ -49,6 +49,7 @@ import prodi_admin  # noqa: E402
 import registri  # noqa: E402
 import superadmin  # noqa: E402
 import tambahan_admin  # noqa: E402
+import terjemah_mesin  # noqa: E402
 from akses import akses  # noqa: E402
 
 SESI_MENIT = 120              # a session ends after this long without activity...
@@ -62,7 +63,8 @@ IP_BOLEH_BAWAAN = "103.84.116.0/24"
 # internet (0.0.0.0/0 to everybody); docker/nginx/40-prodi-jaringan.sh refuses the same
 AWALAN_MIN = {4: 8, 6: 32}
 PENGATURAN_LINGKUNGAN = ("ADMIN_IP_BOLEH", "ADMIN_HTTPS", "PROXY_TERPERCAYA", "ADMIN_AWALAN", "PORT", "PRODI_ALAMAT_PUBLIK",
-                         "PRODI_BANGUN", "PRODI_BANGUN_HARIAN", "PRODI_MODE")
+                         "PRODI_BANGUN", "PRODI_BANGUN_HARIAN", "PRODI_MODE", "TERJEMAH_PENYEDIA", "TERJEMAH_KUNCI",
+                         "TERJEMAH_BATAS_HARIAN", "TERJEMAH_BATAS_BULANAN")
 POLA_NAMA_AKUN = re.compile(r"^([a-z][a-z0-9._-]{2,31}|-|baris-perintah)$")
 POLA_AKSI = re.compile(r"^[a-z][a-z-]{1,40}$")
 POLA_KODE = re.compile(r"^[0-9A-Za-z]{3,12}$")
@@ -125,6 +127,12 @@ def buat_app(env=None):
     except ValueError as e:
         raise SystemExit(str(e))
     alamat_publik = (env.get("PRODI_ALAMAT_PUBLIK") or "https://prodi.unsrat.ac.id").rstrip("/")
+    # machine translation for the English editor (Fase 5, K-P37): the provider and its limits; the key is never shown
+    try:
+        penerjemah = terjemah_mesin.penyedia_dari_pengaturan(env)
+        batas_terjemah = terjemah_mesin.batas_dari_pengaturan(env)
+    except ValueError as e:
+        raise SystemExit(str(e))
 
     app = Flask(__name__, template_folder=os.path.join(ADMIN, "templates"), static_folder=os.path.join(ADMIN, "static"))
     app.config.update(
@@ -360,7 +368,12 @@ def buat_app(env=None):
     def dasbor():
         daftar = prodi_terlihat(g.akun)
         if g.akun["peran"] == "super":
-            return render_template("super_dasbor.html", r=alat.ringkasan(), masukan_baru=alat.jumlah_masukan_baru())
+            terjemah = None
+            if alat.penerjemah is not None:
+                terjemah = {"penyedia": alat.penerjemah.nama, "batas": alat.batas_terjemah,
+                            "pakai": terjemah_mesin.pakai_bulan_ini(registri_per_kode())}
+            return render_template("super_dasbor.html", r=alat.ringkasan(), masukan_baru=alat.jumlah_masukan_baru(),
+                                   terjemah=terjemah)
         if len(daftar) == 1:
             return redirect(url_for("dasbor_prodi", kode=daftar[0]["kode"]))
         return render_template("dasbor.html", daftar=daftar)
@@ -517,6 +530,7 @@ def buat_app(env=None):
     alat = Alat()
     alat.catat, alat.antrean, alat.penjadwal, alat.info_prodi = catat, antrean, penjadwal, info_prodi
     alat.kelompok_prodi, alat.prodi_dari_formulir = kelompok_prodi, prodi_dari_formulir
+    alat.penerjemah, alat.batas_terjemah = penerjemah, batas_terjemah
     superadmin.pasang(app, alat)
     prodi_admin.pasang(app, alat)
     pengumuman_admin.pasang(app, alat)
@@ -526,7 +540,7 @@ def buat_app(env=None):
     tambahan_admin.pasang(app, alat)
     panduan.pasang(app, alat)
     masukan_admin.pasang(app, alat)
-    app.antrean, app.penjadwal = antrean, penjadwal
+    app.antrean, app.penjadwal, app.penerjemah = antrean, penjadwal, penerjemah
 
     # -------------------------------------------------------------- errors
 

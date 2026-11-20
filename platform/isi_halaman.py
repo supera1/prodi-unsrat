@@ -591,6 +591,9 @@ def _periksa_terjemahan(node, v, masalah):
         masalah.append(("", "", "terjemahan harus berupa objek teks"))
         return
     teks_en, asal = v.get("teks", {}), v.get("asal", {})
+    mesin = v.get("mesin", [])
+    if not isinstance(mesin, list) or not all(isinstance(x, str) for x in mesin) or len(mesin) > node["maks"]:
+        masalah.append(("", "", "tanda terjemahan mesin tidak sah"))
     if len(teks_en) > node["maks"]:
         masalah.append(("", "", "paling banyak %d terjemahan" % node["maks"]))
     for sumber, en in list(teks_en.items())[:node["maks"]]:
@@ -948,6 +951,7 @@ def terbitkan(kode, id_halaman, isi, oleh, versi=None, dari_draf=False):
     masalah = periksa(id_halaman, isi, kode)
     if masalah:
         raise GagalIsi("%d isian perlu diperbaiki: %s" % (len(masalah), "; ".join(masalah[:5])))
+    _belum_diperiksa(id_halaman, isi)
     if dari_draf and kosong(templat_halaman(id_halaman), isi):
         raise GagalIsi("halaman ini belum berisi apa pun untuk diterbitkan")
     with _KUNCI:
@@ -1071,12 +1075,20 @@ def _draf_dari(isi, oleh, lama=None):
     return d
 
 
+def _belum_diperiksa(id_halaman, isi):
+    """An English version with machine translations nobody checked yet is never submitted or published (K-P37)."""
+    if id_halaman.endswith(EN) and isinstance(isi, dict) and isi.get("mesin"):
+        raise GagalIsi("%d terjemahan mesin belum diperiksa; periksa, lalu centang “Saya sudah memeriksa terjemahan "
+                       "mesin”" % len(isi["mesin"]))
+
+
 def _siap_diterbitkan(id_halaman, isi, kode):
     masalah = periksa(id_halaman, isi, kode)
     if masalah:
         raise GagalIsi("%d isian perlu diperbaiki: %s" % (len(masalah), "; ".join(masalah[:5])))
     if kosong(templat_halaman(id_halaman), isi):
         raise GagalIsi("halaman ini belum berisi apa pun")
+    _belum_diperiksa(id_halaman, isi)
 
 
 def ajukan(kode, id_halaman, isi, oleh, versi=None):
@@ -1198,6 +1210,9 @@ def _saring(node, v, kode):
         _periksa_terjemahan(node, {"asal": asal}, masalah)
         if not masalah:
             hasil["asal"] = dict(asal)
+        mesin = v.get("mesin") if isinstance(v, dict) and isinstance(v.get("mesin"), list) else []
+        if mesin:
+            hasil["mesin"] = [x for x in mesin if x in hasil["teks"]]
         return hasil
     if j == "objek":
         if not isinstance(v, dict):
