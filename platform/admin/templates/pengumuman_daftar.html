@@ -14,7 +14,7 @@
 </nav>
 <div class="tabel-gulir">
 	<table>
-		<thead><tr><th scope="col">Judul</th><th scope="col">Kategori</th><th scope="col">Tanggal</th><th scope="col">Status</th><th scope="col">Penulis</th></tr></thead>
+		<thead><tr><th scope="col">Judul</th><th scope="col">Kategori</th><th scope="col">Tanggal</th><th scope="col">Status</th><th scope="col">Versi Inggris</th><th scope="col">Penulis</th></tr></thead>
 		<tbody>
 			{% for b in daftar %}
 			<tr>
@@ -22,10 +22,12 @@
 				<td>{{ label.get(b.kategori, b.kategori) }}</td>
 				<td>{{ b.tanggal }}{% if b.kedaluwarsa %}<br><span class="keterangan">s.d. {{ b.kedaluwarsa }}</span>{% endif %}</td>
 				<td><span class="status status--{{ b.status }}">{{ NAMA_STATUS[b.status] }}</span></td>
+				{% set k_en = keadaan_en(b) %}
+				<td>{% if k_en == 'kosong' %}<span class="keterangan">–</span>{% else %}{{ NAMA_EN[k_en] }}{% endif %}</td>
 				<td>{{ b.oleh }}</td>
 			</tr>
 			{% else %}
-			<tr><td colspan="5">Belum ada pengumuman{% if status %} berstatus {{ NAMA_STATUS[status] | lower }}{% endif %}.</td></tr>
+			<tr><td colspan="6">Belum ada pengumuman{% if status %} berstatus {{ NAMA_STATUS[status] | lower }}{% endif %}.</td></tr>
 			{% endfor %}
 		</tbody>
 	</table>

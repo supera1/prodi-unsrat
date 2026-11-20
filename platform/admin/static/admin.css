@@ -676,6 +676,16 @@ dl.data dd {
 	color: var(--abu-900);
 }
 
+.kartu .terjemah-mesin {
+	margin: 0 0 1.5rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--abu-200);
+}
+
+.kartu .terjemah-mesin h3 {
+	margin-top: 0;
+}
+
 .cek-mesin {
 	margin: 0 0 0.5rem;
 	padding: 0.5rem 0.75rem;

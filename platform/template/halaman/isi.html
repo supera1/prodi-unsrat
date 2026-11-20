@@ -25,7 +25,7 @@
 	<ul class="kabar-daftar kabar-daftar--ringkas">
 		{% for b in t.butir %}{{ kartu_kabar(b, 3) }}{% endfor %}
 	</ul>
-	<p><a href="{{ ke(slug ~ '/pengumuman/kategori/' ~ t.kategori.id) }}">Semua kabar {{ t.kategori.label | lower }} ({{ t.jumlah }})</a></p>
+	<p><a href="{{ ke(akar ~ '/pengumuman/kategori/' ~ t.kategori.id) }}">{{ _('Semua kabar %s (%d)') | format(t.kategori.label | lower, t.jumlah) }}</a></p>
 </section>
 {% endfor %}
 {% endblock %}

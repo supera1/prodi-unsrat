@@ -202,6 +202,9 @@ diterbitkan.
   langsung dari data resmi www.
 - Halaman yang diisi prodi diterjemahkan di penyuntingnya: buka halaman di menu **Isi halaman**, lalu pilih tab
   **English**. Kolom **English** di daftar Isi halaman menunjukkan keadaan versi Inggris setiap halaman.
+- Pengumuman diterjemahkan di formulirnya sendiri, bagian **Versi bahasa Inggris (opsional)**; lihat
+  [Pengumuman dan berita](#pengumuman-dan-berita). Menu **News** muncul di versi Inggris setelah ada pengumuman
+  berbahasa Inggris yang terbit.
 
 Di tab **English**, setiap teks versi Indonesia tampil sekali dengan isian bahasa Inggrisnya:
 
@@ -291,6 +294,25 @@ isinya tetap tersimpan di riwayat.
 Menu **Pengumuman**: tulis judul, ringkasan, dan isi, lalu tambahkan foto atau PDF bila perlu. Operator mengajukan;
 admin prodi menerbitkan, mengembalikan dengan catatan, atau menarik dari situs. Pengumuman yang ditarik tidak hilang dan
 bisa diterbitkan lagi.
+
+**Versi bahasa Inggris (opsional).** Di formulir pengumuman, bagian **Versi bahasa Inggris (opsional)** memuat isian
+**Judul (Inggris)**, **Ringkasan (Inggris)**, dan **Isi (Inggris)**. Isian ini disimpan bersama pengumuman dan mengikuti
+alur yang sama: operator mengajukan, admin prodi menerbitkan.
+
+- Pengumuman tampil di situs berbahasa Inggris setelah terbit, bila judul, ringkasan, dan isinya (bila versi Indonesia
+  punya isi) sudah diisi dan tidak ada terjemahan mesin yang belum diperiksa. Pengumuman tanpa versi Inggris hanya
+  tampil di situs berbahasa Indonesia.
+- Tanggal, kategori, foto, dan PDF sama dengan versi Indonesia. Teks alternatif foto dan judul PDF tetap berbahasa
+  Indonesia.
+- Bila server sudah disambungkan ke DeepL, tombol **Simpan dan terjemahkan dari versi Indonesia** menyimpan formulir,
+  lalu mengisi isian Inggris yang masih kosong. Hasilnya ditandai **terjemahan mesin** dan belum tampil di situs.
+  Periksa dan sesuaikan: isian yang Anda ubah dianggap sudah diperiksa, atau centang
+  **Saya sudah memeriksa versi Inggris pengumuman ini**, lalu simpan. Untuk pengumuman baru, simpan dulu sebelum
+  menerjemahkan.
+- Bila judul, ringkasan, atau isi versi Indonesia diubah setelah diterjemahkan, isian Inggrisnya diberi tanda kuning.
+  Terjemahan lama tetap tampil sampai Anda memperbaruinya atau mencentang kotak pemeriksaan tadi.
+- Kolom **Versi Inggris** di daftar pengumuman menunjukkan keadaannya: *Lengkap*, *Belum lengkap*, atau
+  *Terjemahan mesin belum diperiksa*.
 
 ## Pengaturan situs (admin prodi)
 

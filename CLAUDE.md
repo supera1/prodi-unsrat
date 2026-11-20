@@ -98,6 +98,9 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   `platform/terjemah_mesin.py` (DeepL dengan pustaka standar, penyedia `tiruan` untuk uji; istilah resmi dikunci
   dengan `<keep>`; batas `TERJEMAH_BATAS_*`; kunci `TERJEMAH_KUNCI` hanya di `.env`, tidak pernah ditampilkan).
   Hasil mesin bertanda `"mesin"` di memori terjemahan dan tidak bisa terbit sebelum dicentang sudah diperiksa.
+  Pengumuman Inggris (langkah 4): `"en"` di butir `pengumuman.py` (`keadaan_en`, `inggris`, `perlu_diperbarui`),
+  isian dan tombol terjemahan di formulir `pengumuman_admin.py`; tampil di situs Inggris (menu News,
+  `bangun_pengumuman` untuk kedua bahasa) hanya bila lengkap dan tanpa tanda mesin.
 - Halaman tambahan prodi (K-P35): daftar di `platform/halaman_tambahan.py` (`data/prodi/<kode>/tambahan.json`, alamat
   `/<slug>/halaman/<alamat>/`), isinya halaman `isi_halaman` dengan `TEMPLAT_TAMBAHAN` (id `x` + 6 heksa,
   `templat_halaman()`); admin di `platform/admin/tambahan_admin.py`. Sematan hanya dari daftar tetap di

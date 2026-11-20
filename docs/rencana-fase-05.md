@@ -158,6 +158,12 @@ Dasar: [rencana Fase 2](rencana-fase-02.md), keputusan K-P23–K-P36, dan pandua
 
 - Pengumuman boleh diberi judul, ringkasan, dan isi berbahasa Inggris, dengan tombol terjemahan mesin yang sama.
 - Daftar berita Inggris hanya memuat pengumuman yang punya versi Inggris. Foto dan PDF dipakai bersama.
+- **Pelaksanaan (langkah 4, 20 November 2026):** versi Inggris disimpan di dalam butir pengumuman (`"en"`: judul,
+  ringkasan, isi, tanda `mesin`, dan `asal`), bukan berkas terpisah, sehingga ikut status dan alur persetujuan butir itu.
+  Hasil mesin yang belum diperiksa tidak menghalangi penerbitan versi Indonesia (pengumuman sering mendesak), tetapi
+  versi Inggrisnya tidak tampil sampai diperiksa. Menu **News** ada di versi Inggris selama ada pengumuman Inggris yang
+  terbit; kategori mendapat `label_en`. Teks alternatif foto dan judul PDF tetap berbahasa Indonesia dan ditandai
+  `lang="id"`. Versi Inggris tanpa RSS.
 
 ## 4. Model data
 

@@ -92,7 +92,7 @@ Stack Docker lengkap di komputer sendiri: [docs/deploy.md §13](docs/deploy.md#1
 | 1 | Kerangka bahasa di situs: teks dan label Inggris, `/<slug>/en/` dari data resmi, tombol bahasa, `hreflang`, sitemap, saklar superadmin | selesai |
 | 2a | Isi Inggris di penyunting: tab English, alur dan riwayat, tanda perlu diperbarui, kolom English, kelengkapan | selesai |
 | 2b | Teks Inggris lainnya: bagian depan beranda, label menu, nama halaman tambahan, label kriteria | selesai |
-| 3 | Terjemahan mesin (DeepL) dengan istilah tetap, pemeriksaan hasil, dan batas pemakaian | selesai, menunggu tinjauan |
-| 4 | Pengumuman berbahasa Inggris (opsional) | — |
+| 3 | Terjemahan mesin (DeepL) dengan istilah tetap, pemeriksaan hasil, dan batas pemakaian | selesai |
+| 4 | Pengumuman berbahasa Inggris: isian Inggris dan terjemahan mesin di formulir pengumuman, menu News di versi Inggris | selesai, menunggu tinjauan |
 | 5 | Panduan dan pilot | — |
 | 6 | Uji menyeluruh + log fase | — |

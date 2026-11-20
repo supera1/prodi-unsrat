@@ -198,6 +198,11 @@ try:
     cek(mesin.post("/masuk", data={"csrf": token, "pengguna": "opa", "sandi": SANDI["opa"]}).status_code == 302,
         "operator masuk ke admin berterjemahan mesin")
     tampak["terjemahan mesin"] = halaman(mesin, URL + "sejarah/en")
+    import pengumuman as pg_
+    id_pg = pg_.tambah(A, {"judul": "Jadwal ujian", "kategori": "akademik", "ringkasan": "Jadwal ujian semester.",
+                           "en": {"judul": "Exam", "ringkasan": "Exams.", "mesin": {"judul": "Exam"}}}, "opa", "draf")
+    tampak["pengumuman inggris"] = halaman(mesin, "/prodi/%s/pengumuman/%s" % (A, id_pg))
+    tampak["daftar pengumuman"] = halaman(mesin, "/prodi/%s/pengumuman" % A)
     tampak["sematan"] = py.formulir(ih.TEMPLAT["jadwal"], {"sematan": [{
         "judul": "Jadwal kuliah", "alamat": "https://drive.google.com/file/d/1PdfJadwalKuliahContoh0123/preview"}]}, py.Tampil())
     for di, labels in (("operator, draf", ("Simpan draf", "Simpan dan pratinjau", "Ajukan untuk diterbitkan", "Buang draf",
@@ -205,6 +210,10 @@ try:
                        ("sematan", ("Tambah sematan", "Judul", "Alamat atau kode sematan", "Tinggi bingkai")),
                        ("versi inggris", ("English", "Simpan draf", "Simpan dan pratinjau", "Riwayat versi Inggris")),
                        ("terjemahan mesin", ("Terjemahan mesin", "Terjemahkan dari versi Indonesia")),
+                       ("pengumuman inggris", ("Versi bahasa Inggris (opsional)", "Judul (Inggris)", "Ringkasan (Inggris)",
+                                               "Isi (Inggris)", "Simpan dan terjemahkan dari versi Indonesia",
+                                               "Saya sudah memeriksa versi Inggris pengumuman ini", "terjemahan mesin")),
+                       ("daftar pengumuman", ("Versi Inggris", "Terjemahan mesin belum diperiksa")),
                        ("impor", ("Unduh templat (.xlsx)", "Baca berkas", "Petunjuk", "Data")),
                        ("halaman tambahan", ("Nama menu", "Nama menu (bahasa Inggris)", "Kelompok menu", "Buat halaman dan isi",
                                              "Simpan nama, kelompok, dan urutan", "Hapus")),

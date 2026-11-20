@@ -6,6 +6,10 @@
     /prodi/<kode>/pengumuman/<id>            form of one item; POST saves it
     /prodi/<kode>/pengumuman/<id>/status     POST aksi=ajukan|batal|terbitkan|kembalikan|tarik|arsipkan
 
+The form also holds the item's English version (Fase 5 langkah 4, K-P37), saved with it under the same rules; its
+button "Terjemahkan dari versi Indonesia" (aksi_simpan=terjemahkan) saves the form, then fills the empty English
+texts with machine translations marked to be checked (terjemah_mesin.py, the same limits as the pages).
+
 Who may do what (checked here for every request, whatever the form says):
     operator   writes drafts and submits them; changes and withdraws only its own items while they are a draft or
                waiting; never publishes
@@ -26,9 +30,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(ADMIN), "bangun"))
 
 from flask import abort, flash, g, redirect, render_template, request, url_for  # noqa: E402
 
+import data_prodi  # noqa: E402
+import lokasi  # noqa: E402
 import media  # noqa: E402
 import pengumuman as pg  # noqa: E402
 import registri  # noqa: E402
+import terjemah_mesin  # noqa: E402
 from akses import akses  # noqa: E402
 
 PRIVASI = ("Jangan mengunggah data pribadi: NIK, nomor HP, alamat rumah, nilai, atau daftar mahasiswa beserta NIM dan "
@@ -38,6 +45,32 @@ AKSI = {"ajukan": (("draf",), "menunggu", False), "batal": (("menunggu",), "draf
         "arsipkan": (("draf",), "ditarik", False), "terbitkan": (("draf", "menunggu", "ditarik"), "terbit", True),
         "kembalikan": (("menunggu",), "draf", True), "tarik": (("terbit",), "ditarik", True)}
 NAMA_STATUS = {"draf": "Draf", "menunggu": "Menunggu persetujuan", "terbit": "Terbit", "ditarik": "Ditarik"}
+NAMA_EN = {"kosong": "Belum ada", "belum-lengkap": "Belum lengkap", "mesin": "Terjemahan mesin belum diperiksa",
+           "siap": "Lengkap"}
+
+
+def en_dari_formulir(f, lama, id_baru):
+    """The English version from the form. lama: the stored item's "en"; id_baru: the Indonesian texts being saved.
+    A machine translation stays marked until its text is changed or the checkbox periksa_en is ticked; "asal" (the
+    Indonesian text an English text was written for) moves on for a text that changed, and for all with periksa_en."""
+    lama = lama or {}
+    periksa = f.get("periksa_en") == "1"
+    teks = {k: f.get("en_" + k, "").replace("\r\n", "\n").strip() for k in pg.TEKS_EN}
+    if not any(teks.values()):
+        return {}
+    mesin = {k: v for k, v in (lama.get("mesin") or {}).items() if not periksa and teks.get(k) == v}
+    asal = {}
+    for k in pg.TEKS_EN:
+        if not teks[k]:
+            continue
+        if periksa or teks[k] != (lama.get(k) or "") or k not in (lama.get("asal") or {}):
+            asal[k] = id_baru.get(k) or ""
+        else:
+            asal[k] = lama["asal"][k]
+    hasil = dict(teks, asal=asal)
+    if mesin:
+        hasil["mesin"] = mesin
+    return hasil
 
 
 def adalah_admin(akun):
@@ -103,11 +136,78 @@ def pasang(app, alat):
         return sekarang or "draf"
 
     def halaman_form(kode, b=None, isian=None, kode_status=200):
-        return render_template("pengumuman_form.html", pr=g.prodi, b=b, isian=isian or (b or {}), kategori=pg.baca_kategori(),
+        isian = isian or (b or {})
+        mesin = None
+        if b and alat.penerjemah is not None:            # what "Terjemahkan dari versi Indonesia" would send
+            kosong_, semua = sasaran_mesin(b), sasaran_mesin(b, timpa=True)
+            pakai = int(terjemah_mesin.pemakaian(kode)["hari"].get(terjemah_mesin.hari_ini(), 0))
+            mesin = {"penyedia": alat.penerjemah.nama, "n": len(kosong_), "karakter": sum(map(len, kosong_)),
+                     "n_semua": len(semua), "sisa": max(0, alat.batas_terjemah[0] - pakai)}
+        return render_template("pengumuman_form.html", pr=g.prodi, b=b, isian=isian, en=isian.get("en") or {},
+                               kategori=pg.baca_kategori(),
                                admin=adalah_admin(g.akun), privasi=PRIVASI, maks=pg.MAKS, maks_foto=pg.MAKS_FOTO,
                                maks_pdf=pg.MAKS_PDF, boleh=boleh_ubah(g.akun, b) if b else True,
                                hari_ini=datetime.date.today().isoformat(), NAMA_STATUS=NAMA_STATUS,
-                               pratinjau=_pratinjau(b)), kode_status
+                               keadaan_en=pg.keadaan_en(isian), NAMA_EN=NAMA_EN, mesin=mesin,
+                               penerjemah_ada=alat.penerjemah is not None,
+                               basi_en=pg.perlu_diperbarui(b) if b else [], label_en=pg.LABEL_EN,
+                               inggris_aktif=bool((registri.cari(registri.baca(), kode) or {}).get("inggris")),
+                               pratinjau=_pratinjau(b), pratinjau_en=_pratinjau(b.get("en") if b else None)), kode_status
+
+    def sasaran_mesin(b, timpa=False):
+        """The Indonesian texts of an item a machine translation would send: those whose English text is empty
+        (timpa: all)."""
+        en = b.get("en") or {}
+        return [b[k] for k in pg.TEKS_EN if (b.get(k) or "").strip() and (timpa or not (en.get(k) or "").strip())]
+
+    def terjemahkan(kode, id_):
+        """Fill the English texts of a saved item with machine translations (marked "mesin"); False when nothing was
+        translated (the reason is flashed)."""
+        b = pg.cari(kode, id_)
+        timpa = request.form.get("timpa") == "1"
+        sasaran = list(dict.fromkeys(sasaran_mesin(b, timpa)))
+        n = sum(len(t) for t in sasaran)
+        try:
+            if not sasaran:
+                raise terjemah_mesin.GagalTerjemah("semua teks pengumuman ini sudah diterjemahkan")
+            terjemah_mesin.periksa_batas(kode, n, [r["kode_pddikti"] for r in registri.baca()["prodi"]],
+                                         alat.batas_terjemah)
+            p = data_prodi.efektif(kode) or {}
+            glos = terjemah_mesin.glosarium(p, data_prodi.unit_per_kode().values(), lokasi.baca("warisan/universitas"))
+            hasil = terjemah_mesin.terjemahkan(alat.penerjemah, sasaran, glos)
+        except terjemah_mesin.GagalTerjemah as e:
+            flash("Terjemahan mesin tidak dijalankan: %s." % e, "galat" if sasaran else "info")
+            return False
+        terjemah_mesin.catat_pemakaian(kode, n)
+        en = dict(b.get("en") or {})
+        mesin, asal = dict(en.get("mesin") or {}), dict(en.get("asal") or {})
+        jadi = gagal = 0
+        for k in pg.TEKS_EN:
+            sumber = b.get(k) or ""
+            if sumber not in hasil:
+                continue
+            if (en.get(k) or "").strip() and not timpa:
+                continue
+            if hasil[sumber]:
+                en[k], mesin[k], asal[k] = hasil[sumber], hasil[sumber], sumber
+                jadi += 1
+            else:
+                gagal += 1
+        en.update(mesin=mesin, asal=asal)
+        if not mesin:
+            del en["mesin"]
+        try:
+            pg.ubah(kode, id_, {"en": en}, g.akun["nama"])
+        except pg.GagalPengumuman as e:
+            flash("Terjemahan mesin tidak disimpan: %s." % e, "galat")
+            return False
+        alat.catat("pengumuman-en-terjemahan-mesin", prodi=kode, id=id_, teks=jadi, karakter=n,
+                   penyedia=alat.penerjemah.nama)
+        flash("%d teks diterjemahkan mesin (%s, %d karakter). Periksa setiap isian bertanda “terjemahan mesin”: "
+              "versi Inggris baru tampil di situs setelah diperiksa.%s" % (
+                  jadi, alat.penerjemah.nama, n,
+                  " %d teks tidak kembali utuh dan dibiarkan kosong; terjemahkan sendiri." % gagal if gagal else ""), "ok")
+        return True
 
     def _pratinjau(b):
         if not b or not b.get("isi"):
@@ -130,7 +230,8 @@ def pasang(app, alat):
         daftar = [b for b in pilih if b["status"] == "menunggu"] + [b for b in pilih if b["status"] != "menunggu"]
         label = {k["id"]: k["label"] for k in pg.baca_kategori()}
         return render_template("pengumuman_daftar.html", pr=g.prodi, daftar=daftar, jumlah=jumlah, status=status,
-                               NAMA_STATUS=NAMA_STATUS, label=label, admin=adalah_admin(g.akun))
+                               NAMA_STATUS=NAMA_STATUS, label=label, admin=adalah_admin(g.akun),
+                               keadaan_en=pg.keadaan_en, NAMA_EN=NAMA_EN)
 
     # -------------------------------------------------------------- new
 
@@ -143,6 +244,7 @@ def pasang(app, alat):
     @akses("prodi")
     def pengumuman_buat(kode):
         isian = isian_teks(request.form)
+        isian["en"] = en_dari_formulir(request.form, {}, isian)
         status = status_baru(request.form.get("aksi_simpan"))
         masalah = periksa_dulu(isian, status)
         if masalah:
@@ -177,6 +279,7 @@ def pasang(app, alat):
             abort(403, "Pengumuman ini tidak dapat Anda ubah lagi (sudah terbit atau milik akun lain).")
         f = request.form
         isian = isian_teks(f)
+        isian["en"] = en_dari_formulir(f, b.get("en"), isian)
         # photos kept, with their texts; the one chosen as main photo goes first
         foto = []
         for i, x in enumerate(b.get("foto", [])):
@@ -202,9 +305,12 @@ def pasang(app, alat):
             flash("Perubahan tidak disimpan: %s" % e, "galat")
             return halaman_form(kode, b=b, isian=dict(b, **isian), kode_status=400)
         alat.catat("pengumuman-diubah", prodi=kode, id=id_, status=status)
+        diterjemahkan = f.get("aksi_simpan") == "terjemahkan" and alat.penerjemah is not None and terjemahkan(kode, id_)
         if "terbit" in (status, b["status"]):
             bangun(kode)
-        flash("Perubahan disimpan%s." % ("; situs prodi dibangun ulang" if "terbit" in (status, b["status"]) else ""), "ok")
+        if not diterjemahkan:
+            flash("Perubahan disimpan%s." % ("; situs prodi dibangun ulang" if "terbit" in (status, b["status"]) else ""),
+                  "ok")
         return redirect(url_for("pengumuman_ubah", kode=kode, id_=id_))
 
     @app.route("/prodi/<kode>/pengumuman/<id_>/status", methods=["POST"])
