@@ -9,7 +9,13 @@ An item:
      "foto": [media.simpan_foto records; the first is the main photo], "pdf": [media.simpan_pdf records],
      "sematkan": bool (kept at the top of the home page), "kedaluwarsa": "" or YYYY-MM-DD (leaves the home page
      after that day, stays in the archive), "status": draf | menunggu | terbit | ditarik,
-     "dibuat", "diubah", "oleh" (who wrote it), "catatan" (the admin's note when sending it back; never published)}
+     "dibuat", "diubah", "oleh" (who wrote it), "catatan" (the admin's note when sending it back; never published),
+     "en": optional English version (Fase 5 langkah 4, K-P37), see below}
+
+English version: "en": {"judul", "ringkasan", "isi" (same plain text rules), "mesin": {field: machine translation not
+yet checked by a person}, "asal": {field: the Indonesian text it was translated from}}. It follows the item's own
+status and workflow; photos and PDFs are shared. The English site shows an item (inggris()) once it is published and
+its English title, summary and (when the Indonesian one has one) body are filled in with no unchecked machine text.
 
 Workflow (langkah 6): an operator writes a draft and submits it ("menunggu"); a programme admin publishes it
 ("terbit") or sends it back to draft with a note (kembalikan). Admins may also write and publish directly.
@@ -53,6 +59,8 @@ MAKS = {"judul": 150, "ringkasan": 300, "isi": 20000, "alt": 200, "judul_pdf": 1
 MAKS_FOTO = 7             # the main photo + 6 in the gallery
 MAKS_PDF = 3
 MAKS_ID = 70
+TEKS_EN = ("judul", "ringkasan", "isi")
+LABEL_EN = {"judul": "Judul (Inggris)", "ringkasan": "Ringkasan (Inggris)", "isi": "Isi (Inggris)"}
 
 
 class GagalPengumuman(ValueError):
@@ -95,6 +103,23 @@ def _periksa_teks(label, nilai, maks, wajib, masalah):
         masalah.append("%s memuat istilah terlarang (“%s”)" % (label, istilah))
 
 
+def _periksa_en(en, masalah):
+    """The English version of an item: optional texts (judul and ringkasan together), machine marks, sources."""
+    if not isinstance(en, dict) or set(en) - set(TEKS_EN) - {"mesin", "asal"}:
+        masalah.append("versi Inggris tidak sah")
+        return
+    for k in TEKS_EN:
+        _periksa_teks(LABEL_EN[k], en.get(k, ""), MAKS[k], False, masalah)
+    if isinstance(en.get("isi", ""), str) and (en.get("isi") or "").strip() \
+            and not all(isinstance(en.get(k), str) and en[k].strip() for k in ("judul", "ringkasan")):
+        masalah.append("versi Inggris perlu judul dan ringkasan bila isinya diisi")
+    for kunci in ("mesin", "asal"):
+        nilai = en.get(kunci, {})
+        if not isinstance(nilai, dict) or set(nilai) - set(TEKS_EN) or \
+                not all(isinstance(v, str) and len(v) <= MAKS[k] for k, v in nilai.items()):
+            masalah.append("versi Inggris: %s tidak sah" % kunci)
+
+
 def _periksa_media_alamat(rekam):
     if "url" in rekam:
         return media.url_sah(rekam["url"])
@@ -114,6 +139,8 @@ def periksa(b, kategori=None):
     _periksa_teks("Isi", b.get("isi", ""), MAKS["isi"], False, masalah)
     if b.get("catatan"):
         _periksa_teks("Catatan", b["catatan"], MAKS["catatan"], False, masalah)
+    if "en" in b:
+        _periksa_en(b["en"], masalah)
     if not _tanggal_sah(b.get("tanggal")):
         masalah.append("tanggal tidak sah")
     if b.get("kedaluwarsa") and not _tanggal_sah(b["kedaluwarsa"]):
@@ -169,7 +196,7 @@ def _simpan(kode, data, oleh, aksi):
 
 def tambah(kode, isian, oleh, status="draf"):
     """Add an item from `isian` (judul, ringkasan, kategori, and optionally tanggal, isi, foto, pdf, sematkan,
-    kedaluwarsa). Media must already be stored (media.simpan_foto / simpan_pdf). Returns the new id."""
+    kedaluwarsa, en). Media must already be stored (media.simpan_foto / simpan_pdf). Returns the new id."""
     data = baca(kode)
     tanggal = isian.get("tanggal") or datetime.date.today().isoformat()
     b = {"id": "", "judul": (isian.get("judul") or "").strip(), "tanggal": tanggal,
@@ -177,6 +204,8 @@ def tambah(kode, isian, oleh, status="draf"):
          "isi": (isian.get("isi") or "").strip(), "foto": isian.get("foto") or [], "pdf": isian.get("pdf") or [],
          "sematkan": bool(isian.get("sematkan")), "kedaluwarsa": isian.get("kedaluwarsa") or "", "status": status,
          "dibuat": _sekarang(), "diubah": _sekarang(), "oleh": oleh}
+    if isian.get("en"):
+        b["en"] = isian["en"]
     if _tanggal_sah(tanggal):
         b["id"] = buat_id(tanggal, b["judul"] or "pengumuman", {x["id"] for x in data["butir"]})
     masalah = periksa(b)
@@ -194,7 +223,7 @@ def _cari(data, id_):
     raise GagalPengumuman("pengumuman %s tidak ada" % id_)
 
 
-BOLEH_DIUBAH = ("judul", "tanggal", "kategori", "ringkasan", "isi", "foto", "pdf", "sematkan", "kedaluwarsa")
+BOLEH_DIUBAH = ("judul", "tanggal", "kategori", "ringkasan", "isi", "foto", "pdf", "sematkan", "kedaluwarsa", "en")
 
 
 def ubah(kode, id_, perubahan, oleh):
@@ -254,6 +283,40 @@ def terbit(data):
     kategori = baca_kategori()
     hasil = [b for b in data.get("butir", []) if b.get("status") == "terbit" and not periksa(b, kategori)]
     return sorted(hasil, key=lambda b: (b["tanggal"], b.get("dibuat", "")), reverse=True)
+
+
+# ------------------------------------------------------------------ English version (Fase 5 langkah 4)
+
+def keadaan_en(b):
+    """The state of an item's English version: "kosong" (none), "belum-lengkap" (title, summary, or body missing),
+    "mesin" (unchecked machine translation), or "siap" (shown on the English site once the item is published)."""
+    en = b.get("en") or {}
+    if not any((en.get(k) or "").strip() for k in TEKS_EN):
+        return "kosong"
+    if not (en.get("judul") or "").strip() or not (en.get("ringkasan") or "").strip() \
+            or ((b.get("isi") or "").strip() and not (en.get("isi") or "").strip()):
+        return "belum-lengkap"
+    if en.get("mesin"):
+        return "mesin"
+    return "siap"
+
+
+def perlu_diperbarui(b):
+    """The fields whose Indonesian text changed since its English text was written."""
+    en = b.get("en") or {}
+    asal = en.get("asal") or {}
+    return [k for k in TEKS_EN if (en.get(k) or "").strip() and k in asal and asal[k] != (b.get(k) or "")]
+
+
+def inggris(b):
+    """The item as the English site shows it (its English texts, the shared date, category, photos and PDFs), or
+    None while its English version is not ready (keadaan_en)."""
+    if keadaan_en(b) != "siap":
+        return None
+    en = b["en"]
+    hasil = {k: v for k, v in b.items() if k not in ("en", "catatan")}
+    hasil.update(judul=en["judul"].strip(), ringkasan=en["ringkasan"].strip(), isi=(en.get("isi") or "").strip())
+    return hasil
 
 
 # ------------------------------------------------------------------ command line
