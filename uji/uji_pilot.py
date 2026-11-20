@@ -203,6 +203,7 @@ try:
                            "en": {"judul": "Exam", "ringkasan": "Exams.", "mesin": {"judul": "Exam"}}}, "opa", "draf")
     tampak["pengumuman inggris"] = halaman(mesin, "/prodi/%s/pengumuman/%s" % (A, id_pg))
     tampak["daftar pengumuman"] = halaman(mesin, "/prodi/%s/pengumuman" % A)
+    tampak["terjemahkan semua"] = halaman(mesin, "/prodi/%s/terjemahkan-semua" % A)
     tampak["sematan"] = py.formulir(ih.TEMPLAT["jadwal"], {"sematan": [{
         "judul": "Jadwal kuliah", "alamat": "https://drive.google.com/file/d/1PdfJadwalKuliahContoh0123/preview"}]}, py.Tampil())
     for di, labels in (("operator, draf", ("Simpan draf", "Simpan dan pratinjau", "Ajukan untuk diterbitkan", "Buang draf",
@@ -213,7 +214,8 @@ try:
                        ("pengumuman inggris", ("Versi bahasa Inggris (opsional)", "Judul (Inggris)", "Ringkasan (Inggris)",
                                                "Isi (Inggris)", "Simpan dan terjemahkan dari versi Indonesia",
                                                "Saya sudah memeriksa versi Inggris pengumuman ini", "terjemahan mesin")),
-                       ("daftar pengumuman", ("Versi Inggris", "Terjemahan mesin belum diperiksa")),
+                       ("daftar pengumuman", ("Versi Inggris", "Terjemahan mesin belum diperiksa", "Terjemahkan semua")),
+                       ("terjemahkan semua", ("Terjemahkan semua", "Ya, terjemahkan semua")),
                        ("impor", ("Unduh templat (.xlsx)", "Baca berkas", "Petunjuk", "Data")),
                        ("halaman tambahan", ("Nama menu", "Nama menu (bahasa Inggris)", "Kelompok menu", "Buat halaman dan isi",
                                              "Simpan nama, kelompok, dan urutan", "Hapus")),

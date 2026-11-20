@@ -404,6 +404,10 @@ try:
          hanya("superuji", "adma", "opa", "opab", ya=404)),
         ("POST", "/prodi/%s/halaman/sejarah/en/riwayat/20000101-000000-000000" % A, "isi_pakai_versi_en",
          hanya("superuji", "adma", "opa", "opab", ya=404)),
+        # "Terjemahkan semua" (Fase 5 langkah 5a): operators too; without a machine translation provider it never runs
+        ("GET", "/prodi/%s/terjemahkan-semua" % A, "terjemahkan_semua", hanya("superuji", "adma", "opa", "opab")),
+        ("POST", "/prodi/%s/terjemahkan-semua" % A, "terjemahkan_semua_mulai",
+         hanya("superuji", "adma", "opa", "opab", ya=400)),
         ("GET", "/super/kelengkapan", "super_kelengkapan", hanya("superuji")),
         ("GET", "/super/kelengkapan.csv", "super_kelengkapan_csv", hanya("superuji")),
         # the guide and the feedback (Fase 2 langkah 5): everybody logged in sends; only the superadmin reads all
