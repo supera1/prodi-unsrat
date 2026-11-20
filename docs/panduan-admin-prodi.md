@@ -198,6 +198,25 @@ Situs prodi bisa punya versi bahasa Inggris di `.../<slug>/en/`, misalnya untuk 
 tayang setelah superadmin UPA TIK mengaktifkannya untuk prodi Anda. Sebelum itu, terjemahan tetap bisa disiapkan dan
 diterbitkan.
 
+**Ringkasan prodi** memuat kotak **Versi bahasa Inggris**. Isinya:
+
+- apakah versi Inggris sudah diaktifkan;
+- berapa halaman wajib yang sudah terbit dalam bahasa Inggris;
+- halaman yang perlu diperbarui atau masih memuat terjemahan mesin yang belum diperiksa;
+- pengumuman berbahasa Inggris;
+- untuk admin prodi, baris **Data resmi berbahasa Inggris**: lengkap, atau apa yang masih kosong. Nama Inggris prodi,
+  bidang kerja lulusan berbahasa Inggris, dan CPL berbahasa Inggris diperbaiki di menu **Data prodi** atau di www; nama
+  Inggris fakultas hanya di www.
+
+Urutan kerja yang disarankan:
+
+1. Admin prodi memeriksa data resmi berbahasa Inggris di kotak tadi.
+2. Halaman wajib diterjemahkan satu per satu, misalnya mulai dari kelompok Profil: terjemahan mesin, periksa, lalu
+   terbitkan.
+3. Admin prodi mengisi teks Inggris lainnya: Bagian depan beranda, Menu, Halaman tambahan, dan Kriteria akreditasi
+   (lihat di bawah).
+4. Pengumuman baru diberi versi Inggris bila perlu.
+
 - Beranda, Profil Lulusan dan CPL, Spesifikasi, Akreditasi, Dosen Tetap, Kalender, dan Kontak berbahasa Inggris
   langsung dari data resmi www.
 - Halaman yang diisi prodi diterjemahkan di penyuntingnya: buka halaman di menu **Isi halaman**, lalu pilih tab

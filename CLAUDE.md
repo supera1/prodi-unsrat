@@ -22,7 +22,8 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
 - `docs/keputusan.md` — log keputusan (K-P1, …). Tambahkan entri setiap ada keputusan baru.
 - `docs/asal-modul.md` — modul yang disalin dari repo www beserta versi asalnya.
 - `docs/panduan-admin-prodi.md` — panduan untuk admin prodi dan operator (juga menu Panduan di admin);
-  `docs/pilot-fase-02.md` — persiapan pilot; `docs/kriteria-akreditasi.md` — draf label kriteria untuk LPMPP.
+  `docs/pilot-fase-02.md` — persiapan pilot; `docs/pilot-fase-05.md` — persiapan pilot versi Inggris (enam prodi);
+  `docs/kriteria-akreditasi.md` — draf label kriteria untuk LPMPP.
 - `platform/data-awal/slug.csv` — slug 97 prodi yang disetujui. Kunci tetap prodi adalah `kode_pddikti`, bukan slug.
 - Log hasil setiap langkah/fase ditulis ke `docs/log/`; ringkasan Fase 1 (kriteria, verifikasi manual, sisa pekerjaan):
   `docs/log/fase-01.md`.
@@ -98,6 +99,8 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   `platform/terjemah_mesin.py` (DeepL dengan pustaka standar, penyedia `tiruan` untuk uji; istilah resmi dikunci
   dengan `<keep>`; batas `TERJEMAH_BATAS_*`; kunci `TERJEMAH_KUNCI` hanya di `.env`, tidak pernah ditampilkan).
   Hasil mesin bertanda `"mesin"` di memori terjemahan dan tidak bisa terbit sebelum dicentang sudah diperiksa.
+  Ringkasan prodi (`dasbor_prodi` di `app.py`) memuat kotak versi Inggris; kekurangan data resmi Inggris dari
+  `tarik_www.kekurangan_en`.
   Pengumuman Inggris (langkah 4): `"en"` di butir `pengumuman.py` (`keadaan_en`, `inggris`, `perlu_diperbarui`),
   isian dan tombol terjemahan di formulir `pengumuman_admin.py`; tampil di situs Inggris (menu News,
   `bangun_pengumuman` untuk kedua bahasa) hanya bila lengkap dan tanpa tanda mesin.
