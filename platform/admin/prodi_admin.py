@@ -245,12 +245,15 @@ def pasang(app, alat):
 
     # the front section of the home page
 
-    def halaman_beranda(kode, kode_status=200, isian=None):
+    def halaman_beranda(kode, kode_status=200, isian=None, isian_en=None):
         s = situs(kode)
         p, unit = unit_prodi(kode)
         bawaan, resmi = tampilan_prodi.bawaan_dan_resmi(p, unit["nama"])
+        bawaan_en, resmi_en = tampilan_prodi.bawaan_dan_resmi(p, unit.get("nama_en") or unit["nama"], "en")
         beranda = isian if isian is not None else (s.get("beranda") or {})
-        return render_template("prodi_beranda.html", pr=g.prodi, s=s, b=beranda, bawaan=bawaan, resmi=resmi,
+        en = isian_en if isian_en is not None else (s.get("en") or {})
+        return render_template("prodi_beranda.html", pr=g.prodi, s=s, b=beranda, bawaan=bawaan, resmi=resmi, en=en,
+                               bawaan_en=bawaan_en, resmi_en={k["id"]: k for k in resmi_en},
                                semua_resmi=tampilan_prodi.KARTU_RESMI, maks_tambahan=tampilan_prodi.MAKS_KARTU_TAMBAHAN,
                                petunjuk=media.PETUNJUK_HERO, fokus=media.FOKUS, maks=tampilan_prodi.MAKS,
                                foto=(s.get("beranda") or {}).get("latar", {}).get("foto")), kode_status
@@ -308,12 +311,25 @@ def pasang(app, alat):
                 tambahan.append(k)
         if tambahan:
             beranda["kartu_tambahan"] = tambahan
+        # the English home page (K-P37): texts, card labels, the extra cards in the same order
+        en = {k: f.get("en-%s" % k, "").strip() for k in ("label", "judul", "subjudul", "tagline")
+              if f.get("en-%s" % k, "").strip()}
+        kartu_en = {id_: {"label": f.get("en-kartu-%s-label" % id_).strip()} for id_ in tampilan_prodi.KARTU_RESMI
+                    if f.get("en-kartu-%s-label" % id_, "").strip()}
+        if kartu_en:
+            en["kartu"] = kartu_en
+        tambahan_en = [{k: f.get("en-tambahan-%d-%s" % (i, k), "").strip() for k in ("label", "nilai", "keterangan")}
+                       for i in range(tampilan_prodi.MAKS_KARTU_TAMBAHAN)]
+        while tambahan_en and not any(tambahan_en[-1].values()):
+            tambahan_en.pop()
+        if tambahan_en:
+            en["kartu_tambahan"] = tambahan_en
         try:
-            simpan_situs(kode, {"tagline": f.get("pengantar", "").strip(), "beranda": beranda}, "beranda-diubah",
-                         "Bagian depan beranda disimpan.", latar=jenis)
+            simpan_situs(kode, {"tagline": f.get("pengantar", "").strip(), "beranda": beranda, "en": en},
+                         "beranda-diubah", "Bagian depan beranda disimpan.", latar=jenis)
         except tampilan_prodi.GagalTampilan as e:
             flash("Bagian depan tidak disimpan: %s" % e, "galat")
-            return halaman_beranda(kode, 400, isian=beranda)
+            return halaman_beranda(kode, 400, isian=beranda, isian_en=en)
         return redirect(url_for("beranda_prodi", kode=kode))
 
     @app.route("/prodi/<kode>/beranda/foto", methods=["POST"])
@@ -358,6 +374,9 @@ def pasang(app, alat):
                 label = f.get("label-%s" % x["id"], "").strip()
                 if label and label != x["label"]:
                     atur["label"] = label
+                label_en = f.get("label_en-%s" % x["id"], "").strip()
+                if label_en and label_en != x["label_en"]:
+                    atur["label_en"] = label_en
                 if posisi is not None and f.get("urutan-%s" % x["id"], "").strip():
                     try:
                         urutan = int(f.get("urutan-%s" % x["id"]))

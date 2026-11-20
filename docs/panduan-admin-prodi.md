@@ -220,6 +220,17 @@ Yang perlu diketahui:
 - Bila versi Indonesia yang terbit berubah, halamannya ditandai **perlu diperbarui**. Uraian yang berubah tetap memakai
   terjemahan lamanya sampai diperbarui; isiannya diberi tanda kuning untuk diperiksa.
 
+Teks Inggris lainnya diisi di menunya masing-masing (admin prodi):
+
+- **Bagian depan beranda**, bagian *Versi bahasa Inggris*: label kecil, judul, subjudul, kalimat pengantar, label kartu
+  fakta, dan kartu tambahan. Isian yang kosong memakai teks bawaan berbahasa Inggris. Kartu tambahan tampil di versi
+  Inggris bila labelnya diisi; nilai yang dikosongkan memakai nilai versi Indonesia.
+- **Menu**, kolom *Label Inggris*: label menu di versi Inggris; kosong berarti label bawaan berbahasa Inggris.
+- **Halaman tambahan**, kolom **Nama menu (bahasa Inggris)**: halaman tambahan tampil di versi Inggris bila nama
+  Inggrisnya diisi dan versi Inggris isinya sudah terbit.
+- **Kriteria akreditasi**: nama kriteria dan nama instrumen dalam bahasa Inggris. Kriteria tanpa nama Inggris tidak
+  berlabel di versi Inggris.
+
 ## Halaman Akreditasi
 
 Status akreditasi (peringkat, lembaga, masa berlaku) tampil otomatis dari data resmi prodi. Di halaman Akreditasi

@@ -11,6 +11,12 @@ Settings live in prodi/<kode>/situs.json:
                 "internasional": {...}},
       "kartu_tambahan": [{"label": "Mahasiswa aktif", "nilai": "812", "keterangan": "Oktober 2026"}]   at most 2
     }
+    "en": {                                  the English home page (Fase 5, K-P37); empty: the English defaults
+      "label": "", "judul": "", "subjudul": "", "tagline": "",
+      "kartu": {"akreditasi": {"label": "..."}, ...},                                  labels of the official cards
+      "kartu_tambahan": [{"label": "Active students", "nilai": "", "keterangan": ""}]   the extra cards, in the same
+    }                                        order; a card without an English label is not on the English page, an
+                                             empty value is the Indonesian one
 
 What the admin may change (decision of 26 October 2026): the label line, the title, the subtitle and the sentence;
 the background (pale or full programme colour, any colour that keeps text readable, or a photo); and the fact cards'
@@ -58,7 +64,7 @@ MEDIA_SOSIAL = {
     "linkedin": ("LinkedIn", r"^https://(www\.)?linkedin\.com/(company|school|in)/[A-Za-z0-9_.\-%]{1,100}/?$"),
 }
 MAKS_MEDIA_SOSIAL = 6
-KUNCI_SITUS = ("tagline", "beranda", "palet", "logo", "media_sosial", "menu")
+KUNCI_SITUS = ("tagline", "beranda", "palet", "logo", "media_sosial", "menu", "en")
 KARTU_RESMI = ("akreditasi", "gelar", "sks", "internasional")
 MAKS = {"label": 80, "judul": 100, "subjudul": 120, "tagline": 300, "kartu_label": 30, "kartu_nilai": 24,
         "kartu_keterangan": 40}
@@ -171,6 +177,79 @@ def periksa(beranda, tagline=""):
         if "urutan" in k and (not isinstance(k["urutan"], int) or isinstance(k["urutan"], bool) or not 0 <= k["urutan"] <= 9):
             masalah.append("kartu tambahan ke-%d: urutan harus angka 0-9" % i)
     return masalah
+
+
+def periksa_en(en):
+    """Problems with the English texts of a programme's home page (empty list when they can be used)."""
+    if en in (None, {}):
+        return []
+    if not isinstance(en, dict):
+        return ["teks bahasa Inggris harus berupa objek"]
+    masalah = []
+    tidak_dikenal = set(en) - {"label", "judul", "subjudul", "tagline", "kartu", "kartu_tambahan"}
+    if tidak_dikenal:
+        masalah.append("teks bahasa Inggris tidak dikenal: %s" % ", ".join(sorted(tidak_dikenal)))
+    for k, label in (("label", "Label (Inggris)"), ("judul", "Judul (Inggris)"), ("subjudul", "Subjudul (Inggris)"),
+                     ("tagline", "Kalimat pengantar (Inggris)")):
+        _teks(label, en.get(k), MAKS[k], masalah)
+    kartu = en.get("kartu") or {}
+    if not isinstance(kartu, dict):
+        masalah.append("kartu (Inggris) harus berupa objek")
+        kartu = {}
+    for id_, atur in kartu.items():
+        if id_ not in KARTU_RESMI or not isinstance(atur, dict) or set(atur) - {"label"}:
+            masalah.append("kartu (Inggris) %r tidak sah: hanya labelnya yang diterjemahkan" % (id_,))
+            continue
+        _teks("Label kartu %s (Inggris)" % id_, atur.get("label"), MAKS["kartu_label"], masalah)
+    tambahan = en.get("kartu_tambahan") or []
+    if not isinstance(tambahan, list) or len(tambahan) > MAKS_KARTU_TAMBAHAN:
+        masalah.append("kartu tambahan (Inggris) paling banyak %d" % MAKS_KARTU_TAMBAHAN)
+        tambahan = []
+    for i, k in enumerate(tambahan, 1):
+        if not isinstance(k, dict) or set(k) - {"label", "nilai", "keterangan"}:
+            masalah.append("kartu tambahan ke-%d (Inggris) tidak sah" % i)
+            continue
+        _teks("Label kartu tambahan ke-%d (Inggris)" % i, k.get("label"), MAKS["kartu_label"], masalah)
+        _teks("Nilai kartu tambahan ke-%d (Inggris)" % i, k.get("nilai"), MAKS["kartu_nilai"], masalah)
+        _teks("Keterangan kartu tambahan ke-%d (Inggris)" % i, k.get("keterangan"), MAKS["kartu_keterangan"], masalah)
+    return masalah
+
+
+def situs_inggris(situs):
+    """The settings the English home page is made from (K-P37), in the shape susun() reads: the English texts and card
+    labels ("en"), the background and the order and visibility of the cards of the Indonesian settings, and the extra
+    cards that have an English label (an empty English value is the Indonesian one)."""
+    beranda = situs.get("beranda") if isinstance(situs.get("beranda"), dict) else {}
+    en = situs.get("en") if isinstance(situs.get("en"), dict) else {}
+    hasil = {}
+    if beranda.get("latar"):
+        hasil["latar"] = beranda["latar"]
+    for k in ("label", "judul", "subjudul"):
+        if (en.get(k) or "").strip():
+            hasil[k] = en[k].strip()
+    label_en = {i: (a.get("label") or "").strip() for i, a in (en.get("kartu") or {}).items() if isinstance(a, dict)}
+    kartu = {}
+    for id_ in KARTU_RESMI:
+        atur = (beranda.get("kartu") or {}).get(id_)
+        x = {k: atur[k] for k in ("sembunyi", "urutan") if isinstance(atur, dict) and k in atur}
+        if label_en.get(id_):
+            x["label"] = label_en[id_]
+        if x:
+            kartu[id_] = x
+    if kartu:
+        hasil["kartu"] = kartu
+    tambahan, en_t = [], en.get("kartu_tambahan") or []
+    for i, k in enumerate(beranda.get("kartu_tambahan") or []):
+        e = en_t[i] if i < len(en_t) and isinstance(en_t[i], dict) else {}
+        if isinstance(k, dict) and (e.get("label") or "").strip():
+            x = {"label": e["label"].strip(), "nilai": (e.get("nilai") or "").strip() or k.get("nilai", ""),
+                 "keterangan": (e.get("keterangan") or "").strip()}
+            if "urutan" in k:
+                x["urutan"] = k["urutan"]
+            tambahan.append(x)
+    if tambahan:
+        hasil["kartu_tambahan"] = tambahan
+    return {"beranda": hasil, "tagline": (en.get("tagline") or "").strip()}
 
 
 def periksa_identitas(situs):
@@ -302,7 +381,7 @@ def atur(kode, perubahan, oleh, aksi=None):
         raise GagalTampilan("pengaturan tidak dikenal: %s" % ", ".join(sorted(set(perubahan) - set(KUNCI_SITUS))))
     situs = lokasi.baca("prodi/%s/situs" % kode) or {}
     baru = dict(situs, **perubahan)
-    masalah = periksa(baru.get("beranda"), baru.get("tagline") or "") + periksa_identitas(baru)
+    masalah = periksa(baru.get("beranda"), baru.get("tagline") or "") + periksa_identitas(baru) + periksa_en(baru.get("en"))
     if masalah:
         raise GagalTampilan("; ".join(masalah))
     _simpan(kode, baru, oleh, aksi or "atur %s" % ", ".join(sorted(perubahan)))

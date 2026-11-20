@@ -62,6 +62,37 @@
 		{% endfor %}
 		<p class="keterangan">Angka di kartu tambahan ditulis prodi sendiri; pastikan sesuai data resmi (PDDIKTI) karena dibaca asesor.</p>
 	</fieldset>
+	{% set kartu_en = en.get('kartu') or {} %}
+	{% set tambahan_en = en.get('kartu_tambahan') or [] %}
+	<fieldset class="kartu">
+		<legend>Versi bahasa Inggris</legend>
+		<p class="keterangan">Teks bagian depan beranda situs berbahasa Inggris (<code>…/en/</code>). Isian yang dikosongkan memakai teks bawaan berbahasa Inggris dari data prodi. Latar, urutan, dan kartu yang disembunyikan sama dengan versi Indonesia.</p>
+		<div class="isian"><label for="en-label">Label kecil (bahasa Inggris)</label>
+			<input id="en-label" name="en-label" type="text" lang="en" value="{{ en.get('label', '') }}" maxlength="{{ maks.label }}" placeholder="{{ bawaan_en.label }}"></div>
+		<div class="isian"><label for="en-judul">Judul (bahasa Inggris)</label>
+			<input id="en-judul" name="en-judul" type="text" lang="en" value="{{ en.get('judul', '') }}" maxlength="{{ maks.judul }}" placeholder="{{ bawaan_en.judul }}"></div>
+		<div class="isian"><label for="en-subjudul">Subjudul (bahasa Inggris)</label>
+			<input id="en-subjudul" name="en-subjudul" type="text" lang="en" value="{{ en.get('subjudul', '') }}" maxlength="{{ maks.subjudul }}" placeholder="{{ bawaan_en.subjudul }}"></div>
+		<div class="isian"><label for="en-tagline">Kalimat pengantar (bahasa Inggris)</label>
+			<textarea id="en-tagline" name="en-tagline" rows="2" lang="en" maxlength="{{ maks.tagline }}" placeholder="{{ bawaan_en.pengantar }}">{{ en.get('tagline', '') }}</textarea></div>
+		{% if resmi %}
+		<h3>Label kartu fakta (bahasa Inggris)</h3>
+		{% for k in resmi %}
+		<div class="isian"><label for="en-kartu-{{ k.id }}-label">Label kartu {{ k.label }} (bahasa Inggris)</label>
+			<input id="en-kartu-{{ k.id }}-label" name="en-kartu-{{ k.id }}-label" type="text" lang="en" value="{{ kartu_en.get(k.id, {}).get('label', '') }}" maxlength="{{ maks.kartu_label }}" placeholder="{{ resmi_en[k.id].label if k.id in resmi_en else '' }}"></div>
+		{% endfor %}
+		{% endif %}
+		<h3>Kartu tambahan (bahasa Inggris)</h3>
+		<p class="keterangan">Kartu tambahan tampil di versi Inggris bila labelnya diisi. Nilai yang dikosongkan memakai nilai versi Indonesia.</p>
+		{% for i in range(maks_tambahan) %}
+		{% set t = tambahan_en[i] if i < tambahan_en | length else {} %}
+		<div class="medsos-baris">
+			<div class="isian"><label for="en-tambahan-{{ i }}-label">Label kartu ke-{{ i + 1 }} (bahasa Inggris)</label><input id="en-tambahan-{{ i }}-label" name="en-tambahan-{{ i }}-label" type="text" lang="en" value="{{ t.get('label', '') }}" maxlength="{{ maks.kartu_label }}" placeholder="mis. Active students"></div>
+			<div class="isian"><label for="en-tambahan-{{ i }}-nilai">Nilai (bahasa Inggris)</label><input id="en-tambahan-{{ i }}-nilai" name="en-tambahan-{{ i }}-nilai" type="text" lang="en" value="{{ t.get('nilai', '') }}" maxlength="{{ maks.kartu_nilai }}"></div>
+			<div class="isian"><label for="en-tambahan-{{ i }}-keterangan">Keterangan (bahasa Inggris)</label><input id="en-tambahan-{{ i }}-keterangan" name="en-tambahan-{{ i }}-keterangan" type="text" lang="en" value="{{ t.get('keterangan', '') }}" maxlength="{{ maks.kartu_keterangan }}" placeholder="mis. as of October 2026"></div>
+		</div>
+		{% endfor %}
+	</fieldset>
 	<button type="submit" class="tombol">Simpan bagian depan</button>
 </form>
 <section class="kartu">

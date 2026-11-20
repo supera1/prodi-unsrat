@@ -92,7 +92,9 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   Isi Inggris halaman (langkah 2): halaman `"<id>:en"` di `isi_halaman.py` (`halaman-<id>-en.json`), berisi memori
   terjemahan per teks; digabung ke isi Indonesia oleh `platform/isi_inggris.py`. Kolom templat isi yang tidak
   diterjemahkan: `teks(..., terjemah=False)` (nama, kode) atau `"boleh"` (judul karya). Penyunting: rute `/en` di
-  `isi_admin.py`, templat `halaman_sunting_en.html`.
+  `isi_admin.py`, templat `halaman_sunting_en.html`. Teks Inggris prodi lainnya (langkah 2b): `situs.json` `"en"`
+  (bagian depan beranda, `tampilan_prodi.periksa_en`/`situs_inggris`), `label_en` di pengaturan menu dan di
+  `tambahan.json`, `nama_en`/`instrumen_en` kriteria (`kriteria.inggris`).
 - Halaman tambahan prodi (K-P35): daftar di `platform/halaman_tambahan.py` (`data/prodi/<kode>/tambahan.json`, alamat
   `/<slug>/halaman/<alamat>/`), isinya halaman `isi_halaman` dengan `TEMPLAT_TAMBAHAN` (id `x` + 6 heksa,
   `templat_halaman()`); admin di `platform/admin/tambahan_admin.py`. Sematan hanya dari daftar tetap di

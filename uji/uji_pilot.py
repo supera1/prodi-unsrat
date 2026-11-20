@@ -196,7 +196,7 @@ try:
                        ("sematan", ("Tambah sematan", "Judul", "Alamat atau kode sematan", "Tinggi bingkai")),
                        ("versi inggris", ("English", "Simpan draf", "Simpan dan pratinjau", "Riwayat versi Inggris")),
                        ("impor", ("Unduh templat (.xlsx)", "Baca berkas", "Petunjuk", "Data")),
-                       ("halaman tambahan", ("Nama menu", "Kelompok menu", "Buat halaman dan isi",
+                       ("halaman tambahan", ("Nama menu", "Nama menu (bahasa Inggris)", "Kelompok menu", "Buat halaman dan isi",
                                              "Simpan nama, kelompok, dan urutan", "Hapus")),
                        ("pratinjau impor", ("Masukkan ke draf", "Tambahkan di bawah baris yang ada", "Ganti semua baris")),
                        ("operator, menunggu", ("Batalkan pengajuan",)),

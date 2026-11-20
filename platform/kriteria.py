@@ -22,6 +22,9 @@ in the shared file is shown, if any. The shared drafts serve as starting points 
 
     {"nama": "LAM Teknik", "instrumen": "...", "kriteria": [{"nomor": "1", "nama": "..."}], "halaman": {"visi-misi": ["1"]}}
 
+Both may carry English names for the English site (K-P37): "instrumen_en", and "nama_en" of a criterion. The English
+site shows only the criteria that have one (inggris()).
+
     python3 platform/kriteria.py periksa      check the file
     python3 platform/kriteria.py tabel        the draft mapping as Markdown, for LPMPP (docs/kriteria-akreditasi.md)
 """
@@ -85,6 +88,8 @@ def periksa(data, halaman_ada):
         for k in ("nama", "instrumen"):
             if not _teks(lb.get(k)):
                 masalah.append("%s: %s harus teks 1-%d karakter, tanpa < > dan karakter kendali" % (di, k, MAKS_NAMA))
+        if "instrumen_en" in lb and not _teks(lb["instrumen_en"]):
+            masalah.append("%s: instrumen_en harus teks 1-%d karakter, tanpa < > dan karakter kendali" % (di, MAKS_NAMA))
         alias = lb.get("alias")
         if not isinstance(alias, list) or not alias or not all(_teks(a, 60) for a in alias):
             masalah.append("%s: alias harus daftar nilai lembaga_akreditasi" % di)
@@ -103,7 +108,7 @@ def periksa(data, halaman_ada):
             kriteria = []
         for k in kriteria:
             if not isinstance(k, dict) or not isinstance(k.get("nomor"), str) or not POLA_NOMOR.match(k["nomor"]) \
-                    or k["nomor"] in nomor or not _teks(k.get("nama")):
+                    or k["nomor"] in nomor or not _teks(k.get("nama")) or ("nama_en" in k and not _teks(k["nama_en"])):
                 masalah.append("%s: kriteria %r tidak sah (nomor unik, nama 1-%d karakter)" % (di, k, MAKS_NAMA))
             else:
                 nomor.add(k["nomor"])
@@ -150,6 +155,8 @@ def periksa_prodi(data, halaman_ada):
                        % MAKS_LEMBAGA)
     if data.get("instrumen", "") != "" and not _teks(data.get("instrumen")):
         masalah.append("Nama instrumen paling panjang %d karakter, tanpa < > dan karakter kendali" % MAKS_NAMA)
+    if data.get("instrumen_en", "") != "" and not _teks(data.get("instrumen_en")):
+        masalah.append("Nama instrumen (Inggris) paling panjang %d karakter, tanpa < > dan karakter kendali" % MAKS_NAMA)
     kriteria = data.get("kriteria")
     if not isinstance(kriteria, list):
         return masalah + ["kriteria harus daftar"]
@@ -166,6 +173,9 @@ def periksa_prodi(data, halaman_ada):
         if not isinstance(k, dict) or not _teks(k.get("nama")):
             masalah.append("Kriteria baris %d: nama harus diisi, paling panjang %d karakter, tanpa < > dan karakter "
                            "kendali" % (i, MAKS_NAMA))
+        elif k.get("nama_en", "") != "" and not _teks(k.get("nama_en")):
+            masalah.append("Kriteria baris %d: nama Inggris paling panjang %d karakter, tanpa < > dan karakter kendali"
+                           % (i, MAKS_NAMA))
     halaman = data.get("halaman")
     if not isinstance(halaman, dict):
         return masalah + ["halaman harus objek {id halaman: [nomor kriteria]}"]
@@ -175,7 +185,8 @@ def periksa_prodi(data, halaman_ada):
         elif not isinstance(daftar, list) or not daftar or not all(x in nomor for x in daftar) \
                 or len(set(daftar)) != len(daftar):
             masalah.append("kriteria halaman %r harus nomor kriteria di atas, tanpa ganda" % id_)
-    for teks in [data.get("nama"), data.get("instrumen")] + [k.get("nama") for k in kriteria if isinstance(k, dict)]:
+    for teks in [data.get("nama"), data.get("instrumen"), data.get("instrumen_en")] + \
+            [k.get(x) for k in kriteria if isinstance(k, dict) for x in ("nama", "nama_en")]:
         istilah = saringan_spam.cari(teks) if isinstance(teks, str) else None
         if istilah:
             masalah.append("memuat teks %s (%s)" % (saringan_spam.jenis(istilah), istilah))
@@ -191,8 +202,11 @@ def simpan_prodi(kode, data, halaman_ada, oleh, aksi):
     """Check and store a programme's own criteria (the previous version stays in the history). Pages without criteria
     are left out; a body without criteria clears the labels (the shared file applies again)."""
     bersih = {"nama": data.get("nama", ""), "instrumen": data.get("instrumen", ""),
-              "kriteria": list(data.get("kriteria") or []),
+              "kriteria": [{k: v for k, v in x.items() if k != "nama_en" or v} if isinstance(x, dict) else x
+                           for x in data.get("kriteria") or []],
               "halaman": {k: v for k, v in (data.get("halaman") or {}).items() if v}}
+    if data.get("instrumen_en"):
+        bersih["instrumen_en"] = data["instrumen_en"]
     masalah = periksa_prodi(bersih, halaman_ada)
     if masalah:
         raise GagalKriteria("; ".join(masalah))
@@ -223,8 +237,20 @@ def usulan(data):
 
 def dari_usulan(lembaga):
     """A programme's criteria filled from a body of the shared file (copied: the form changes it)."""
-    return {"nama": lembaga["nama"], "instrumen": lembaga["instrumen"], "kriteria": copy.deepcopy(lembaga["kriteria"]),
-            "halaman": copy.deepcopy(lembaga.get("halaman") or {})}
+    hasil = {"nama": lembaga["nama"], "instrumen": lembaga["instrumen"], "kriteria": copy.deepcopy(lembaga["kriteria"]),
+             "halaman": copy.deepcopy(lembaga.get("halaman") or {})}
+    if lembaga.get("instrumen_en"):
+        hasil["instrumen_en"] = lembaga["instrumen_en"]
+    return hasil
+
+
+def inggris(lembaga):
+    """A body as the English site shows it (K-P37): its criteria that have an English name, under that name, and the
+    English name of its instrument ("" without one); None without a body."""
+    if not lembaga:
+        return None
+    kriteria = [dict(k, nama=k["nama_en"]) for k in lembaga.get("kriteria", []) if k.get("nama_en")]
+    return dict(lembaga, instrumen=lembaga.get("instrumen_en") or "", kriteria=kriteria)
 
 
 def lembaga_untuk(data, nama_lembaga, termasuk_draf=False):

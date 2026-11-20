@@ -443,7 +443,7 @@ class Pembangun(object):
                         konteks["og_gambar"] = self.media_mutlak(hero["latar"]["foto"]["varian"]["1600"])
                 self.render(templat, self.jalur_halaman(slug, ini["alamat"]), **konteks)
         if menu_en:
-            self.bangun_inggris(r, p, unit, situs, w, menu_en, umum, folder_bahasa)
+            self.bangun_inggris(r, p, unit, situs, w, menu_en, umum, folder_bahasa, lembaga)
 
     @staticmethod
     def templat_halaman(ini):
@@ -473,26 +473,32 @@ class Pembangun(object):
                 hasil.append(en(e))
         return hasil
 
-    def bangun_inggris(self, r, p, unit, situs, w, menu_en, umum, folder_bahasa):
-        """The English pages of a programme (Fase 5 langkah 1): from the official data in English. The programme's
-        Indonesian texts (front section, card labels, extra cards) are not used: their English comes with langkah 2;
-        the background and the order of the official cards are."""
+    def bangun_inggris(self, r, p, unit, situs, w, menu_en, umum, folder_bahasa, lembaga=None):
+        """The English pages of a programme (Fase 5 langkah 1-2): the official data in English, the programme's own
+        pages with an English version, and its English texts: the front section (situs.json "en"), menu labels, extra
+        pages' names, criteria names. Its Indonesian texts are never used on them."""
         kode, slug = r["kode_pddikti"], r["slug"]
         unit_en = dict(unit, nama=unit.get("nama_en") or unit["nama"])
-        beranda = situs.get("beranda") or {}
-        situs_en = {"beranda": {k: v for k, v in (("latar", beranda.get("latar")), ("kartu", {
-            i: {x: a[x] for x in ("sembunyi", "urutan") if x in a} for i, a in (beranda.get("kartu") or {}).items()
-            if isinstance(a, dict)})) if v}}
         bawaan, resmi = tampilan_prodi.bawaan_dan_resmi(p, unit_en["nama"], "en")
         try:
-            hero = tampilan_prodi.susun(bawaan, resmi, situs_en, w)
-        except tampilan_prodi.GagalTampilan:
+            if tampilan_prodi.periksa_en(situs.get("en")):
+                raise tampilan_prodi.GagalTampilan("; ".join(tampilan_prodi.periksa_en(situs.get("en"))))
+            hero = tampilan_prodi.susun(bawaan, resmi, tampilan_prodi.situs_inggris(situs), w)
+        except tampilan_prodi.GagalTampilan as e:
+            self.peringatan.append("prodi %s: pengaturan beranda Inggris diabaikan (%s)" % (kode, e))
             hero = tampilan_prodi.susun(bawaan, resmi, {}, w)
         if hero["latar"]["jenis"] == "foto" and not all(
                 self.terbitkan_media(v) for v in hero["latar"]["foto"]["varian"].values()):
             hero["latar"] = {"jenis": "pucat"}
+        # the criteria with an English name (kriteria.inggris), per criterion the pages the English site has
+        lembaga_en = kriteria_mod.inggris(lembaga)
+        urut = [b["id"] for b in menu_mod.halaman(menu_en)]
+        ada = {b["id"]: b for b in menu_mod.halaman(menu_en)}
+        peta_en = [{"nomor": n, "nama": nama, "halaman": [ada[x] for x in sorted(ids, key=urut.index)]}
+                   for n, nama, ids in kriteria_mod.peta(lembaga_en, set(ada))]
         umum_en = dict(umum, bahasa="en", akar=posixpath.join(slug, "en"), nama=bahasa_mod.nama_tampil(p, "en"),
-                       unit=unit_en, menu=menu_en, hero=hero, kabar_beranda=[], terkait={}, peta_kriteria=[],
+                       unit=unit_en, menu=menu_en, hero=hero, kabar_beranda=[], terkait={}, peta_kriteria=peta_en,
+                       lembaga_kriteria=lembaga_en,
                        jenjang_panjang=bahasa_mod.jenjang_panjang(p["jenjang"], "en"),
                        bidang_kerja=p.get("bidang_kerja_en") or "",
                        cpl=[dict(c, isi=c["isi_en"]) for c in p.get("cpl") or [] if c.get("isi_en")])
@@ -500,7 +506,8 @@ class Pembangun(object):
             for ini in [e] + e["anak"]:
                 folder = folder_bahasa(ini["alamat"])
                 konteks = dict(umum_en, ini=ini, kelompok=e if e["kelompok"] and ini is not e else None,
-                               kanonik=self.kanonik(folder["en"]), versi_folder=folder, label_kriteria=None,
+                               kanonik=self.kanonik(folder["en"]), versi_folder=folder,
+                               label_kriteria=kriteria_mod.label(lembaga_en, ini["id"]),
                                isi_bagian=self.isi_halaman_prodi_en(kode, ini["id"])
                                if isi_halaman.templat_halaman(ini["id"]) is not None else None)
                 if ini["alamat"] == "":
