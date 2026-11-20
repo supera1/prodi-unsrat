@@ -10,12 +10,18 @@
 	Situs selalu menampilkan isi yang sudah terbit.</p>
 <p><strong>{{ r.terbit }} dari {{ r.wajib }}</strong> halaman wajib terbit.
 	Versi Inggris: <strong>{{ r.en_terbit }} dari {{ r.wajib }}</strong> halaman wajib{% if not inggris %} (situs berbahasa Inggris belum diaktifkan superadmin){% endif %}.</p>
+{% if terjemah_semua and terjemah_semua.berjalan %}
+<p class="pesan pesan--info"><a href="{{ url_for('terjemahkan_semua', kode=pr.kode) }}">Terjemahkan semua sedang berjalan: {{ terjemah_semua.butir | rejectattr('status', 'in', ['menunggu', 'berjalan']) | list | length }} dari {{ terjemah_semua.butir | length }} selesai.</a></p>
+{% elif penyedia %}
+<p><a class="tombol tombol--garis" href="{{ url_for('terjemahkan_semua', kode=pr.kode) }}">Terjemahkan semua</a>
+	<span class="keterangan">Terjemahan mesin ({{ penyedia }}) untuk semua halaman dan pengumuman yang belum punya versi Inggris; Anda melihat daftarnya dulu sebelum menjalankannya.</span></p>
+{% endif %}
 {% if r.en_perlu %}<p class="pesan pesan--info">{{ r.en_perlu }} halaman berversi Inggris perlu diperbarui: versi Indonesianya berubah sejak diterjemahkan.</p>{% endif %}
 {% if admin and r.menunggu %}<p class="pesan pesan--info"><a href="{{ url_for('isi_daftar', kode=pr.kode, status='menunggu') }}">{{ r.menunggu }} halaman menunggu persetujuan Anda.</a></p>{% endif %}
 {% if not admin and r.dikembalikan %}<p class="pesan pesan--info"><a href="{{ url_for('isi_daftar', kode=pr.kode, status='dikembalikan') }}">{{ r.dikembalikan }} halaman dikembalikan dengan catatan dari admin prodi.</a></p>{% endif %}
 <nav class="saring-status" aria-label="Saring keadaan">
 	<a href="{{ url_for('isi_daftar', kode=pr.kode) }}"{% if not status %} aria-current="page"{% endif %}>Semua ({{ r.halaman | length }})</a>
-	{% for s in ['menunggu', 'dikembalikan', 'draf', 'terbit', 'kosong'] %}
+	{% for s in ['menunggu', 'dikembalikan', 'draf', 'terbit', 'kosong'] + (['mesin'] if jumlah.mesin or status == 'mesin' else []) %}
 	<a href="{{ url_for('isi_daftar', kode=pr.kode, status=s) }}"{% if status == s %} aria-current="page"{% endif %}>{{ NAMA_STATUS[s] }} ({{ jumlah[s] }})</a>
 	{% endfor %}
 </nav>
@@ -52,6 +58,6 @@
 	</div>
 </section>
 {% else %}
-<p>Tidak ada halaman berstatus {{ NAMA_STATUS[status] | lower }}.</p>
+<p>{% if status == 'mesin' %}Tidak ada lagi halaman dengan terjemahan mesin yang belum diperiksa.{% else %}Tidak ada halaman berstatus {{ NAMA_STATUS[status] | lower }}.{% endif %}</p>
 {% endfor %}
 {% endblock %}

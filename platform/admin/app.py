@@ -50,6 +50,7 @@ import registri  # noqa: E402
 import superadmin  # noqa: E402
 import tambahan_admin  # noqa: E402
 import terjemah_mesin  # noqa: E402
+import terjemah_semua  # noqa: E402
 from akses import akses  # noqa: E402
 
 SESI_MENIT = 120              # a session ends after this long without activity...
@@ -394,7 +395,8 @@ def buat_app(env=None):
               "mesin": isi["en_mesin"],
               "pengumuman": sum(1 for b in pengumuman.baca(kode)["butir"]
                                 if b.get("status") == "terbit" and pengumuman.inggris(b)),
-              "pengumuman_mesin": sum(1 for b in butir if pengumuman.keadaan_en(b) == "mesin")}
+              "pengumuman_mesin": sum(1 for b in butir if pengumuman.keadaan_en(b) == "mesin"),
+              "penyedia": penerjemah.nama if penerjemah is not None else None}
         siap = []
         if not operator:
             situs = lokasi.baca("prodi/%s/situs" % kode) or {}
@@ -539,6 +541,8 @@ def buat_app(env=None):
     alat.catat, alat.antrean, alat.penjadwal, alat.info_prodi = catat, antrean, penjadwal, info_prodi
     alat.kelompok_prodi, alat.prodi_dari_formulir = kelompok_prodi, prodi_dari_formulir
     alat.penerjemah, alat.batas_terjemah = penerjemah, batas_terjemah
+    # "Terjemahkan semua" runs as the builds do: in the background, or inside the request in the tests
+    alat.terjemah_semua = terjemah_semua.Pekerja(antrean.mode)
     superadmin.pasang(app, alat)
     prodi_admin.pasang(app, alat)
     pengumuman_admin.pasang(app, alat)
@@ -548,7 +552,8 @@ def buat_app(env=None):
     tambahan_admin.pasang(app, alat)
     panduan.pasang(app, alat)
     masukan_admin.pasang(app, alat)
-    app.antrean, app.penjadwal, app.penerjemah = antrean, penjadwal, penerjemah
+    terjemah_semua.pasang(app, alat)
+    app.antrean, app.penjadwal, app.penerjemah, app.terjemah_semua = antrean, penjadwal, penerjemah, alat.terjemah_semua
 
     # -------------------------------------------------------------- errors
 
