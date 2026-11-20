@@ -4,7 +4,8 @@
 A page's English version is stored as a page of its own (isi_halaman.EN, "<id>:en"), written, submitted, published
 and kept in the history like any page (K-P24). Its content is a translation memory, not a copy of the page:
 
-    {"teks": {Indonesian text: English text}, "asal": {field outside a list: the Indonesian text it translated}}
+    {"teks": {Indonesian text: English text}, "asal": {field outside a list: the Indonesian text it translated},
+     "mesin": [Indonesian texts whose English is a machine's (terjemah_mesin.py) that nobody changed or confirmed yet]}
 
 The English page is the Indonesian published content with its texts replaced (terjemahkan()): the structure, the
 rows, numbers, years, links, files and embeds stay those of the Indonesian version, so a row added, removed or moved
@@ -43,10 +44,15 @@ def kosong_en():
 
 
 def rapi(en):
-    """A translation memory in its stored shape (whatever was stored)."""
+    """A translation memory in its stored shape (whatever was stored); "mesin" only while it has texts."""
     en = en if isinstance(en, dict) else {}
-    return {"teks": dict(en["teks"]) if isinstance(en.get("teks"), dict) else {},
-            "asal": dict(en["asal"]) if isinstance(en.get("asal"), dict) else {}}
+    hasil = {"teks": dict(en["teks"]) if isinstance(en.get("teks"), dict) else {},
+             "asal": dict(en["asal"]) if isinstance(en.get("asal"), dict) else {}}
+    mesin = [x for x in en.get("mesin") or [] if isinstance(x, str) and x in hasil["teks"]] \
+        if isinstance(en.get("mesin"), list) else []
+    if mesin:
+        hasil["mesin"] = mesin
+    return hasil
 
 
 def perlu_terjemah(templat, isi):
@@ -183,6 +189,7 @@ def butir_formulir(templat, isi_id, en):
         # an English text may be longer than the Indonesian one; the stored limit is MAKS_TEKS_EN
         maks = ih.MAKS_TEKS_EN if n.get("panjang") else min(ih.MAKS_TEKS_EN, max(2 * n.get("maks", 300), 100))
         hasil.append({"kunci": t["kunci"], "tempat": t["tempat"], "teks": t["teks"], "panjang": bool(n.get("panjang")),
+                      "mesin": t["teks"] in en.get("mesin", []) and jenis == "segar",
                       "kaya": bool(n.get("kaya")), "maks": maks,
                       "wajib": n.get("terjemah", True) is True, "boleh": n.get("terjemah", True) == "boleh",
                       "nilai": nilai or "", "jenis": jenis, "jalur": t["jalur"], "dalam_daftar": t["dalam_daftar"]})
@@ -195,6 +202,7 @@ def dari_formulir(templat, en_lama, form, isi_sumber_):
     translation; translations of texts in none of those contents go. Returns (memory, fields of texts that changed
     while translating: their keys did not match)."""
     en = rapi(en_lama)
+    en.setdefault("mesin", [])
     templat_ = templat
     butir = {}
     for isi in isi_sumber_:
@@ -212,6 +220,8 @@ def dari_formulir(templat, en_lama, form, isi_sumber_):
         nilai = (nilai or "").replace("\r\n", "\n").strip()
         if not t["node"].get("panjang"):
             nilai = " ".join(nilai.split())
+        if t["teks"] in en.get("mesin", []) and nilai != en["teks"].get(t["teks"]):
+            en["mesin"].remove(t["teks"])          # a person changed the machine's text: it counts as checked
         if nilai:
             en["teks"][t["teks"]] = nilai
             if not t["dalam_daftar"]:
@@ -225,4 +235,36 @@ def dari_formulir(templat, en_lama, form, isi_sumber_):
     dipakai = ada | {s for j, s in en["asal"].items() if j in asal_ada}
     en["teks"] = {s: e for s, e in en["teks"].items() if s in dipakai}
     en["asal"] = {j: s for j, s in en["asal"].items() if j in asal_ada and s in en["teks"]}
-    return en, tak_cocok
+    return rapi(en), tak_cocok
+
+
+def sasaran_mesin(templat, isi_id, en, timpa=False, excel=False):
+    """The different texts machine translation would fill: those without a translation (all, timpa), without the
+    lists kept in spreadsheets unless excel. [text, ...] in order."""
+    en = rapi(en)
+    hasil, sudah = [], set()
+    for t in perlu_terjemah(templat, isi_id):
+        if t["teks"] in sudah or (t["lewat_excel"] and not excel):
+            continue
+        sudah.add(t["teks"])
+        if timpa or cari(en, t["jalur"], t["teks"], t["dalam_daftar"])[1] is None:
+            hasil.append(t["teks"])
+    return hasil
+
+
+def pasang_mesin(templat, isi_id, en, terjemahan):
+    """The translation memory with a machine's translations ({Indonesian text: English text}) put in, marked as
+    the machine's until a person checks them."""
+    en = rapi(en)
+    mesin = list(en.get("mesin", []))
+    for t in perlu_terjemah(templat, isi_id):
+        hasil = terjemahan.get(t["teks"])
+        if not hasil:
+            continue
+        en["teks"][t["teks"]] = hasil
+        if not t["dalam_daftar"]:
+            en["asal"][t["jalur"]] = t["teks"]
+        if t["teks"] not in mesin:
+            mesin.append(t["teks"])
+    en["mesin"] = mesin
+    return rapi(en)
