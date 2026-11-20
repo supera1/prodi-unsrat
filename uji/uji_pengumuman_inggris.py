@@ -229,6 +229,8 @@ try:
         and "2 teks diterjemahkan mesin" in teks and "Terjemahan mesin belum diperiksa" in teks
         and "Pratinjau isi versi Inggris" in teks, "tanda terjemahan mesin di formulir")
     cek("pengumuman-en-terjemahan-mesin" in ks.get("/super/audit").get_data(as_text=True), "log audit")
+    cek("<strong>1</strong> pengumuman dengan terjemahan mesin belum diperiksa" in ko.get("/prodi/%s/" % A).get_data(as_text=True),
+        "dasbor prodi: pengumuman dengan terjemahan mesin yang belum diperiksa")
 
     # published with unchecked machine text: the Indonesian item is on the site, the English one is not
     r = kirim(ka, U, **formulir(b, aksi_simpan="terbit"))
@@ -246,6 +248,9 @@ try:
     kirim(ka, U, **formulir(b, periksa_en="1"))
     b = pg.cari(A, ID)
     cek("mesin" not in b["en"] and pg.keadaan_en(b) == "siap", "dicentang: terjemahan mesin sudah diperiksa")
+    teks = ka.get("/prodi/%s/" % A).get_data(as_text=True)
+    cek("<strong>1</strong> pengumuman berbahasa Inggris terbit" in teks
+        and "pengumuman dengan terjemahan mesin belum diperiksa" not in teks, "dasbor prodi: pengumuman Inggris terbit")
 
     # the English site
     daftar = halaman("s1informatika/en/pengumuman")

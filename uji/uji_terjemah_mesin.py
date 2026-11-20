@@ -290,6 +290,8 @@ try:
     teks = ko.get(E).get_data(as_text=True)
     cek(teks.count('class="keterangan terjemah__mesin"') == 2 and "Saya sudah memeriksa 2 terjemahan mesin" in teks
         and "2 teks diterjemahkan mesin" in teks, "tanda terjemahan mesin di formulir")
+    cek("<strong>1</strong> halaman dengan terjemahan mesin belum diperiksa" in ko.get("/prodi/%s/" % A).get_data(as_text=True),
+        "dasbor prodi: halaman dengan terjemahan mesin yang belum diperiksa")
     r = kirim(ko, E, aksi="ajukan", **dict(versi(), **{
         "t." + ih.kunci_teks("Program Studi Teknik Informatika berdiri tahun 1990."): "(EN) Program Studi Informatics Engineering berdiri tahun 1990.",
         "t." + ih.kunci_teks("Akreditasi pertama"): "First accreditation"}))

@@ -231,11 +231,32 @@ try:
         "admin menerbitkan versi Inggris")
     cek(halaman("en/profil/sejarah") is None, "situs: tanpa saklar superadmin belum ada versi Inggris")
 
+    # the programme's dashboard: the English version's state
+    cek(tarik_www.kekurangan_en({"nama_en": "", "bidang_kerja": "", "bidang_kerja_en": "", "cpl": []}, {"nama_en": ""})
+        == ["nama prodi", "nama fakultas"]
+        and tarik_www.kekurangan_en({"nama_en": "X", "bidang_kerja": "B.", "bidang_kerja_en": "F.",
+                                     "cpl": [{"isi": "C.", "isi_en": "P."}, {"isi": "D.", "isi_en": " "}]}, {"nama_en": "F"})
+        == ["1 CPL"], "kekurangan data resmi berbahasa Inggris")
+    teks = ka.get("/prodi/%s/" % A).get_data(as_text=True)
+    cek("Versi bahasa Inggris situs ini <strong>belum diaktifkan</strong>" in teks
+        and "<strong>1 dari 22</strong> halaman wajib akreditasi sudah terbit dalam bahasa Inggris" in teks
+        and "Data resmi berbahasa Inggris masih kosong: bidang kerja lulusan, 1 CPL" in teks
+        and "Bagian depan beranda berbahasa Inggris masih bawaan (opsional)" in teks
+        and "<strong>0</strong> pengumuman berbahasa Inggris terbit" in teks
+        and "terjemahan mesin belum diperiksa" not in teks and "perlu diperbarui" not in teks,
+        "dasbor prodi: versi Inggris belum aktif")
+    teks = ko.get("/prodi/%s/" % A).get_data(as_text=True)
+    cek('<h2 id="judul-en">Versi bahasa Inggris</h2>' in teks and "<strong>1 dari 22</strong>" in teks
+        and "Data resmi berbahasa Inggris" not in teks, "dasbor operator: versi Inggris tanpa data resmi")
+
     # ============================================================== the site
     registri.atur(A, "penguji", inggris=True)
     b = bangun.Pembangun(produksi=False)
     b.bangun()
     cek(not b.peringatan, "bangun tanpa peringatan: %r" % b.peringatan[:3])
+    teks = ka.get("/prodi/%s/" % A).get_data(as_text=True)
+    cek("Versi bahasa Inggris situs ini <strong>aktif</strong>" in teks and 's1informatika/en/">' in teks,
+        "dasbor prodi: versi Inggris aktif dengan tautannya")
     sej_en = halaman("en/profil/sejarah") or ""
     cek("The study program was founded in 1990." in sej_en and "<th scope=\"col\">Year</th>" in sej_en
         and "<th scope=\"col\">Event</th>" in sej_en and "First accreditation" in sej_en and "Prodi didirikan" not in sej_en
