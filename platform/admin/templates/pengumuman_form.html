@@ -64,6 +64,45 @@
 		<p><label><input type="checkbox" name="sematkan" value="1"{% if isian.get('sematkan') %} checked{% endif %}> Sematkan di atas beranda selama masih berlaku</label></p>
 	</section>
 
+	<section class="kartu" aria-labelledby="judul-en">
+		<h2 id="judul-en">Versi bahasa Inggris (opsional)</h2>
+		<p>Pengumuman tampil di situs berbahasa Inggris setelah terbit, bila judul, ringkasan, dan isinya (bila versi Indonesia punya isi) diisi dan tidak ada terjemahan mesin yang belum diperiksa. Tanggal, kategori, foto, dan PDF sama dengan versi Indonesia; teks alternatif foto dan judul PDF tetap berbahasa Indonesia.</p>
+		<p>Versi Inggris: <strong>{{ NAMA_EN[keadaan_en] }}</strong>.{% if not inggris_aktif %} Situs berbahasa Inggris prodi ini belum diaktifkan superadmin; teks Inggris tetap tersimpan dan tampil setelah diaktifkan.{% endif %}</p>
+		{% if mesin and mesin.n_semua %}
+		<div class="terjemah-mesin">
+			<h3>Terjemahan mesin ({{ mesin.penyedia }})</h3>
+			{% if mesin.n %}
+			<p>Menyimpan formulir ini, lalu mengisi isian Inggris yang masih kosong dengan terjemahan dari versi Indonesia yang tersimpan: <strong>{{ mesin.n }} teks</strong>, ±{{ mesin.karakter }} karakter. Hasilnya ditandai “terjemahan mesin” dan belum tampil di situs sampai diperiksa.</p>
+			{% else %}
+			<p>Semua teks pengumuman ini sudah punya terjemahan Inggris. Untuk menerjemahkan ulang dengan mesin, centang pilihan di bawah; hasilnya ditandai “terjemahan mesin” dan belum tampil di situs sampai diperiksa.</p>
+			{% endif %}
+			{% if mesin.n_semua > mesin.n %}<p><label><input type="checkbox" name="timpa" value="1"> Terjemahkan ulang juga {{ mesin.n_semua - mesin.n }} teks yang sudah diterjemahkan (menimpa terjemahannya)</label></p>{% endif %}
+			<p class="keterangan">Teks pengumuman ini dikirim ke {{ mesin.penyedia }} untuk diterjemahkan. Sisa batas terjemahan mesin prodi ini hari ini: {{ mesin.sisa }} karakter.</p>
+			<button type="submit" class="tombol tombol--garis" name="aksi_simpan" value="terjemahkan">Simpan dan terjemahkan dari versi Indonesia</button>
+		</div>
+		{% elif not b and penerjemah_ada %}
+		<p class="keterangan">Terjemahan mesin dari versi Indonesia tersedia setelah pengumuman ini disimpan.</p>
+		{% endif %}
+		{% for k in ('judul', 'ringkasan', 'isi') %}
+		{% set nilai = en.get(k, '') %}
+		{% set ket = [] %}
+		{% if (en.get('mesin') or {}).get(k) and en.mesin[k] == nilai %}{% set ket = ket + ['en-' ~ k ~ '-mesin'] %}{% endif %}
+		{% if k in basi_en %}{% set ket = ket + ['en-' ~ k ~ '-basi'] %}{% endif %}
+		<div class="isian"><label for="en-{{ k }}">{{ label_en[k] }}</label>
+			{% if k == 'judul' %}
+			<input id="en-{{ k }}" name="en_{{ k }}" type="text" lang="en" value="{{ nilai }}" maxlength="{{ maks[k] }}"{% if ket %} aria-describedby="{{ ket | join(' ') }}"{% endif %}>
+			{% else %}
+			<textarea id="en-{{ k }}" name="en_{{ k }}" lang="en" rows="{{ 2 if k == 'ringkasan' else 8 }}" maxlength="{{ maks[k] }}"{% if ket %} aria-describedby="{{ ket | join(' ') }}"{% endif %}>{{ nilai }}</textarea>
+			{% endif %}
+			{% if 'en-' ~ k ~ '-mesin' in ket %}<p class="keterangan terjemah__mesin" id="en-{{ k }}-mesin">Terjemahan mesin: periksa dan sesuaikan bila perlu.</p>{% endif %}
+			{% if k in basi_en %}<p class="keterangan terjemah__lama" id="en-{{ k }}-basi">Teks Indonesianya berubah sejak diterjemahkan; periksa apakah terjemahan ini masih sesuai.</p>{% endif %}
+		</div>
+		{% endfor %}
+		{% if en.get('mesin') or basi_en %}
+		<p class="cek-mesin"><label><input type="checkbox" name="periksa_en" value="1"> Saya sudah memeriksa versi Inggris pengumuman ini{% if en.get('mesin') %} (termasuk terjemahan mesin){% endif %}</label></p>
+		{% endif %}
+	</section>
+
 	<section class="kartu">
 		<h2>Foto</h2>
 		{% if b and b.foto %}
@@ -132,6 +171,12 @@
 <section class="kartu pratinjau-isi" aria-labelledby="judul-pratinjau">
 	<h2 id="judul-pratinjau">Pratinjau isi (tersimpan)</h2>
 	{{ pratinjau }}
+</section>
+{% endif %}
+{% if pratinjau_en %}
+<section class="kartu pratinjau-isi" aria-labelledby="judul-pratinjau-en" lang="en">
+	<h2 id="judul-pratinjau-en" lang="id">Pratinjau isi versi Inggris (tersimpan)</h2>
+	{{ pratinjau_en }}
 </section>
 {% endif %}
 {% endblock %}
