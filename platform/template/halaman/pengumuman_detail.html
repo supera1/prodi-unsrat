@@ -5,11 +5,11 @@
 {% block deskripsi %}{{ b.ringkasan }}{% endblock %}
 {% block isi %}
 <div class="wadah halaman">
-	<nav class="jejak" aria-label="Jejak halaman">
+	<nav class="jejak" aria-label="{{ _('Jejak halaman') }}">
 		<ol>
-			<li><a href="{{ ke(slug) }}">{{ nama }}</a></li>
-			<li><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman) }}">{{ ini.label }}</a></li>
-			<li><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman ~ '/kategori/' ~ b.kategori) }}">{{ label_kategori.get(b.kategori, b.kategori) }}</a></li>
+			<li><a href="{{ ke(akar) }}">{{ nama }}</a></li>
+			<li><a href="{{ ke(akar ~ '/' ~ dasar_pengumuman) }}">{{ ini.label }}</a></li>
+			<li><a href="{{ ke(akar ~ '/' ~ dasar_pengumuman ~ '/kategori/' ~ b.kategori) }}">{{ label_kategori.get(b.kategori, b.kategori) }}</a></li>
 		</ol>
 	</nav>
 	<article class="halaman__isi kabar-isi">
@@ -20,14 +20,14 @@
 		<h1>{{ b.judul }}</h1>
 		<p class="pengantar">{{ b.ringkasan }}</p>
 		{% if b.kedaluwarsa and b.kedaluwarsa < hari_ini %}
-		<p class="catatan">Pengumuman ini berlaku sampai {{ b.kedaluwarsa | tanggal }}.</p>
+		<p class="catatan">{{ _("Pengumuman ini berlaku sampai %s.") | format(b.kedaluwarsa | tanggal) }}</p>
 		{% endif %}
 		{% if b.foto %}
 		{% set f = b.foto[0] %}
 		<figure class="kabar-isi__foto">
 			<img src="{{ media_url(f | foto_varian(800)) }}"
 				srcset="{% for v in f.varian.values() | sort(attribute='lebar') %}{{ media_url(v) }} {{ v.lebar }}w{% if not loop.last %}, {% endif %}{% endfor %}"
-				sizes="(min-width: 800px) 48rem, 100vw" alt="{{ f.alt }}" width="{{ f.lebar }}" height="{{ f.tinggi }}">
+				sizes="(min-width: 800px) 48rem, 100vw" alt="{{ f.alt }}"{% if bahasa != 'id' %} lang="id"{% endif %} width="{{ f.lebar }}" height="{{ f.tinggi }}">
 		</figure>
 		{% endif %}
 		{% if b.isi %}
@@ -37,27 +37,27 @@
 		{% endif %}
 		{% if b.pdf %}
 		<section class="pdf-bagian" aria-labelledby="judul-lampiran">
-			<h2 id="judul-lampiran">Lampiran</h2>
+			<h2 id="judul-lampiran">{{ _("Lampiran") }}</h2>
 			{% for p in b.pdf %}
 			<div class="pdf">
-				<h3 class="pdf__judul">{{ p.judul }}</h3>
-				<p class="pdf__info">PDF, {{ p.halaman }} halaman, {{ p.ukuran | ukuran }}</p>
+				<h3 class="pdf__judul"{% if bahasa != 'id' %} lang="id"{% endif %}>{{ p.judul }}</h3>
+				<p class="pdf__info">{{ _("PDF, %d halaman, %s") | format(p.halaman, p.ukuran | ukuran) }}</p>
 				<p class="pdf__tombol">
-					<a class="tombol" href="{{ media_url(p) }}">Buka PDF</a>
-					<a class="tombol tombol--garis" href="{{ media_url(p) }}" download>Unduh</a>
+					<a class="tombol" href="{{ media_url(p) }}">{{ _("Buka PDF") }}</a>
+					<a class="tombol tombol--garis" href="{{ media_url(p) }}" download>{{ _("Unduh") }}</a>
 				</p>
-				<iframe class="pdf__pembaca" src="{{ media_url(p) }}" title="PDF: {{ p.judul }}" loading="lazy"></iframe>
+				<iframe class="pdf__pembaca" src="{{ media_url(p) }}" title="PDF: {{ p.judul }}"{% if bahasa != 'id' %} lang="id"{% endif %} loading="lazy"></iframe>
 			</div>
 			{% endfor %}
 		</section>
 		{% endif %}
 		{% if b.foto | length > 1 %}
 		<section aria-labelledby="judul-galeri">
-			<h2 id="judul-galeri">Foto</h2>
+			<h2 id="judul-galeri">{{ _("Foto") }}</h2>
 			<ul class="galeri">
 				{% for f in b.foto[1:] %}
 				{% set kecil = f | foto_varian(400) %}
-				<li><a href="{{ media_url(f | foto_varian) }}"><img src="{{ media_url(kecil) }}" alt="{{ f.alt }}" width="{{ kecil.lebar }}" height="{{ kecil.tinggi }}" loading="lazy"></a></li>
+				<li><a href="{{ media_url(f | foto_varian) }}"><img src="{{ media_url(kecil) }}" alt="{{ f.alt }}"{% if bahasa != 'id' %} lang="id"{% endif %} width="{{ kecil.lebar }}" height="{{ kecil.tinggi }}" loading="lazy"></a></li>
 				{% endfor %}
 			</ul>
 		</section>
@@ -65,11 +65,11 @@
 	</article>
 	{% if lain %}
 	<section class="kabar-lain" aria-labelledby="judul-lain">
-		<h2 id="judul-lain">Pengumuman lain</h2>
+		<h2 id="judul-lain">{{ _("Pengumuman lain") }}</h2>
 		<ul class="kabar-daftar kabar-daftar--ringkas">
 			{% for x in lain %}{{ kartu_kabar(x, 3) }}{% endfor %}
 		</ul>
-		<p><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman) }}">Semua pengumuman</a></p>
+		<p><a href="{{ ke(akar ~ '/' ~ dasar_pengumuman) }}">{{ _("Semua pengumuman") }}</a></p>
 	</section>
 	{% endif %}
 </div>

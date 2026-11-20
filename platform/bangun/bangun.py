@@ -101,7 +101,8 @@ URL_ISI = re.compile(r"https://[^\s<>\"']+")
 PER_HALAMAN = 12          # items per list page of announcements
 DI_BERANDA = 3            # newest announcements on a programme's home page, besides the pinned ones
 TERKAIT = 5               # items under "Kabar terkait" on an accreditation page
-# the pages of the English version that come from the official data (Fase 5 langkah 1); announcements stay Indonesian
+# the pages of the English version that come from the official data (Fase 5 langkah 1); the news pages are there while
+# the programme has announcements with an English version (langkah 4, pengumuman.inggris)
 HALAMAN_EN = ("beranda", "akreditasi", "profil_lulusan", "spesifikasi", "kalender", "dosen", "kontak")
 WITA = datetime.timezone(datetime.timedelta(hours=8))
 
@@ -203,7 +204,8 @@ def lingkungan(bahasa="id"):
     env = Environment(loader=FileSystemLoader(os.path.join(TEMPLATE, "halaman")), autoescape=True,
                       undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True, keep_trailing_newline=True)
     env.filters.update(tanggal=bahasa_mod.tanggal_en if bahasa == "en" else tanggal, tautan_md=tautan_md,
-                       json_ld=json_ld, teks_isi=teks_isi, ukuran=ukuran, foto_varian=foto_varian,
+                       json_ld=json_ld, teks_isi=teks_isi, foto_varian=foto_varian,
+                       ukuran=(lambda n: ukuran(n).replace(",", ".")) if bahasa == "en" else ukuran,
                        akreditasi=lambda nilai: bahasa_mod.label_akreditasi(nilai, bahasa),
                        data_bahasa=bahasa_mod.penerjemah(bahasa, lunak=True))
     env.globals.update(nama_tampil=nama_tampil, JENJANG_PANJANG=JENJANG_PANJANG, alamat_www=alamat_www,
@@ -241,6 +243,7 @@ class Pembangun(object):
         self.palet = warna_mod.baca_palet()
         self.kategori = pengumuman_mod.baca_kategori()
         self.label_kategori = {k["id"]: k["label"] for k in self.kategori}
+        self.label_kategori_en = {k["id"]: k.get("label_en") or k["label"] for k in self.kategori}
         self.env = lingkungan()
         self.env_bahasa = {"id": self.env, "en": lingkungan("en")}
         self.berkas = {}      # published path -> bytes
@@ -392,14 +395,8 @@ class Pembangun(object):
         menu = self.menu_prodi(kode)
         tagline = (situs.get("tagline") or "").strip()
         kabar = self.pengumuman_prodi(kode)
-        berlaku = [b for b in kabar if pengumuman_mod.masih_berlaku(b, self.hari_ini)]
-        di_beranda = [b for b in berlaku if b.get("sematkan")] + [b for b in berlaku if not b.get("sematkan")][:DI_BERANDA]
-        terkait = {}
-        for k in self.kategori:
-            isi = [b for b in kabar if b["kategori"] == k["id"]]
-            for halaman_id in k["halaman"]:
-                if isi:
-                    terkait.setdefault(halaman_id, []).append({"kategori": k, "butir": isi[:TERKAIT], "jumlah": len(isi)})
+        di_beranda = self.kabar_beranda(kabar)
+        terkait = self.kabar_terkait(kabar, self.label_kategori)
         lembaga, masalah = kriteria_mod.untuk_prodi(kode, self.kriteria, p.get("lembaga_akreditasi"),
                                                     set(isi_halaman.TEMPLAT))
         if masalah:
@@ -418,7 +415,8 @@ class Pembangun(object):
                     akar=slug, jenjang_panjang=bahasa_mod.jenjang_panjang(p["jenjang"], "id"),
                     bidang_kerja=p.get("bidang_kerja") or "", cpl=p.get("cpl") or [])
         # the English version (K-P37): only for a programme the superadmin switched it on for
-        menu_en = self.menu_inggris(menu, kode) if r.get("inggris") else []
+        kabar_en = [x for x in map(pengumuman_mod.inggris, kabar) if x] if r.get("inggris") else []
+        menu_en = self.menu_inggris(menu, kode, bool(kabar_en)) if r.get("inggris") else []
         ada_en = {b["id"] for b in menu_mod.halaman(menu_en)}
 
         def folder_bahasa(alamat):
@@ -428,7 +426,7 @@ class Pembangun(object):
             for ini in [e] + e.get("anak", []):
                 kelompok = e if e["kelompok"] and ini is not e else None
                 if ini["templat"] == "pengumuman":
-                    self.bangun_pengumuman(slug, ini, kabar, umum)
+                    self.bangun_pengumuman(slug, ini, kabar, umum, kabar_en if ini["id"] in ada_en else None)
                     continue
                 templat = self.templat_halaman(ini)
                 folder = folder_bahasa(ini["alamat"])
@@ -443,7 +441,24 @@ class Pembangun(object):
                         konteks["og_gambar"] = self.media_mutlak(hero["latar"]["foto"]["varian"]["1600"])
                 self.render(templat, self.jalur_halaman(slug, ini["alamat"]), **konteks)
         if menu_en:
-            self.bangun_inggris(r, p, unit, situs, w, menu_en, umum, folder_bahasa, lembaga)
+            self.bangun_inggris(r, p, unit, situs, w, menu_en, umum, folder_bahasa, lembaga, kabar_en, kabar)
+
+    def kabar_beranda(self, kabar):
+        """The announcements on a home page: the pinned ones still valid, then the newest DI_BERANDA still valid."""
+        berlaku = [b for b in kabar if pengumuman_mod.masih_berlaku(b, self.hari_ini)]
+        return [b for b in berlaku if b.get("sematkan")] + [b for b in berlaku if not b.get("sematkan")][:DI_BERANDA]
+
+    def kabar_terkait(self, kabar, label):
+        """{page id: [{"kategori", "butir", "jumlah"}]}: the newest items of the categories a page shows ("Kabar
+        terkait"), with the category names of `label`."""
+        terkait = {}
+        for k in self.kategori:
+            isi = [b for b in kabar if b["kategori"] == k["id"]]
+            for halaman_id in k["halaman"]:
+                if isi:
+                    terkait.setdefault(halaman_id, []).append({"kategori": dict(k, label=label[k["id"]]),
+                                                               "butir": isi[:TERKAIT], "jumlah": len(isi)})
+        return terkait
 
     @staticmethod
     def templat_halaman(ini):
@@ -451,15 +466,16 @@ class Pembangun(object):
             return "kelompok.html"
         return ini["templat"] + ".html" if ini["templat"] else "isi.html"
 
-    def menu_inggris(self, menu, kode):
-        """The menu of a programme's English version: the pages it has in English (HALAMAN_EN, and its own pages with
-        English content to show), with the master menu's English labels and descriptions; a group only while it has
-        such a page. An extra page needs its English name (label_en) too."""
+    def menu_inggris(self, menu, kode, kabar=False):
+        """The menu of a programme's English version: the pages it has in English (HALAMAN_EN, the news while it has
+        announcements in English (kabar), and its own pages with English content to show), with the master menu's
+        English labels and descriptions; a group only while it has such a page. An extra page needs its English name
+        (label_en) too."""
         def en(b):
             return dict(b, label=b["label_en"], deskripsi=b["deskripsi_en"] or b["label_en"] + ".", anak=[])
 
         def ada(a):
-            if a.get("templat") in HALAMAN_EN:
+            if a.get("templat") in HALAMAN_EN or (a.get("templat") == "pengumuman" and kabar):
                 return True
             return (a.get("templat") is None and bool(a.get("label_en"))
                     and self.isi_halaman_prodi_en(kode, a["id"]) is not None)
@@ -469,14 +485,16 @@ class Pembangun(object):
                 anak = [en(a) for a in e["anak"] if ada(a)]
                 if anak:
                     hasil.append(dict(en(e), anak=anak))
-            elif e.get("templat") in HALAMAN_EN:
+            elif ada(e):
                 hasil.append(en(e))
         return hasil
 
-    def bangun_inggris(self, r, p, unit, situs, w, menu_en, umum, folder_bahasa, lembaga=None):
+    def bangun_inggris(self, r, p, unit, situs, w, menu_en, umum, folder_bahasa, lembaga=None, kabar_en=(), kabar=()):
         """The English pages of a programme (Fase 5 langkah 1-2): the official data in English, the programme's own
-        pages with an English version, and its English texts: the front section (situs.json "en"), menu labels, extra
-        pages' names, criteria names. Its Indonesian texts are never used on them."""
+        pages with an English version, its announcements with an English version (kabar_en; kabar: the Indonesian ones,
+        for the language switch), and its English texts: the front section (situs.json "en"), menu labels, extra
+        pages' names, criteria names, category names. Its Indonesian texts are never used on them (photos' alternative
+        texts and PDF titles stay Indonesian, marked lang="id")."""
         kode, slug = r["kode_pddikti"], r["slug"]
         unit_en = dict(unit, nama=unit.get("nama_en") or unit["nama"])
         bawaan, resmi = tampilan_prodi.bawaan_dan_resmi(p, unit_en["nama"], "en")
@@ -497,13 +515,18 @@ class Pembangun(object):
         peta_en = [{"nomor": n, "nama": nama, "halaman": [ada[x] for x in sorted(ids, key=urut.index)]}
                    for n, nama, ids in kriteria_mod.peta(lembaga_en, set(ada))]
         umum_en = dict(umum, bahasa="en", akar=posixpath.join(slug, "en"), nama=bahasa_mod.nama_tampil(p, "en"),
-                       unit=unit_en, menu=menu_en, hero=hero, kabar_beranda=[], terkait={}, peta_kriteria=peta_en,
+                       unit=unit_en, menu=menu_en, hero=hero, kabar_beranda=self.kabar_beranda(kabar_en),
+                       terkait=self.kabar_terkait(kabar_en, self.label_kategori_en),
+                       label_kategori=self.label_kategori_en, peta_kriteria=peta_en,
                        lembaga_kriteria=lembaga_en,
                        jenjang_panjang=bahasa_mod.jenjang_panjang(p["jenjang"], "en"),
                        bidang_kerja=p.get("bidang_kerja_en") or "",
                        cpl=[dict(c, isi=c["isi_en"]) for c in p.get("cpl") or [] if c.get("isi_en")])
         for e in menu_en:
             for ini in [e] + e["anak"]:
+                if ini.get("templat") == "pengumuman":
+                    self.bangun_pengumuman(slug, ini, list(kabar_en), umum_en, list(kabar))
+                    continue
                 folder = folder_bahasa(ini["alamat"])
                 konteks = dict(umum_en, ini=ini, kelompok=e if e["kelompok"] and ini is not e else None,
                                kanonik=self.kanonik(folder["en"]), versi_folder=folder,
@@ -626,40 +649,61 @@ class Pembangun(object):
                 self.simpan("unggahan/" + jalur, f.read())
         return True
 
-    def bangun_pengumuman(self, slug, ini, kabar, umum):
-        """List pages, one page per item, category and year archives, and the RSS feed."""
-        dasar = ini["alamat"]
-        kategori_ada = [dict(k, jumlah=sum(1 for b in kabar if b["kategori"] == k["id"])) for k in self.kategori]
+    def bangun_pengumuman(self, slug, ini, kabar, umum, kabar_lain=None):
+        """List pages, one page per item, category and year archives, and (Indonesian) the RSS feed, in the language
+        of umum (under its akar). kabar_lain: the items of the other language when the site has one; the language
+        switch links the pages both languages have."""
+        bahasa = umum.get("bahasa", "id")
+        label = self.label_kategori_en if bahasa == "en" else self.label_kategori
+        akar, dasar = umum["akar"], ini["alamat"]
+        lain_kategori = {b["kategori"] for b in kabar_lain or []}
+        lain_tahun = {b["tanggal"][:4] for b in kabar_lain or []}
+        lain_id = {b["id"] for b in kabar_lain or []}
+
+        def versi(alamat, ada):
+            """{language: folder} of a page the other language has too, else None."""
+            if not kabar_lain or not ada:
+                return None
+            return {"id": posixpath.join(slug, alamat), "en": posixpath.join(slug, "en", alamat)}
+        kategori_ada = [dict(k, label=label[k["id"]], jumlah=sum(1 for b in kabar if b["kategori"] == k["id"]))
+                        for k in self.kategori]
         kategori_ada = [k for k in kategori_ada if k["jumlah"]]
         tahun_ada = sorted({b["tanggal"][:4] for b in kabar}, reverse=True)
         bersama = dict(umum, ini=ini, kelompok=None, kategori_ada=kategori_ada, tahun_ada=tahun_ada,
                        dasar_pengumuman=dasar)
-        self.daftar_berhalaman(slug, dasar, kabar, dict(bersama, saring=None))
+        self.daftar_berhalaman(akar, dasar, kabar, dict(bersama, saring=None), versi(dasar, True))
         for k in kategori_ada:
-            self.daftar_berhalaman(slug, "%s/kategori/%s" % (dasar, k["id"]),
-                                   [b for b in kabar if b["kategori"] == k["id"]],
-                                   dict(bersama, saring={"jenis": "kategori", "id": k["id"], "label": k["label"]}))
+            alamat = "%s/kategori/%s" % (dasar, k["id"])
+            self.daftar_berhalaman(akar, alamat, [b for b in kabar if b["kategori"] == k["id"]],
+                                   dict(bersama, saring={"jenis": "kategori", "id": k["id"], "label": k["label"]}),
+                                   versi(alamat, k["id"] in lain_kategori))
         for t in tahun_ada:
-            self.daftar_berhalaman(slug, "%s/arsip/%s" % (dasar, t), [b for b in kabar if b["tanggal"][:4] == t],
-                                   dict(bersama, saring={"jenis": "tahun", "id": t, "label": "Arsip %s" % t}))
+            alamat = "%s/arsip/%s" % (dasar, t)
+            self.daftar_berhalaman(akar, alamat, [b for b in kabar if b["tanggal"][:4] == t],
+                                   dict(bersama, saring={"jenis": "tahun", "id": t,
+                                                         "label": bahasa_mod.penerjemah(bahasa)("Arsip %s") % t}),
+                                   versi(alamat, t in lain_tahun))
         for b in kabar:
-            folder = posixpath.join(slug, dasar, b["id"])
+            folder = posixpath.join(akar, dasar, b["id"])
             lain = [x for x in kabar if x["id"] != b["id"]][:3]
             foto = b.get("foto", [])
             og = self.media_mutlak(foto_varian(foto[0])) if foto else None
             self.render("pengumuman_detail.html", posixpath.join(folder, "index.html"),
                         **dict(bersama, b=b, lain=lain, sub=True, kanonik=self.kanonik(folder), og_gambar=og,
-                               og_jenis="article"))
-        self.simpan(posixpath.join(slug, dasar, "rss.xml"), self.rss(slug, dasar, kabar, umum["nama"]))
+                               og_jenis="article", versi_folder=versi(posixpath.join(dasar, b["id"]), b["id"] in lain_id)))
+        if bahasa == "id":
+            self.simpan(posixpath.join(slug, dasar, "rss.xml"), self.rss(slug, dasar, kabar, umum["nama"]))
 
-    def daftar_berhalaman(self, slug, dasar, butir, konteks):
+    def daftar_berhalaman(self, akar, dasar, butir, konteks, versi=None):
+        """A list in pages of PER_HALAMAN; versi: the language versions of its first page."""
         potong = [butir[i:i + PER_HALAMAN] for i in range(0, len(butir), PER_HALAMAN)] or [[]]
         for nomor, isi in enumerate(potong, 1):
             alamat = dasar if nomor == 1 else "%s/halaman/%d" % (dasar, nomor)
-            folder = posixpath.join(slug, alamat)
+            folder = posixpath.join(akar, alamat)
             self.render("pengumuman_daftar.html", posixpath.join(folder, "index.html"),
                         **dict(konteks, butir=isi, nomor=nomor, jumlah_halaman=len(potong), dasar_daftar=dasar,
-                               sub=bool(konteks["saring"]) or nomor > 1, kanonik=self.kanonik(folder)))
+                               sub=bool(konteks["saring"]) or nomor > 1, kanonik=self.kanonik(folder),
+                               versi_folder=versi if nomor == 1 else None))
 
     def rss(self, slug, dasar, kabar, nama):
         """RSS 2.0 of the newest 20 items, with full addresses (feeds need them, also on staging)."""

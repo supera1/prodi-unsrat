@@ -29,7 +29,7 @@
 		<ul class="kabar-daftar kabar-daftar--ringkas">
 			{% for b in kabar_beranda %}{{ kartu_kabar(b, 3) }}{% endfor %}
 		</ul>
-		<p><a class="tombol tombol--garis" href="{{ ke(slug ~ '/pengumuman') }}">{{ _("Semua pengumuman") }}</a></p>
+		<p><a class="tombol tombol--garis" href="{{ ke(akar ~ '/pengumuman') }}">{{ _("Semua pengumuman") }}</a></p>
 	</section>
 	{% endif %}
 

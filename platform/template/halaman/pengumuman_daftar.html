@@ -2,28 +2,28 @@
    page; feed readers find it through the <link rel="alternate"> of prodi.html. #}
 {% extends "prodi.html" %}
 {% from "_kabar.html" import kartu_kabar with context %}
-{% block judul %}{% if saring %}{{ saring.label }} — {% endif %}{{ ini.label }}{% if nomor > 1 %} (halaman {{ nomor }}){% endif %} — {{ nama }} — UNSRAT{% endblock %}
-{% block deskripsi %}{% if saring %}{{ saring.label }}: {% endif %}{{ ini.deskripsi }} Program Studi {{ nama }}, {{ unit.nama }}, Universitas Sam Ratulangi.{% endblock %}
+{% block judul %}{% if saring %}{{ saring.label }} — {% endif %}{{ ini.label }}{% if nomor > 1 %} ({{ _('halaman %d') | format(nomor) }}){% endif %} — {{ nama }} — UNSRAT{% endblock %}
+{% block deskripsi %}{% if saring %}{{ saring.label }}: {% endif %}{{ ini.deskripsi }} {{ _("Program Studi %s, %s, Universitas Sam Ratulangi.") | format(nama, unit.nama) }}{% endblock %}
 {% block isi %}
 <div class="wadah halaman">
-	<nav class="jejak" aria-label="Jejak halaman">
+	<nav class="jejak" aria-label="{{ _('Jejak halaman') }}">
 		<ol>
-			<li><a href="{{ ke(slug) }}">{{ nama }}</a></li>
-			<li><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman) }}"{% if not saring and nomor == 1 %} aria-current="page"{% endif %}>{{ ini.label }}</a></li>
+			<li><a href="{{ ke(akar) }}">{{ nama }}</a></li>
+			<li><a href="{{ ke(akar ~ '/' ~ dasar_pengumuman) }}"{% if not saring and nomor == 1 %} aria-current="page"{% endif %}>{{ ini.label }}</a></li>
 			{% if saring %}
-			<li><a href="{{ ke(slug ~ '/' ~ dasar_daftar) }}"{% if nomor == 1 %} aria-current="page"{% endif %}>{{ saring.label }}</a></li>
+			<li><a href="{{ ke(akar ~ '/' ~ dasar_daftar) }}"{% if nomor == 1 %} aria-current="page"{% endif %}>{{ saring.label }}</a></li>
 			{% endif %}
 		</ol>
 	</nav>
 	<div class="halaman__isi halaman__isi--lebar">
 		<h1>{% if saring %}{{ saring.label }}{% else %}{{ ini.label }}{% endif %}</h1>
-		<p class="pengantar">{% if saring and saring.jenis == 'kategori' %}{{ saring.label }} Program Studi {{ nama }}.{% elif saring %}Pengumuman dan berita Program Studi {{ nama }} tahun {{ saring.id }}.{% else %}{{ ini.deskripsi }}{% endif %}</p>
+		<p class="pengantar">{% if saring and saring.jenis == 'kategori' %}{{ _('%s Program Studi %s.') | format(saring.label, nama) }}{% elif saring %}{{ _('Pengumuman dan berita Program Studi %s tahun %s.') | format(nama, saring.id) }}{% else %}{{ ini.deskripsi }}{% endif %}</p>
 		{% if kategori_ada %}
-		<nav class="saring" aria-label="Kategori">
+		<nav class="saring" aria-label="{{ _('Kategori') }}">
 			<ul>
-				<li><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman) }}"{% if not saring %} class="saring--aktif"{% endif %}>Semua</a></li>
+				<li><a href="{{ ke(akar ~ '/' ~ dasar_pengumuman) }}"{% if not saring %} class="saring--aktif"{% endif %}>{{ _('Semua') }}</a></li>
 				{% for k in kategori_ada %}
-				<li><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman ~ '/kategori/' ~ k.id) }}"{% if saring and saring.id == k.id %} class="saring--aktif"{% endif %}>{{ k.label }} <span class="saring__jumlah">{{ k.jumlah }}</span></a></li>
+				<li><a href="{{ ke(akar ~ '/' ~ dasar_pengumuman ~ '/kategori/' ~ k.id) }}"{% if saring and saring.id == k.id %} class="saring--aktif"{% endif %}>{{ k.label }} <span class="saring__jumlah">{{ k.jumlah }}</span></a></li>
 				{% endfor %}
 			</ul>
 		</nav>
@@ -33,24 +33,24 @@
 			{% for b in butir %}{{ kartu_kabar(b, 2) }}{% endfor %}
 		</ul>
 		{% else %}
-		<p class="catatan catatan--menyusul">Belum ada pengumuman dari Program Studi {{ nama }}.</p>
+		<p class="catatan catatan--menyusul">{{ _('Belum ada pengumuman dari Program Studi %s.') | format(nama) }}</p>
 		{% endif %}
 		{% if jumlah_halaman > 1 %}
-		<nav class="halaman-nomor" aria-label="Halaman daftar">
+		<nav class="halaman-nomor" aria-label="{{ _('Halaman daftar') }}">
 			<ul>
 				{% for n in range(1, jumlah_halaman + 1) %}
-				<li><a href="{{ ke(slug ~ '/' ~ dasar_daftar ~ ('' if n == 1 else '/halaman/' ~ n)) }}"{% if n == nomor %} aria-current="page"{% endif %}>{% if n == nomor %}<span class="tersembunyi">Halaman </span>{% endif %}{{ n }}</a></li>
+				<li><a href="{{ ke(akar ~ '/' ~ dasar_daftar ~ ('' if n == 1 else '/halaman/' ~ n)) }}"{% if n == nomor %} aria-current="page"{% endif %}>{% if n == nomor %}<span class="tersembunyi">{{ _("Halaman") }} </span>{% endif %}{{ n }}</a></li>
 				{% endfor %}
 			</ul>
 		</nav>
 		{% endif %}
 		{% if tahun_ada %}
 		<div class="kabar-bawah">
-			<nav aria-label="Arsip per tahun">
-				<p class="kabar-bawah__judul">Arsip</p>
+			<nav aria-label="{{ _('Arsip per tahun') }}">
+				<p class="kabar-bawah__judul">{{ _("Arsip") }}</p>
 				<ul class="saring saring--kecil">
 					{% for t in tahun_ada %}
-					<li><a href="{{ ke(slug ~ '/' ~ dasar_pengumuman ~ '/arsip/' ~ t) }}"{% if saring and saring.id == t %} class="saring--aktif"{% endif %}>{{ t }}</a></li>
+					<li><a href="{{ ke(akar ~ '/' ~ dasar_pengumuman ~ '/arsip/' ~ t) }}"{% if saring and saring.id == t %} class="saring--aktif"{% endif %}>{{ t }}</a></li>
 					{% endfor %}
 				</ul>
 			</nav>
