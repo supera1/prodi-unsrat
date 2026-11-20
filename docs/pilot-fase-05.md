@@ -80,7 +80,7 @@ yang belum pernah memakainya mengikuti dulu sesi pengenalan Fase 2 ([docs/pilot-
 | Waktu | Materi |
 |---|---|
 | 10 menit | Versi Inggris di `/<slug>/en/` dan tombol bahasa. Halaman yang otomatis dari data resmi, dan yang diisi prodi. Kotak **Versi bahasa Inggris** di Ringkasan prodi |
-| 20 menit | Praktik halaman **Sejarah**: tab **English**, **Terjemahkan dari versi Indonesia**, periksa setiap isian bertanda terjemahan mesin, centang **Saya sudah memeriksa terjemahan mesin di halaman ini**, **Simpan dan pratinjau**, lalu ajukan atau terbitkan; lihat hasilnya di situs |
+| 20 menit | Praktik: **Terjemahkan semua** di daftar Isi halaman (periksa daftarnya, lalu **Ya, terjemahkan semua**); buka saringan **Terjemahan mesin belum diperiksa**; di tab **English** halaman **Sejarah**, periksa setiap isian bertanda terjemahan mesin, centang kotak pemeriksaan, lalu **Terbitkan dan buka berikutnya** (operator: **Ajukan dan buka berikutnya**); lihat hasilnya di situs |
 | 10 menit | Admin prodi: bagian *Versi bahasa Inggris* di **Bagian depan beranda**, label menu Inggris, nama Inggris halaman tambahan, nama kriteria Inggris |
 | 10 menit | Pengumuman: bagian **Versi bahasa Inggris (opsional)**, **Simpan dan terjemahkan dari versi Indonesia**, pemeriksaan, menu **News** |
 | 10 menit | Yang tidak diterjemahkan (nama orang dan mitra, kode, judul karya, tabel Excel), tanda **perlu diperbarui**, batas harian, teks dikirim ke DeepL (jangan memuat data pribadi), masukan, target pilot |

@@ -143,6 +143,20 @@ Dasar: [rencana Fase 2](rencana-fase-02.md), keputusan K-P23–K-P36, dan pandua
     operator mencentang **Saya sudah memeriksa terjemahan mesin di halaman ini**. Isian yang diubah dianggap sudah
     diperiksa;
   - judul tabel Excel (tugas akhir) ikut diterjemahkan hanya bila pilihannya dicentang (keputusan nomor 4).
+- **Terjemahkan semua (langkah 5a, 20 November 2026; usulan pengembang nomor 1–6 disetujui pengguna, dengan tiga
+  keputusan pengguna):**
+  - satu tombol menerjemahkan semua halaman dan pengumuman yang belum punya terjemahan Inggris, setelah layar
+    konfirmasi (daftar, jumlah teks dan karakter, sisa batas);
+  - keputusan pengguna: operator juga boleh memakainya, draf Indonesia ikut diterjemahkan, dan pengumuman ikut
+    sekaligus;
+  - terjemahan yang ada tidak ditimpa. Judul tabel Excel, halaman yang disembunyikan, dan versi Inggris yang menunggu
+    persetujuan dilewati. Pengumuman hanya yang boleh diubah akun itu, tanpa yang ditarik;
+  - berjalan di latar (seperti bangun ulang), supaya load balancer tidak memutus permintaan yang lama. Halaman
+    kemajuannya memuat ulang sendiri tanpa JavaScript;
+  - per butir, batas dicek; yang tidak muat menunggu, butir lain jalan. Penyedia yang gagal menghentikan pekerjaan.
+    Butir yang diubah orang lain di tengah jalan dilewati (cek versi);
+  - tidak ada yang langsung terbit. Pemeriksaan tetap per halaman (K-P37), dibantu saringan "Terjemahan mesin belum
+    diperiksa" dan tombol **Terbitkan dan buka berikutnya** / **Ajukan dan buka berikutnya**.
 
 ### 3.6 Mengaktifkan versi Inggris dan kelengkapan
 
@@ -237,7 +251,8 @@ Dasar: [rencana Fase 2](rencana-fase-02.md), keputusan K-P23–K-P36, dan pandua
    log audit, variabel stack di `.env.example` dan `docs/deploy.md`.
 4. **Pengumuman berbahasa Inggris** (`fase/05-4-pengumuman-en`, opsional).
 5. **Panduan dan pilot**: bagian "Versi bahasa Inggris" di panduan admin prodi; pilot di produksi dengan versi Inggris
-   aktif hanya untuk prodi pilot.
+   aktif hanya untuk prodi pilot. 5a. **Terjemahkan semua** (`fase/05-5a-terjemahkan-semua`), atas permintaan pengguna
+   sebelum pilot (§3.5).
 6. **Uji menyeluruh** dan `docs/log/fase-05.md`.
 
 Langkah 1 dan 2 tidak memerlukan kunci API; langkah 3 memerlukan akun DeepL dari UPA TIK untuk mencoba penyedia yang
