@@ -476,6 +476,27 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
   5. Nama mata kuliah diterjemahkan; judul tugas akhir tetap bahasa asli kecuali prodi memilih menerjemahkan.
   6. Fase 5 dikerjakan lebih dulu dari Fase 3 dan 4. Prodi pilot: prodi yang menuju akreditasi internasional; sampai
      disebutkan, tiga prodi pilot Fase 2. Disebutkan pengguna 20 November 2026: S1 Teknik Informatika, S2 Informatika,
-     S1 Biologi, S1 Agribisnis, S1 Kehutanan, dan S1 Agroteknologi ([persiapan pilot](pilot-fase-05.md)).
+     S1 Biologi, S1 Agribisnis, S1 Kehutanan, dan S1 Agroteknologi ([persiapan](versi-inggris-prodi.md)). Bukan pilot:
+     lihat K-P38.
 - **Konsekuensi:** teks isi halaman dikirim ke penyedia terjemahan saat tombol dipakai; kunci API disimpan di `.env`.
   Prodi memelihara dua versi isi; kelengkapan versi Inggris dipantau superadmin.
+
+### K-P38 — Versi bahasa Inggris hanya untuk prodi akreditasi internasional (Fase 5 langkah 5b)
+- **Konteks:** K-P37 membuat penyunting bahasa Inggris dan terjemahan mesin tersedia untuk semua prodi; saklar
+  superadmin hanya mengatur situs `/<slug>/en/`. Pengguna mengoreksi (22 November 2026): keenam prodi yang disebutkan
+  bukan pilot, tetapi prodi yang akan mengikuti akreditasi internasional, dan karena keterbatasan API DeepL hanya
+  merekalah yang punya tombol terjemahan dan yang bisa diterjemahkan ke bahasa Inggris.
+- **Keputusan:**
+  1. Saklar versi Inggris per prodi (registri `inggris`, menu Prodi superadmin) mengatur seluruh versi Inggris: situs,
+     tab English dan rute versi Inggris (404 tanpa saklar), kolom dan kotak versi Inggris, isian bahasa Inggris di
+     pengumuman, Bagian depan beranda, Menu, Halaman tambahan, dan Kriteria akreditasi, serta semua tombol terjemahan
+     mesin termasuk Terjemahkan semua.
+  2. Daftar prodinya data, bukan kode: superadmin menyalakan saklar S1 Teknik Informatika (55201), S2 Informatika
+     (55100), S1 Biologi (46201), S1 Agribisnis (54201), S1 Kehutanan (54251), dan S1 Agroteknologi (54211). Prodi lain
+     yang kelak mengikuti akreditasi internasional cukup dinyalakan saklarnya. Dasbor superadmin mendaftar prodi yang
+     saklarnya menyala.
+  3. Mematikan saklar tidak menghapus apa pun: menyimpan formulir tanpa isian Inggris mempertahankan nilai Inggris
+     yang tersimpan, dan draf Inggris yang tersembunyi tidak ikut dihitung.
+- **Konsekuensi:** terjemahan tidak lagi bisa disiapkan sebelum saklar dinyalakan; keenam prodi dinyalakan sejak awal
+  (situsnya langsung memuat halaman Inggris dari data resmi, halaman lain menyusul setelah terbit). Kuota DeepL hanya
+  dipakai keenam prodi.

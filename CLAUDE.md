@@ -13,7 +13,8 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
 - Audiens: asesor akreditasi, calon mahasiswa, mahasiswa, alumni, pengguna lulusan. Banyak pengguna ponsel dengan
   koneksi terbatas di Indonesia Timur.
 - Bahasa: Indonesia; versi Inggris di `/<slug>/en/` sedang dikerjakan (Fase 5, K-P37): isi Inggris dari penyunting
-  dengan draf terjemahan mesin yang ditinjau prodi, tanpa skrip pihak ketiga.
+  dengan draf terjemahan mesin yang ditinjau prodi, tanpa skrip pihak ketiga. Hanya untuk prodi akreditasi
+  internasional (K-P38): enam prodi yang saklarnya dinyalakan superadmin.
 
 ## Dokumen (baca bagian yang relevan sebelum mengerjakan fitur)
 - `docs/rencana-fase-01.md` — rencana Fase 1 (selesai): arsitektur, model data, peran, template, urutan kerja.
@@ -22,7 +23,8 @@ Satu platform untuk situs ke-97 program studi Universitas Sam Ratulangi, di `pro
 - `docs/keputusan.md` — log keputusan (K-P1, …). Tambahkan entri setiap ada keputusan baru.
 - `docs/asal-modul.md` — modul yang disalin dari repo www beserta versi asalnya.
 - `docs/panduan-admin-prodi.md` — panduan untuk admin prodi dan operator (juga menu Panduan di admin);
-  `docs/pilot-fase-02.md` — persiapan pilot; `docs/pilot-fase-05.md` — persiapan pilot versi Inggris (enam prodi);
+  `docs/pilot-fase-02.md` — persiapan pilot; `docs/versi-inggris-prodi.md` — versi Inggris enam prodi
+  akreditasi internasional (bukan pilot, K-P38);
   `docs/kriteria-akreditasi.md` — draf label kriteria untuk LPMPP.
 - `platform/data-awal/slug.csv` — slug 97 prodi yang disetujui. Kunci tetap prodi adalah `kode_pddikti`, bukan slug.
 - Log hasil setiap langkah/fase ditulis ke `docs/log/`; ringkasan Fase 1 (kriteria, verifikasi manual, sisa pekerjaan):
@@ -86,8 +88,10 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   melihat tampilan, bertanda `[CONTOH]`, ditolak di produksi). Templat situs: `platform/template/halaman/isi.html` +
   `_isi.html`; pratinjau admin memakai makro yang sama (`bangun.bagian_html`).
 - Versi bahasa Inggris (Fase 5, K-P37): `/<slug>/en/` hanya untuk prodi yang registrinya bertanda `inggris` (saklar di
-  superadmin, detail prodi). Teks tetap templat situs ditulis Indonesia di dalam `_("...")` (dengan `| format(...)`
-  untuk nilai); terjemahannya di `platform/template/teks-en.json`, dibaca `platform/bahasa.py`. Teks baru di templat
+  superadmin, detail prodi). Saklar yang sama mengatur admin (K-P38): `g.prodi["inggris"]` (`app.info_prodi`);
+  tanpa saklar, rute versi Inggris 404 (`isi_admin.perlu_inggris`), isian dan tombol Inggris tidak tampil di templat
+  (`pr.inggris`), dan pengurai formulir mempertahankan nilai Inggris yang tersimpan. Uji: `uji/uji_inggris_terbatas.py`.
+  Teks tetap templat situs ditulis Indonesia di dalam `_("...")` (dengan `| format(...)` untuk nilai); terjemahannya di `platform/template/teks-en.json`, dibaca `platform/bahasa.py`. Teks baru di templat
   wajib masuk kamus: `python3 platform/bahasa.py periksa`, `uji/uji_inggris.py`. Menu induk wajib `label_en` dan
   `deskripsi_en`. Tautan di dalam situs prodi memakai `ke(akar ~ ...)`, bukan `ke(slug ~ ...)`.
   Isi Inggris halaman (langkah 2): halaman `"<id>:en"` di `isi_halaman.py` (`halaman-<id>-en.json`), berisi memori

@@ -194,9 +194,10 @@ versi lama dengan sekarang lalu pulihkan. Pemulihan di menu ini langsung berlaku
 
 ## Versi bahasa Inggris
 
-Situs prodi bisa punya versi bahasa Inggris di `.../<slug>/en/`, misalnya untuk akreditasi internasional. Versi ini
-tayang setelah superadmin UPA TIK mengaktifkannya untuk prodi Anda. Sebelum itu, terjemahan tetap bisa disiapkan dan
-diterbitkan.
+Versi bahasa Inggris di `.../<slug>/en/` hanya ada untuk prodi yang mengikuti akreditasi internasional, karena kuota
+terjemahan mesin terbatas. Superadmin UPA TIK mengaktifkannya per prodi. Tanpa itu, admin tidak menampilkan tab
+English, isian bahasa Inggris, maupun tombol terjemahan; isian Inggris yang pernah tersimpan tetap aman. Bila prodi
+Anda akan mengikuti akreditasi internasional dan belum punya versi Inggris, hubungi superadmin UPA TIK.
 
 **Ringkasan prodi** memuat kotak **Versi bahasa Inggris**. Isinya:
 
