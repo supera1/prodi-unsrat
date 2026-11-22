@@ -14,6 +14,7 @@
 	<li><a href="{{ url_for('super_prodi') }}"><strong>{{ r.timpaan }}</strong> prodi mengubah data resminya sendiri</a></li>
 	<li><a href="{{ url_for('super_kelengkapan') }}">Kelengkapan halaman wajib setiap prodi (unduhan CSV untuk LPMPP)</a></li>
 	<li><a href="{{ url_for('super_masukan', status='baru') }}"><strong>{{ masukan_baru }}</strong> masukan baru dari pengguna admin</a></li>
+	<li>Versi bahasa Inggris dan terjemahan mesin aktif untuk <strong>{{ r.inggris | length }}</strong> prodi{% if r.inggris %}: {% for x in r.inggris %}<a href="{{ url_for('super_prodi_detail', kode=x.kode) }}">{{ x.nama }}</a>{{ ', ' if not loop.last }}{% endfor %}{% endif %}</li>
 	{% if terjemah %}<li>Terjemahan mesin ({{ terjemah.penyedia }}) bulan ini: <strong>{{ '{:,}'.format(terjemah.pakai).replace(',', '.') }}</strong> dari {{ '{:,}'.format(terjemah.batas[1]).replace(',', '.') }} karakter untuk semua prodi; paling banyak {{ '{:,}'.format(terjemah.batas[0]).replace(',', '.') }} karakter per prodi per hari</li>{% endif %}
 </ul>
 <section class="kartu">

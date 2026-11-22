@@ -14,14 +14,14 @@
 	<input type="hidden" name="csrf" value="{{ token_csrf() }}">
 	<div class="tabel-gulir">
 		<table>
-			<thead><tr><th scope="col">Nama menu</th><th scope="col">Nama menu (bahasa Inggris)</th><th scope="col">Kelompok</th><th scope="col">Urutan</th><th scope="col">Alamat</th><th scope="col">Keadaan</th><th scope="col">Isi</th></tr></thead>
+			<thead><tr><th scope="col">Nama menu</th>{% if pr.inggris %}<th scope="col">Nama menu (bahasa Inggris)</th>{% endif %}<th scope="col">Kelompok</th><th scope="col">Urutan</th><th scope="col">Alamat</th><th scope="col">Keadaan</th><th scope="col">Isi</th></tr></thead>
 			<tbody>
 				{% for h in daftar %}
 				<tr>
 					<td><label class="tersembunyi" for="label-{{ h.id }}">Nama menu {{ h.label }}</label>
 						<input id="label-{{ h.id }}" name="label-{{ h.id }}" type="text" value="{{ h.label }}" maxlength="{{ maks_label }}" required></td>
-					<td><label class="tersembunyi" for="label_en-{{ h.id }}">Nama menu bahasa Inggris {{ h.label }}</label>
-						<input id="label_en-{{ h.id }}" name="label_en-{{ h.id }}" type="text" lang="en" value="{{ h.label_en or '' }}" maxlength="{{ maks_label }}"></td>
+					{% if pr.inggris %}<td><label class="tersembunyi" for="label_en-{{ h.id }}">Nama menu bahasa Inggris {{ h.label }}</label>
+						<input id="label_en-{{ h.id }}" name="label_en-{{ h.id }}" type="text" lang="en" value="{{ h.label_en or '' }}" maxlength="{{ maks_label }}"></td>{% endif %}
 					<td><label class="tersembunyi" for="kelompok-{{ h.id }}">Kelompok {{ h.label }}</label>
 						<select id="kelompok-{{ h.id }}" name="kelompok-{{ h.id }}">{% for k, label in kelompok.items() %}<option value="{{ k }}"{% if k == h.kelompok %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></td>
 					<td><label class="tersembunyi" for="urutan-{{ h.id }}">Urutan {{ h.label }}</label>
@@ -34,7 +34,7 @@
 			</tbody>
 		</table>
 	</div>
-	<p class="keterangan">Alamat tetap seperti saat halaman dibuat, supaya tautan yang sudah dibagikan tidak rusak; nama menu dan kelompoknya boleh diganti. Halaman tambahan tampil di versi bahasa Inggris situs bila nama menu Inggrisnya diisi dan versi Inggris isinya sudah terbit.</p>
+	<p class="keterangan">Alamat tetap seperti saat halaman dibuat, supaya tautan yang sudah dibagikan tidak rusak; nama menu dan kelompoknya boleh diganti.{% if pr.inggris %} Halaman tambahan tampil di versi bahasa Inggris situs bila nama menu Inggrisnya diisi dan versi Inggris isinya sudah terbit.{% endif %}</p>
 	<button type="submit" class="tombol">Simpan nama, kelompok, dan urutan</button>
 </form>
 
@@ -65,9 +65,11 @@
 		<div class="isian"><label for="label">Nama menu</label>
 			<input id="label" name="label" type="text" value="{{ isian.get('label', '') }}" maxlength="{{ maks_label }}" required>
 			<p class="keterangan">Mis. Database Skripsi, Pendaftaran Seminar, Video Profil.</p></div>
+		{% if pr.inggris %}
 		<div class="isian"><label for="label_en">Nama menu bahasa Inggris (opsional)</label>
 			<input id="label_en" name="label_en" type="text" lang="en" value="{{ isian.get('label_en', '') }}" maxlength="{{ maks_label }}">
 			<p class="keterangan">Untuk versi bahasa Inggris situs, mis. Thesis Database. Bisa diisi nanti.</p></div>
+		{% endif %}
 		<div class="isian"><label for="kelompok">Kelompok menu</label>
 			<select id="kelompok" name="kelompok">{% for k, label in kelompok.items() %}<option value="{{ k }}"{% if k == isian.get('kelompok') %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
 		<div class="isian"><label for="alamat">Alamat (opsional)</label>

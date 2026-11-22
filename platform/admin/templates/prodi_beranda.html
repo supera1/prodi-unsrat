@@ -62,6 +62,7 @@
 		{% endfor %}
 		<p class="keterangan">Angka di kartu tambahan ditulis prodi sendiri; pastikan sesuai data resmi (PDDIKTI) karena dibaca asesor.</p>
 	</fieldset>
+	{% if pr.inggris %}
 	{% set kartu_en = en.get('kartu') or {} %}
 	{% set tambahan_en = en.get('kartu_tambahan') or [] %}
 	<fieldset class="kartu">
@@ -93,6 +94,7 @@
 		</div>
 		{% endfor %}
 	</fieldset>
+	{% endif %}
 	<button type="submit" class="tombol">Simpan bagian depan</button>
 </form>
 <section class="kartu">

@@ -45,10 +45,13 @@
 		<input type="hidden" name="inggris" value="{{ '0' if r.inggris else '1' }}">
 		<button type="submit" class="tombol tombol--kecil tombol--garis">{{ 'Nonaktifkan versi Inggris' if r.inggris else 'Aktifkan versi Inggris' }}</button>
 	</form>
-	<p class="keterangan">Saat aktif, situs prodi mendapat versi bahasa Inggris dan tombol English di setiap halaman yang punya
-		versi Inggris: beranda, Profil Lulusan dan CPL, Spesifikasi, Akreditasi, Dosen Tetap, Kalender, dan Kontak dari data
-		resmi berbahasa Inggris; halaman yang diisi prodi setelah versi Inggrisnya terbit; dan menu News bila ada pengumuman
-		berbahasa Inggris. Kemajuannya terlihat di <a href="{{ url_for('dasbor_prodi', kode=b.kode) }}">Ringkasan prodi</a>
+	<p class="keterangan">Versi bahasa Inggris hanya untuk prodi yang mengikuti akreditasi internasional (K-P38), karena
+		kuota terjemahan mesin DeepL terbatas. Saat aktif, admin prodi dan operatornya mendapat tab English, isian bahasa
+		Inggris, dan tombol terjemahan mesin, termasuk Terjemahkan semua. Situs prodi mendapat versi bahasa Inggris dan tombol
+		English di setiap halaman yang punya versi Inggris: beranda, Profil Lulusan dan CPL, Spesifikasi, Akreditasi, Dosen
+		Tetap, Kalender, dan Kontak dari data resmi berbahasa Inggris; halaman yang diisi prodi setelah versi Inggrisnya
+		terbit; dan menu News bila ada pengumuman berbahasa Inggris. Saat dinonaktifkan, semua itu hilang dari admin dan
+		situs, tetapi terjemahan yang sudah ada tetap tersimpan. Kemajuannya terlihat di <a href="{{ url_for('dasbor_prodi', kode=b.kode) }}">Ringkasan prodi</a>
 		dan di menu <a href="{{ url_for('super_kelengkapan') }}">Kelengkapan</a>.</p>
 </section>
 

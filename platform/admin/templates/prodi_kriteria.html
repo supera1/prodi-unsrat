@@ -38,11 +38,13 @@
 		<div class="isian"><label for="instrumen">Nama instrumen (opsional)</label>
 			<input id="instrumen" name="instrumen" type="text" value="{{ isian.instrumen or '' }}" maxlength="{{ maks_nama }}">
 			<p class="keterangan">Mis. "Instrumen Akreditasi Program Studi (IAPS) 4.0". Tampil di halaman Akreditasi.</p></div>
+		{% if pr.inggris %}
 		<div class="isian"><label for="instrumen_en">Nama instrumen dalam bahasa Inggris (opsional)</label>
 			<input id="instrumen_en" name="instrumen_en" type="text" lang="en" value="{{ isian.instrumen_en or '' }}" maxlength="{{ maks_nama }}">
 			<p class="keterangan">Untuk versi bahasa Inggris situs.</p></div>
+		{% endif %}
 		{% else %}
-		<p>{{ isian.nama or '—' }}{% if isian.instrumen %} — {{ isian.instrumen }}{% endif %}{% if isian.instrumen_en %} (<span lang="en">{{ isian.instrumen_en }}</span>){% endif %}</p>
+		<p>{{ isian.nama or '—' }}{% if isian.instrumen %} — {{ isian.instrumen }}{% endif %}{% if pr.inggris and isian.instrumen_en %} (<span lang="en">{{ isian.instrumen_en }}</span>){% endif %}</p>
 		{% endif %}
 	</section>
 
@@ -50,13 +52,13 @@
 		<h2 id="judul-daftar">Daftar kriteria</h2>
 		{% if admin %}
 		<p class="keterangan">Paling banyak {{ maks }} kriteria. Nomor boleh angka atau huruf (mis. 1, 2.1, C). Kosongkan nomor dan nama
-			sebuah baris untuk menghapusnya. Baris baru mendapat kolom centang di tabel halaman setelah disimpan. Nama bahasa Inggris
-			dipakai versi bahasa Inggris situs; kriteria tanpa nama Inggris tidak berlabel di sana.</p>
+			sebuah baris untuk menghapusnya. Baris baru mendapat kolom centang di tabel halaman setelah disimpan.{% if pr.inggris %} Nama bahasa Inggris
+			dipakai versi bahasa Inggris situs; kriteria tanpa nama Inggris tidak berlabel di sana.{% endif %}</p>
 		{% set baris = (isian.kriteria or []) + [{}] * kosong %}
 		<input type="hidden" name="kriteria_jumlah" value="{{ baris | length }}">
 		<div class="tabel-gulir">
 			<table>
-				<thead><tr><th scope="col">Nomor</th><th scope="col">Nama kriteria</th><th scope="col">Nama kriteria (bahasa Inggris)</th></tr></thead>
+				<thead><tr><th scope="col">Nomor</th><th scope="col">Nama kriteria</th>{% if pr.inggris %}<th scope="col">Nama kriteria (bahasa Inggris)</th>{% endif %}</tr></thead>
 				<tbody>
 					{% for k in baris %}
 					<tr>
@@ -64,15 +66,15 @@
 							<input id="k-{{ loop.index0 }}-nomor" name="k-{{ loop.index0 }}-nomor" type="text" value="{{ k.nomor or '' }}" maxlength="8" class="angka-kecil"></td>
 						<td><label class="tersembunyi" for="k-{{ loop.index0 }}-nama">Nama kriteria baris {{ loop.index }}</label>
 							<input id="k-{{ loop.index0 }}-nama" name="k-{{ loop.index0 }}-nama" type="text" value="{{ k.nama or '' }}" maxlength="{{ maks_nama }}"></td>
-						<td><label class="tersembunyi" for="k-{{ loop.index0 }}-nama_en">Nama kriteria bahasa Inggris baris {{ loop.index }}</label>
-							<input id="k-{{ loop.index0 }}-nama_en" name="k-{{ loop.index0 }}-nama_en" type="text" lang="en" value="{{ k.nama_en or '' }}" maxlength="{{ maks_nama }}"></td>
+						{% if pr.inggris %}<td><label class="tersembunyi" for="k-{{ loop.index0 }}-nama_en">Nama kriteria bahasa Inggris baris {{ loop.index }}</label>
+							<input id="k-{{ loop.index0 }}-nama_en" name="k-{{ loop.index0 }}-nama_en" type="text" lang="en" value="{{ k.nama_en or '' }}" maxlength="{{ maks_nama }}"></td>{% endif %}
 					</tr>
 					{% endfor %}
 				</tbody>
 			</table>
 		</div>
 		{% elif isian.kriteria %}
-		<ul>{% for k in isian.kriteria %}<li>Kriteria {{ k.nomor }}: {{ k.nama }}{% if k.nama_en %} (<span lang="en">{{ k.nama_en }}</span>){% endif %}</li>{% endfor %}</ul>
+		<ul>{% for k in isian.kriteria %}<li>Kriteria {{ k.nomor }}: {{ k.nama }}{% if pr.inggris and k.nama_en %} (<span lang="en">{{ k.nama_en }}</span>){% endif %}</li>{% endfor %}</ul>
 		{% else %}
 		<p>Belum ada daftar kriteria.</p>
 		{% endif %}

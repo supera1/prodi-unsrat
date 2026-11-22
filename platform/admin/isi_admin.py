@@ -22,6 +22,9 @@ akses("prodi"): operators too, except where noted.
     /aset-situs/<nama>                        the site's style sheets (tokens.css, prodi.css), for the previews
     /super/kelengkapan (.csv)                 akses("super"): the required pages of every programme, for LPMPP
 
+The English routes (/en..., and "Terjemahkan semua") answer 404 for a programme whose English version the superadmin
+has not switched on (K-P38: only the programmes in international accreditation have it, for DeepL's quota).
+
 Who may do what (checked here for every request, whatever the form says):
     operator   writes the draft, submits it (it must pass every check), takes a submission back, discards a draft that
                is not waiting; never publishes, sends back or withdraws
@@ -104,6 +107,13 @@ def adalah_admin(akun):
     return akun["peran"] in ("super", "admin")
 
 
+def perlu_inggris():
+    """404 unless the programme of this request has its English version switched on (K-P38): its English editors and
+    machine translation exist only then."""
+    if not (g.get("prodi") or {}).get("inggris"):
+        abort(404)
+
+
 def halaman_prodi(kode):
     """The programme's own pages in menu order: [(group label, [menu entry + "sembunyi", ...])]. A label the
     programme gave a page in its menu settings is used; "sembunyi": an optional page the programme hides. The
@@ -135,13 +145,14 @@ def halaman_wajib():
             if b.get("jenis") == "wajib" and b["id"] in ih.TEMPLAT]
 
 
-def ringkasan_isi(kode, wajib=None):
+def ringkasan_isi(kode, wajib=None, inggris=True):
     """What a programme's own pages hold: {"halaman": {id: isi_halaman.keadaan}, "wajib": number of required pages,
     "terbit": required pages the site shows, "kosong": required pages with nothing yet, "menunggu" / "dikembalikan" /
     "draf": drafts of any page in that status (either language), "terakhir": the last change; "en": {id: the English
     version's isi_inggris.keadaan}, "en_terbit": required pages whose English version shows, "en_perlu": pages whose
     published English version lacks translations of the Indonesian published content, "en_mesin": pages whose English
-    draft holds machine translations not checked yet}."""
+    draft holds machine translations not checked yet}. inggris=False (the programme's English version is switched off):
+    its English drafts are not counted among the drafts."""
     wajib = halaman_wajib() if wajib is None else wajib
     hasil = {"halaman": {}, "en": {}, "wajib": len(wajib), "terbit": 0, "kosong": 0, "menunggu": 0, "dikembalikan": 0,
              "draf": 0, "terakhir": "", "en_terbit": 0, "en_perlu": 0, "en_mesin": 0}
@@ -157,7 +168,7 @@ def ringkasan_isi(kode, wajib=None):
             hasil["en_terbit"] += en["tayang"]
         hasil["en_perlu"] += bool(en["terbit"] and en["perlu"])
         hasil["en_mesin"] += mesin_belum(en)
-        for x in (k, en):                       # a draft waiting in either language is one to look at
+        for x in (k, en) if inggris else (k,):  # a draft waiting in either language is one to look at
             status_draf = (x["draf"] or {}).get("status")
             if status_draf in ih.STATUS_DRAF:
                 hasil[status_draf] += 1
@@ -330,20 +341,21 @@ def pasang(app, alat):
     @akses("prodi")
     def isi_daftar(kode):
         status = request.args.get("status", "")
-        if status and status not in STATUS_SARING:
+        if status and (status not in STATUS_SARING or (status == "mesin" and not g.prodi.get("inggris"))):
             abort(404)
-        r = ringkasan_isi(kode)
+        inggris = bool(g.prodi.get("inggris"))
+        r = ringkasan_isi(kode, inggris=inggris)
         kelompok = []
         for label, anak in halaman_prodi(kode):
             anak = [dict(a, k=r["halaman"][a["id"]], en=r["en"][a["id"]]) for a in anak]
-            anak = [a for a in anak if not status or saring_cocok(a["k"], status) or saring_cocok_en(a["en"], status)]
+            anak = [a for a in anak if not status or saring_cocok(a["k"], status)
+                    or (inggris and saring_cocok_en(a["en"], status))]
             if anak:
                 kelompok.append((label, anak))
-        jumlah = {s: sum(1 for id_, k in r["halaman"].items() if saring_cocok(k, s) or saring_cocok_en(r["en"][id_], s))
-                  for s in STATUS_SARING}
-        reg = registri.cari(registri.baca(), kode) or {}
+        jumlah = {s: sum(1 for id_, k in r["halaman"].items()
+                         if saring_cocok(k, s) or (inggris and saring_cocok_en(r["en"][id_], s))) for s in STATUS_SARING}
         return render_template("halaman_daftar.html", pr=g.prodi, kelompok=kelompok, r=r, jumlah=jumlah, status=status,
-                               NAMA_STATUS=NAMA_STATUS, admin=adalah_admin(g.akun), inggris=bool(reg.get("inggris")),
+                               NAMA_STATUS=NAMA_STATUS, admin=adalah_admin(g.akun), inggris=inggris,
                                penyedia=alat.penerjemah.nama if alat.penerjemah is not None else None,
                                terjemah_semua=alat.terjemah_semua.keadaan(kode))
 
@@ -510,12 +522,14 @@ def pasang(app, alat):
     @app.route("/prodi/<kode>/halaman/<id_>/en")
     @akses("prodi")
     def isi_sunting_en(kode, id_):
+        perlu_inggris()
         return tampil_sunting_en(kode, ini_(kode, id_))
 
     @app.route("/prodi/<kode>/halaman/<id_>/en", methods=["POST"])
     @akses("prodi")
     def isi_simpan_en(kode, id_):
         """The English form: the same buttons and rules as the page's own form (isi_simpan), without lists or files."""
+        perlu_inggris()
         ini = ini_(kode, id_)
         id_en = isi_inggris.id_en(id_)
         ke_sini = url_for("isi_sunting_en", kode=kode, id_=id_)
@@ -677,6 +691,7 @@ def pasang(app, alat):
     @app.route("/prodi/<kode>/halaman/<id_>/en/pratinjau")
     @akses("prodi")
     def isi_pratinjau_en(kode, id_):
+        perlu_inggris()
         ini = ini_(kode, id_)
         data = ih.baca(kode, isi_inggris.id_en(id_))
         judul = "Pratinjau versi Inggris (%s)" % ("draf" if ih.draf(data) else "sudah terbit")
@@ -804,16 +819,19 @@ def pasang(app, alat):
     @app.route("/prodi/<kode>/halaman/<id_>/en/riwayat")
     @akses("prodi")
     def isi_riwayat_en(kode, id_):
+        perlu_inggris()
         return riwayat_halaman(kode, id_, True)
 
     @app.route("/prodi/<kode>/halaman/<id_>/en/riwayat/<versi_lama>")
     @akses("prodi")
     def isi_versi_en(kode, id_, versi_lama):
+        perlu_inggris()
         return versi_lama_halaman(kode, id_, versi_lama, True)
 
     @app.route("/prodi/<kode>/halaman/<id_>/en/riwayat/<versi_lama>", methods=["POST"])
     @akses("prodi")
     def isi_pakai_versi_en(kode, id_, versi_lama):
+        perlu_inggris()
         return pakai_versi_halaman(kode, id_, versi_lama, True)
 
     # -------------------------------------------------------------- completeness of every programme (superadmin)
@@ -826,7 +844,8 @@ def pasang(app, alat):
         for r in registri.baca()["prodi"]:
             info = alat.info_prodi(r["kode_pddikti"])
             if info:
-                baris.append(dict(info, isi=ringkasan_isi(info["kode"], wajib), inggris=bool(r.get("inggris")),
+                baris.append(dict(info, isi=ringkasan_isi(info["kode"], wajib, bool(r.get("inggris"))),
+                                  inggris=bool(r.get("inggris")),
                                   kriteria=len(kriteria_mod.baca_prodi(info["kode"]).get("kriteria") or [])))
         return sorted(baris, key=registri.kunci_urut), wajib
 

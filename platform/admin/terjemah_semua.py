@@ -2,7 +2,8 @@
 """Translating a programme's pages and announcements in one go (Fase 5 langkah 5a, K-P37): "Terjemahkan semua".
 
     /prodi/<kode>/terjemahkan-semua     akses("prodi"), operators too: what it would translate (the confirmation), the
-                                        progress of a running job, or the result of the last one; POST starts a job
+                                        progress of a running job, or the result of the last one; POST starts a job.
+                                        404 for a programme without its English version switched on (K-P38)
 
 What it translates, in this order (rencana):
     pages          every page of the programme in menu order whose Indonesian working content (its draft, else its
@@ -246,6 +247,7 @@ def pasang(app, alat):
     @app.route("/prodi/<kode>/terjemahkan-semua")
     @akses("prodi")
     def terjemahkan_semua(kode):
+        isi_admin.perlu_inggris()
         keadaan = alat.terjemah_semua.keadaan(kode)
         butir, dilewati = ([], [])
         if alat.penerjemah is not None and not (keadaan and keadaan["berjalan"]):
@@ -259,6 +261,7 @@ def pasang(app, alat):
     @app.route("/prodi/<kode>/terjemahkan-semua", methods=["POST"])
     @akses("prodi")
     def terjemahkan_semua_mulai(kode):
+        isi_admin.perlu_inggris()
         if alat.penerjemah is None:
             abort(400)
         butir, _dilewati = rencana(kode, daftar_halaman(kode), boleh_bagi(g.akun))

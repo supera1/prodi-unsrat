@@ -7,7 +7,8 @@
     /prodi/<kode>/pengumuman/<id>            form of one item; POST saves it
     /prodi/<kode>/pengumuman/<id>/status     POST aksi=ajukan|batal|terbitkan|kembalikan|tarik|arsipkan
 
-The form also holds the item's English version (Fase 5 langkah 4, K-P37), saved with it under the same rules; its
+The form also holds the item's English version (Fase 5 langkah 4, K-P37) when the programme's English version is
+switched on (K-P38; otherwise the form leaves a stored English version as it is), saved with it under the same rules; its
 button "Terjemahkan dari versi Indonesia" (aksi_simpan=terjemahkan) saves the form, then fills the empty English
 texts with machine translations marked to be checked (terjemah_mesin.py, the same limits as the pages).
 
@@ -139,7 +140,7 @@ def pasang(app, alat):
     def halaman_form(kode, b=None, isian=None, kode_status=200):
         isian = isian or (b or {})
         mesin = None
-        if b and alat.penerjemah is not None:            # what "Terjemahkan dari versi Indonesia" would send
+        if b and alat.penerjemah is not None and g.prodi["inggris"]:   # what "Terjemahkan dari versi Indonesia" would send
             kosong_, semua = pg.teks_mesin(b), pg.teks_mesin(b, timpa=True)
             pakai = int(terjemah_mesin.pemakaian(kode)["hari"].get(terjemah_mesin.hari_ini(), 0))
             mesin = {"penyedia": alat.penerjemah.nama, "n": len(kosong_), "karakter": sum(map(len, kosong_)),
@@ -152,7 +153,6 @@ def pasang(app, alat):
                                keadaan_en=pg.keadaan_en(isian), NAMA_EN=NAMA_EN, mesin=mesin,
                                penerjemah_ada=alat.penerjemah is not None,
                                basi_en=pg.perlu_diperbarui(b) if b else [], label_en=pg.LABEL_EN,
-                               inggris_aktif=bool((registri.cari(registri.baca(), kode) or {}).get("inggris")),
                                pratinjau=_pratinjau(b), pratinjau_en=_pratinjau(b.get("en") if b else None)), kode_status
 
     def terjemahkan(kode, id_):
@@ -200,7 +200,7 @@ def pasang(app, alat):
     @akses("prodi")
     def pengumuman_daftar(kode):
         status, en = request.args.get("status", ""), request.args.get("en", "")
-        if (status and status not in pg.STATUS) or en not in ("", "mesin"):
+        if (status and status not in pg.STATUS) or en not in ("", "mesin") or (en and not g.prodi["inggris"]):
             abort(404)
         semua = [b for b in pg.baca(kode)["butir"] if boleh_lihat(g.akun, b)]
         jumlah = {s: sum(1 for b in semua if b["status"] == s) for s in pg.STATUS}
@@ -226,7 +226,7 @@ def pasang(app, alat):
     @akses("prodi")
     def pengumuman_buat(kode):
         isian = isian_teks(request.form)
-        isian["en"] = en_dari_formulir(request.form, {}, isian)
+        isian["en"] = en_dari_formulir(request.form, {}, isian) if g.prodi["inggris"] else {}
         status = status_baru(request.form.get("aksi_simpan"))
         masalah = periksa_dulu(isian, status)
         if masalah:
@@ -261,7 +261,8 @@ def pasang(app, alat):
             abort(403, "Pengumuman ini tidak dapat Anda ubah lagi (sudah terbit atau milik akun lain).")
         f = request.form
         isian = isian_teks(f)
-        isian["en"] = en_dari_formulir(f, b.get("en"), isian)
+        # without the English version switched on the form has no English fields: a stored one stays as it is
+        isian["en"] = en_dari_formulir(f, b.get("en"), isian) if g.prodi["inggris"] else (b.get("en") or {})
         # photos kept, with their texts; the one chosen as main photo goes first
         foto = []
         for i, x in enumerate(b.get("foto", [])):
@@ -287,7 +288,8 @@ def pasang(app, alat):
             flash("Perubahan tidak disimpan: %s" % e, "galat")
             return halaman_form(kode, b=b, isian=dict(b, **isian), kode_status=400)
         alat.catat("pengumuman-diubah", prodi=kode, id=id_, status=status)
-        diterjemahkan = f.get("aksi_simpan") == "terjemahkan" and alat.penerjemah is not None and terjemahkan(kode, id_)
+        diterjemahkan = f.get("aksi_simpan") == "terjemahkan" and alat.penerjemah is not None and g.prodi["inggris"] \
+            and terjemahkan(kode, id_)
         if "terbit" in (status, b["status"]):
             bangun(kode)
         if not diterjemahkan:

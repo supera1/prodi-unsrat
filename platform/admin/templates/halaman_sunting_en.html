@@ -34,7 +34,6 @@
 	<a href="{{ url_for('isi_sunting_en', kode=pr.kode, id_=ini.id) }}" aria-current="page" lang="en">English</a>
 </nav>
 {% if ini.label_en %}<p class="keterangan">Nama halaman di situs berbahasa Inggris: <span lang="en">{{ ini.label_en }}</span>.</p>{% endif %}
-{% if not inggris %}<p class="pesan pesan--info">Versi Inggris situs prodi ini belum diaktifkan superadmin. Terjemahan tetap bisa disiapkan dan diterbitkan sekarang; halaman berbahasa Inggris tampil setelah versi Inggris diaktifkan.</p>{% endif %}
 {% if not k_id.terbit %}<p class="pesan pesan--info">Versi Indonesia halaman ini belum terbit. Versi Inggris baru tampil di situs setelah versi Indonesia terbit.</p>{% endif %}
 <section class="kartu tindakan-status" aria-label="Keadaan versi Inggris">
 	<p>

@@ -64,10 +64,11 @@
 		<p><label><input type="checkbox" name="sematkan" value="1"{% if isian.get('sematkan') %} checked{% endif %}> Sematkan di atas beranda selama masih berlaku</label></p>
 	</section>
 
+	{% if pr.inggris %}
 	<section class="kartu" aria-labelledby="judul-en">
 		<h2 id="judul-en">Versi bahasa Inggris (opsional)</h2>
 		<p>Pengumuman tampil di situs berbahasa Inggris setelah terbit, bila judul, ringkasan, dan isinya (bila versi Indonesia punya isi) diisi dan tidak ada terjemahan mesin yang belum diperiksa. Tanggal, kategori, foto, dan PDF sama dengan versi Indonesia; teks alternatif foto dan judul PDF tetap berbahasa Indonesia.</p>
-		<p>Versi Inggris: <strong>{{ NAMA_EN[keadaan_en] }}</strong>.{% if not inggris_aktif %} Situs berbahasa Inggris prodi ini belum diaktifkan superadmin; teks Inggris tetap tersimpan dan tampil setelah diaktifkan.{% endif %}</p>
+		<p>Versi Inggris: <strong>{{ NAMA_EN[keadaan_en] }}</strong>.</p>
 		{% if mesin and mesin.n_semua %}
 		<div class="terjemah-mesin">
 			<h3>Terjemahan mesin ({{ mesin.penyedia }})</h3>
@@ -102,6 +103,7 @@
 		<p class="cek-mesin"><label><input type="checkbox" name="periksa_en" value="1"> Saya sudah memeriksa versi Inggris pengumuman ini{% if en.get('mesin') %} (termasuk terjemahan mesin){% endif %}</label></p>
 		{% endif %}
 	</section>
+	{% endif %}
 
 	<section class="kartu">
 		<h2>Foto</h2>
@@ -173,7 +175,7 @@
 	{{ pratinjau }}
 </section>
 {% endif %}
-{% if pratinjau_en %}
+{% if pr.inggris and pratinjau_en %}
 <section class="kartu pratinjau-isi" aria-labelledby="judul-pratinjau-en" lang="en">
 	<h2 id="judul-pratinjau-en" lang="id">Pratinjau isi versi Inggris (tersimpan)</h2>
 	{{ pratinjau_en }}
