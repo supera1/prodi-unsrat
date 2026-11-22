@@ -88,6 +88,7 @@ try:
     with io.open(path_csv, "w", encoding="utf-8") as f:
         f.write(",".join(registri.slug_mod.KOLOM) + "\n%s,S1,Teknik Informatika,FT,s1informatika,x,x\n" % A)
     registri.siapkan_dari_csv("penguji", path_csv)
+    registri.atur(A, "penguji", inggris=True)        # the English version exists only when switched on (K-P38)
 
     # published, with one text translated by hand
     ih.terbitkan(A, "sejarah", {"uraian": "Prodi berdiri tahun 1990.", "linimasa": [
