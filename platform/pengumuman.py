@@ -308,6 +308,36 @@ def perlu_diperbarui(b):
     return [k for k in TEKS_EN if (en.get(k) or "").strip() and k in asal and asal[k] != (b.get(k) or "")]
 
 
+def teks_mesin(b, timpa=False):
+    """The different Indonesian texts of an item a machine translation would send: those whose English text is empty
+    (timpa: all), in field order."""
+    en = b.get("en") or {}
+    return list(dict.fromkeys(b[k] for k in TEKS_EN
+                              if (b.get(k) or "").strip() and (timpa or not (en.get(k) or "").strip())))
+
+
+def pasang_mesin(b, hasil, timpa=False):
+    """The item's English version with a machine's translations ({Indonesian text: English text or None}) put in the
+    fields whose Indonesian text was translated and whose English text is empty (timpa: any), marked "mesin" until a
+    person checks them. Returns (en, translated fields, fields whose translation did not come back)."""
+    en = dict(b.get("en") or {})
+    mesin, asal = dict(en.get("mesin") or {}), dict(en.get("asal") or {})
+    jadi = gagal = 0
+    for k in TEKS_EN:
+        sumber = b.get(k) or ""
+        if sumber not in hasil or ((en.get(k) or "").strip() and not timpa):
+            continue
+        if hasil[sumber]:
+            en[k], mesin[k], asal[k] = hasil[sumber], hasil[sumber], sumber
+            jadi += 1
+        else:
+            gagal += 1
+    en.update(mesin=mesin, asal=asal)
+    if not mesin:
+        del en["mesin"]
+    return en, jadi, gagal
+
+
 def inggris(b):
     """The item as the English site shows it (its English texts, the shared date, category, photos and PDFs), or
     None while its English version is not ready (keadaan_en)."""

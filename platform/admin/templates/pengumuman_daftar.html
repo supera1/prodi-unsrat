@@ -4,13 +4,15 @@
 {% block isi %}
 {{ nav_prodi(pr, 'pengumuman_daftar') }}
 <h1>Pengumuman dan berita</h1>
-<p><a class="tombol" href="{{ url_for('pengumuman_baru', kode=pr.kode) }}">Buat pengumuman</a></p>
+<p class="tombol-baris"><a class="tombol" href="{{ url_for('pengumuman_baru', kode=pr.kode) }}">Buat pengumuman</a>
+	{% if penyedia %}<a class="tombol tombol--garis" href="{{ url_for('terjemahkan_semua', kode=pr.kode) }}">Terjemahkan semua</a>{% endif %}</p>
 {% if admin and jumlah.menunggu %}<p class="pesan pesan--info">{{ jumlah.menunggu }} pengumuman menunggu persetujuan Anda.</p>{% endif %}
 <nav class="saring-status" aria-label="Saring status">
-	<a href="{{ url_for('pengumuman_daftar', kode=pr.kode) }}"{% if not status %} aria-current="page"{% endif %}>Semua ({{ jumlah.values() | sum }})</a>
+	<a href="{{ url_for('pengumuman_daftar', kode=pr.kode) }}"{% if not status and not en %} aria-current="page"{% endif %}>Semua ({{ jumlah.values() | sum }})</a>
 	{% for s in ['menunggu', 'draf', 'terbit', 'ditarik'] %}
-	<a href="{{ url_for('pengumuman_daftar', kode=pr.kode, status=s) }}"{% if status == s %} aria-current="page"{% endif %}>{{ NAMA_STATUS[s] }} ({{ jumlah[s] }})</a>
+	<a href="{{ url_for('pengumuman_daftar', kode=pr.kode, status=s) }}"{% if status == s and not en %} aria-current="page"{% endif %}>{{ NAMA_STATUS[s] }} ({{ jumlah[s] }})</a>
 	{% endfor %}
+	{% if jumlah_mesin or en %}<a href="{{ url_for('pengumuman_daftar', kode=pr.kode, en='mesin') }}"{% if en %} aria-current="page"{% endif %}>Terjemahan mesin belum diperiksa ({{ jumlah_mesin }})</a>{% endif %}
 </nav>
 <div class="tabel-gulir">
 	<table>
@@ -27,7 +29,7 @@
 				<td>{{ b.oleh }}</td>
 			</tr>
 			{% else %}
-			<tr><td colspan="6">Belum ada pengumuman{% if status %} berstatus {{ NAMA_STATUS[status] | lower }}{% endif %}.</td></tr>
+			<tr><td colspan="6">{% if en %}Tidak ada pengumuman dengan terjemahan mesin yang belum diperiksa.{% else %}Belum ada pengumuman{% if status %} berstatus {{ NAMA_STATUS[status] | lower }}{% endif %}.{% endif %}</td></tr>
 			{% endfor %}
 		</tbody>
 	</table>

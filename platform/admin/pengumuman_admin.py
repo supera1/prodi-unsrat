@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Announcements and news of a programme in the admin (langkah 6, K-P14). akses("prodi"): operators too.
 
-    /prodi/<kode>/pengumuman                 list (?status=menunggu|draf|terbit|ditarik)
+    /prodi/<kode>/pengumuman                 list (?status=menunggu|draf|terbit|ditarik; ?en=mesin: English versions with
+                                             machine translations not checked yet)
     /prodi/<kode>/pengumuman/baru            form; POST creates
     /prodi/<kode>/pengumuman/<id>            form of one item; POST saves it
     /prodi/<kode>/pengumuman/<id>/status     POST aksi=ajukan|batal|terbitkan|kembalikan|tarik|arsipkan
@@ -139,7 +140,7 @@ def pasang(app, alat):
         isian = isian or (b or {})
         mesin = None
         if b and alat.penerjemah is not None:            # what "Terjemahkan dari versi Indonesia" would send
-            kosong_, semua = sasaran_mesin(b), sasaran_mesin(b, timpa=True)
+            kosong_, semua = pg.teks_mesin(b), pg.teks_mesin(b, timpa=True)
             pakai = int(terjemah_mesin.pemakaian(kode)["hari"].get(terjemah_mesin.hari_ini(), 0))
             mesin = {"penyedia": alat.penerjemah.nama, "n": len(kosong_), "karakter": sum(map(len, kosong_)),
                      "n_semua": len(semua), "sisa": max(0, alat.batas_terjemah[0] - pakai)}
@@ -154,18 +155,12 @@ def pasang(app, alat):
                                inggris_aktif=bool((registri.cari(registri.baca(), kode) or {}).get("inggris")),
                                pratinjau=_pratinjau(b), pratinjau_en=_pratinjau(b.get("en") if b else None)), kode_status
 
-    def sasaran_mesin(b, timpa=False):
-        """The Indonesian texts of an item a machine translation would send: those whose English text is empty
-        (timpa: all)."""
-        en = b.get("en") or {}
-        return [b[k] for k in pg.TEKS_EN if (b.get(k) or "").strip() and (timpa or not (en.get(k) or "").strip())]
-
     def terjemahkan(kode, id_):
         """Fill the English texts of a saved item with machine translations (marked "mesin"); False when nothing was
         translated (the reason is flashed)."""
         b = pg.cari(kode, id_)
         timpa = request.form.get("timpa") == "1"
-        sasaran = list(dict.fromkeys(sasaran_mesin(b, timpa)))
+        sasaran = pg.teks_mesin(b, timpa)
         n = sum(len(t) for t in sasaran)
         try:
             if not sasaran:
@@ -179,23 +174,7 @@ def pasang(app, alat):
             flash("Terjemahan mesin tidak dijalankan: %s." % e, "galat" if sasaran else "info")
             return False
         terjemah_mesin.catat_pemakaian(kode, n)
-        en = dict(b.get("en") or {})
-        mesin, asal = dict(en.get("mesin") or {}), dict(en.get("asal") or {})
-        jadi = gagal = 0
-        for k in pg.TEKS_EN:
-            sumber = b.get(k) or ""
-            if sumber not in hasil:
-                continue
-            if (en.get(k) or "").strip() and not timpa:
-                continue
-            if hasil[sumber]:
-                en[k], mesin[k], asal[k] = hasil[sumber], hasil[sumber], sumber
-                jadi += 1
-            else:
-                gagal += 1
-        en.update(mesin=mesin, asal=asal)
-        if not mesin:
-            del en["mesin"]
+        en, jadi, gagal = pg.pasang_mesin(pg.cari(kode, id_), hasil, timpa)
         try:
             pg.ubah(kode, id_, {"en": en}, g.akun["nama"])
         except pg.GagalPengumuman as e:
@@ -220,18 +199,21 @@ def pasang(app, alat):
     @app.route("/prodi/<kode>/pengumuman")
     @akses("prodi")
     def pengumuman_daftar(kode):
-        status = request.args.get("status", "")
-        if status and status not in pg.STATUS:
+        status, en = request.args.get("status", ""), request.args.get("en", "")
+        if (status and status not in pg.STATUS) or en not in ("", "mesin"):
             abort(404)
         semua = [b for b in pg.baca(kode)["butir"] if boleh_lihat(g.akun, b)]
         jumlah = {s: sum(1 for b in semua if b["status"] == s) for s in pg.STATUS}
-        pilih = sorted((b for b in semua if not status or b["status"] == status),
+        jumlah_mesin = sum(1 for b in semua if pg.keadaan_en(b) == "mesin")
+        pilih = sorted((b for b in semua if (not status or b["status"] == status)
+                        and (not en or pg.keadaan_en(b) == "mesin")),
                        key=lambda b: (b["tanggal"], b.get("dibuat", "")), reverse=True)
         daftar = [b for b in pilih if b["status"] == "menunggu"] + [b for b in pilih if b["status"] != "menunggu"]
         label = {k["id"]: k["label"] for k in pg.baca_kategori()}
         return render_template("pengumuman_daftar.html", pr=g.prodi, daftar=daftar, jumlah=jumlah, status=status,
                                NAMA_STATUS=NAMA_STATUS, label=label, admin=adalah_admin(g.akun),
-                               keadaan_en=pg.keadaan_en, NAMA_EN=NAMA_EN)
+                               keadaan_en=pg.keadaan_en, NAMA_EN=NAMA_EN, en=en, jumlah_mesin=jumlah_mesin,
+                               penyedia=alat.penerjemah.nama if alat.penerjemah is not None else None)
 
     # -------------------------------------------------------------- new
 

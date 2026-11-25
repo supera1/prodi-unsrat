@@ -13,12 +13,15 @@
 	<button type="submit" class="tombol tombol--garis" name="aksi" value="pratinjau">Simpan dan pratinjau</button>
 	{% if admin %}
 	<button type="submit" class="tombol tombol--garis" name="aksi" value="terbitkan">{{ 'Terbitkan perubahan' if k.terbit else 'Terbitkan' }}</button>
+	{% if berikut %}<button type="submit" class="tombol tombol--garis" name="aksi" value="terbitkan-lanjut">Terbitkan dan buka berikutnya</button>{% endif %}
 	{% elif menunggu %}
 	<button type="submit" class="tombol tombol--garis" name="aksi" value="batal-ajukan">Batalkan pengajuan</button>
 	{% else %}
 	<button type="submit" class="tombol tombol--garis" name="aksi" value="ajukan">Ajukan untuk diterbitkan</button>
+	{% if berikut %}<button type="submit" class="tombol tombol--garis" name="aksi" value="ajukan-lanjut">Ajukan dan buka berikutnya</button>{% endif %}
 	{% endif %}
 </div>
+{% if berikut and (admin or not menunggu) %}<p class="keterangan">Halaman berikutnya yang perlu diperiksa: {{ berikut.label }}.</p>{% endif %}
 {% endmacro %}
 {% block isi %}
 {% set d = k.draf %}
@@ -96,7 +99,11 @@
 	{% if mesin and (mesin.n_semua or mesin.n_excel) %}
 	<section class="kartu terjemah-mesin" aria-labelledby="judul-mesin">
 		<h2 id="judul-mesin">Terjemahan mesin ({{ mesin.penyedia }})</h2>
+		{% if mesin.n %}
 		<p>Mengisi isian yang masih kosong dengan terjemahan dari versi Indonesia: <strong>{{ mesin.n }} teks</strong>, ±{{ mesin.karakter }} karakter. Hasilnya masuk draf dan ditandai “terjemahan mesin”: periksa setiap terjemahan sebelum mengajukan atau menerbitkan. Nama prodi, fakultas, dan universitas memakai nama Inggris dari data resmi.</p>
+		{% else %}
+		<p>Semua teks halaman ini sudah punya terjemahan Inggris. Untuk menerjemahkan ulang dengan mesin, centang pilihan di bawah; hasilnya ditandai “terjemahan mesin” dan diperiksa sebelum mengajukan atau menerbitkan.</p>
+		{% endif %}
 		{% if mesin.n_semua > mesin.n %}<p><label><input type="checkbox" name="timpa" value="1"> Terjemahkan ulang juga {{ mesin.n_semua - mesin.n }} teks yang sudah diterjemahkan (menimpa terjemahannya)</label></p>{% endif %}
 		{% if mesin.n_excel %}<p><label><input type="checkbox" name="excel" value="1"> Terjemahkan juga {{ mesin.n_excel }} judul di tabel Excel (±{{ mesin.karakter_excel }} karakter); tanpa ini judulnya tampil dalam bahasa aslinya</label></p>{% endif %}
 		<p class="keterangan">Teks halaman ini dikirim ke {{ mesin.penyedia }} untuk diterjemahkan. Sisa batas terjemahan mesin prodi ini hari ini: {{ mesin.sisa }} karakter.</p>

@@ -211,8 +211,8 @@ diterbitkan.
 Urutan kerja yang disarankan:
 
 1. Admin prodi memeriksa data resmi berbahasa Inggris di kotak tadi.
-2. Halaman wajib diterjemahkan satu per satu, misalnya mulai dari kelompok Profil: terjemahan mesin, periksa, lalu
-   terbitkan.
+2. Setelah versi Indonesia diisi, tekan **Terjemahkan semua** (lihat di bawah) sekali, lalu periksa halaman satu per
+   satu dengan **Terbitkan dan buka berikutnya** (operator: **Ajukan dan buka berikutnya**).
 3. Admin prodi mengisi teks Inggris lainnya: Bagian depan beranda, Menu, Halaman tambahan, dan Kriteria akreditasi
    (lihat di bawah).
 4. Pengumuman baru diberi versi Inggris bila perlu.
@@ -242,6 +242,35 @@ Tombol **Terjemahkan dari versi Indonesia** mengisi isian yang masih kosong, lal
   diterjemahkan hanya bila pilihannya dicentang.
 - Teks halaman dikirim ke DeepL. Ada batas karakter per prodi per hari; bila tercapai, coba lagi besok atau terjemahkan
   sendiri.
+
+**Terjemahkan semua.** Tombol **Terjemahkan semua** ada di daftar **Isi halaman**, di daftar pengumuman, dan di kotak
+**Versi bahasa Inggris** di Ringkasan prodi. Admin prodi dan operator boleh memakainya. Tombol ini membuka daftar yang
+akan diterjemahkan, beserta jumlah teks, perkiraan karakter, dan sisa batas hari ini. Terjemahan baru berjalan setelah
+Anda menekan **Ya, terjemahkan semua**.
+
+- Yang diterjemahkan:
+  - semua halaman yang versi Indonesianya punya teks tanpa terjemahan Inggris, termasuk draf Indonesia yang belum
+    terbit;
+  - semua pengumuman yang boleh Anda ubah dan belum punya versi Inggris. Operator: pengumumannya sendiri yang belum
+    terbit; admin prodi: semua pengumuman kecuali yang ditarik.
+- Yang tidak disentuh:
+  - terjemahan yang sudah ada;
+  - judul tabel Excel;
+  - halaman yang disembunyikan di menu;
+  - versi Inggris yang sedang menunggu persetujuan.
+- Terjemahan berjalan di latar. Halamannya menampilkan kemajuan dan memuat ulang sendiri, dan Anda boleh membuka
+  halaman lain. Setelah selesai, setiap halaman dan pengumuman tercantum dengan hasilnya.
+- Bila batas hari ini tidak cukup, yang belum muat ditandai *Belum (batas tercapai)*; tekan tombol yang sama besok.
+- Tidak ada yang langsung terbit. Hasilnya menjadi draf versi Inggris bertanda **terjemahan mesin**, sama seperti
+  tombol per halaman.
+
+Memeriksa hasilnya:
+
+- Di daftar **Isi halaman**, saringan **Terjemahan mesin belum diperiksa** menampilkan halaman yang perlu diperiksa.
+  Daftar pengumuman punya saringan yang sama.
+- Di tab **English**, setelah memeriksa dan mencentang kotak pemeriksaan, tekan **Terbitkan dan buka berikutnya**
+  (operator: **Ajukan dan buka berikutnya**). Halaman berikutnya yang perlu diperiksa langsung terbuka, tanpa kembali
+  ke daftar. Untuk admin prodi, versi Inggris yang diajukan operator juga termasuk.
 
 Yang perlu diketahui:
 
@@ -327,7 +356,7 @@ alur yang sama: operator mengajukan, admin prodi menerbitkan.
   lalu mengisi isian Inggris yang masih kosong. Hasilnya ditandai **terjemahan mesin** dan belum tampil di situs.
   Periksa dan sesuaikan: isian yang Anda ubah dianggap sudah diperiksa, atau centang
   **Saya sudah memeriksa versi Inggris pengumuman ini**, lalu simpan. Untuk pengumuman baru, simpan dulu sebelum
-  menerjemahkan.
+  menerjemahkan. Banyak pengumuman sekaligus: **Terjemahkan semua** (bagian "Versi bahasa Inggris").
 - Bila judul, ringkasan, atau isi versi Indonesia diubah setelah diterjemahkan, isian Inggrisnya diberi tanda kuning.
   Terjemahan lama tetap tampil sampai Anda memperbaruinya atau mencentang kotak pemeriksaan tadi.
 - Kolom **Versi Inggris** di daftar pengumuman menunjukkan keadaannya: *Lengkap*, *Belum lengkap*, atau

@@ -3,7 +3,8 @@
 forms built from their content templates (isi_halaman.py, penyunting.py), submitted, published and withdrawn (K-P24).
 akses("prodi"): operators too, except where noted.
 
-    /prodi/<kode>/halaman                     the pages and what they hold (?status=menunggu|dikembalikan|draf|terbit|kosong)
+    /prodi/<kode>/halaman                     the pages and what they hold (?status=menunggu|dikembalikan|draf|terbit|kosong,
+                                              or mesin: English drafts with machine translations not checked yet)
     /prodi/<kode>/halaman/<id>                the form of a page; POST aksi=simpan | pratinjau | ajukan | batal-ajukan |
                                               kembalikan | terbitkan | tarik | buang | pulihkan-butir |
                                               tambah:<list> | hapus|naik|turun:<list>.<i>
@@ -13,8 +14,10 @@ akses("prodi"): operators too, except where noted.
                                               with an English field each; POST aksi=simpan | pratinjau | ajukan |
                                               batal-ajukan | kembalikan | terbitkan | tarik | buang | terjemahkan
                                               (machine translation, terjemah_mesin.py; its texts are checked before
-                                              they are submitted or published: periksa_mesin=1). /en/pratinjau,
-                                              /en/riwayat and /en/riwayat/<versi> as for the page
+                                              they are submitted or published: periksa_mesin=1) | ajukan-lanjut |
+                                              terbitkan-lanjut (then the next page waiting for a check, berikutnya()).
+                                              /en/pratinjau, /en/riwayat and /en/riwayat/<versi> as for the page.
+                                              "Terjemahkan semua" for every page at once: terjemah_semua.py
     /prodi/<kode>/pratinjau/warna.css         the programme's colours, for the previews
     /aset-situs/<nama>                        the site's style sheets (tokens.css, prodi.css), for the previews
     /super/kelengkapan (.csv)                 akses("super"): the required pages of every programme, for LPMPP
@@ -70,8 +73,9 @@ PRIVASI = ("Jangan mengunggah data pribadi: NIK, nomor HP, alamat rumah, nilai a
            "dokumen internal akreditasi yang memuat data pribadi. Daftar tenaga kependidikan dan prestasi cukup memuat "
            "nama dan peran.")
 STATUS = ("menunggu", "dikembalikan", "draf", "terbit", "kosong")
+STATUS_SARING = STATUS + ("mesin",)      # the list's filters; mesin: English drafts with unchecked machine translations
 NAMA_STATUS = {"kosong": "Belum diisi", "draf": "Draf", "menunggu": "Menunggu persetujuan", "dikembalikan": "Dikembalikan",
-               "terbit": "Terbit"}
+               "terbit": "Terbit", "mesin": "Terjemahan mesin belum diperiksa"}
 # what a button does with the page, besides saving what the form holds
 AKSI = ("simpan", "pratinjau", "ajukan", "batal-ajukan", "kembalikan", "terbitkan", "tarik", "buang", "pulihkan-butir")
 ADMIN_SAJA = ("kembalikan", "terbitkan", "tarik")
@@ -87,6 +91,7 @@ GAGAL = {"ajukan": "Belum diajukan", "batal-ajukan": "Pengajuan tidak dibatalkan
 AUDIT = {"ajukan": "isi-diajukan", "batal-ajukan": "isi-pengajuan-dibatalkan", "kembalikan": "isi-dikembalikan",
          "terbitkan": "isi-diterbitkan", "tarik": "isi-ditarik"}
 AKSI_EN = tuple(a for a in AKSI if a != "pulihkan-butir") + ("terjemahkan",)
+LANJUT = "-lanjut"               # ajukan-lanjut, terbitkan-lanjut: then open the next page waiting for a check
 # the history: the change that followed a version
 PERUBAHAN = (("simpan draf", "Draf disimpan"), ("batal ajukan", "Pengajuan dibatalkan"), ("ajukan", "Diajukan"),
              ("kembalikan", "Dikembalikan dengan catatan"), ("terbitkan", "Diterbitkan"), ("tarik", "Ditarik dari situs"),
@@ -151,8 +156,7 @@ def ringkasan_isi(kode, wajib=None):
             hasil["kosong"] += k["status"] == "kosong"
             hasil["en_terbit"] += en["tayang"]
         hasil["en_perlu"] += bool(en["terbit"] and en["perlu"])
-        isi_draf_en = (en["draf"] or {}).get("isi")
-        hasil["en_mesin"] += bool(isinstance(isi_draf_en, dict) and isi_draf_en.get("mesin"))
+        hasil["en_mesin"] += mesin_belum(en)
         for x in (k, en):                       # a draft waiting in either language is one to look at
             status_draf = (x["draf"] or {}).get("status")
             if status_draf in ih.STATUS_DRAF:
@@ -183,8 +187,16 @@ def inti(x):
     return x
 
 
+def mesin_belum(k):
+    """Does the English version (its keadaan, or {"draf": draft}) hold machine translations nobody checked yet?"""
+    isi = (k.get("draf") or {}).get("isi")
+    return bool(isinstance(isi, dict) and isi.get("mesin"))
+
+
 def saring_cocok_en(k, status):
-    """saring_cocok for the English version: a draft of it in that status."""
+    """saring_cocok for the English version: a draft of it in that status; mesin: machine translations to check."""
+    if status == "mesin":
+        return mesin_belum(k)
     return status in ih.STATUS_DRAF and k["draf"] is not None and k["draf"].get("status") == status
 
 
@@ -228,6 +240,22 @@ def pasang(app, alat):
             return media.url_sah(rekam["url"])
         jalur = rekam.get("jalur")
         return media.jalur_sah(jalur) and os.path.isfile(os.path.join(lokasi.unggahan(), *jalur.split("/")))
+
+    def berikutnya(kode, id_, admin):
+        """The next page after id_ (menu order, going round) whose English draft waits for this account: machine
+        translations not checked yet (for an operator, not while that draft waits for approval), or, for an admin, a
+        submitted draft. None when there is none."""
+        urut = [a for _label, anak in halaman_prodi(kode) for a in anak]
+        ids = [a["id"] for a in urut]
+        i = ids.index(id_) if id_ in ids else -1
+        for a in urut[i + 1:] + urut[:max(i, 0)]:
+            d = ih.draf(ih.baca(kode, isi_inggris.id_en(a["id"])))
+            if d is None:
+                continue
+            menunggu = d.get("status") == "menunggu"
+            if (mesin_belum({"draf": d}) and (admin or not menunggu)) or (admin and menunggu):
+                return a
+        return None
 
     def masalah_draf(id_, isi, kode):
         return penyunting.masalah_tampil(ih.templat_halaman(id_), isi, ih.daftar_masalah(id_, isi, kode))
@@ -302,7 +330,7 @@ def pasang(app, alat):
     @akses("prodi")
     def isi_daftar(kode):
         status = request.args.get("status", "")
-        if status and status not in STATUS:
+        if status and status not in STATUS_SARING:
             abort(404)
         r = ringkasan_isi(kode)
         kelompok = []
@@ -312,10 +340,12 @@ def pasang(app, alat):
             if anak:
                 kelompok.append((label, anak))
         jumlah = {s: sum(1 for id_, k in r["halaman"].items() if saring_cocok(k, s) or saring_cocok_en(r["en"][id_], s))
-                  for s in STATUS}
+                  for s in STATUS_SARING}
         reg = registri.cari(registri.baca(), kode) or {}
         return render_template("halaman_daftar.html", pr=g.prodi, kelompok=kelompok, r=r, jumlah=jumlah, status=status,
-                               NAMA_STATUS=NAMA_STATUS, admin=adalah_admin(g.akun), inggris=bool(reg.get("inggris")))
+                               NAMA_STATUS=NAMA_STATUS, admin=adalah_admin(g.akun), inggris=bool(reg.get("inggris")),
+                               penyedia=alat.penerjemah.nama if alat.penerjemah is not None else None,
+                               terjemah_semua=alat.terjemah_semua.keadaan(kode))
 
     # -------------------------------------------------------------- one page
 
@@ -471,6 +501,7 @@ def pasang(app, alat):
                      "karakter_excel": sum(map(len, excel)), "sisa": max(0, alat.batas_terjemah[0] - pakai)}
         return render_template("halaman_sunting_en.html", pr=g.prodi, ini=ini, data=data_en, versi_id=versi_id,
                                mesin=mesin, n_mesin=len(en.get("mesin", [])),
+                               berikut=berikutnya(kode, id_, adalah_admin(g.akun)),
                                k=isi_inggris.keadaan(kode, id_, k_id), k_id=k_id, butir=butir, galat=galat,
                                admin=adalah_admin(g.akun), maks_catatan=ih.MAKS_CATATAN, inggris=bool(reg.get("inggris")),
                                lewat_excel=any(t["lewat_excel"] for t in isi_inggris.perlu_terjemah(templat, sumber))), \
@@ -489,6 +520,9 @@ def pasang(app, alat):
         id_en = isi_inggris.id_en(id_)
         ke_sini = url_for("isi_sunting_en", kode=kode, id_=id_)
         aksi = request.form.get("aksi", "simpan")
+        lanjut = aksi in ("ajukan" + LANJUT, "terbitkan" + LANJUT)
+        if lanjut:
+            aksi = aksi[:-len(LANJUT)]
         try:
             versi = int(request.form.get("versi", ""))
             versi_id = int(request.form.get("versi_id", ""))
@@ -577,6 +611,14 @@ def pasang(app, alat):
                 bangun(kode)
             flash(BERHASIL[aksi].replace("halaman kembali “sedang dilengkapi” dan isinya tetap ada di draf",
                                          "versi Inggris halaman ini tidak tampil lagi; terjemahannya tetap ada di draf"), "ok")
+            if lanjut:
+                b = berikutnya(kode, id_, admin)
+                if b is not None:
+                    flash("Berikutnya: %s." % b["label"], "info")
+                    return redirect(url_for("isi_sunting_en", kode=kode, id_=b["id"]))
+                flash("Tidak ada lagi halaman dengan terjemahan mesin yang perlu diperiksa%s." % (
+                    " atau menunggu persetujuan" if admin else ""), "info")
+                return redirect(url_for("isi_daftar", kode=kode))
             return redirect(ke_sini)
         if aksi == "pratinjau":
             return redirect(url_for("isi_pratinjau_en", kode=kode, id_=id_))

@@ -100,7 +100,9 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   dengan `<keep>`; batas `TERJEMAH_BATAS_*`; kunci `TERJEMAH_KUNCI` hanya di `.env`, tidak pernah ditampilkan).
   Hasil mesin bertanda `"mesin"` di memori terjemahan dan tidak bisa terbit sebelum dicentang sudah diperiksa.
   Ringkasan prodi (`dasbor_prodi` di `app.py`) memuat kotak versi Inggris; kekurangan data resmi Inggris dari
-  `tarik_www.kekurangan_en`.
+  `tarik_www.kekurangan_en`. "Terjemahkan semua" (langkah 5a): `platform/admin/terjemah_semua.py` (rencana, pekerjaan
+  latar per prodi mengikuti `PRODI_BANGUN`, rute `/prodi/<kode>/terjemahkan-semua`); saringan `status=mesin` dan
+  aksi `ajukan-lanjut`/`terbitkan-lanjut` di `isi_admin.py`, saringan `en=mesin` di daftar pengumuman.
   Pengumuman Inggris (langkah 4): `"en"` di butir `pengumuman.py` (`keadaan_en`, `inggris`, `perlu_diperbarui`),
   isian dan tombol terjemahan di formulir `pengumuman_admin.py`; tampil di situs Inggris (menu News,
   `bangun_pengumuman` untuk kedua bahasa) hanya bila lengkap dan tanpa tanda mesin.

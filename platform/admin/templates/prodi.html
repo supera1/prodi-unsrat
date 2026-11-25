@@ -51,9 +51,9 @@
 	<p><strong>{{ en.terbit }} dari {{ en.wajib }}</strong> halaman wajib akreditasi sudah terbit dalam bahasa Inggris.</p>
 	<ul class="angka">
 		{% if en.perlu %}<li><a href="{{ url_for('isi_daftar', kode=p.kode) }}"><strong>{{ en.perlu }}</strong> halaman perlu diperbarui</a></li>{% endif %}
-		{% if en.mesin %}<li><a href="{{ url_for('isi_daftar', kode=p.kode) }}"><strong>{{ en.mesin }}</strong> halaman dengan terjemahan mesin belum diperiksa</a></li>{% endif %}
+		{% if en.mesin %}<li><a href="{{ url_for('isi_daftar', kode=p.kode, status='mesin') }}"><strong>{{ en.mesin }}</strong> halaman dengan terjemahan mesin belum diperiksa</a></li>{% endif %}
 		<li><a href="{{ url_for('pengumuman_daftar', kode=p.kode, status='terbit') }}"><strong>{{ en.pengumuman }}</strong> pengumuman berbahasa Inggris terbit</a></li>
-		{% if en.pengumuman_mesin %}<li><a href="{{ url_for('pengumuman_daftar', kode=p.kode) }}"><strong>{{ en.pengumuman_mesin }}</strong> pengumuman dengan terjemahan mesin belum diperiksa</a></li>{% endif %}
+		{% if en.pengumuman_mesin %}<li><a href="{{ url_for('pengumuman_daftar', kode=p.kode, en='mesin') }}"><strong>{{ en.pengumuman_mesin }}</strong> pengumuman dengan terjemahan mesin belum diperiksa</a></li>{% endif %}
 	</ul>
 	{% if not operator %}
 	<ul class="daftar-periksa">
@@ -61,6 +61,7 @@
 		<li class="{{ 'ok' if en.beranda else 'belum' }}"><span class="tersembunyi">{{ 'Selesai:' if en.beranda else 'Belum:' }}</span><a href="{{ url_for('beranda_prodi', kode=p.kode) }}">Bagian depan beranda berbahasa Inggris {{ 'sudah disesuaikan' if en.beranda else 'masih bawaan (opsional)' }}</a></li>
 	</ul>
 	{% endif %}
+	{% if en.penyedia %}<p><a class="tombol tombol--garis" href="{{ url_for('terjemahkan_semua', kode=p.kode) }}">Terjemahkan semua</a></p>{% endif %}
 	<p><a href="{{ url_for('panduan') }}#versi-bahasa-inggris">Cara mengisi versi bahasa Inggris</a></p>
 </section>
 {% if siap %}

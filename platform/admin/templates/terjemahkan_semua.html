@@ -1,0 +1,91 @@
+{% extends "dasar.html" %}
+{% from "_nav_prodi.html" import nav_prodi %}
+{# "Terjemahkan semua" (Fase 5 langkah 5a, terjemah_semua.py): what it would translate, the progress of a running job
+   (the page reloads itself, no JavaScript), the result of the last job. #}
+{% block judul %}Terjemahkan semua — {{ pr.nama }}{% endblock %}
+{% block kepala %}{% if keadaan and keadaan.berjalan %}<meta http-equiv="refresh" content="5">{% endif %}{% endblock %}
+{% macro tautan(x) %}{% if x.jenis == 'halaman' %}<a href="{{ url_for('isi_sunting_en', kode=pr.kode, id_=x.id) }}">{{ x.label }}</a>{% else %}<a href="{{ url_for('pengumuman_ubah', kode=pr.kode, id_=x.id) }}">{{ x.label }}</a>{% endif %}{% endmacro %}
+{% macro angka(n) %}{{ '{:,}'.format(n).replace(',', '.') }}{% endmacro %}
+{% block isi %}
+{{ nav_prodi(pr, 'isi_daftar') }}
+<p class="jejak-admin"><a href="{{ url_for('isi_daftar', kode=pr.kode) }}">Isi halaman</a> › Terjemahkan semua</p>
+<h1>Terjemahkan semua ke bahasa Inggris</h1>
+
+{% if keadaan and keadaan.berjalan %}
+{% set selesai = keadaan.butir | rejectattr('status', 'in', ['menunggu', 'berjalan']) | list | length %}
+<section class="kartu" aria-labelledby="judul-jalan">
+	<h2 id="judul-jalan">Sedang menerjemahkan</h2>
+	<p><strong>{{ selesai }} dari {{ keadaan.butir | length }}</strong> halaman dan pengumuman selesai. Dimulai {{ keadaan.mulai | replace('T', ' ') }} oleh {{ keadaan.oleh }}.</p>
+	<p class="keterangan">Halaman ini memuat ulang sendiri setiap 5 detik. Anda boleh membuka halaman lain; terjemahan tetap berjalan.</p>
+</section>
+{% elif not penyedia %}
+<p class="pesan pesan--info">Terjemahan mesin belum disambungkan di server ini. Halaman dan pengumuman tetap bisa diterjemahkan sendiri di tab English dan di formulir pengumuman. Untuk terjemahan mesin, hubungi superadmin UPA TIK.</p>
+{% endif %}
+
+{% if keadaan %}
+<section class="kartu" aria-labelledby="judul-hasil">
+	<h2 id="judul-hasil">{{ 'Kemajuan' if keadaan.berjalan else 'Hasil terakhir' }}</h2>
+	{% if not keadaan.berjalan %}
+	<p>Dijalankan {{ keadaan.mulai | replace('T', ' ') }} oleh {{ keadaan.oleh }}, selesai {{ keadaan.selesai | replace('T', ' ') }}. {{ keadaan.pesan }}</p>
+	<p>Hasil terjemahan mesin disimpan sebagai draf versi Inggris dan ditandai “terjemahan mesin”. Periksa setiap halaman, lalu {{ 'terbitkan' if admin else 'ajukan' }}; pengumuman tampil di situs berbahasa Inggris setelah diperiksa.
+		Daftar yang perlu diperiksa: <a href="{{ url_for('isi_daftar', kode=pr.kode, status='mesin') }}">halaman</a> dan <a href="{{ url_for('pengumuman_daftar', kode=pr.kode, en='mesin') }}">pengumuman</a>.</p>
+	{% endif %}
+	<div class="tabel-gulir">
+		<table>
+			<thead><tr><th scope="col">Jenis</th><th scope="col">Judul</th><th scope="col">Hasil</th><th scope="col">Teks</th><th scope="col">Karakter</th></tr></thead>
+			<tbody>
+				{% for x in keadaan.butir %}
+				<tr>
+					<td>{{ 'Halaman' if x.jenis == 'halaman' else 'Pengumuman' }}</td>
+					<td>{{ tautan(x) }}</td>
+					<td>{% if x.status == 'menunggu' %}Menunggu giliran{% elif x.status == 'berjalan' %}<strong>Sedang diterjemahkan…</strong>{% else %}{{ NAMA_HASIL[x.status] }}{% if x.pesan %}<br><span class="keterangan">{{ x.pesan }}</span>{% endif %}{% if x.gagal %}<br><span class="keterangan">{{ x.gagal }} teks tidak kembali utuh dan dibiarkan kosong</span>{% endif %}{% endif %}</td>
+					<td class="sel-angka">{{ x.teks }}</td>
+					<td class="sel-angka">{{ angka(x.karakter) }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</section>
+{% endif %}
+
+{% if penyedia and not (keadaan and keadaan.berjalan) %}
+<section class="kartu" aria-labelledby="judul-rencana">
+	<h2 id="judul-rencana">{{ 'Terjemahkan lagi' if keadaan else 'Yang akan diterjemahkan' }}</h2>
+	{% if butir %}
+	<p>Teks yang belum punya terjemahan Inggris di <strong>{{ butir | selectattr('jenis', 'equalto', 'halaman') | list | length }} halaman</strong> dan <strong>{{ butir | selectattr('jenis', 'equalto', 'pengumuman') | list | length }} pengumuman</strong> akan diterjemahkan dengan {{ penyedia }}: {{ teks }} teks, ±{{ angka(karakter) }} karakter. Sisa batas terjemahan mesin prodi ini hari ini: {{ angka(sisa) }} karakter.</p>
+	{% if karakter > sisa %}
+	<p class="pesan pesan--info">Batas hari ini hanya cukup untuk sebagian. Yang tidak muat ditandai “belum” dan bisa dilanjutkan besok dengan tombol yang sama.</p>
+	{% endif %}
+	<ul>
+		<li>Sumbernya versi Indonesia yang sedang dikerjakan: draf bila ada, selain itu yang sudah terbit.</li>
+		<li>Terjemahan yang sudah ada tidak ditimpa. Judul di tabel Excel (misalnya Tugas Akhir) tidak ikut diterjemahkan.</li>
+		<li>Hasilnya menjadi draf versi Inggris bertanda “terjemahan mesin”. Tidak ada yang langsung terbit: setiap halaman tetap diperiksa lalu {{ 'diterbitkan' if admin else 'diajukan' }}, dan pengumuman tampil di versi Inggris setelah diperiksa.</li>
+		<li>Teks halaman dan pengumuman ini dikirim ke {{ penyedia }}.</li>
+	</ul>
+	<div class="tabel-gulir">
+		<table>
+			<thead><tr><th scope="col">Jenis</th><th scope="col">Judul</th><th scope="col">Teks</th><th scope="col">Karakter</th></tr></thead>
+			<tbody>
+				{% for x in butir %}
+				<tr><td>{{ 'Halaman' if x.jenis == 'halaman' else 'Pengumuman' }}</td><td>{{ tautan(x) }}</td><td class="sel-angka">{{ x.teks }}</td><td class="sel-angka">{{ angka(x.karakter) }}</td></tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	<form method="post" action="{{ url_for('terjemahkan_semua_mulai', kode=pr.kode) }}">
+		<input type="hidden" name="csrf" value="{{ token_csrf() }}">
+		<p><button type="submit" class="tombol">Ya, terjemahkan semua</button></p>
+	</form>
+	{% else %}
+	<p>Tidak ada yang perlu diterjemahkan: semua teks halaman dan pengumuman yang dapat Anda ubah sudah punya terjemahan Inggris.</p>
+	{% endif %}
+	{% if dilewati %}
+	<h3>Dilewati</h3>
+	<ul>
+		{% for x in dilewati %}<li>{{ tautan(x) }}: {{ x.alasan }}.</li>{% endfor %}
+	</ul>
+	{% endif %}
+</section>
+{% endif %}
+{% endblock %}

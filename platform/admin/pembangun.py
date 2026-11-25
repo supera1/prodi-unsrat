@@ -10,6 +10,7 @@ PRODI_BANGUN chooses how builds run:
     latar    (default) in a background thread, so a form answers at once; the dashboard shows the status
     sinkron  inside the request (tests)
     mati     not at all (tests of the access rules, which change data without building)
+"Terjemahkan semua" (terjemah_semua.py) follows it: latar in a background thread, sinkron and mati inside the request.
 
 PRODI_BANGUN_HARIAN ("HH:MM", local time; empty: none) adds a full rebuild every day (Penjadwal), so announcements
 whose "berlaku sampai" date has passed leave the sites even when nobody changes anything.
