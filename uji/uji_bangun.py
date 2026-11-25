@@ -253,7 +253,45 @@ try:
         and bangun.alamat_www("berita.html") == "https://www.unsrat.ac.id/berita.html", "alamat www lewat WWW_SEKARANG")
     cek("Direktori Dosen UNSRAT" in baca_halaman("s1informatika/dosen/dosen-tetap/index.html"), "halaman dosen tanpa tautan khusus")
     akar = baca_halaman("index.html")
-    cek(akar.count('class="kartu kartu--prodi"') == 3, "halaman akar harus memuat 3 prodi")
+    # the root page is a line map (K-P39): one line per faculty in www's unit order, one stop per programme
+    cek(akar.count('class="halte"') == 3, "halaman akar harus memuat 3 prodi")
+    cek(all(akar.count('href="%s/"' % s_) == 1 for s_ in ("s1informatika", "profesidokter", "s1politik")),
+        "setiap prodi tepat satu halte")
+    cek(0 < akar.index('id="jalur-ft"') < akar.index('id="jalur-fk"') < akar.index('id="jalur-fisip"'),
+        "jalur mengikuti urutan unit di data www")
+    cek('class="jalur jalur--ft"' in akar and 'class="lencana jalur--ft" href="#jalur-ft"' in akar,
+        "jalur dan lencananya membawa kelas warna fakultas")
+    cek('<h3 class="jalur__jenjang">Sarjana</h3>' in akar and '<h3 class="jalur__jenjang">Profesi</h3>' in akar,
+        "halte dikelompokkan per jenjang")
+    cek('data-cari="S1 Teknik Informatika S.T. Fakultas Teknik FT Sarjana"' in akar,
+        "kata pencarian halte: nama, gelar, fakultas, singkatan, jenjang")
+    halte_dokter = akar.split('href="profesidokter/"', 1)[1].split("</li>", 1)[0]
+    cek("halte__akreditasi" not in halte_dokter and "halte__status" not in halte_dokter
+        and '<span class="halte__akreditasi halte__akreditasi--puncak"><span class="tersembunyi">Akreditasi </span>Unggul'
+        in akar, "akreditasi kosong tanpa tag; peringkat tertinggi bertag terisi, bertanda untuk pembaca layar")
+    cek(" style=" not in akar and not re.search(r"<script(?![^>]*\bsrc=)", akar),
+        "halaman akar tanpa gaya dan skrip inline (CSP)")
+    cek(re.search(r'<noscript><link rel="stylesheet" href="aset/css/akar-tanpa-js\.css\?v=\w+"></noscript>', akar)
+        and ".cari {" in baca_halaman("aset/css/akar-tanpa-js.css") and ada("aset/js/cari-prodi.js")
+        and not re.search(r'<form class="cari"[^>]*\bhidden', akar),
+        "kotak cari ada sejak awal (tanpa geser), disembunyikan <noscript> tanpa JavaScript; skripnya ikut terbit")
+    cek("fonts.googleapis.com/css2?family=Overpass" in akar and "Plus+Jakarta" not in akar
+        and "Plus+Jakarta" in baca_halaman("s1informatika/index.html"), "huruf Overpass hanya di halaman akar")
+    with io.open(os.path.join(lokasi.publik(), "aset", "css", "jalur.css"), encoding="utf-8") as f:
+        jalur_css = f.read()
+    cek(".jalur--ft{--jalur:#000099;--jalur-teks:#FFFF00;--jalur-tepi:#000099}" in jalur_css
+        and ".jalur--fisip{--jalur:#FF8500;--jalur-teks:#15123B;--jalur-tepi:#15123B}" in jalur_css,
+        "warna jalur dari bendera: tulisan bendera bila kontrasnya cukup, tinta bila tidak: %s" % jalur_css)
+    cek(bangun.warna_jalur({"dasar": "#FFFFFF", "tulisan": "#3500FF"}) == {"jalur": "#FFFFFF", "teks": "#3500FF",
+                                                                           "tepi": "#15123B"}
+        and bangun.warna_jalur({"dasar": "#FE0002", "tulisan": "#FFFFFF"})["teks"] == "#000000"
+        and bangun.warna_jalur({"dasar": "merah"})["jalur"] == "#15123B" and bangun.warna_jalur(None)["teks"] == "#FFFFFF"
+        and bangun.kelas_jalur("ft") == "ft" and bangun.kelas_jalur('x"><b') == "lain", "warna_jalur dan kelas_jalur")
+    with io.open(os.path.join(AKAR, "platform", "data-awal", "www", "unit.json"), encoding="utf-8") as f:
+        bendera_asli = [u["bendera"] for u in json.load(f)["unit"] if u.get("bendera")]
+    kurang = [b_ for b_ in bendera_asli if (lambda w: warna.kontras(w["jalur"], w["teks"]) < 4.5
+              or (warna.kontras(w["jalur"], "#FFFFFF") < 3 and w["tepi"] != bangun.TINTA_AKAR))(bangun.warna_jalur(b_))]
+    cek(bendera_asli and not kurang, "setiap bendera fakultas asli: teks 4,5:1 di jalurnya, jalur pucat bertepi: %s" % kurang)
     with io.open(os.path.join(lokasi.publik(), "robots.txt"), encoding="utf-8") as f:
         cek("Disallow: /" in f.read(), "robots staging harus melarang")
     cek(not ada("sitemap.xml"), "staging tanpa sitemap")

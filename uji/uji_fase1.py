@@ -198,13 +198,18 @@ def bandingkan(p, unit_www, slug, tampil_berlaku, akar_html):
         selisih("beranda", "kartu %s" % kunci, harap.get(kunci), dapat.get(kunci))
 
     # the root list of all programmes
-    m = re.search(r'<a href="%s/">(.*?)</a></h3>(.*?)</li>' % re.escape(slug), akar_html, re.S)
+    m = re.search(r'<a class="halte__nama" href="%s/">(.*?)</a>(.*?)</li>' % re.escape(slug), akar_html, re.S)
     if not m:
         beda.append("halaman akar: tautan ke %s/ tidak ada" % slug)
     else:
         selisih("halaman akar", "nama", registri.nama_tampil(p), m.group(1))
-        lencana = re.search(r'<span class="lencana">(.*?)</span>', m.group(2), re.S)
-        selisih("halaman akar", "akreditasi", "Akreditasi " + label if label else None, lencana.group(1) if lencana else None)
+        gelar = re.search(r'<span class="halte__gelar">(.*?)</span>', m.group(2), re.S)
+        selisih("halaman akar", "gelar", p.get("gelar") or None,
+                gelar.group(1) if gelar else None)
+        lencana = re.search(r'<span class="halte__(?:akreditasi|status)[^"]*"><span class="tersembunyi">(.*?)</span>'
+                            r'(.*?)</span>', m.group(2), re.S)
+        selisih("halaman akar", "akreditasi", "Akreditasi " + label if label else None,
+                lencana.group(1) + lencana.group(2) if lencana else None)
     return beda
 
 
