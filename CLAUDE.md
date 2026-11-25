@@ -145,6 +145,10 @@ docker/              Dockerfile web, konfigurasi Nginx, skrip mulai, cadangan/pu
   Persiapan pilot: `docs/pilot-fase-02.md`.
 - Halaman superadmin di `platform/admin/superadmin.py`. Perubahan yang memengaruhi situs memanggil bangun ulang lewat
   `platform/admin/pembangun.py`; `PRODI_BANGUN=latar` (bawaan, utas latar), `sinkron` (uji), `mati` (uji akses).
+- Halaman akar `prodi.unsrat.ac.id/` (K-P39): peta jalur fakultas, `akar.html` + `aset/css/akar.css` (hanya di akar;
+  `prodi.css` tidak disentuh) + `aset/js/cari-prodi.js` (penyaring progresif); warna jalur dari bendera unit www ke
+  `aset/css/jalur.css` lewat `bangun.warna_jalur`/`css_jalur` (kontras diuji). Desainnya dikerjakan dengan skill
+  Impeccable: konteks produk `PRODUCT.md`, sistem desain `DESIGN.md`, kontrak per halaman `.impeccable/surfaces/`.
 - Template: `platform/template/menu.json` (menu induk), `platform/template/kategori.json` (kategori pengumuman), `platform/template/halaman/*.html` (Jinja2, autoescape),
   `platform/template/aset/css/prodi.css`; palet pilihan `platform/data-awal/palet.json`, uji kontras di `platform/bangun/warna.py`.
 

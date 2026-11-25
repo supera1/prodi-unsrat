@@ -95,6 +95,12 @@ Stack Docker lengkap di komputer sendiri: [docs/deploy.md §13](docs/deploy.md#1
 | 3 | Terjemahan mesin (DeepL) dengan istilah tetap, pemeriksaan hasil, dan batas pemakaian | selesai |
 | 4 | Pengumuman berbahasa Inggris: isian Inggris dan terjemahan mesin di formulir pengumuman, menu News di versi Inggris | selesai |
 | 5 | Panduan dan prodi berversi Inggris: kotak versi Inggris di Ringkasan prodi, [persiapan enam prodi](docs/versi-inggris-prodi.md), batas CPL Data prodi | selesai; menunggu deploy |
-| 5a | Terjemahkan semua: satu tombol untuk semua halaman dan pengumuman, di latar; saringan dan tombol "… dan buka berikutnya" untuk memeriksa | selesai, menunggu tinjauan |
-| 5b | Versi Inggris hanya untuk prodi akreditasi internasional (K-P38): saklar superadmin mengatur juga penyunting, isian, dan terjemahan mesin | selesai, menunggu tinjauan |
+| 5a | Terjemahkan semua: satu tombol untuk semua halaman dan pengumuman, di latar; saringan dan tombol "… dan buka berikutnya" untuk memeriksa | selesai; menunggu deploy |
+| 5b | Versi Inggris hanya untuk prodi akreditasi internasional (K-P38): saklar superadmin mengatur juga penyunting, isian, dan terjemahan mesin | selesai; menunggu deploy |
 | 6 | Uji menyeluruh + log fase | — |
+
+## Fase 6 (desain halaman)
+
+| Langkah | Isi | Status |
+|---|---|---|
+| 1 | Halaman akar `prodi.unsrat.ac.id/` sebagai peta jalur fakultas (K-P39): satu jalur berwarna bendera per fakultas, halte prodi dengan gelar dan akreditasi, pencarian nama prodi; konteks produk di `PRODUCT.md`, kontrak desain di `.impeccable/surfaces/` | selesai, menunggu tinjauan |

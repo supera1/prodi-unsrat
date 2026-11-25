@@ -500,3 +500,27 @@ Rincian Fase 1 ada di `rencana-fase-01.md`.
 - **Konsekuensi:** terjemahan tidak lagi bisa disiapkan sebelum saklar dinyalakan; keenam prodi dinyalakan sejak awal
   (situsnya langsung memuat halaman Inggris dari data resmi, halaman lain menyusul setelah terbit). Kuota DeepL hanya
   dipakai keenam prodi.
+
+### K-P39 — Desain baru halaman akar: peta jalur fakultas (Fase 6 langkah 1)
+- **Konteks:** pengguna meminta desain baru yang bersih dan modern untuk halaman utama `prodi.unsrat.ac.id/`
+  (25 November 2026), dikerjakan dengan skill desain Impeccable. Halaman akar sebelumnya berupa kisi kartu 97 prodi
+  per jenjang dengan gaya yang sama dengan situs prodi. Jawaban pengguna: cakupannya **halaman akar saja**;
+  pengunjungnya campuran merata; lambang UNSRAT dan warna bendera fakultas wajib dipertahankan; prodi paling sering
+  dicari dengan mengetik namanya; setiap prodi menampilkan akreditasi dan gelar; yang harus dihindari adalah kesan
+  "tabel kantor". Dari empat arah desain dan satu standar kategori di halaman pilihan Impeccable, pengguna memilih
+  **Peta jalur fakultas**.
+- **Keputusan:**
+  1. Halaman akar adalah peta jalur: satu jalur per fakultas dan Program Pascasarjana, berwarna bendera unitnya,
+     urut seperti data unit www; setiap prodi satu halte berisi nama, gelar, dan akreditasi, dikelompokkan per jenjang.
+     Kontrak desainnya di `.impeccable/surfaces/platform-template-halaman-akar-html.md`; konteks produk di `PRODUCT.md`.
+  2. Warna jalur dibuat saat bangun (`aset/css/jalur.css`, `bangun.warna_jalur`) dari `bendera` di data unit www,
+     karena CSP melarang gaya inline. Teks di atas warna bendera memakai warna tulisan bendera bila kontrasnya 4,5:1,
+     selain itu putih, tinta, atau hitam; jalur yang terlalu pucat di atas putih (di bawah 3:1) diberi tepi tinta.
+  3. Pencarian adalah penyaring progresif (`aset/js/cari-prodi.js`, tanpa skrip inline): tanpa JavaScript kotak cari
+     tersembunyi dan seluruh daftar tetap tampil dengan lencana fakultas sebagai tautan lompat. Bila tersisa satu prodi,
+     muncul panel tiba dengan tombol Buka situs. Kata yang diketik tersimpan di alamat (`?q=`).
+  4. Gaya dan huruf (Overpass dari Google Fonts, yang sudah diizinkan CSP) hanya dimuat di halaman akar
+     (`aset/css/akar.css`); `prodi.css` tidak berubah, jadi situs ke-97 prodi tetap seperti sebelumnya.
+- **Konsekuensi:** warna fakultas baru atau berubah di data www langsung tampil di halaman akar setelah bangun ulang.
+  Uji `uji_bangun.py` memeriksa susunan, warna, dan tidak adanya gaya inline; `uji_fase1.py` membandingkan nama,
+  gelar, dan akreditasi ke-97 prodi di halaman akar dengan data www.

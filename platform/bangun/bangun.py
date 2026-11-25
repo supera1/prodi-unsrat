@@ -89,10 +89,18 @@ FONT = ("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,
         "&display=swap")
 
 JENJANG_PANJANG = registri.JENJANG_PANJANG
-# sections of the root page, in this order
-KELOMPOK_JENJANG = (("sarjana", "Sarjana (S1)", ("S1",)), ("magister", "Magister (S2)", ("S2",)),
-                    ("doktor", "Doktor (S3)", ("S3",)), ("profesi", "Profesi", ("Profesi",)),
-                    ("spesialis", "Spesialis dan Subspesialis", ("Sp-1", "Sp-2")))
+# The root page (the directory of every programme) is a line map: one line per faculty (and the graduate school) in
+# its flag colours, one stop per programme (K-P39, .impeccable/surfaces/platform-template-halaman-akar-html.md).
+FONT_AKAR = ("https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&family=Overpass+Mono:wght@600"
+             "&display=swap")
+TINTA_AKAR = "#15123B"      # the directory's ink, --tinta in aset/css/akar.css
+# a line badge's short name, when it is not the unit code in capitals
+SINGKATAN_UNIT = {"faperta": "Faperta", "fapet": "Fapet", "pps": "Pascasarjana"}
+POLA_KELAS = re.compile(r"^[a-z0-9-]{1,40}$")
+# accreditation grades (registri.AKREDITASI_LABEL) shown as a tag on a stop, the top one of each scheme filled; any
+# other status (Terakreditasi sementara, Menunggu akreditasi prodi baru, ...) is a line of text under the degree
+PERINGKAT = ("Unggul", "Baik Sekali", "Baik", "A", "B", "C")
+PERINGKAT_PUNCAK = ("Unggul", "A")
 BULAN = ("Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober",
          "November", "Desember")
 BERKAS_AKAR = ("index.html", "404.html", "robots.txt", "sitemap.xml")
@@ -222,6 +230,43 @@ def bagian_html(bagian, media_url, bahasa="id"):
                   .render(bagian=bagian, media_url=media_url, sematan_aktif=False))
 
 
+# ------------------------------------------------------------------ the root page's lines
+
+def kelas_jalur(kode_unit):
+    """CSS class suffix of a unit's line ("ft"); "lain" for a code that is not a plain lowercase word."""
+    return kode_unit if POLA_KELAS.match(kode_unit or "") else "lain"
+
+
+def warna_jalur(bendera):
+    """A line's colours from the faculty flag {dasar, tulisan}: the line itself is the flag's ground; the text on it
+    is the flag's lettering when that reaches 4.5:1 there, otherwise white, the ink or (last) black, whichever first
+    does (the law faculty's red reaches 4.5:1 only with black); and a line too
+    pale to stand on the white page (under 3:1, WCAG 1.4.11) is edged with the ink. No usable flag: the ink."""
+    bendera = bendera or {}
+    dasar = (bendera.get("dasar") or "").upper()
+    if not warna_mod.HEX.match(dasar):
+        dasar = TINTA_AKAR
+    tulisan = (bendera.get("tulisan") or "").upper()
+    calon = ([tulisan] if warna_mod.HEX.match(tulisan) else []) + [warna_mod.PUTIH, TINTA_AKAR, "#000000"]
+    teks = next((c for c in calon if warna_mod.kontras(dasar, c) >= 4.5),
+                max(calon, key=lambda c: warna_mod.kontras(dasar, c)))
+    tepi = dasar if warna_mod.kontras(dasar, warna_mod.PUTIH) >= 3 else TINTA_AKAR
+    return {"jalur": dasar, "teks": teks, "tepi": tepi}
+
+
+def css_jalur(unit):
+    """aset/css/jalur.css: each unit's line colours as custom properties on .jalur--<kode> (the CSP allows no inline
+    style, so the flag colours from www's data come in a generated style sheet)."""
+    baris = ["/* Written by bangun.py from the faculty flags in www's unit data (warisan/unit). Do not edit. */"]
+    for kode in sorted(unit):
+        kelas = kelas_jalur(kode)
+        if kelas == "lain" or not unit[kode].get("bendera"):     # a unit without a flag keeps the ink (akar.css)
+            continue
+        w = warna_jalur(unit[kode].get("bendera"))
+        baris.append(".jalur--%s{--jalur:%s;--jalur-teks:%s;--jalur-tepi:%s}" % (kelas, w["jalur"], w["teks"], w["tepi"]))
+    return "\n".join(baris) + "\n"
+
+
 # ------------------------------------------------------------------ the builder
 
 class Pembangun(object):
@@ -323,6 +368,7 @@ class Pembangun(object):
         unsrat = [p for p in self.palet if p["id"] == warna_mod.CADANGAN][0]
         self.simpan("aset/css/warna-unsrat.css", warna_mod.css(dict(warna_mod.turunan(unsrat["utama"], unsrat["aksen"]),
                                                                     keterangan=unsrat["nama"])))
+        self.simpan("aset/css/jalur.css", css_jalur(self.unit))
         for jalur, isi in self.berkas.items():
             if jalur.startswith("aset/"):
                 self.versi[jalur] = sha(isi)[:10]
@@ -342,7 +388,7 @@ class Pembangun(object):
             konteks["pasangan"] = ke([f for b, f in versi.items() if b != bahasa][0])
         konteks.setdefault("sub", False)
         konteks.update(ke=ke, aset=aset, media_url=media_url, media_mutlak=self.media_mutlak, alamat=self.alamat,
-                       produksi=self.produksi, csp=CSP, font=FONT, univ=self.univ, www=WWW,
+                       produksi=self.produksi, csp=CSP, font=konteks.get("font", FONT), univ=self.univ, www=WWW,
                        tahun=self.univ.get("identitas", {}).get("tahun_hak_cipta") or str(datetime.date.today().year))
         self.simpan(jalur, self.env_bahasa[bahasa].get_template(templat).render(**konteks))
 
@@ -749,18 +795,45 @@ class Pembangun(object):
 
     # -------------------------------------------------------------- root pages
 
+    def jalur_akar(self, aktif):
+        """The root page's lines: one per unit (faculty, graduate school), in the order of www's unit data, each with
+        its programmes by level then name, grouped by level. A programme whose unit is not in the unit data gets a
+        line of its own, after the others, in the ink."""
+        urutan = list(self.unit)
+        per_unit = {}
+        for r in aktif:
+            p = self.prodi[r["kode_pddikti"]]
+            per_unit.setdefault(p.get("unit_kode") or "", []).append(dict(r=r, p=p))
+        hasil = []
+        for kode in sorted(per_unit, key=lambda k: (urutan.index(k) if k in urutan else len(urutan), k)):
+            u = self.unit.get(kode, {})
+            daftar = sorted(per_unit[kode], key=lambda x: (registri.kunci_urut(x["p"]), x["r"]["kode_pddikti"]))
+            kelas = kelas_jalur(kode) if kode in self.unit else "lain"
+            nama = u.get("nama") or daftar[0]["p"].get("unit") or "Unit lain"
+            singkat = SINGKATAN_UNIT.get(kode) or (kode.upper() if kode in self.unit else nama)
+            kelompok = []
+            for x in daftar:
+                jenjang = x["p"].get("jenjang")
+                x["akr"] = registri.label_akreditasi(x["p"].get("akreditasi"))
+                x["akr_jenis"] = ("" if not x["akr"] else "puncak" if x["akr"] in PERINGKAT_PUNCAK
+                                  else "peringkat" if x["akr"] in PERINGKAT else "status")
+                x["cari"] = " ".join(t for t in (registri.nama_tampil(x["p"]), x["p"].get("gelar"), nama, singkat,
+                                                  JENJANG_PANJANG.get(jenjang)) if t)
+                if not kelompok or kelompok[-1]["jenjang"] != jenjang:
+                    kelompok.append({"jenjang": jenjang, "judul": JENJANG_PANJANG.get(jenjang) or jenjang or "",
+                                     "prodi": []})
+                kelompok[-1]["prodi"].append(x)
+            hasil.append({"id": "jalur-" + (kelas if kelas != "lain" else "lain-%d" % len(hasil)), "kelas": kelas,
+                          "nama": nama, "singkat": singkat, "jenis": u.get("jenis"), "jumlah": len(daftar),
+                          "kelompok": kelompok})
+        return hasil
+
     def bangun_akar(self, aktif):
-        daftar = sorted(aktif, key=lambda r: (self.prodi[r["kode_pddikti"]]["nama"], r["kode_pddikti"]))
-        kelompok = []
-        for id_, judul, jenjang in KELOMPOK_JENJANG:
-            isi = [dict(r=r, p=self.prodi[r["kode_pddikti"]],
-                        unit=self.unit.get(self.prodi[r["kode_pddikti"]]["unit_kode"], {}).get("nama")
-                        or self.prodi[r["kode_pddikti"]]["unit"])
-                   for r in daftar if self.prodi[r["kode_pddikti"]]["jenjang"] in jenjang]
-            if isi:
-                kelompok.append({"id": id_, "judul": judul, "prodi": isi})
-        self.render("akar.html", "index.html", kelompok=kelompok, jumlah=len(daftar), kanonik=self.kanonik(""),
-                    warna_css="aset/css/warna-unsrat.css")
+        jalur = self.jalur_akar(aktif)
+        self.render("akar.html", "index.html", peta_jalur=jalur, jumlah=len(aktif), kanonik=self.kanonik(""),
+                    warna_css="aset/css/warna-unsrat.css", font=FONT_AKAR,
+                    jumlah_fakultas=sum(1 for j in jalur if j["jenis"] == "fakultas"),
+                    ada_pascasarjana=any(j["jenis"] == "pascasarjana" for j in jalur))
         self.render("404.html", "404.html", mutlak=True, kanonik="", warna_css="aset/css/warna-unsrat.css")
         if self.produksi:
             self.simpan("robots.txt", "User-agent: *\nAllow: /\nSitemap: %s/sitemap.xml\n" % self.alamat)

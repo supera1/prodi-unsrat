@@ -1,0 +1,481 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-25T12:00:00Z",
+  "title": "Design System: Peta Jalur Fakultas",
+  "scope": "Root directory page of prodi.unsrat.ac.id only (platform/template/halaman/akar.html, aset/css/akar.css, akar-tanpa-js.css, generated jalur.css). The 97 programme sites keep prodi.css + tokens.css and are not governed by this system.",
+  "extensions": {
+    "colorMeta": {
+      "putih": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.01 285)",
+          "oklch(27% 0.01 285)",
+          "oklch(39% 0.01 285)",
+          "oklch(51% 0.01 285)",
+          "oklch(63% 0.008 285)",
+          "oklch(75% 0.006 285)",
+          "oklch(87% 0.004 285)",
+          "oklch(100% 0 0)"
+        ]
+      },
+      "tinta": {
+        "role": "primary",
+        "displayName": "Indigo Ink",
+        "canonical": "#15123b",
+        "tonalRamp": [
+          "oklch(15% 0.05 285)",
+          "oklch(22% 0.08 285)",
+          "oklch(33% 0.08 285)",
+          "oklch(45% 0.07 285)",
+          "oklch(57% 0.06 285)",
+          "oklch(70% 0.04 285)",
+          "oklch(83% 0.02 285)",
+          "oklch(95% 0.008 285)"
+        ]
+      },
+      "tinta-lembut": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "#4b4966",
+        "tonalRamp": [
+          "oklch(15% 0.02 290)",
+          "oklch(27% 0.03 290)",
+          "oklch(41% 0.04 290)",
+          "oklch(52% 0.035 290)",
+          "oklch(63% 0.03 290)",
+          "oklch(74% 0.02 290)",
+          "oklch(85% 0.012 290)",
+          "oklch(95% 0.005 290)"
+        ]
+      },
+      "garis": {
+        "role": "neutral",
+        "displayName": "Hairline Lilac",
+        "canonical": "#e3e2ec",
+        "tonalRamp": [
+          "oklch(15% 0.01 290)",
+          "oklch(27% 0.012 290)",
+          "oklch(39% 0.013 290)",
+          "oklch(51% 0.013 290)",
+          "oklch(63% 0.012 290)",
+          "oklch(75% 0.011 290)",
+          "oklch(91% 0.01 290)",
+          "oklch(97% 0.005 290)"
+        ]
+      },
+      "sorot": {
+        "role": "neutral",
+        "displayName": "Pointer Wash",
+        "canonical": "#f3f2f8",
+        "tonalRamp": [
+          "oklch(15% 0.008 290)",
+          "oklch(27% 0.01 290)",
+          "oklch(39% 0.01 290)",
+          "oklch(51% 0.01 290)",
+          "oklch(63% 0.009 290)",
+          "oklch(75% 0.008 290)",
+          "oklch(87% 0.007 290)",
+          "oklch(96.5% 0.006 290)"
+        ]
+      },
+      "bendera-ft": {
+        "role": "data",
+        "displayName": "Fakultas Teknik line",
+        "canonical": "#000099",
+        "source": "www unit data via bangun.warna_jalur (jalur.css --jalur)"
+      },
+      "bendera-ft-teks": {
+        "role": "data",
+        "displayName": "Fakultas Teknik lettering",
+        "canonical": "#FFFF00",
+        "source": "computed by bangun.warna_jalur (jalur.css --jalur-teks)"
+      },
+      "bendera-fk": {
+        "role": "data",
+        "displayName": "Fakultas Kedokteran line",
+        "canonical": "#013300",
+        "source": "www unit data via bangun.warna_jalur (jalur.css --jalur)"
+      },
+      "bendera-fk-teks": {
+        "role": "data",
+        "displayName": "Fakultas Kedokteran lettering",
+        "canonical": "#FFFF00",
+        "source": "computed by bangun.warna_jalur (jalur.css --jalur-teks)"
+      },
+      "bendera-faperta": {
+        "role": "data",
+        "displayName": "Fakultas Pertanian line",
+        "canonical": "#00FF01",
+        "source": "www unit data via bangun.warna_jalur (jalur.css --jalur)"
+      },
+      "bendera-faperta-teks": {
+        "role": "data",
+        "displayName": "Fakultas Pertanian lettering",
+        "canonical": "#3500FF",
+        "source": "computed by bangun.warna_jalur (jalur.css --jalur-teks)"
+      },
+      "bendera-fapet": {
+        "role": "data",
+        "displayName": "Fakultas Peternakan line",
+        "canonical": "#663200",
+        "source": "www unit data via bangun.warna_jalur (jalur.css --jalur)"
+      },
+      "bendera-fapet-teks": {
+        "role": "data",
+        "displayName": "Fakultas Peternakan lettering",
+        "canonical": "#FFFF00",
+        "source": "computed by bangun.warna_jalur (jalur.css --jalur-teks)"
+      },
+      "bendera-fpik": {
+        "role": "data",
+        "displayName": "Fakultas Perikanan dan Ilmu Kelautan line",
+        "canonical": "#0000FE",
+        "source": "www unit data via bangun.warna_jalur (jalur.css --jalur)"
+      },
+      "bendera-fpik-teks": {
+        "role": "data",
+        "displayName": "Fakultas Perikanan dan Ilmu Kelautan lettering",
+        "canonical": "#00FFFF",
+        "source": "computed by bangun.warna_jalur (jalur.css --jalur-teks)"
+      },
+      "bendera-feb": {
+        "role": "data",
+        "displayName": "Fakultas Ekonomi dan Bisnis line",
+        "canonical": "#C6C6C6",
+        "source": "www unit data via bangun.warna_jalur (jalur.css --jalur)"
+      },
+      "bendera-feb-teks": {
+        "role": "data",
+        "displayName": "Fakultas Ekonomi dan Bisnis lettering",
+        "canonical": "#3500FF",
+        "source": "computed by bangun.warna_jalur (jalur.css --jalur-teks)"
+      },
+      "bendera-fh": {
+        "role": "data",
+        "displayName": "Fakultas Hukum line",
+        "canonical": "#FE0002",
+        "source": "www unit data via bangun.warna_jalur (jalur.css --jalur)"
+      },
+      "bendera-fh-teks": {
+        "role": "data",
+        "displayName": "Fakultas Hukum lettering",
+        "canonical": "#000000",
+        "source": "computed by bangun.warna_jalur (jalur.css --jalur-teks)"
+      },
+      "bendera-fisip": {
+        "role": "data",
+        "displayName": "Fakultas Ilmu Sosial dan Ilmu Politik line",
+        "canonical": "#FF8500",
+        "source": "www unit data via bangun.warna_jalur (jalur.css --jalur)"
+      },
+      "bendera-fisip-teks": {
+        "role": "data",
+        "displayName": "Fakultas Ilmu Sosial dan Ilmu Politik lettering",
+        "canonical": "#15123B",
+        "source": "computed by bangun.warna_jalur (jalur.css --jalur-teks)"
+      },
+      "bendera-fib": {
+        "role": "data",
+        "displayName": "Fakultas Ilmu Budaya line",
+        "canonical": "#9A00FF",
+        "source": "www unit data via bangun.warna_jalur (jalur.css --jalur)"
+      },
+      "bendera-fib-teks": {
+        "role": "data",
+        "displayName": "Fakultas Ilmu Budaya lettering",
+        "canonical": "#FFFF00",
+        "source": "computed by bangun.warna_jalur (jalur.css --jalur-teks)"
+      },
+      "bendera-fmipa": {
+        "role": "data",
+        "displayName": "Fakultas MIPA line",
+        "canonical": "#FFFFFF",
+        "source": "www unit data via bangun.warna_jalur (jalur.css --jalur)"
+      },
+      "bendera-fmipa-teks": {
+        "role": "data",
+        "displayName": "Fakultas MIPA lettering",
+        "canonical": "#3500FF",
+        "source": "computed by bangun.warna_jalur (jalur.css --jalur-teks)"
+      },
+      "bendera-fkm": {
+        "role": "data",
+        "displayName": "Fakultas Kesehatan Masyarakat line",
+        "canonical": "#381873",
+        "source": "www unit data via bangun.warna_jalur (jalur.css --jalur)"
+      },
+      "bendera-fkm-teks": {
+        "role": "data",
+        "displayName": "Fakultas Kesehatan Masyarakat lettering",
+        "canonical": "#FFFF00",
+        "source": "computed by bangun.warna_jalur (jalur.css --jalur-teks)"
+      },
+      "bendera-pps": {
+        "role": "data",
+        "displayName": "Program Pascasarjana line",
+        "canonical": "#503003",
+        "source": "www unit data via bangun.warna_jalur (jalur.css --jalur)"
+      },
+      "bendera-pps-teks": {
+        "role": "data",
+        "displayName": "Program Pascasarjana lettering",
+        "canonical": "#FFFFFF",
+        "source": "computed by bangun.warna_jalur (jalur.css --jalur-teks)"
+      }
+    },
+    "lineColors": {
+      "source": "Faculty flags (bendera.dasar / bendera.tulisan) in www's unit data, written by platform/bangun/bangun.py (warna_jalur, css_jalur) to publik/aset/css/jalur.css as .jalur--<kode> { --jalur; --jalur-teks; --jalur-tepi }. Data, not tokens; CSP forbids inline styles.",
+      "textRule": "Flag lettering if >= 4.5:1 on the ground, else the first of white, #15123B, #000000 that reaches 4.5:1, else the best of them.",
+      "edgeRule": "Ground colour if it reaches 3:1 on white, else #15123B (WCAG 1.4.11).",
+      "fallback": "No usable flag: --jalur #15123B, --jalur-teks #fff, --jalur-tepi #15123B (akar.css :where(.jalur, .lencana, .tiba))."
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The single h1 question above the search."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Programme name in the arrival panel."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Line-head band names."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Page base text."
+      },
+      "body-strong": {
+        "displayName": "Stop name",
+        "purpose": "Programme names on stops, the links into each site."
+      },
+      "body-small": {
+        "displayName": "Stop detail",
+        "purpose": "Degree and status under a stop name, in soft ink."
+      },
+      "label": {
+        "displayName": "Tag",
+        "purpose": "Accreditation grade tags (0.75rem on stops, 0.8125rem in the arrival panel)."
+      },
+      "mono-level": {
+        "displayName": "Level marker",
+        "purpose": "Uppercase Overpass Mono label at each change of level on a line."
+      },
+      "mono-count": {
+        "displayName": "Count",
+        "purpose": "Programme counts in line heads and badges, tabular numbers."
+      },
+      "brand": {
+        "displayName": "Brand",
+        "purpose": "Header name \"Program Studi\" beside the emblem (1.25rem 800)."
+      },
+      "button-large": {
+        "displayName": "Button large",
+        "purpose": "\"Buka situs\" button (1.125rem 800)."
+      },
+      "body-note": {
+        "displayName": "Note",
+        "purpose": "Count sentence and search status (0.9375rem soft ink); reset button at 800."
+      },
+      "body-caption": {
+        "displayName": "Caption",
+        "purpose": "Header unit line (0.875rem soft ink)."
+      },
+      "badge": {
+        "displayName": "Badge",
+        "purpose": "Faculty short names on jump badges (0.875rem 800)."
+      }
+    },
+    "fonts": [
+      {
+        "name": "Overpass",
+        "weights": [
+          400,
+          600,
+          800
+        ],
+        "source": "Google Fonts, root page only (FONT_AKAR in bangun.py)"
+      },
+      {
+        "name": "Overpass Mono",
+        "weights": [
+          600
+        ],
+        "source": "Google Fonts, root page only (FONT_AKAR in bangun.py)"
+      }
+    ],
+    "shadows": [
+      {
+        "name": "line-edge",
+        "value": "inset 0 0 0 2px var(--jalur-tepi)",
+        "purpose": "Inner edge on rails, head bands, badges and the arrival band so pale flags still read on white. A border, not elevation."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "All movement in this world."
+      },
+      {
+        "name": "badge-lift",
+        "value": "transform translateY(-2px) 0.2s",
+        "purpose": "Badge hover."
+      },
+      {
+        "name": "stop-dot-scale",
+        "value": "transform scale(1.2) 0.2s",
+        "purpose": "Stop dot on hover or focus within."
+      },
+      {
+        "name": "halte-nyala",
+        "value": "0.45s: dot background var(--jalur) at scale(1.35) to #fff at none",
+        "purpose": "Stops matched by a search light once."
+      },
+      {
+        "name": "tiba-masuk",
+        "value": "0.42s: translateY(0.75rem) to none",
+        "purpose": "Arrival panel entrance, movement only."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "No transitions or keyframes; badge does not lift."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "arrival-split",
+        "value": "48rem"
+      },
+      {
+        "name": "destination-split",
+        "value": "64rem"
+      },
+      {
+        "name": "map-columns",
+        "value": "columns: 4 17.5rem (no media query)"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Search Box",
+      "kind": "input",
+      "refersTo": "search-box",
+      "description": "The destination: the page's primary action.",
+      "html": "<label class=\"ds-cari\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" aria-hidden=\"true\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\"/><path d=\"M15.5 15.5 21 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\"/></svg><input type=\"search\" placeholder=\"Mis. Teknik Informatika\" aria-label=\"Nama program studi\"></label>",
+      "css": ".ds-cari { display: flex; align-items: center; gap: 0.75rem; min-height: 3.75rem; max-width: 46rem; padding: 0 1.125rem; border: 2px solid #15123b; border-radius: 0.75rem; background: #fff; color: #15123b; font-family: Overpass, system-ui, sans-serif; } .ds-cari:focus-within { outline: 3px solid #15123b; outline-offset: 3px; } .ds-cari input { flex: 1; min-width: 0; border: 0; padding: 0.875rem 0 0.625rem; background: transparent; color: #15123b; font: 600 1.1875rem/1.2 Overpass, system-ui, sans-serif; outline: none; } .ds-cari input::placeholder { color: #4b4966; font-weight: 400; opacity: 1; }"
+    },
+    {
+      "name": "Line Badge",
+      "kind": "chip",
+      "refersTo": "line-badge",
+      "description": "Jump link to a faculty line, in its flag colours (FT shown).",
+      "html": "<a class=\"ds-lencana\" href=\"#\"><span>FT</span> <span class=\"ds-lencana__jumlah\">10</span></a>",
+      "css": ".ds-lencana { --jalur: #000099; --jalur-teks: #FFFF00; --jalur-tepi: #000099; display: inline-flex; align-items: baseline; gap: 0.4rem; padding: 0.5rem 0.8rem 0.35rem; border-radius: 999px; background: var(--jalur); color: var(--jalur-teks); box-shadow: inset 0 0 0 2px var(--jalur-tepi); font: 800 0.875rem/1.2 Overpass, system-ui, sans-serif; text-decoration: none; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); } .ds-lencana:hover { transform: translateY(-2px); } .ds-lencana:focus-visible { outline: 3px solid #15123b; outline-offset: 3px; } .ds-lencana__jumlah { font: 600 0.8125rem 'Overpass Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Line With Stops",
+      "kind": "custom",
+      "refersTo": "line-head",
+      "description": "Signature: a faculty line with head band, rail, level marker, and stops with grade tags (pale MIPA flag with ink edge shown).",
+      "html": "<section class=\"ds-jalur\"><h2 class=\"ds-jalur__kepala\"><span>Fakultas MIPA</span> <span class=\"ds-mono\">7 prodi</span></h2><div class=\"ds-jalur__rel\"><h3 class=\"ds-jalur__jenjang\">Sarjana</h3><ul class=\"ds-halte-daftar\"><li class=\"ds-halte\"><a href=\"#\" class=\"ds-halte__nama\">S1 Matematika</a><span class=\"ds-halte__ket\">S.Mat.</span><span class=\"ds-tag ds-tag--puncak\">Unggul</span></li><li class=\"ds-halte\"><a href=\"#\" class=\"ds-halte__nama\">S1 Kimia</a><span class=\"ds-halte__ket\">S.Si.</span><span class=\"ds-tag\">Baik Sekali</span></li></ul></div></section>",
+      "css": ".ds-jalur { --jalur: #FFFFFF; --jalur-teks: #3500FF; --jalur-tepi: #15123B; max-width: 20rem; font-family: Overpass, system-ui, sans-serif; color: #15123b; } .ds-jalur__kepala { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; margin: 0; padding: 0.8rem 1rem 0.6rem; border-radius: 0.625rem 0.625rem 0 0; background: var(--jalur); color: var(--jalur-teks); box-shadow: inset 0 0 0 2px var(--jalur-tepi); font-size: 1rem; font-weight: 800; line-height: 1.25; } .ds-mono { font: 600 0.75rem 'Overpass Mono', ui-monospace, monospace; } .ds-jalur__rel { position: relative; padding: 0.25rem 0 0.5rem; } .ds-jalur__rel::before { content: ''; position: absolute; left: 1.0625rem; top: 0; bottom: 1.25rem; width: 0.625rem; background: var(--jalur); box-shadow: inset 0 0 0 2px var(--jalur-tepi); } .ds-jalur__rel::after { content: ''; position: absolute; left: 0.625rem; bottom: 1.0625rem; width: 1.5rem; height: 0.375rem; border-radius: 0.1875rem; background: var(--jalur-tepi); } .ds-jalur__jenjang { position: relative; margin: 0.5rem 0 0.125rem 3.25rem; font: 600 0.6875rem 'Overpass Mono', ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #4b4966; } .ds-halte-daftar { margin: 0; padding: 0; list-style: none; } .ds-halte { position: relative; display: grid; grid-template-columns: 3.25rem minmax(0, 1fr) auto; grid-template-areas: '. nama tag' '. ket tag'; align-items: center; column-gap: 0.5rem; min-height: 3rem; padding: 0.4rem 0.375rem 0.35rem 0; border-radius: 0.5rem; } .ds-halte::before { content: ''; position: absolute; left: 0.75rem; top: calc(50% - 0.625rem); width: 1.25rem; height: 1.25rem; box-sizing: border-box; border-radius: 50%; background: #fff; border: 0.3125rem solid #15123b; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); } .ds-halte:hover { background: #f3f2f8; } .ds-halte:hover::before, .ds-halte:focus-within::before { transform: scale(1.2); } .ds-halte__nama { grid-area: nama; color: #15123b; font-weight: 600; line-height: 1.3; text-decoration: none; } .ds-halte__nama:hover { text-decoration: underline; text-decoration-thickness: 2px; } .ds-halte__nama:focus-visible { outline: 3px solid #15123b; outline-offset: 1px; } .ds-halte__ket { grid-area: ket; font-size: 0.8125rem; color: #4b4966; } .ds-tag { grid-area: tag; padding: 0.25rem 0.5rem 0.15rem; border: 1.5px solid #15123b; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 800; line-height: 1.2; white-space: nowrap; } .ds-tag--puncak { background: #15123b; color: #fff; }"
+    },
+    {
+      "name": "Grade Tag",
+      "kind": "chip",
+      "refersTo": "grade-tag",
+      "description": "Accreditation grade: outlined; the top grade of each scheme (Unggul, A) filled in ink.",
+      "html": "<span class=\"ds-tag\">Baik Sekali</span> <span class=\"ds-tag ds-tag--puncak\">Unggul</span>",
+      "css": ".ds-tag { display: inline-block; padding: 0.25rem 0.5rem 0.15rem; border: 1.5px solid #15123b; border-radius: 0.375rem; color: #15123b; font: 800 0.75rem/1.2 Overpass, system-ui, sans-serif; white-space: nowrap; } .ds-tag--puncak { background: #15123b; color: #fff; }"
+    },
+    {
+      "name": "Buka Situs Button",
+      "kind": "button",
+      "refersTo": "button-open",
+      "description": "The single door out of the arrival panel.",
+      "html": "<a class=\"ds-buka\" href=\"#\">Buka situs<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" aria-hidden=\"true\"><path d=\"M5 12h13M13 6l6 6-6 6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></a>",
+      "css": ".ds-buka { display: inline-flex; align-items: center; justify-content: center; gap: 0.625rem; min-height: 3.5rem; padding: 0.75rem 1.75rem 0.55rem; border-radius: 0.75rem; background: #15123b; color: #fff; font: 800 1.125rem Overpass, system-ui, sans-serif; text-decoration: none; } .ds-buka:hover { background: #4b4966; color: #fff; } .ds-buka:focus-visible { outline: 3px solid #15123b; outline-offset: 3px; }"
+    },
+    {
+      "name": "Reset Button",
+      "kind": "button",
+      "refersTo": "button-reset",
+      "description": "Shown only when a search finds nothing: clears it.",
+      "html": "<button class=\"ds-ulang\" type=\"button\">Tampilkan semua program studi</button>",
+      "css": ".ds-ulang { padding: 0.625rem 1rem 0.5rem; border: 2px solid #15123b; border-radius: 0.5rem; background: #fff; color: #15123b; font: 800 0.9375rem/1.2 Overpass, system-ui, sans-serif; cursor: pointer; } .ds-ulang:hover { background: #f3f2f8; } .ds-ulang:focus-visible { outline: 3px solid #15123b; outline-offset: 3px; }"
+    },
+    {
+      "name": "Arrival Panel",
+      "kind": "card",
+      "refersTo": "button-open",
+      "description": "Replaces the map when a search leaves one programme: its stop, grown, on its line (FT shown).",
+      "html": "<section class=\"ds-tiba\"><p class=\"ds-tiba__fak\">Fakultas Teknik</p><div class=\"ds-tiba__isi\"><h2 class=\"ds-tiba__nama\">S1 Teknik Sipil</h2><p class=\"ds-tiba__rinci\">S.T. <span class=\"ds-tag ds-tag--puncak\">Akreditasi Unggul</span></p></div></section>",
+      "css": ".ds-tiba { --jalur: #000099; --jalur-teks: #FFFF00; --jalur-tepi: #000099; font-family: Overpass, system-ui, sans-serif; color: #15123b; } .ds-tiba__fak { margin: 0; padding: 0.75rem 1.25rem 0.6rem; border-radius: 0.875rem 0.875rem 0 0; background: var(--jalur); color: var(--jalur-teks); box-shadow: inset 0 0 0 2px var(--jalur-tepi); font-weight: 800; } .ds-tiba__isi { position: relative; padding: 1.5rem 1.25rem 1.5rem 4rem; border: 2px solid #15123b; border-top: 0; border-radius: 0 0 0.875rem 0.875rem; } .ds-tiba__isi::after { content: ''; position: absolute; left: 1.6875rem; top: 0; bottom: 0; width: 0.625rem; background: var(--jalur); } .ds-tiba__isi::before { content: ''; position: absolute; z-index: 1; left: 1.125rem; top: 1.75rem; width: 1.75rem; height: 1.75rem; box-sizing: border-box; border-radius: 50%; background: #fff; border: 0.4rem solid #15123b; } .ds-tiba__nama { margin: 0; font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.125rem); font-weight: 800; letter-spacing: -0.01em; } .ds-tiba__rinci { margin: 0.5rem 0 0; color: #4b4966; } .ds-tag { margin-left: 0.5rem; padding: 0.25rem 0.5rem 0.15rem; border: 1.5px solid #15123b; border-radius: 0.375rem; font-size: 0.8125rem; font-weight: 800; } .ds-tag--puncak { background: #15123b; color: #fff; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Faculty Line Map",
+    "overview": "The directory reads as a transit map. Each faculty (and the Program Pascasarjana) is one line drawn in its own flag colour, each programme is a stop on that line, and the search box is the destination. The page is white paper with one indigo-black ink. All colour comes from the faculty flags, drawn from www's unit data, and appears only as line material: the thick rail, the solid line head band, the jump badge.\n\nDensity is a printed timetable's, not an office table's. Every stop keeps a fixed column order (stop dot, name over degree, grade tag on the right), so a visitor scans down a line without reading across. Levels change on a line through a small monospaced label, like a zone marker. Overpass, the highway-sign family, sets everything, and Overpass Mono sets level labels and counts.\n\nThe interaction belongs to the map too. Typing filters the stops. Lines left empty fold away and their badges dim. Matching stops light once. When one programme is left, its stop grows into an arrival panel on its own line, with a single door, \"Buka situs\".",
+    "keyCharacteristics": [
+      "Three inks besides the flags: white ground, ink `#15123b`, soft ink `#4b4966`; two quiet tints for hairlines and hover.",
+      "Faculty colour lives only in line material, never in running text.",
+      "Thick rails (0.625rem) with white stops ringed in ink.",
+      "A fixed stop row: dot column 3.25rem, name and degree, grade tag.",
+      "Flat; depth comes from lines and solid bands, not shadows.",
+      "Works without JavaScript: the whole map is always in the HTML, and search only narrows it."
+    ],
+    "rules": [
+      {
+        "name": "The Flags Only On Lines Rule",
+        "body": "A faculty colour fills only line material: the rail, the line-head band, the jump badge, the arrival band and rail, and a stop's light-up. Text, tags and buttons stay in ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Computed Lettering Rule",
+        "body": "Never hand-pick a text colour for a line. It comes from `warna_jalur`'s contrast ladder, so the next faculty flag from www lands legibly with no design work.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink Edge Rule",
+        "body": "A line under 3:1 against white gets an ink edge (an inset 2px ring in `--jalur-tepi`), so a white or near-white flag still reads as a line.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono For Codes Rule",
+        "body": "Overpass Mono sets only level markers and counts, the timetable's codes. Names and sentences are never monospaced.",
+        "section": "typography"
+      },
+      {
+        "name": "The Heavy Names Rule",
+        "body": "Names a visitor is looking for carry weight: 800 for line heads, the arrival name and tags, 600 for stop names. Secondary facts stay 400 in soft ink.",
+        "section": "typography"
+      },
+      {
+        "name": "The Line Is The Depth Rule",
+        "body": "Separate things with a rail, a band or a hairline, never a drop shadow or a raised card.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** take every line colour from `aset/css/jalur.css` via `--jalur`, `--jalur-teks` and `--jalur-tepi`; add a faculty by updating www's unit data and rebuilding, not by writing CSS.",
+      "**Do** keep faculty colour on line material only (rail, head band, badge, arrival band, light-up) and keep all text, tags and buttons in `tinta`.",
+      "**Do** keep the stop row's fixed columns (3.25rem dot column, name over degree, tag right) on every line and at every width.",
+      "**Do** use a 3px `tinta` outline at a 3px offset for keyboard focus (1px offset on stop rows).",
+      "**Do** keep the full map in the HTML and treat search as a progressive filter from the separate `cari-prodi.js`; no inline scripts or styles.",
+      "**Do** gate every movement (badge lift, dot scale, light-up, arrival slide) behind `prefers-reduced-motion`, and animate movement rather than opacity so a paused animation never hides content."
+    ],
+    "donts": [
+      "**Don't** introduce a colour beyond white, `tinta`, `tinta-lembut`, `garis`, `sorot` and the generated flag colours. UNSRAT blue `#3500ff` and yellow `#f2b705` from `tokens.css` are not part of this world (they appear here only where a faculty flag's own lettering uses them).",
+      "**Don't** put flag colour on running text, or rely on a flag colour alone to carry meaning.",
+      "**Don't** add drop shadows or raised cards; separate with rails, bands, borders and hairlines.",
+      "**Don't** monospace names or sentences; Overpass Mono is for level markers and counts.",
+      "**Don't** apply this stylesheet, these fonts or these tokens to the programme sites."
+    ]
+  }
+}

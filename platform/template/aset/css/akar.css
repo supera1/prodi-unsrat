@@ -1,0 +1,640 @@
+/*
+ * prodi.unsrat.ac.id/ — the directory as a line map (K-P39). Loaded on the root page only, after prodi.css, so the
+ * programme sites never see it. One line per faculty in its flag colours (aset/css/jalur.css, written by bangun.py:
+ * --jalur, --jalur-teks, --jalur-tepi), one stop per programme. Besides the flags there are two inks only: the white
+ * ground and --tinta. Overpass comes from the highway-sign lettering family; Overpass Mono sets levels and counts.
+ */
+
+:root {
+	--tinta: #15123b;          /* 16.9:1 on white */
+	--tinta-lembut: #4b4966;   /* secondary text, 8.6:1 on white */
+	--garis: #e3e2ec;          /* hairlines, never text */
+	--sorot: #f3f2f8;          /* a stop under the pointer; tinta on it 15.6:1 */
+	--unsrat-font-sans: "Overpass", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+	--font-mono: "Overpass Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+	--unsrat-abu-900: var(--tinta);     /* the shared top bar and footer take the directory's ink */
+	--prodi-utama: var(--tinta);
+	--prodi-utama-gelap: var(--tinta);
+	--prodi-aksen: var(--tinta);
+	--unsrat-lebar-luas: 1376px;
+	--tepi-akar: clamp(1rem, 4vw, 4rem);
+	color-scheme: light;
+}
+
+body {
+	background: #fff;
+	color: var(--tinta);
+	caret-color: var(--tinta);
+}
+
+.akar {
+	font-size: 1rem;
+	line-height: 1.4;
+}
+
+::selection {
+	background: var(--tinta);
+	color: #fff;
+}
+
+.lewati:hover {          /* the skip link sits on the ink; prodi.css would turn its hover text ink too */
+	color: #fff;
+}
+
+html {
+	scrollbar-color: var(--tinta-lembut) var(--sorot);
+}
+
+/* the shared top bar's "Semua program studi" is this page itself */
+.bar-atas__daftar li:has(> a[href="./"]) {
+	display: none;
+}
+
+.akar [hidden],
+.akar[hidden] {
+	display: none !important;
+}
+
+.wadah,
+.wadah-akar {
+	width: 100%;
+	max-width: var(--unsrat-lebar-luas);
+	margin-inline: auto;
+	padding-inline: var(--tepi-akar);
+}
+
+:where(.jalur, .lencana, .tiba) {
+	--jalur: var(--tinta);
+	--jalur-teks: #fff;
+	--jalur-tepi: var(--tinta);
+}
+
+/* ---------------------------------------------------------------- header */
+
+.kepala-akar {
+	border-bottom: 1px solid var(--garis);
+}
+
+.kepala-akar__isi {
+	display: flex;
+	align-items: center;
+	min-height: 4.5rem;
+}
+
+.kepala-akar__merek {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.875rem;
+	color: var(--tinta);
+	text-decoration: none;
+	line-height: 1.15;
+}
+
+.kepala-akar__merek img {
+	width: 3rem;
+	height: 3rem;
+}
+
+.kepala-akar__nama {
+	display: block;
+	font-size: 1.25rem;
+	font-weight: 800;
+}
+
+.kepala-akar__unit {
+	display: block;
+	font-size: 0.875rem;
+	color: var(--tinta-lembut);
+}
+
+/* ---------------------------------------------------------------- where to: question, search, count */
+
+.tujuan {
+	display: grid;
+	gap: 0.25rem 3rem;
+	padding-top: clamp(1.75rem, 4vw, 2.75rem);
+	padding-bottom: 1.5rem;
+}
+
+@media (min-width: 64rem) {
+	.tujuan {
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: end;
+	}
+}
+
+.tujuan h1 {
+	margin: 0 0 1rem;
+	font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.5rem);
+	font-weight: 800;
+	letter-spacing: -0.015em;
+	text-wrap: balance;
+	color: var(--tinta);
+}
+
+.cari {
+	margin: 0;
+	max-width: 46rem;
+}
+
+.cari__kotak {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	min-height: 3.75rem;
+	padding: 0 1.125rem;
+	border: 2px solid var(--tinta);
+	border-radius: 0.75rem;
+	background: #fff;
+	color: var(--tinta);
+}
+
+.cari__kotak:focus-within {
+	outline: 3px solid var(--tinta);
+	outline-offset: 3px;
+}
+
+.cari__ikon {
+	flex: none;
+}
+
+.cari input {
+	flex: 1;
+	min-width: 0;
+	border: 0;
+	padding: 0.875rem 0 0.625rem;
+	background: transparent;
+	color: var(--tinta);
+	font: 600 1.1875rem/1.2 var(--unsrat-font-sans);
+	outline: none;
+}
+
+.cari input::placeholder {
+	color: var(--tinta-lembut);
+	font-weight: 400;
+	opacity: 1;
+}
+
+.cari input::-webkit-search-cancel-button {
+	cursor: pointer;
+}
+
+.cari__status {
+	min-height: 1.5rem;
+	margin: 0.625rem 0 0;
+	font-size: 0.9375rem;
+	color: var(--tinta-lembut);
+}
+
+.cari__ulang {
+	margin-top: 0.25rem;
+	padding: 0.625rem 1rem 0.5rem;
+	border: 2px solid var(--tinta);
+	border-radius: 0.5rem;
+	background: #fff;
+	color: var(--tinta);
+	font: 800 0.9375rem/1.2 var(--unsrat-font-sans);
+	cursor: pointer;
+}
+
+.cari__ulang:hover {
+	background: var(--sorot);
+}
+
+.tujuan__jumlah {
+	margin: 0;
+	font-size: 0.9375rem;
+	color: var(--tinta-lembut);
+	max-width: 16rem;
+}
+
+.tujuan__jumlah strong {
+	font-weight: 800;
+	color: var(--tinta);
+	font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 64rem) {
+	.tujuan__jumlah {
+		text-align: right;
+		padding-bottom: 2.25rem;
+	}
+	.tujuan__jumlah strong {
+		display: block;
+		font-size: 2.5rem;
+		line-height: 1;
+	}
+}
+
+/* ---------------------------------------------------------------- line badges (jump links) */
+
+.lencana-jalur {
+	padding-bottom: 1.375rem;
+	border-bottom: 1px solid var(--garis);
+}
+
+.lencana-jalur ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.lencana {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.4rem;
+	padding: 0.5rem 0.8rem 0.35rem;
+	border-radius: 999px;
+	background: var(--jalur);
+	color: var(--jalur-teks);
+	box-shadow: inset 0 0 0 2px var(--jalur-tepi);
+	font-size: 0.875rem;
+	font-weight: 800;
+	line-height: 1.2;
+	text-decoration: none;
+	transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease-out;
+}
+
+.lencana:hover {
+	color: var(--jalur-teks);
+	transform: translateY(-2px);
+}
+
+.lencana:focus-visible {
+	outline: 3px solid var(--tinta);
+	outline-offset: 3px;
+}
+
+.lencana__jumlah {
+	font-family: var(--font-mono);
+	font-weight: 600;
+	font-size: 0.8125rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.lencana--redup {
+	opacity: 0.28;
+	pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- arrival: the one programme a search left */
+
+.tiba {
+	margin-top: 1.5rem;
+}
+
+.tiba__fakultas {
+	margin: 0;
+	padding: 0.75rem 1.25rem 0.6rem;
+	border-radius: 0.875rem 0.875rem 0 0;
+	background: var(--jalur);
+	color: var(--jalur-teks);
+	box-shadow: inset 0 0 0 2px var(--jalur-tepi);
+	font-weight: 800;
+}
+
+.tiba__isi {
+	display: grid;
+	gap: 0.5rem 2rem;
+	align-items: center;
+	padding: 1.5rem 1.25rem 1.5rem 4rem;
+	border: 2px solid var(--tinta);
+	border-top: 0;
+	border-radius: 0 0 0.875rem 0.875rem;
+	position: relative;
+}
+
+.tiba__isi::before {     /* the stop, big */
+	content: "";
+	position: absolute;
+	z-index: 1;
+	left: 1.125rem;
+	top: 1.75rem;
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: 50%;
+	background: #fff;
+	border: 0.4rem solid var(--tinta);
+}
+
+.tiba__isi::after {      /* ... on its line */
+	content: "";
+	position: absolute;
+	left: 1.6875rem;
+	top: 0;
+	bottom: 0;
+	width: 0.625rem;
+	background: var(--jalur);
+	box-shadow: inset 0 0 0 2px var(--jalur-tepi);
+}
+
+@media (min-width: 48rem) {
+	.tiba__isi {
+		grid-template-columns: minmax(0, 1fr) auto;
+		grid-template-areas:
+			"nama buka"
+			"rincian buka";
+	}
+	.tiba__nama {
+		grid-area: nama;
+	}
+	.tiba__rincian {
+		grid-area: rincian;
+	}
+	.tiba__buka {
+		grid-area: buka;
+	}
+}
+
+.tiba__nama {
+	margin: 0;
+	font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.125rem);
+	font-weight: 800;
+	letter-spacing: -0.01em;
+	color: var(--tinta);
+}
+
+.tiba__rincian {
+	margin: 0;
+	color: var(--tinta-lembut);
+}
+
+.tiba__akreditasi:not(:empty) {
+	margin-left: 0.5rem;
+	padding: 0.25rem 0.5rem 0.15rem;
+	border: 1.5px solid var(--tinta);
+	border-radius: 0.375rem;
+	color: var(--tinta);
+	font-size: 0.8125rem;
+	font-weight: 800;
+}
+
+.tiba__akreditasi--puncak:not(:empty) {
+	background: var(--tinta);
+	color: #fff;
+}
+
+.tiba__akreditasi--status:not(:empty) {
+	margin-left: 0;
+	padding: 0;
+	border: 0;
+	font-weight: 600;
+}
+
+.tiba__akreditasi--status:not(:empty)::before {
+	content: "· ";
+}
+
+.tiba__buka {
+	justify-self: start;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.625rem;
+	min-height: 3.5rem;
+	padding: 0.75rem 1.75rem 0.55rem;
+	border-radius: 0.75rem;
+	background: var(--tinta);
+	color: #fff;
+	font-size: 1.125rem;
+	font-weight: 800;
+	text-decoration: none;
+}
+
+.tiba__buka:hover {
+	color: #fff;
+	background: var(--tinta-lembut);    /* white on it 8.6:1 */
+}
+
+.tiba__buka:focus-visible {
+	outline: 3px solid var(--tinta);
+	outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.tiba:not([hidden]) {
+		animation: tiba-masuk 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+}
+
+@keyframes tiba-masuk {     /* movement only: a paused animation never hides the panel */
+	from {
+		transform: translateY(0.75rem);
+	}
+	to {
+		transform: none;
+	}
+}
+
+/* ---------------------------------------------------------------- the lines */
+
+.peta {
+	columns: 4 17.5rem;
+	column-gap: 1.75rem;
+	padding-top: 1.5rem;
+	padding-bottom: 3rem;
+}
+
+.jalur {
+	break-inside: avoid;
+	display: inline-block;   /* keeps a whole line in one column in every engine */
+	width: 100%;
+	margin-bottom: 1.75rem;
+	scroll-margin-top: 1rem;
+}
+
+.jalur__kepala {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 0.75rem;
+	margin: 0;
+	padding: 0.8rem 1rem 0.6rem;
+	border-radius: 0.625rem 0.625rem 0 0;
+	background: var(--jalur);
+	color: var(--jalur-teks);
+	box-shadow: inset 0 0 0 2px var(--jalur-tepi);
+	font-size: 1rem;
+	font-weight: 800;
+	line-height: 1.25;
+}
+
+.jalur__jumlah {
+	flex: none;
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.jalur__rel {
+	position: relative;
+	padding: 0.25rem 0 0.5rem;
+}
+
+.jalur__rel::before {    /* the line itself */
+	content: "";
+	position: absolute;
+	left: 1.0625rem;
+	top: 0;
+	bottom: 1.25rem;
+	width: 0.625rem;
+	background: var(--jalur);
+	box-shadow: inset 0 0 0 2px var(--jalur-tepi);
+}
+
+.jalur__rel::after {     /* the end of the line: a terminus bar across it */
+	content: "";
+	position: absolute;
+	left: 0.625rem;
+	bottom: 1.0625rem;
+	width: 1.5rem;
+	height: 0.375rem;
+	border-radius: 0.1875rem;
+	background: var(--jalur-tepi);
+}
+
+.jalur__jenjang {
+	position: relative;
+	margin: 0.5rem 0 0.125rem 3.25rem;
+	font-family: var(--font-mono);
+	font-size: 0.6875rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--tinta-lembut);
+}
+
+.jalur__halte {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.halte {
+	position: relative;
+	display: grid;
+	grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+	grid-template-areas:
+		". nama akreditasi"
+		". gelar akreditasi";
+	align-items: center;
+	column-gap: 0.5rem;
+	min-height: 3rem;
+	padding: 0.4rem 0.375rem 0.35rem 0;
+	border-radius: 0.5rem;
+}
+
+.halte::before {         /* the stop */
+	content: "";
+	position: absolute;
+	left: 0.75rem;
+	top: calc(50% - 0.625rem);
+	width: 1.25rem;
+	height: 1.25rem;
+	border-radius: 50%;
+	background: #fff;
+	border: 0.3125rem solid var(--tinta);
+	transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.halte:hover {
+	background: var(--sorot);
+}
+
+.halte:hover::before,
+.halte:focus-within::before {
+	transform: scale(1.2);
+}
+
+.halte__nama {
+	grid-area: nama;
+	color: var(--tinta);
+	font-weight: 600;
+	line-height: 1.3;
+	text-decoration: none;
+}
+
+.halte__nama::after {    /* the whole stop opens the programme */
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: 0.5rem;
+}
+
+.halte__nama:hover {
+	color: var(--tinta);
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+}
+
+.halte__nama:focus-visible {
+	outline: none;
+}
+
+.halte__nama:focus-visible::after {
+	outline: 3px solid var(--tinta);
+	outline-offset: 1px;
+}
+
+.halte__keterangan {
+	grid-area: gelar;
+	font-size: 0.8125rem;
+	color: var(--tinta-lembut);
+}
+
+.halte__gelar + .halte__status::before {
+	content: " · ";
+}
+
+.halte__status {
+	color: var(--tinta);
+}
+
+.halte__akreditasi {
+	grid-area: akreditasi;
+	padding: 0.25rem 0.5rem 0.15rem;
+	border: 1.5px solid var(--tinta);
+	border-radius: 0.375rem;
+	font-size: 0.75rem;
+	font-weight: 800;
+	line-height: 1.2;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.halte__akreditasi--puncak {
+	background: var(--tinta);
+	color: #fff;
+}
+
+/* a search lights the stops it found, once: the ring fills with the line's colour and settles back */
+@media (prefers-reduced-motion: no-preference) {
+	.halte--nyala::before {
+		animation: halte-nyala 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+}
+
+@keyframes halte-nyala {
+	from {
+		background: var(--jalur);
+		transform: scale(1.35);
+	}
+	to {
+		background: #fff;
+		transform: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lencana,
+	.halte::before {
+		transition: none;
+	}
+	.lencana:hover {
+		transform: none;
+	}
+}

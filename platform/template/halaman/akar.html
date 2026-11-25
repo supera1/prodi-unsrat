@@ -1,50 +1,86 @@
-{# prodi.unsrat.ac.id/ — every programme site, by level. The search page comes in phase 3. #}
+{# prodi.unsrat.ac.id/ — every programme site as a line map: one line per faculty (and the graduate school) in its
+   flag colours, one stop per programme (K-P39). The full list is always in the page; aset/js/cari-prodi.js only
+   adds the search that narrows it. Line colours: aset/css/jalur.css, written by bangun.py from www's unit data. #}
 {% extends "dasar.html" %}
 {% block judul %}Program Studi — Universitas Sam Ratulangi{% endblock %}
 {% block deskripsi %}Situs {{ jumlah }} program studi Universitas Sam Ratulangi, Manado: profil, kurikulum, capaian pembelajaran lulusan, dan akreditasi.{% endblock %}
+{% block kepala_tambahan %}
+<link rel="stylesheet" href="{{ aset('aset/css/jalur.css') }}">
+<link rel="stylesheet" href="{{ aset('aset/css/akar.css') }}">
+<noscript><link rel="stylesheet" href="{{ aset('aset/css/akar-tanpa-js.css') }}"></noscript>
+<script src="{{ aset('aset/js/cari-prodi.js') }}" defer></script>
+{% endblock %}
 {% block kepala_situs %}
-<header class="kepala">
-	<div class="wadah kepala__isi">
-		<a class="merek" href="{{ ke('') }}">
-			<img class="merek__lambang" src="{{ aset('aset/img/lambang-128.png') }}" alt="" width="56" height="56">
-			<span class="merek__teks">
-				<span class="merek__nama">Program Studi</span>
-				<span class="merek__unit">Universitas Sam Ratulangi</span>
+<header class="kepala-akar">
+	<div class="wadah-akar kepala-akar__isi">
+		<a class="kepala-akar__merek" href="{{ ke('') }}">
+			<img src="{{ aset('aset/img/lambang-128.png') }}" alt="" width="48" height="48">
+			<span>
+				<span class="kepala-akar__nama">Program Studi</span>
+				<span class="kepala-akar__unit">Direktori situs program studi</span>
 			</span>
 		</a>
 	</div>
-	<div class="nav-utama nav-utama--kosong"></div>
 </header>
 {% endblock %}
 {% block isi %}
-<section class="pahlawan" aria-labelledby="judul-akar">
-	<div class="wadah pahlawan__isi">
-		<h1 id="judul-akar">Program Studi Universitas Sam Ratulangi</h1>
-		<p class="pahlawan__pengantar">{{ jumlah }} program studi, dari sarjana sampai subspesialis. Setiap program studi menyajikan profil, kurikulum, capaian pembelajaran lulusan, dan akreditasinya.</p>
-		<nav aria-label="Jenjang">
-			<ul class="loncat">
-				{% for k in kelompok %}
-				<li><a href="#{{ k.id }}">{{ k.judul }} <span class="loncat__jumlah">{{ k.prodi | length }}</span></a></li>
-				{% endfor %}
-			</ul>
-		</nav>
-	</div>
-</section>
-<div class="wadah akar">
-	{% for k in kelompok %}
-	<section class="akar__jenjang" id="{{ k.id }}" aria-labelledby="judul-{{ k.id }}">
-		<h2 id="judul-{{ k.id }}">{{ k.judul }}</h2>
-		<ul class="kartu-daftar kartu-daftar--tiga">
-			{% for x in k.prodi %}
-			<li class="kartu kartu--prodi">
-				<h3 class="kartu__judul"><a href="{{ ke(x.r.slug) }}">{{ nama_tampil(x.p) }}</a></h3>
-				<p class="kartu__unit">{{ x.unit }}</p>
-				{% if x.p.akreditasi | akreditasi %}<p><span class="lencana">Akreditasi {{ x.p.akreditasi | akreditasi }}</span></p>{% endif %}
-			</li>
+<div class="akar">
+	<section class="tujuan wadah-akar" aria-labelledby="judul-akar">
+		<div class="tujuan__utama">
+			<h1 id="judul-akar">Mau ke program studi mana?</h1>
+			<form class="cari" id="cari" role="search" aria-label="Cari program studi">
+				<label class="tersembunyi" for="cari-prodi">Nama program studi</label>
+				<div class="cari__kotak">
+					<svg class="cari__ikon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5 21 21" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+					<input id="cari-prodi" name="q" type="search" autocomplete="off" spellcheck="false" enterkeyhint="go" placeholder="Mis. Teknik Informatika" aria-describedby="cari-status">
+				</div>
+				<p class="cari__status" id="cari-status" role="status" aria-live="polite"></p>
+				<button class="cari__ulang" id="cari-ulang" type="button" hidden>Tampilkan semua program studi</button>
+			</form>
+		</div>
+		<p class="tujuan__jumlah"><strong>{{ jumlah }}</strong> program studi di {{ jumlah_fakultas }} fakultas{% if ada_pascasarjana %} dan Program Pascasarjana{% endif %}</p>
+	</section>
+
+	<nav class="lencana-jalur wadah-akar" aria-label="Fakultas">
+		<ul>
+			{% for j in peta_jalur %}
+			<li><a class="lencana jalur--{{ j.kelas }}" href="#{{ j.id }}" title="{{ j.nama }}"><span class="lencana__nama">{{ j.singkat }}</span> <span class="lencana__jumlah">{{ j.jumlah }}<span class="tersembunyi"> program studi</span></span></a></li>
 			{% endfor %}
 		</ul>
+	</nav>
+
+	<section class="tiba wadah-akar" id="tiba" aria-labelledby="tiba-nama" hidden>
+		<p class="tiba__fakultas"></p>
+		<div class="tiba__isi">
+			<h2 class="tiba__nama" id="tiba-nama"></h2>
+			<p class="tiba__rincian"><span class="tiba__gelar"></span> <span class="tiba__akreditasi"></span></p>
+			<a class="tiba__buka" href="#">Buka situs<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+		</div>
 	</section>
-	{% endfor %}
+
+	<div class="peta wadah-akar" id="peta">
+		{% for j in peta_jalur %}
+		<section class="jalur jalur--{{ j.kelas }}" id="{{ j.id }}" aria-labelledby="judul-{{ j.id }}">
+			<h2 class="jalur__kepala" id="judul-{{ j.id }}"><span class="jalur__nama">{{ j.nama }}</span> <span class="jalur__jumlah">{{ j.jumlah }} prodi</span></h2>
+			<div class="jalur__rel">
+				{% for k in j.kelompok %}
+				<div class="jalur__kelompok">
+					<h3 class="jalur__jenjang">{{ k.judul }}</h3>
+					<ul class="jalur__halte">
+						{% for x in k.prodi %}
+						<li class="halte" data-cari="{{ x.cari }}">
+							<a class="halte__nama" href="{{ ke(x.r.slug) }}">{{ nama_tampil(x.p) }}</a>
+							<span class="halte__keterangan">{% if x.p.gelar %}<span class="halte__gelar">{{ x.p.gelar }}</span>{% endif %}{% if x.akr_jenis == 'status' %}<span class="halte__status"><span class="tersembunyi">Akreditasi </span>{{ x.akr }}</span>{% endif %}</span>
+							{% if x.akr_jenis in ('puncak', 'peringkat') %}<span class="halte__akreditasi{% if x.akr_jenis == 'puncak' %} halte__akreditasi--puncak{% endif %}"><span class="tersembunyi">Akreditasi </span>{{ x.akr }}</span>{% endif %}
+						</li>
+						{% endfor %}
+					</ul>
+				</div>
+				{% endfor %}
+			</div>
+		</section>
+		{% endfor %}
+	</div>
 </div>
 {% endblock %}
 {% block kaki %}
