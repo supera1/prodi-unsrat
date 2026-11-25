@@ -1,0 +1,6 @@
+/* Loaded inside <noscript> on the root page (K-P39): without JavaScript the search box would do nothing, so it
+   is not shown; the whole line map and the faculty badges stay. With JavaScript the box is there from the first
+   paint, so nothing below it moves when the script arrives. */
+.cari {
+	display: none;
+}
