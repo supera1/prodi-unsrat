@@ -1,18 +1,23 @@
-# Persiapan pilot Fase 5 — versi bahasa Inggris enam prodi
+# Versi bahasa Inggris — enam prodi akreditasi internasional
 
-**Status (20 November 2026):** aplikasinya siap. Langkah 1–4 Fase 5 sudah ada di `main`, dan langkah 5 menunggu PR-nya
-digabung. Keenam prodi pilot sudah disebutkan pengguna. Pilot berjalan di produksi (`https://prodi.unsrat.ac.id`, admin
-`https://bo-prodi.unsrat.ac.id`). Sebelum mulai, admin VM perlu memperbarui stack dan memasang kunci DeepL (lihat
-[Sebelum pilot](#sebelum-pilot)). Rencana: [rencana Fase 5](rencana-fase-05.md) §6; keputusan K-P37.
+**Status (22 November 2026):** aplikasinya siap. Langkah 1–5 Fase 5 sudah ada di `main`; langkah 5a (Terjemahkan
+semua) dan 5b (versi Inggris hanya untuk prodi yang diaktifkan) menunggu PR-nya digabung. Versi Inggris berjalan di
+produksi (`https://prodi.unsrat.ac.id`, admin `https://bo-prodi.unsrat.ac.id`). Sebelum mulai, admin VM perlu
+memperbarui stack dan memasang kunci DeepL (lihat [Sebelum mulai](#sebelum-mulai)). Rencana:
+[rencana Fase 5](rencana-fase-05.md) §6; keputusan K-P37 dan K-P38.
 
-Panduan untuk peserta: [docs/panduan-admin-prodi.md](panduan-admin-prodi.md), bagian "Versi bahasa Inggris" dan
-"Pengumuman dan berita". Panduan ini juga terbuka di admin lewat menu **Panduan**. Dokumen ini untuk superadmin UPA TIK
-dan pengguna yang memimpin pilot.
+Ini **bukan pilot**. Keenam prodi di bawah adalah prodi yang mengikuti akreditasi internasional, dan hanya mereka
+yang mendapat versi bahasa Inggris (K-P38). Penyebabnya kuota terjemahan mesin DeepL yang terbatas. Prodi lain tidak
+melihat tab English, isian bahasa Inggris, maupun tombol terjemahan.
 
-## Prodi pilot
+Panduan untuk admin prodi dan operator: [docs/panduan-admin-prodi.md](panduan-admin-prodi.md), bagian "Versi bahasa
+Inggris" dan "Pengumuman dan berita". Panduan ini juga terbuka di admin lewat menu **Panduan**. Dokumen ini untuk
+superadmin UPA TIK.
 
-Keenam prodi disebutkan pengguna pada 20 November 2026. Mereka berasal dari tiga fakultas dan Program Pascasarjana,
-dengan empat lembaga akreditasi.
+## Enam prodi
+
+Disebutkan pengguna pada 20 November 2026 dan ditegaskan pada 22 November 2026. Mereka berasal dari tiga fakultas
+dan Program Pascasarjana, dengan empat lembaga akreditasi.
 
 | No | Prodi | Jenjang · fakultas · lembaga (data www) | Versi Inggris | Data resmi Inggris (data awal) | Admin prodi | Operator |
 |---|---|---|---|---|---|---|
@@ -28,15 +33,29 @@ dengan empat lembaga akreditasi.
 - **Data resmi Inggris** berarti nama Inggris prodi dan fakultasnya, bidang kerja lulusan berbahasa Inggris, dan CPL
   berbahasa Inggris. Angka di tabel berasal dari salinan data www di `platform/data-awal/www/` (diambil 26 Oktober
   2026). Data di produksi bisa lebih baru; keadaannya terlihat di Ringkasan prodi, kotak **Versi bahasa Inggris**.
-- S2 Informatika (42 CPL) dan S1 Agribisnis (nama kurikulum CPL lebih dari 20 karakter) sebelumnya **tidak bisa
+- S2 Informatika (42 CPL) dan S1 Agribisnis (nama kurikulum CPL lebih dari 20 karakter) dulu **tidak bisa
   menyimpan** formulir Data prodi sama sekali, karena data www mereka melampaui batas formulir. Hal ini juga menimpa
-  19 prodi lain. Langkah 5 memperbaikinya, jadi versi yang di-deploy harus memuat langkah 5.
+  19 prodi lain. Langkah 5 memperbaikinya.
 
-## Sebelum pilot
+## Yang diatur saklar versi Inggris
+
+Saklarnya ada di menu **Prodi** → prodi → **Aktifkan versi Inggris**. Dasbor superadmin menampilkan daftar prodi yang
+saklarnya menyala.
+
+| Saklar menyala | Saklar mati |
+|---|---|
+| Situs `/<slug>/en/` dan tombol bahasa | Tanpa versi Inggris di situs |
+| Tab English di Isi halaman, kolom English, kotak Versi bahasa Inggris di Ringkasan | Tidak tampil; rute versi Inggris menjawab 404 |
+| Isian bahasa Inggris di pengumuman, Bagian depan beranda, Menu, Halaman tambahan, dan Kriteria akreditasi | Tidak tampil; menyimpan formulir tidak menghapus nilai Inggris yang sudah tersimpan |
+| Tombol terjemahan mesin, termasuk **Terjemahkan semua** | Tidak ada, sehingga kuota DeepL tidak terpakai |
+
+Mematikan saklar tidak menghapus apa pun. Terjemahan yang sudah ada kembali tampil bila saklarnya dinyalakan lagi.
+
+## Sebelum mulai
 
 Dikerjakan superadmin UPA TIK, bersama admin VM untuk butir 0 dan 1.
 
-0. **Versi yang di-deploy memuat Fase 5 sampai langkah 5.** Setelah PR langkah 5 digabung, admin VM memperbarui stack
+0. **Versi yang di-deploy memuat Fase 5 sampai langkah 5b.** Setelah PR-nya digabung, admin VM memperbarui stack
    ([docs/deploy.md](deploy.md) §8: `git pull`, lalu `docker compose up -d --build`). Uji berjalan saat build; bila
    gagal, versi lama tetap berjalan.
 1. **Kunci DeepL di `.env` VM** ([docs/deploy.md](deploy.md) §4A): `TERJEMAH_PENYEDIA=deepl` dan `TERJEMAH_KUNCI`.
@@ -45,32 +64,30 @@ Dikerjakan superadmin UPA TIK, bersama admin VM untuk butir 0 dan 1.
    - Batas bawaan: 50.000 karakter per prodi per hari (`TERJEMAH_BATAS_HARIAN`) dan 500.000 karakter per bulan untuk
      semua prodi (`TERJEMAH_BATAS_BULANAN`, sama dengan kuota DeepL API Free).
    - Enam prodi yang memakai batas hariannya penuh menghabiskan 300.000 karakter sehari, jadi kuota bulanan Free bisa
-     habis dalam dua hari. Penyunting menampilkan perkiraan jumlah karakter sebelum tombol ditekan. Bila pemakaian
-     cepat naik, turunkan batas harian atau pakai paket DeepL yang lebih besar.
-2. **Coba kunci sekali.** Superadmin membuka satu halaman pendek yang sudah terbit di salah satu prodi pilot, lalu
+     habis dalam dua hari. Layar konfirmasi Terjemahkan semua dan penyunting menampilkan perkiraan jumlah karakter
+     sebelum tombol ditekan. Bila pemakaian cepat naik, turunkan batas harian atau pakai paket DeepL yang lebih besar.
+2. **Nyalakan saklar versi Inggris keenam prodi**: menu **Prodi** → prodi → **Aktifkan versi Inggris**. Situs prodi
+   itu langsung dibangun ulang.
+   - Saklar dibutuhkan sejak awal, karena tab English dan tombol terjemahan hanya ada bila saklarnya menyala (K-P38).
+   - Begitu diaktifkan, beranda, Profil Lulusan dan CPL, Spesifikasi, Akreditasi, Dosen Tetap, Kalender, dan Kontak
+     langsung tayang dalam bahasa Inggris dari data resmi, yang sudah lengkap untuk keenam prodi.
+   - Halaman yang diisi prodi baru muncul setelah versi Inggrisnya terbit, jadi tidak ada halaman setengah jadi.
+   - Periksa di dasbor superadmin: "Versi bahasa Inggris dan terjemahan mesin aktif untuk **6** prodi".
+3. **Coba kunci sekali.** Superadmin membuka satu halaman pendek yang sudah terbit di salah satu prodi itu, lalu
    **Isi halaman** → tab **English** → **Terjemahkan dari versi Indonesia**.
    - Hasilnya masuk draf dan bertanda terjemahan mesin. Buang drafnya bila tidak dipakai.
    - Pesan "kunci API DeepL ditolak" berarti baris `TERJEMAH_KUNCI` di `.env` perlu diperiksa, misalnya ada spasi atau
      tanda kutip yang ikut tersalin.
-3. **Data resmi berbahasa Inggris.** Buka Ringkasan setiap prodi pilot (menu **Prodi** → prodi → **dasbor prodi**).
+4. **Data resmi berbahasa Inggris.** Buka Ringkasan setiap prodi (menu **Prodi** → prodi → **dasbor prodi**).
    - Kotak **Versi bahasa Inggris** harus menunjukkan *Data resmi berbahasa Inggris lengkap*.
    - Bila ada yang kosong, lengkapi di www lalu unggah data www terbaru (menu **Data www**), atau isi di menu
      **Data prodi** prodi itu.
    - Nama Inggris fakultas hanya bisa diisi di www.
-4. **Akun.** Buat akun admin prodi (koordinator) dan satu atau dua operator untuk prodi pilot yang belum punya, lewat
-   menu **Akun**. Kata sandi sementara hanya tampil sekali; sampaikan langsung atau lewat telepon kepada pemiliknya.
+5. **Akun.** Buat akun admin prodi (koordinator) dan satu atau dua operator untuk prodi yang belum punya, lewat menu
+   **Akun**. Kata sandi sementara hanya tampil sekali; sampaikan langsung atau lewat telepon kepada pemiliknya.
    S1 Teknik Informatika mungkin sudah punya akun dari pilot Fase 2.
-5. **Uji masuk.** Pastikan setiap peserta bisa membuka admin dari tempat kerjanya. Admin hanya terbuka dari jaringan
+6. **Uji masuk.** Pastikan setiap pengguna bisa membuka admin dari tempat kerjanya. Admin hanya terbuka dari jaringan
    kampus atau VPN UNSRAT.
-6. **Aktifkan versi Inggris** setiap prodi pilot setelah sesi pengenalan: menu **Prodi** → prodi → **Aktifkan versi
-   Inggris**. Situs prodi itu langsung dibangun ulang.
-   - Rencana §6 meminta versi Inggris diaktifkan "setelah isinya cukup". Bagian dari data resmi sudah cukup: keenam
-     prodi punya data resmi Inggris lengkap. Begitu diaktifkan, beranda, Profil Lulusan dan CPL, Spesifikasi,
-     Akreditasi, Dosen Tetap, Kalender, dan Kontak langsung tayang dalam bahasa Inggris.
-   - Halaman yang diisi prodi baru muncul setelah versi Inggrisnya terbit, jadi tidak ada halaman setengah jadi.
-   - Peserta melihat hasil terjemahannya di situs sungguhan, termasuk tombol bahasa.
-   - Bila sebuah prodi ingin menunggu, saklarnya bisa dinyalakan kapan saja, dan terjemahan tetap bisa disiapkan dan
-     diterbitkan sebelumnya.
 
 ## Sesi pengenalan (±60 menit)
 
@@ -83,11 +100,9 @@ yang belum pernah memakainya mengikuti dulu sesi pengenalan Fase 2 ([docs/pilot-
 | 20 menit | Praktik: **Terjemahkan semua** di daftar Isi halaman (periksa daftarnya, lalu **Ya, terjemahkan semua**); buka saringan **Terjemahan mesin belum diperiksa**; di tab **English** halaman **Sejarah**, periksa setiap isian bertanda terjemahan mesin, centang kotak pemeriksaan, lalu **Terbitkan dan buka berikutnya** (operator: **Ajukan dan buka berikutnya**); lihat hasilnya di situs |
 | 10 menit | Admin prodi: bagian *Versi bahasa Inggris* di **Bagian depan beranda**, label menu Inggris, nama Inggris halaman tambahan, nama kriteria Inggris |
 | 10 menit | Pengumuman: bagian **Versi bahasa Inggris (opsional)**, **Simpan dan terjemahkan dari versi Indonesia**, pemeriksaan, menu **News** |
-| 10 menit | Yang tidak diterjemahkan (nama orang dan mitra, kode, judul karya, tabel Excel), tanda **perlu diperbarui**, batas harian, teks dikirim ke DeepL (jangan memuat data pribadi), masukan, target pilot |
+| 10 menit | Yang tidak diterjemahkan (nama orang dan mitra, kode, judul karya, tabel Excel), tanda **perlu diperbarui**, batas harian, teks dikirim ke DeepL (jangan memuat data pribadi), masukan, target |
 
-## Masa pengisian
-
-Usul tiga minggu; pengguna yang menentukan.
+## Pemantauan
 
 - **Target per prodi:** paling sedikit 15 dari 22 halaman wajib terbit dalam bahasa Inggris, tanpa bantuan pengembang
   (rencana §6). Beranda Inggris tayang begitu versi Inggris diaktifkan.
@@ -99,24 +114,24 @@ Usul tiga minggu; pengguna yang menentukan.
   - periksa acak halaman Inggris yang baru terbit: nama prodi, fakultas, dan universitas, gelar, serta lembaga
     akreditasi harus sama dengan data resmi, tidak ada data pribadi, dan tidak ada teks Indonesia selain nama dan judul
     yang memang tidak diterjemahkan.
-- **Perbaikan dari masukan** dikerjakan pengembang per langkah kecil (`fase/05-5a-…`, `fase/05-5b-…`). Setiap langkah
-  ditinjau sebelum dipasang di VM.
+- **Perbaikan dari masukan** dikerjakan pengembang per langkah kecil. Setiap langkah ditinjau sebelum dipasang di VM.
 
 ## Ukuran keberhasilan dan cara melihatnya
 
 | Ukuran (rencana §6) | Cara melihat |
 |---|---|
-| Setiap prodi pilot menerbitkan versi Inggris beranda dan ≥15 dari 22 halaman wajib | Menu **Kelengkapan**, kolom "Versi Inggris"; CSV mingguan (`wajib_terbit_en`); kotak **Versi bahasa Inggris** di Ringkasan prodi |
+| Setiap prodi menerbitkan versi Inggris beranda dan ≥15 dari 22 halaman wajib | Menu **Kelengkapan**, kolom "Versi Inggris"; CSV mingguan (`wajib_terbit_en`); kotak **Versi bahasa Inggris** di Ringkasan prodi |
 | Tanpa bantuan pengembang | Masukan berjenis Kendala yang memerlukan pengembang, dan catatan sesi |
 | Terjemahan mesin dipakai dan diperiksa | Log audit (`isi-en-terjemahan-mesin`, `pengumuman-en-terjemahan-mesin`) dan pemakaian di dasbor superadmin. Halaman dengan terjemahan mesin yang belum diperiksa tidak bisa diajukan atau diterbitkan, dan pengumuman seperti itu tidak tampil di versi Inggris |
 | Tidak ada istilah resmi yang salah tayang | Pemeriksaan acak mingguan. Istilah resmi dikunci dari data resmi saat diterjemahkan mesin |
 
-## Sesudah pilot
+## Sesudahnya
 
-- Pengembang menulis ringkasan hasil di `docs/log/fase-05-pilot.md`:
+- Pengembang menulis ringkasan hasil di `docs/log/fase-05-inggris.md`:
   - angka per prodi dari CSV kelengkapan;
   - pemakaian DeepL;
   - masukan per jenis beserta statusnya;
   - istilah yang perlu ditambahkan ke kamus atau glosarium.
 - Langkah 6 Fase 5: uji menyeluruh dan `docs/log/fase-05.md`.
-- Membuka versi Inggris untuk prodi lain tidak memerlukan perubahan kode: superadmin menyalakan saklarnya per prodi.
+- Bila prodi lain kelak mengikuti akreditasi internasional, superadmin menyalakan saklarnya; tidak ada perubahan kode
+  (K-P38). Perhatikan kuota DeepL sebelum menambah prodi.

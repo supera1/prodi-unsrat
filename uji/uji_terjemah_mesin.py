@@ -211,6 +211,7 @@ try:
         f.write(",".join(registri.slug_mod.KOLOM) + "\n%s,S1,Teknik Informatika,FT,s1informatika,x,x\n"
                 "%s,S1,Teknik Elektro,FT,s1elektro,x,x\n" % (A, B))
     registri.siapkan_dari_csv("penguji", path_csv)
+    registri.atur(A, "penguji", inggris=True)        # the English version exists only when switched on (K-P38)
     tm.catat_pemakaian(B, 300, "2026-11-19")
     tm.catat_pemakaian(B, 200, "2026-11-20")
     tm.catat_pemakaian(B, 50, "2026-10-31")

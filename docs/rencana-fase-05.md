@@ -164,7 +164,9 @@ Dasar: [rencana Fase 2](rencana-fase-02.md), keputusan K-P23–K-P36, dan pandua
   depan beranda Inggris sudah terbit, dan setidaknya halaman Profil (sejarah, visi-misi, struktur organisasi) sudah
   punya isi Inggris.
 - Selama belum aktif, admin prodi tetap bisa mengisi dan menerbitkan isi Inggris dan melihatnya di pratinjau; situs
-  belum membuat `/<slug>/en/`.
+  belum membuat `/<slug>/en/`. *Diubah K-P38 (22 November 2026):* tanpa saklar, admin prodi tidak melihat bagian
+  bahasa Inggris dan tidak bisa memakai terjemahan mesin; saklar dinyalakan sejak awal untuk prodi akreditasi
+  internasional.
 - Kelengkapan superadmin dan CSV mendapat kolom: versi Inggris aktif, halaman wajib dengan isi Inggris terbit, dan
   halaman yang perlu diperbarui.
 
@@ -206,17 +208,19 @@ Dasar: [rencana Fase 2](rencana-fase-02.md), keputusan K-P23–K-P36, dan pandua
 - Setiap rute baru memakai `@akses` dan masuk uji matriks peran × rute; tombol terjemahan hanya untuk peran yang boleh
   menyunting halaman itu, dan batas pemakaian diperiksa di server.
 
-## 6. Pilot
+## 6. Prodi berversi Inggris (semula "Pilot")
 
-- **Prodi pilot:** prodi yang sedang menuju akreditasi internasional. Pengguna menyebutkannya pada 20 November 2026:
-  S1 Teknik Informatika, S2 Informatika, S1 Biologi, S1 Agribisnis, S1 Kehutanan, dan S1 Agroteknologi. Sebelumnya,
-  selama belum disebutkan, rencana ini memakai tiga prodi pilot Fase 2.
-- **Pelaksanaan:** versi Inggris diaktifkan untuk prodi pilot setelah isinya cukup; masukan dikumpulkan lewat menu
-  Masukan; perbaikan dikerjakan per langkah kecil.
-- **Ukuran keberhasilan** (usulan): setiap prodi pilot menerbitkan versi Inggris beranda dan minimal 15 dari 22 halaman
+- **Prodinya:** prodi yang mengikuti akreditasi internasional. Pengguna menyebutkannya pada 20 November 2026: S1 Teknik
+  Informatika, S2 Informatika, S1 Biologi, S1 Agribisnis, S1 Kehutanan, dan S1 Agroteknologi. Pada 22 November 2026
+  pengguna mengoreksi bahwa ini **bukan pilot**: hanya keenam prodi ini yang mendapat versi bahasa Inggris dan
+  terjemahan mesin, karena kuota DeepL terbatas (K-P38). Sebelumnya, selama belum disebutkan, rencana ini memakai tiga
+  prodi pilot Fase 2.
+- **Pelaksanaan:** superadmin menyalakan saklar versi Inggris keenam prodi; masukan dikumpulkan lewat menu Masukan;
+  perbaikan dikerjakan per langkah kecil. Prodi lain tidak melihat bagian bahasa Inggris di admin.
+- **Ukuran keberhasilan** (usulan): setiap prodi menerbitkan versi Inggris beranda dan minimal 15 dari 22 halaman
   wajib tanpa bantuan pengembang; terjemahan mesin dipakai dan diperiksa; tidak ada istilah resmi yang salah tayang.
 - **Pelaksanaan (langkah 5, 20 November 2026):**
-  - persiapan pilot di [docs/pilot-fase-05.md](pilot-fase-05.md);
+  - persiapan di [docs/versi-inggris-prodi.md](versi-inggris-prodi.md) (semula `pilot-fase-05.md`);
   - Ringkasan prodi mendapat kotak **Versi bahasa Inggris**: status saklar, halaman wajib yang terbit dalam bahasa
     Inggris, halaman perlu diperbarui, terjemahan mesin yang belum diperiksa, pengumuman Inggris, dan kekurangan data
     resmi berbahasa Inggris. Ini kriteria selesai §9 tentang dasbor prodi;
@@ -224,8 +228,12 @@ Dasar: [rencana Fase 2](rencana-fase-02.md), keputusan K-P23–K-P36, dan pandua
   - keterangan saklar superadmin diperbarui;
   - batas CPL di Data prodi diselaraskan dengan data www. Sebelumnya 21 prodi, termasuk S2 Informatika dan
     S1 Agribisnis, tidak bisa menyimpan formulir Data prodi sama sekali.
-  - Saklar keenam prodi dinyalakan superadmin di produksi setelah sesi pengenalan. Bagian dari data resmi sudah cukup,
-    karena data resmi Inggris keenamnya lengkap, dan halaman prodi baru muncul setelah versi Inggrisnya terbit.
+  - Saklar keenam prodi dinyalakan superadmin di produksi. Bagian dari data resmi sudah cukup, karena data resmi
+    Inggris keenamnya lengkap, dan halaman prodi baru muncul setelah versi Inggrisnya terbit.
+- **Pelaksanaan (langkah 5b, 22 November 2026):** saklar versi Inggris kini juga mengatur admin. Tanpa saklar, tab
+  English, kolom dan kotak versi Inggris, isian bahasa Inggris di semua formulir, serta tombol terjemahan mesin
+  (termasuk Terjemahkan semua) tidak ada, dan rute versi Inggris menjawab 404. Menyimpan formulir tidak menghapus nilai
+  Inggris yang tersimpan. Dasbor superadmin mendaftar prodi yang saklarnya menyala (K-P38).
 
 ## 7. Uji
 
@@ -265,7 +273,7 @@ sebenarnya (ujinya memakai penyedia tiruan).
   sitemap memuat kedua bahasa, tanpa skrip pihak ketiga.
 - [ ] Terjemahan mesin menghasilkan draf dengan istilah resmi yang benar dan markah utuh, dalam batas pemakaian.
 - [ ] Isi Inggris yang tertinggal terlihat di dasbor prodi dan kelengkapan superadmin.
-- [ ] Prodi pilot mencapai ukuran keberhasilan §6.
+- [ ] Keenam prodi berversi Inggris mencapai ukuran keberhasilan §6.
 - [ ] Seluruh uji lulus di dalam image; panduan dan log fase ditulis.
 
 ## 10. Risiko
@@ -299,3 +307,9 @@ dipakai tiga prodi pilot Fase 2 sampai ada prodi lain yang disebutkan.
 Prodi pilot versi Inggris: S1 Teknik Informatika (55201), S2 Informatika (55100), S1 Biologi (46201), S1 Agribisnis
 (54201), S1 Kehutanan (54251; disebut pengguna "S1 Ilmu Kehutanan"), dan S1 Agroteknologi (54211). Pengguna juga
 meminta langkah 5 dimulai ("Boleh mulai langkah 5").
+
+### Jawaban (pengguna, 22 November 2026)
+
+Koreksi: keenam prodi itu bukan pilot, tetapi prodi yang akan mengikuti akreditasi internasional. Karena keterbatasan
+API DeepL, hanya prodi-prodi ini yang punya tombol terjemahan ke bahasa Inggris dan yang bisa diterjemahkan ke bahasa
+Inggris, bukan semua prodi (K-P38, langkah 5b).

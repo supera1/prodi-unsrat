@@ -68,6 +68,17 @@ def dari_formulir(form):
     return hasil
 
 
+def dengan_nama_inggris(isian, tersimpan):
+    """The criteria from a form without English fields, with the English names stored before (matched by number) and
+    the English name of the instrument."""
+    nama_en = {k.get("nomor"): k["nama_en"] for k in tersimpan.get("kriteria") or [] if isinstance(k, dict) and k.get("nama_en")}
+    hasil = dict(isian, kriteria=[dict(k, nama_en=nama_en[k["nomor"]]) if k["nomor"] in nama_en else k
+                                  for k in isian["kriteria"]])
+    if tersimpan.get("instrumen_en"):
+        hasil["instrumen_en"] = tersimpan["instrumen_en"]
+    return hasil
+
+
 def pasang(app, alat):
 
     def bangun(kode):
@@ -97,6 +108,8 @@ def pasang(app, alat):
     @akses("prodi", "admin")
     def kriteria_simpan(kode):
         isian = dari_formulir(request.form)
+        if not g.prodi["inggris"]:                    # no English fields (K-P38): the stored English names stay
+            isian = dengan_nama_inggris(isian, kriteria_mod.baca_prodi(kode))
         try:
             kriteria_mod.simpan_prodi(kode, isian, set(ih.TEMPLAT), g.akun["nama"], "kriteria disimpan")
         except kriteria_mod.GagalKriteria as e:

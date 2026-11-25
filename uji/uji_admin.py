@@ -67,8 +67,8 @@ lokasi.tulis_json(lokasi.path_data("warisan/prodi"), {"program": [
     {"kode_pddikti": A, "nama": "Teknik Informatika", "jenjang": "S1", "unit": "Fakultas Teknik"},
     {"kode_pddikti": B, "nama": "Teknik Elektro", "jenjang": "S1", "unit": "Fakultas Teknik"}]})
 lokasi.tulis_json(lokasi.path_data("registri"), {"prodi": [
-    {"kode_pddikti": A, "slug": "s1informatika", "slug_lama": [], "aktif": True},
-    {"kode_pddikti": B, "slug": "s1elektro", "slug_lama": [], "aktif": True}]})
+    {"kode_pddikti": A, "slug": "s1informatika", "slug_lama": [], "aktif": True, "inggris": True},
+    {"kode_pddikti": B, "slug": "s1elektro", "slug_lama": [], "aktif": True}]})     # B: no English version (K-P38)
 
 try:
     # --- password rules
@@ -408,6 +408,15 @@ try:
         ("GET", "/prodi/%s/terjemahkan-semua" % A, "terjemahkan_semua", hanya("superuji", "adma", "opa", "opab")),
         ("POST", "/prodi/%s/terjemahkan-semua" % A, "terjemahkan_semua_mulai",
          hanya("superuji", "adma", "opa", "opab", ya=400)),
+        # a programme without its English version switched on (K-P38): its English routes do not exist
+        ("GET", "/prodi/%s/halaman/sejarah/en" % B, "isi_sunting_en", hanya("superuji", "admb", "opb", "opab", ya=404)),
+        ("POST", "/prodi/%s/halaman/sejarah/en" % B, "isi_simpan_en", hanya("superuji", "admb", "opb", "opab", ya=404)),
+        ("GET", "/prodi/%s/halaman/sejarah/en/riwayat" % B, "isi_riwayat_en", hanya("superuji", "admb", "opb", "opab", ya=404)),
+        ("GET", "/prodi/%s/terjemahkan-semua" % B, "terjemahkan_semua", hanya("superuji", "admb", "opb", "opab", ya=404)),
+        ("POST", "/prodi/%s/terjemahkan-semua" % B, "terjemahkan_semua_mulai",
+         hanya("superuji", "admb", "opb", "opab", ya=404)),
+        ("GET", "/prodi/%s/halaman?status=mesin" % B, "isi_daftar", hanya("superuji", "admb", "opb", "opab", ya=404)),
+        ("GET", "/prodi/%s/pengumuman?en=mesin" % B, "pengumuman_daftar", hanya("superuji", "admb", "opb", "opab", ya=404)),
         ("GET", "/super/kelengkapan", "super_kelengkapan", hanya("superuji")),
         ("GET", "/super/kelengkapan.csv", "super_kelengkapan_csv", hanya("superuji")),
         # the guide and the feedback (Fase 2 langkah 5): everybody logged in sends; only the superadmin reads all

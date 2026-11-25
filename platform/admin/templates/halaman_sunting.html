@@ -22,10 +22,12 @@
 {{ nav_prodi(pr, 'isi_daftar') }}
 <p class="jejak-admin"><a href="{{ url_for('isi_daftar', kode=pr.kode) }}">Isi halaman</a> › {{ ini.label }}</p>
 <h1>{{ ini.label }}</h1>
+{% if pr.inggris %}
 <nav class="tab-bahasa" aria-label="Bahasa isi halaman">
 	<a href="{{ url_for('isi_sunting', kode=pr.kode, id_=ini.id) }}" aria-current="page">Bahasa Indonesia</a>
 	<a href="{{ url_for('isi_sunting_en', kode=pr.kode, id_=ini.id) }}" lang="en">English</a>
 </nav>
+{% endif %}
 <p class="keterangan">{{ ini.deskripsi }}</p>
 {% if impor %}<p class="keterangan">Tabel {{ impor | join(', ') }} bisa diisi dari Excel: <a href="{{ url_for('isi_impor', kode=pr.kode, id_=ini.id) }}">Impor dari Excel</a>.</p>{% endif %}
 {% if kriteria[1] %}<p class="keterangan">Kriteria akreditasi {{ kriteria[0].nama }}: {% for n, nama_k in kriteria[1] %}Kriteria {{ n }}, {{ nama_k }}{{ "; " if not loop.last }}{% endfor %}.</p>{% endif %}

@@ -75,7 +75,7 @@ def pasang(app, alat):
             kode = r["kode_pddikti"]
             hasil.append({
                 "kode": kode, "slug": r["slug"], "slug_lama": r.get("slug_lama", []), "aktif": r.get("aktif", False),
-                "dosen_url": r.get("dosen_url") or "", "diubah": r.get("diubah", ""),
+                "dosen_url": r.get("dosen_url") or "", "diubah": r.get("diubah", ""), "inggris": bool(r.get("inggris")),
                 "nama": registri.nama_tampil(p) if p else "(tidak ada di data resmi)", "jenjang": p["jenjang"] if p else "",
                 "unit": p["unit"] if p else "", "hilang": p is None or bool(p.get("hilang_dari_www")),
                 "kekurangan": tarik_www.kekurangan(p) if p else [],
@@ -99,7 +99,8 @@ def pasang(app, alat):
                 "tanpa_admin": [r for r in aktif if not r["admin"]], "hilang": [r for r in baris if r["hilang"]],
                 "kurang": [r for r in aktif if r["kekurangan"]], "tanpa_dosen": [r for r in aktif if not r["dosen_url"]],
                 "bentrok": [r for r in baris if r["bentrok"]], "timpaan": sum(1 for r in baris if r["timpaan"]),
-                "meta": meta, "umur_data": umur_hari(meta.get("ditarik")), "bangun": alat.antrean.status}
+                "meta": meta, "umur_data": umur_hari(meta.get("ditarik")), "bangun": alat.antrean.status,
+                "inggris": [r for r in baris if r["inggris"]]}
     alat.ringkasan = ringkasan
     alat.simpan_sementara = lambda jenis, isi: simpan_sementara(jenis, isi)
     alat.ambil_sementara = lambda jenis, token: ambil_sementara(jenis, token)

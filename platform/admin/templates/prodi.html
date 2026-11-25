@@ -41,13 +41,10 @@
 	{% endif %}
 	<p><a class="tombol" href="{{ url_for('pengumuman_baru', kode=p.kode) }}">Buat pengumuman</a></p>
 </section>
+{% if en.aktif %}
 <section class="kartu" aria-labelledby="judul-en">
 	<h2 id="judul-en">Versi bahasa Inggris</h2>
-	{% if en.aktif %}
 	<p>Versi bahasa Inggris situs ini <strong>aktif</strong>: <a href="{{ p.alamat }}en/">{{ p.alamat }}en/</a>.</p>
-	{% else %}
-	<p>Versi bahasa Inggris situs ini <strong>belum diaktifkan</strong> superadmin UPA TIK. Terjemahan tetap bisa disiapkan dan diterbitkan; halamannya tampil di <code>{{ p.alamat }}en/</code> setelah diaktifkan.</p>
-	{% endif %}
 	<p><strong>{{ en.terbit }} dari {{ en.wajib }}</strong> halaman wajib akreditasi sudah terbit dalam bahasa Inggris.</p>
 	<ul class="angka">
 		{% if en.perlu %}<li><a href="{{ url_for('isi_daftar', kode=p.kode) }}"><strong>{{ en.perlu }}</strong> halaman perlu diperbarui</a></li>{% endif %}
@@ -64,6 +61,7 @@
 	{% if en.penyedia %}<p><a class="tombol tombol--garis" href="{{ url_for('terjemahkan_semua', kode=p.kode) }}">Terjemahkan semua</a></p>{% endif %}
 	<p><a href="{{ url_for('panduan') }}#versi-bahasa-inggris">Cara mengisi versi bahasa Inggris</a></p>
 </section>
+{% endif %}
 {% if siap %}
 <section class="kartu">
 	<h2>Kesiapan situs</h2>

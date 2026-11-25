@@ -353,7 +353,12 @@ try:
     r = ka.get("/prodi/%s/halaman" % A)
     teks = r.get_data(as_text=True)
     cek(r.status_code == 200 and len(re.findall(r'href="%s[^"/]+"' % re.escape(URL), teks)) == len(ih.TEMPLAT)
-        and teks.count('/en">') == len(ih.TEMPLAT), "daftar memuat ke-24 halaman, masing-masing dengan versi Inggrisnya")
+        and teks.count('/en">') == 0 and ">English</th>" not in teks,
+        "daftar memuat ke-24 halaman, tanpa versi Inggris bila saklarnya mati (K-P38)")
+    registri.atur(A, "penguji", inggris=True)
+    teks = ka.get("/prodi/%s/halaman" % A).get_data(as_text=True)
+    cek(teks.count('/en">') == len(ih.TEMPLAT), "saklar versi Inggris menyala: setiap halaman dengan versi Inggrisnya")
+    registri.atur(A, "penguji", inggris=False)
     cek("0 dari 22" in teks and "Belum diisi" in teks, "daftar: jumlah halaman wajib yang berisi")
     cek("Isi halaman" in ka.get("/prodi/%s/" % A).get_data(as_text=True) and
         'href="/prodi/%s/halaman"' % A in ka.get("/prodi/%s/" % A).get_data(as_text=True), "dasbor menautkan isi halaman")

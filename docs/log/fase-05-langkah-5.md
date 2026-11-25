@@ -16,7 +16,7 @@ hanya untuk prodi pilot. Pengguna menyebutkan enam prodi pilot dan meminta langk
 | S1 Agroteknologi | 54211 | `/s1agroteknologi/` |
 
 Pengembang tidak menjalankan apa pun ke server produksi. Menyalakan saklar versi Inggris dan memasang kunci DeepL
-dikerjakan superadmin dan admin VM menurut `docs/pilot-fase-05.md`.
+dikerjakan superadmin dan admin VM menurut `docs/pilot-fase-05.md` (sejak langkah 5b: `docs/versi-inggris-prodi.md`).
 
 ## Yang dikerjakan
 - **Persiapan pilot** (`docs/pilot-fase-05.md`), dengan susunan yang sama seperti pilot Fase 2:

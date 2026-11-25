@@ -203,8 +203,10 @@ def buat_app(env=None):
         p = data_prodi.efektif(kode, p) if p else None          # with the programme's own changes
         if not r or not p:
             return None
+        # inggris: the English version, its editors and machine translation (K-P37, K-P38): only for a programme the
+        # superadmin switched it on for
         return {"kode": kode, "slug": r["slug"], "aktif": r["aktif"], "nama": registri.nama_tampil(p), "unit": p["unit"],
-                "jenjang": p["jenjang"], "alamat": "%s/%s/" % (alamat_publik, r["slug"])}
+                "jenjang": p["jenjang"], "alamat": "%s/%s/" % (alamat_publik, r["slug"]), "inggris": bool(r.get("inggris"))}
 
     def kelompok_prodi():
         """Registered programmes grouped by faculty, for the programme checkboxes of the account forms."""
@@ -388,7 +390,7 @@ def buat_app(env=None):
         butir = [b for b in pengumuman.baca(kode)["butir"] if not operator or b.get("oleh") == g.akun["nama"]]
         jumlah = {s: sum(1 for b in butir if b.get("status") == s) for s in pengumuman.STATUS}
         terbaru = sorted(butir, key=lambda b: b.get("diubah", ""), reverse=True)[:5]
-        isi = alat.ringkasan_isi(kode)
+        isi = alat.ringkasan_isi(kode, inggris=g.prodi["inggris"])
         r = registri_per_kode().get(kode, {})
         # the English version (K-P37): what shows, what lags behind, what waits for a check
         en = {"aktif": bool(r.get("inggris")), "terbit": isi["en_terbit"], "wajib": isi["wajib"], "perlu": isi["en_perlu"],

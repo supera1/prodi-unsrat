@@ -199,12 +199,20 @@ try:
     def versi_id():
         return str(ih.baca(A, "sejarah").get("versi", 0))
 
+    # ============================================================== switched off: no English version in the admin (K-P38)
+    teks = ko.get("/prodi/%s/halaman/sejarah" % A).get_data(as_text=True)
+    cek('aria-label="Bahasa isi halaman"' not in teks and ko.get(E).status_code == 404
+        and kirim(ko, E, versi="0", versi_id=versi_id(), aksi="simpan").status_code == 404
+        and '<h2 id="judul-en">' not in ka.get("/prodi/%s/" % A).get_data(as_text=True),
+        "saklar mati: tanpa tab English, rute versi Inggris 404, tanpa kotak versi Inggris di Ringkasan")
+    registri.atur(A, "penguji", inggris=True)
+
     # ============================================================== the admin: the English tab
     teks = ko.get("/prodi/%s/halaman/sejarah" % A).get_data(as_text=True)
     cek('aria-label="Bahasa isi halaman"' in teks and 'href="%s"' % E in teks, "tab English di penyunting")
     teks = ko.get(E).get_data(as_text=True)
     cek("Sejarah: versi Inggris" in teks and teks.count('class="terjemah__sumber"') == 3 and "Prodi didirikan tahun 1990." in teks
-        and 'name="%s"' % t("Akreditasi pertama") in teks and "belum diaktifkan superadmin" in teks
+        and 'name="%s"' % t("Akreditasi pertama") in teks
         and 'lang="id"><span class="tersembunyi">Teks Indonesia: </span>' in teks, "formulir Inggris: setiap teks dengan aslinya")
     r = kirim(ko, E, versi=versi_en(), versi_id=versi_id(), aksi="ajukan",
               **{t("Prodi didirikan tahun 1990."): "The study program was founded in 1990.",
@@ -229,7 +237,13 @@ try:
                  t("Prodi didirikan"): "The study program was founded", t("Akreditasi pertama"): "First accreditation"})
     cek(r.status_code == 302 and ih.terbit(A, "sejarah:en") and ih.draf(ih.baca(A, "sejarah:en")) is None,
         "admin menerbitkan versi Inggris")
-    cek(halaman("en/profil/sejarah") is None, "situs: tanpa saklar superadmin belum ada versi Inggris")
+    cek(halaman("en/profil/sejarah") is not None, "situs: halaman Inggris terbit")
+    # switched off again: the English version leaves the admin and the site; its translations stay
+    registri.atur(A, "penguji", inggris=False)
+    bangun.Pembangun(produksi=False).bangun()
+    cek(halaman("en/profil/sejarah") is None and halaman("en") is None and ih.terbit(A, "sejarah:en") is not None
+        and ka.get(E).status_code == 404, "saklar dimatikan: versi Inggris hilang dari situs dan admin, terjemahannya tetap")
+    registri.atur(A, "penguji", inggris=True)
 
     # the programme's dashboard: the English version's state
     cek(tarik_www.kekurangan_en({"nama_en": "", "bidang_kerja": "", "bidang_kerja_en": "", "cpl": []}, {"nama_en": ""})
@@ -238,13 +252,13 @@ try:
                                      "cpl": [{"isi": "C.", "isi_en": "P."}, {"isi": "D.", "isi_en": " "}]}, {"nama_en": "F"})
         == ["1 CPL"], "kekurangan data resmi berbahasa Inggris")
     teks = ka.get("/prodi/%s/" % A).get_data(as_text=True)
-    cek("Versi bahasa Inggris situs ini <strong>belum diaktifkan</strong>" in teks
+    cek("Versi bahasa Inggris situs ini <strong>aktif</strong>" in teks
         and "<strong>1 dari 22</strong> halaman wajib akreditasi sudah terbit dalam bahasa Inggris" in teks
         and "Data resmi berbahasa Inggris masih kosong: bidang kerja lulusan, 1 CPL" in teks
         and "Bagian depan beranda berbahasa Inggris masih bawaan (opsional)" in teks
         and "<strong>0</strong> pengumuman berbahasa Inggris terbit" in teks
         and "terjemahan mesin belum diperiksa" not in teks and "perlu diperbarui" not in teks,
-        "dasbor prodi: versi Inggris belum aktif")
+        "dasbor prodi: versi Inggris")
     teks = ko.get("/prodi/%s/" % A).get_data(as_text=True)
     cek('<h2 id="judul-en">Versi bahasa Inggris</h2>' in teks and "<strong>1 dari 22</strong>" in teks
         and "Data resmi berbahasa Inggris" not in teks, "dasbor operator: versi Inggris tanpa data resmi")

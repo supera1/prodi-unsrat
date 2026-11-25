@@ -326,8 +326,11 @@ def pasang(app, alat):
             tambahan_en.pop()
         if tambahan_en:
             en["kartu_tambahan"] = tambahan_en
+        perubahan = {"tagline": f.get("pengantar", "").strip(), "beranda": beranda}
+        if g.prodi["inggris"]:                        # without the English version the form has no English part
+            perubahan["en"] = en                      # (K-P38): the stored one stays as it is
         try:
-            simpan_situs(kode, {"tagline": f.get("pengantar", "").strip(), "beranda": beranda, "en": en},
+            simpan_situs(kode, perubahan,
                          "beranda-diubah", "Bagian depan beranda disimpan.", latar=jenis)
         except tampilan_prodi.GagalTampilan as e:
             flash("Bagian depan tidak disimpan: %s" % e, "galat")
@@ -369,6 +372,7 @@ def pasang(app, alat):
     def menu_simpan(kode):
         f = request.form
         pengaturan = {}
+        lama = situs(kode).get("menu") or {}
         for b in menu_mod.baca_templat():
             butir = [(b, None)] + [(a, i) for i, a in enumerate(b.get("anak", []))]
             for x, posisi in butir:
@@ -376,7 +380,10 @@ def pasang(app, alat):
                 label = f.get("label-%s" % x["id"], "").strip()
                 if label and label != x["label"]:
                     atur["label"] = label
-                label_en = f.get("label_en-%s" % x["id"], "").strip()
+                if g.prodi["inggris"]:
+                    label_en = f.get("label_en-%s" % x["id"], "").strip()
+                else:                                 # no English fields (K-P38): the stored label stays
+                    label_en = ((lama.get(x["id"]) if isinstance(lama.get(x["id"]), dict) else {}).get("label_en") or "")
                 if label_en and label_en != x["label_en"]:
                     atur["label_en"] = label_en
                 if posisi is not None and f.get("urutan-%s" % x["id"], "").strip():
