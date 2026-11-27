@@ -40,7 +40,7 @@ for nama, sub in (("PRODI_DATA", "data"), ("PRODI_RIWAYAT", "riwayat"), ("PRODI_
                   ("WWW_DATA", "www"), ("PRODI_PUBLIK", "publik"), ("PRODI_NGINX", "nginx"), ("PRODI_UNGGAHAN", "unggahan")):
     os.environ[nama] = os.path.join(KERJA, sub)
 os.environ["PRODI_MANIFES"] = os.path.join(KERJA, "manifes.json")
-for nama in ("PRODI_MODE", "PRODI_PENYIMPANAN"):
+for nama in ("PRODI_MODE", "PRODI_PENYIMPANAN", "TERJEMAH_PENYEDIA", "TERJEMAH_KUNCI"):
     os.environ.pop(nama, None)
 
 import akun  # noqa: E402
@@ -145,6 +145,8 @@ try:
     cek("<strong>1</strong> prodi baru di www belum terdaftar" in teks, "dasbor: 1 belum terdaftar")
     cek("<strong>1</strong> situs aktif tanpa admin prodi" in teks and "S1 Teknik Elektro" in teks, "dasbor: elektro tanpa admin")
     cek("<strong>2</strong> situs aktif tanpa tautan dosen" in teks, "dasbor: tanpa tautan dosen")
+    cek("aktif untuk <strong>0</strong> prodi" in teks and "Terjemahan mesin belum aktif: kunci DeepL belum dipasang" in teks,
+        "dasbor: kotak versi Inggris tanpa prodi dan tanpa penyedia terjemahan")
 
     # --- slug: refused changes leave everything as it was
     for slug, label in (("S1 TI", "tidak sah"), ("admin", "alamat sistem"), ("s1elektro", "milik prodi lain"), ("s2ti", "jenjang salah")):

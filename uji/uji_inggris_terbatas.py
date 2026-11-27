@@ -244,9 +244,12 @@ try:
 
     # ============================================================== the superadmin
     teks = ks.get("/").get_data(as_text=True)
-    cek("Versi bahasa Inggris dan terjemahan mesin aktif untuk <strong>1</strong> prodi" in teks
-        and "S1 Teknik Informatika</a>" in teks.split("aktif untuk")[1].split("</li>")[0]
-        and "Elektro" not in teks.split("aktif untuk")[1].split("</li>")[0], "dasbor superadmin: daftar prodi berversi Inggris")
+    kotak_en = teks.split('<section class="kartu" id="inggris"', 1)[-1].split("</section>", 1)[0]
+    cek("Versi bahasa Inggris dan terjemahan mesin aktif untuk <strong>1</strong> prodi" in kotak_en
+        and "S1 Teknik Informatika</a>" in kotak_en and "Elektro" not in kotak_en
+        and "Terjemahan mesin (Tiruan) bulan ini" in kotak_en and "belum aktif" not in kotak_en
+        and "Versi bahasa Inggris" not in teks.split('<ul class="ringkasan">', 1)[1].split("</ul>", 1)[0],
+        "dasbor superadmin: kotak versi Inggris tersendiri (di luar kisi ringkasan), daftar prodi, pemakaian")
     cek("hanya untuk prodi yang mengikuti akreditasi internasional" in ks.get("/super/prodi/%s" % B).get_data(as_text=True),
         "keterangan saklar")
     with ks.session_transaction() as s_:
