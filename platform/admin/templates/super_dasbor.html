@@ -14,9 +14,22 @@
 	<li><a href="{{ url_for('super_prodi') }}"><strong>{{ r.timpaan }}</strong> prodi mengubah data resminya sendiri</a></li>
 	<li><a href="{{ url_for('super_kelengkapan') }}">Kelengkapan halaman wajib setiap prodi (unduhan CSV untuk LPMPP)</a></li>
 	<li><a href="{{ url_for('super_masukan', status='baru') }}"><strong>{{ masukan_baru }}</strong> masukan baru dari pengguna admin</a></li>
-	<li>Versi bahasa Inggris dan terjemahan mesin aktif untuk <strong>{{ r.inggris | length }}</strong> prodi{% if r.inggris %}: {% for x in r.inggris %}<a href="{{ url_for('super_prodi_detail', kode=x.kode) }}">{{ x.nama }}</a>{{ ', ' if not loop.last }}{% endfor %}{% endif %}</li>
-	{% if terjemah %}<li>Terjemahan mesin ({{ terjemah.penyedia }}) bulan ini: <strong>{{ '{:,}'.format(terjemah.pakai).replace(',', '.') }}</strong> dari {{ '{:,}'.format(terjemah.batas[1]).replace(',', '.') }} karakter untuk semua prodi; paling banyak {{ '{:,}'.format(terjemah.batas[0]).replace(',', '.') }} karakter per prodi per hari</li>{% endif %}
 </ul>
+<section class="kartu" id="inggris" aria-labelledby="judul-inggris">
+	<h2 id="judul-inggris">Versi bahasa Inggris</h2>
+	<p>Versi bahasa Inggris dan terjemahan mesin aktif untuk <strong>{{ r.inggris | length }}</strong> prodi (hanya prodi yang mengikuti akreditasi internasional){{ ':' if r.inggris else '.' }}</p>
+	{% if r.inggris %}
+	<ul class="daftar-ringkas">
+		{% for x in r.inggris %}<li><a href="{{ url_for('super_prodi_detail', kode=x.kode) }}">{{ x.nama }}</a></li>{% endfor %}
+	</ul>
+	{% endif %}
+	{% if terjemah %}
+	<p>Terjemahan mesin ({{ terjemah.penyedia }}) bulan ini: <strong>{{ '{:,}'.format(terjemah.pakai).replace(',', '.') }}</strong> dari {{ '{:,}'.format(terjemah.batas[1]).replace(',', '.') }} karakter untuk semua prodi; paling banyak {{ '{:,}'.format(terjemah.batas[0]).replace(',', '.') }} karakter per prodi per hari.</p>
+	{% else %}
+	<p class="pesan pesan--info">Terjemahan mesin belum aktif: kunci DeepL belum dipasang. Admin VM mengisi <code>TERJEMAH_PENYEDIA=deepl</code> dan <code>TERJEMAH_KUNCI</code> di <code>.env</code>, lalu menjalankan ulang stack (panduan deploy §4A). Tanpa kunci, versi Inggris tetap bisa diisi manual.</p>
+	{% endif %}
+	<p><a href="{{ url_for('super_prodi') }}">Nyalakan atau matikan versi Inggris per prodi di menu Prodi</a></p>
+</section>
 <section class="kartu">
 	<h2>Data resmi dari www</h2>
 	{% if r.meta.ditarik %}
