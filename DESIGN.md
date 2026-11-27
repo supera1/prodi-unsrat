@@ -223,7 +223,7 @@ Both are loaded from Google Fonts on the root page only (`FONT_AKAR` in `bangun.
 **Character:** Road-sign lettering. It is plain, open and built to be read at a glance, with heavy 800 for names and heads and a monospace for the codes and counts a timetable would print.
 
 ### Hierarchy
-- **Display** (800, clamp(1.75rem → 2.5rem), 1.2, -0.015em, balanced wrap): the single question h1, "Mau ke program studi mana?".
+- **Display** (800, clamp(1.75rem → 2.5rem), 1.2, -0.015em, balanced wrap): the single h1, "Pencarian Program Studi".
 - **Headline** (800, clamp(1.5rem → 2.125rem), -0.01em): the programme name in the arrival panel.
 - **Count figure** (800, 2.5rem, line-height 1, tabular numbers, desktop only from 64rem): the "97" beside the search.
 - **Brand** (800, 1.25rem, 1.15): the header's "Program Studi" beside the emblem.
