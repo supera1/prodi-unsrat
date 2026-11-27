@@ -103,4 +103,5 @@ Stack Docker lengkap di komputer sendiri: [docs/deploy.md §13](docs/deploy.md#1
 
 | Langkah | Isi | Status |
 |---|---|---|
-| 1 | Halaman akar `prodi.unsrat.ac.id/` sebagai peta jalur fakultas (K-P39): satu jalur berwarna bendera per fakultas, halte prodi dengan gelar dan akreditasi, pencarian nama prodi; konteks produk di `PRODUCT.md`, kontrak desain di `.impeccable/surfaces/` | selesai, menunggu tinjauan |
+| 1 | Halaman akar `prodi.unsrat.ac.id/` sebagai peta jalur fakultas (K-P39): satu jalur berwarna bendera per fakultas, halte prodi dengan gelar dan akreditasi, pencarian nama prodi; konteks produk di `PRODUCT.md`, kontrak desain di `.impeccable/surfaces/` | selesai |
+| 2 | Judul halaman akar "Pencarian Program Studi"; kotak Versi bahasa Inggris tersendiri di dasbor superadmin, dengan keterangan bila kunci DeepL belum dipasang | selesai, menunggu tinjauan |

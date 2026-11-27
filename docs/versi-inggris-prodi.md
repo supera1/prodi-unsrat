@@ -60,7 +60,8 @@ Dikerjakan superadmin UPA TIK, bersama admin VM untuk butir 0 dan 1.
    gagal, versi lama tetap berjalan.
 1. **Kunci DeepL di `.env` VM** ([docs/deploy.md](deploy.md) §4A): `TERJEMAH_PENYEDIA=deepl` dan `TERJEMAH_KUNCI`.
    Kunci diserahkan langsung kepada admin VM, bukan lewat chat atau surel. Sesudah `docker compose up -d`, dasbor
-   superadmin menampilkan baris **Terjemahan mesin (DeepL) bulan ini**.
+   superadmin, kotak **Versi bahasa Inggris**, menampilkan pemakaian **Terjemahan mesin (DeepL) bulan ini**. Selama kunci
+   belum dipasang, kotak itu menulis "Terjemahan mesin belum aktif: kunci DeepL belum dipasang".
    - Batas bawaan: 50.000 karakter per prodi per hari (`TERJEMAH_BATAS_HARIAN`) dan 500.000 karakter per bulan untuk
      semua prodi (`TERJEMAH_BATAS_BULANAN`, sama dengan kuota DeepL API Free).
    - Enam prodi yang memakai batas hariannya penuh menghabiskan 300.000 karakter sehari, jadi kuota bulanan Free bisa
@@ -72,7 +73,8 @@ Dikerjakan superadmin UPA TIK, bersama admin VM untuk butir 0 dan 1.
    - Begitu diaktifkan, beranda, Profil Lulusan dan CPL, Spesifikasi, Akreditasi, Dosen Tetap, Kalender, dan Kontak
      langsung tayang dalam bahasa Inggris dari data resmi, yang sudah lengkap untuk keenam prodi.
    - Halaman yang diisi prodi baru muncul setelah versi Inggrisnya terbit, jadi tidak ada halaman setengah jadi.
-   - Periksa di dasbor superadmin: "Versi bahasa Inggris dan terjemahan mesin aktif untuk **6** prodi".
+   - Periksa di dasbor superadmin, kotak **Versi bahasa Inggris**: "Versi bahasa Inggris dan terjemahan mesin aktif
+     untuk **6** prodi".
 3. **Coba kunci sekali.** Superadmin membuka satu halaman pendek yang sudah terbit di salah satu prodi itu, lalu
    **Isi halaman** → tab **English** → **Terjemahkan dari versi Indonesia**.
    - Hasilnya masuk draf dan bertanda terjemahan mesin. Buang drafnya bila tidak dipakai.
